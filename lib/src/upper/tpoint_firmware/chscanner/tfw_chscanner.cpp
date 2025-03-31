@@ -1,0 +1,151 @@
+/*
+ * Copyright 2023-2025 Maxim Penner
+ *
+ * This file is part of DECTNRP.
+ *
+ * DECTNRP is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * DECTNRP is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * A copy of the GNU Affero General Public License can be found in
+ * the LICENSE file in the top-level directory of this distribution
+ * and at http://www.gnu.org/licenses/.
+ */
+
+#include "dectnrp/upper/tpoint_firmware/chscanner/tfw_chscanner.hpp"
+
+#include <algorithm>
+#include <limits>
+
+#include "dectnrp/common/adt/decibels.hpp"
+#include "dectnrp/common/prog/log.hpp"
+
+namespace dectnrp::upper::tfw::chscanner {
+
+const std::string tfw_chscanner_t::firmware_name("chscanner");
+
+tfw_chscanner_t::tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
+                                 phy::mac_lower_t& mac_lower_)
+    : tpoint_t(tpoint_config_, mac_lower_),
+      next_measurement_time_64(std::numeric_limits<int64_t>::max()) {
+    // set frequency, TX and RX power
+    hw.set_command_time();
+    hw.set_tx_power_ant_0dBFS_tc(-1000.0f);
+    rx_power_ant_0dBFS = hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
+    hw.set_freq_tc(freq[freq_idx]);
+}
+
+void tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
+    // start some time in the future
+    next_measurement_time_64 =
+        start_time_64 + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
+}
+
+phy::machigh_phy_t tfw_chscanner_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
+    // get current time
+    const int64_t now_64 = buffer_rx.get_rx_time_passed();
+
+    // should we initiate a new measurement?
+    if (now_64 < next_measurement_time_64) {
+        return phy::machigh_phy_t();
+    }
+
+    // return value
+    phy::machigh_phy_t machigh_phy;
+
+    /**
+     * \brief Define channel measurement over the past 5ms. We must always measure in the past,
+     * therefore the first argument must be <= now_64. Furthermore, we can at most measure as much
+     * as the hardware buffers, for instance 10ms, but it is better to use a shorter duration since
+     * the hardware constantly keeps overwriting the oldest samples. A 5ms measurement will
+     * certainly be finished before the hardware overrides the same range of samples.
+     */
+    machigh_phy.chscan_opt =
+        std::optional(phy::chscan_t(now_64, section3::duration_ec_t::ms001, 5));
+
+    // state machine is progressed in function work_chscan_async(), which gives us the result of the
+    // channel measurement
+    next_measurement_time_64 = std::numeric_limits<int64_t>::max();
+
+    return machigh_phy;
+}
+
+phy::maclow_phy_t tfw_chscanner_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
+    return phy::maclow_phy_t();
+}
+
+phy::machigh_phy_t tfw_chscanner_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_chscanner_t::work_upper(const upper::upper_report_t& upper_report) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& chscan) {
+    // save measurement
+    rms_min = std::min(rms_min, chscan.get_rms_avg());
+    rms_max = std::max(rms_max, chscan.get_rms_avg());
+
+    ++N_measurement_cnt;
+
+    // do we keep measuring in this run?
+    if (N_measurement_cnt < N_measurement) {
+        // trigger new measurement some time in the near future
+        next_measurement_time_64 =
+            buffer_rx.get_rx_time_passed() +
+            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 27);
+    }
+    // run is complete
+    else {
+        // show result
+        dectnrp_log_inf(
+            "frequency: {}MHz | rms_min={} rms_max={}", freq[freq_idx] / 1.0e6, rms_min, rms_max);
+
+        if (0.5 <= rms_max) {
+            dectnrp_log_wrn("ADC range is limited to +/-1. ADC may be clipping.");
+        }
+
+        ++freq_idx;
+        if (freq_idx == freq.size()) {
+            freq_idx = 0;
+            dectnrp_log_inf(" ");
+        }
+
+        N_measurement_cnt = 0;
+
+        rms_min = 1.0e9;
+        rms_max = -1.0e9;
+
+        // set new hardware frequency
+        hw.set_command_time(
+            buffer_rx.get_rx_time_passed() +
+            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 100));
+        hw.set_freq_tc(freq[freq_idx]);
+
+        // trigger new run some distant time in the future
+        next_measurement_time_64 =
+            buffer_rx.get_rx_time_passed() +
+            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
+    }
+
+    return phy::machigh_phy_tx_t();
+}
+
+std::vector<std::string> tfw_chscanner_t::start_threads() {
+    dectnrp_log_inf("start() called, press ctrl+c to stop program");
+    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
+}
+
+std::vector<std::string> tfw_chscanner_t::stop_threads() {
+    dectnrp_log_inf("stop() called");
+    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
+}
+
+}  // namespace dectnrp::upper::tfw::chscanner

@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Penner
+    given-names: Maxim
+title: "DECT-NR-Plus-SDR"
+date-released: 2025-03-03
+repository-code: https://github.com/maxpenner/DECT-NR-Plus-SDR
+license: AGPL-3.0

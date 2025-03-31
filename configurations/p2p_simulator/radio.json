@@ -1,0 +1,46 @@
+{
+  "HW0":
+  {
+    "hw_name": "simulator",
+    "nof_buffer_tx": 16,
+    "turn_around_time_us": 1000,
+    "tx_burst_leading_zero_us": 0,
+    "tx_time_advance_smpl": 0,
+    "rx_prestream_ms": 0,
+    "rx_notification_period_us": 250,
+    "tx_thread_config": [0, -1],
+    "rx_thread_config": [0, -1]
+  },
+  "HW1":
+  {
+    "hw_name": "simulator",
+    "nof_buffer_tx": 16,
+    "turn_around_time_us": 1000,
+    "tx_burst_leading_zero_us": 0,
+    "tx_time_advance_smpl": 0,
+    "rx_prestream_ms": 0,
+    "rx_notification_period_us": 250,
+    "tx_thread_config": [0, -1],
+    "rx_thread_config": [0, -1]
+  },
+  "HW2":
+  {
+    "hw_name": "simulator",
+    "nof_buffer_tx": 16,
+    "turn_around_time_us": 1000,
+    "tx_burst_leading_zero_us": 0,
+    "tx_time_advance_smpl": 0,
+    "rx_prestream_ms": 0,
+    "rx_notification_period_us": 250,
+    "tx_thread_config": [0, -1],
+    "rx_thread_config": [0, -1]
+  },
+  "SIMULATION":
+  {
+    "sim_samp_rate_lte": true,
+    "sim_samp_rate_speedup": 1,
+    "sim_channel_name_inter": "awgn",
+    "sim_channel_name_intra": "awgn",
+    "sim_noise_type": "thermal"
+  }
+}

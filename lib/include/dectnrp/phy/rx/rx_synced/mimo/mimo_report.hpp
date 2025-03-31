@@ -1,0 +1,66 @@
+/*
+ * Copyright 2023-2025 Maxim Penner
+ *
+ * This file is part of DECTNRP.
+ *
+ * DECTNRP is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * DECTNRP is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * A copy of the GNU Affero General Public License can be found in
+ * the LICENSE file in the top-level directory of this distribution
+ * and at http://www.gnu.org/licenses/.
+ */
+
+#pragma once
+
+#include <cstdint>
+
+#include "dectnrp/common/adt/miscellaneous.hpp"
+
+namespace dectnrp::phy {
+
+class mimo_report_t {
+    public:
+        mimo_report_t() = default;
+        ~mimo_report_t() = default;
+
+        /**
+         * \brief Upper must know whether a report is still valid. It becomes invalid if too much
+         * time has passed since the creation of the report.
+         */
+        int64_t fine_peak_time_64{common::adt::UNDEFINED_EARLY_64};
+
+        /**
+         * \brief Number of transmit streams N_TS, i.e. number of effective antennas N_eff_TX, as
+         * received from the opposite site.
+         */
+        uint32_t N_TS_tx{};
+
+        /**
+         * \brief These are the recommended beamforming matrix indices for MIMO modes with a single
+         * spatial stream, namely mode 3 and 7. For transmit diversity modes, no beamforming matrix
+         * is recommended, instead index 0 shall be used.
+         */
+
+        /// recommendation mode 3
+        uint32_t tm_3_7_beamforming_idx{};
+
+        /**
+         * \brief These are the recommended beamforming matrix indices for MIMO modes with more than
+         * a single spatial stream.
+         */
+
+        // same terminology as in LTE
+        uint32_t RI{};   // rank indicator
+        uint32_t CQI{};  // channel quality indicator
+        uint32_t PMI{};  // pre coding matrix indicator
+};
+
+}  // namespace dectnrp::phy

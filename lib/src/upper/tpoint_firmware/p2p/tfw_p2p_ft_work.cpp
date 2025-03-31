@@ -1,0 +1,96 @@
+/*
+ * Copyright 2023-2025 Maxim Penner
+ *
+ * This file is part of DECTNRP.
+ *
+ * DECTNRP is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * DECTNRP is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * A copy of the GNU Affero General Public License can be found in
+ * the LICENSE file in the top-level directory of this distribution
+ * and at http://www.gnu.org/licenses/.
+ */
+
+#include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_ft.hpp"
+//
+
+#include <functional>
+
+#include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/common/randomgen.hpp"
+
+namespace dectnrp::upper::tfw::p2p {
+
+void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
+    // what is the next full second after PHY becomes operational?
+    const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
+
+    // some headroom is required to set the PPS aligned with the first beacon
+    const int64_t B = A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
+
+    // set first beacon transmission time, beacon is aligned with full second
+    allocation_ft.set_beacon_time_scheduled(B);
+
+    // initialize regular callback for logs
+    callbacks.add_callback(
+        std::bind(&tfw_p2p_ft_t::worksub_callback_log, this, std::placeholders::_1),
+        A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 500),
+        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001,
+                                                 worksub_callback_log_period_sec));
+
+#ifdef TFW_P2P_EXPORT_1PPS
+    // callback is triggered shortly before a PPS is due, and before first beacon
+    callbacks.add_callback(
+        std::bind(&tfw_p2p_ft_t::worksub_callback_pps,
+                  this,
+                  std::placeholders::_1,
+                  std::placeholders::_2,
+                  std::placeholders::_3),
+        B - duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 100),
+        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001));
+#endif
+}
+
+phy::machigh_phy_t tfw_p2p_ft_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
+    const int64_t now_64 = buffer_rx.get_rx_time_passed();
+
+    // update time of callbacks
+    callbacks.run(now_64);
+
+    // do we have to generate the next beacon?
+    if (!allocation_ft.check_beacon_prepare_duration(now_64)) {
+        return phy::machigh_phy_t();
+    }
+
+    phy::machigh_phy_t machigh_phy;
+
+    // try defining beacon transmission
+    if (!worksub_tx_beacon(machigh_phy)) {
+        dectnrp_assert_failure("beacon not transmitted");
+    }
+
+    worksub_tx_unicast_consecutive(machigh_phy);
+
+    return machigh_phy;
+}
+
+phy::machigh_phy_t tfw_p2p_ft_t::work_upper(const upper::upper_report_t& upper_report) {
+    phy::machigh_phy_t machigh_phy;
+
+    worksub_tx_unicast_consecutive(machigh_phy);
+
+    return machigh_phy;
+}
+
+phy::machigh_phy_tx_t tfw_p2p_ft_t::work_chscan_async(const phy::chscan_t& chscan) {
+    return phy::machigh_phy_tx_t();
+}
+
+}  // namespace dectnrp::upper::tfw::p2p

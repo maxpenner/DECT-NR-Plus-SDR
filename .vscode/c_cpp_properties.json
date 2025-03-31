@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            // https://github.com/microsoft/vscode-cpptools/issues/4009#issuecomment-517430975
+            "includePath": [
+                "${workspaceFolder}/lib/include",
+                "${workspaceFolder}/build/lib/include",
+                "/usr/include/eigen3"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/g++",
+            "cppStandard": "c++23",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

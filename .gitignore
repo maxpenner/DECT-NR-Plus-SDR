@@ -1,0 +1,13 @@
+# general
+*.__pycache__
+*.py[cod]
+*.mat
+
+# folders
+bin
+!bin/README.md
+build
+docs/doxygen/html
+docs/doxygen/latex
+gnuradio/*.py
+.VSCodeCounter

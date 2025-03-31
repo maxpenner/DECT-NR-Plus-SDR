@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "dectnrp loopback",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/dectnrp",
+            "args": [
+                "../configurations/loopback_simulator/"
+            ],
+            "environment": [],
+            "cwd": "${workspaceFolder}/bin/"
+        },
+        {
+            "name": "dectnrp p2p",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/dectnrp",
+            "args": [
+                "../configurations/p2p_simulator/"
+            ],
+            "environment": [],
+            "cwd": "${workspaceFolder}/bin/"
+        }
+    ]
+}

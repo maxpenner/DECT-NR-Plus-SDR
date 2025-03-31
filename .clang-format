@@ -1,0 +1,19 @@
+---
+BasedOnStyle: Google
+AllowShortEnumsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakStringLiterals: false
+ColumnLimit: 100
+IndentAccessModifiers: true
+IndentCaseBlocks: true
+IndentWidth: 4
+InsertBraces: true
+PackConstructorInitializers: Never
+CompactNamespaces: true
+
+# https://stackoverflow.com/questions/56537847/why-do-the-pointeralignment-options-not-work
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+InsertNewlineAtEOF: true

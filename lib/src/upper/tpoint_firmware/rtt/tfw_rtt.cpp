@@ -1,0 +1,353 @@
+/*
+ * Copyright 2023-2025 Maxim Penner
+ *
+ * This file is part of DECTNRP.
+ *
+ * DECTNRP is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * DECTNRP is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * A copy of the GNU Affero General Public License can be found in
+ * the LICENSE file in the top-level directory of this distribution
+ * and at http://www.gnu.org/licenses/.
+ */
+
+#include "dectnrp/upper/tpoint_firmware/rtt/tfw_rtt.hpp"
+
+#include <algorithm>
+
+#include "dectnrp/application/socket/socket_client.hpp"
+#include "dectnrp/application/socket/socket_server.hpp"
+#include "dectnrp/common/prog/log.hpp"
+#include "dectnrp/phy/agc/agc_tx.hpp"
+#include "dectnrp/upper/tpoint_firmware/rtt/tfw_rtt_param.hpp"
+
+namespace dectnrp::upper::tfw::rtt {
+
+const std::string tfw_rtt_t::firmware_name("rtt");
+
+tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
+    : tpoint_t(tpoint_config_, mac_lower_) {
+    // init HARQ process pool
+    hpp =
+        std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 4, 4);
+
+    // set frequency, TX and RX power
+    hw.set_command_time();
+    hw.set_tx_power_ant_0dBFS_tc(10.0f);
+    hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
+
+    // frequency should be free of any interference
+    hw.set_freq_tc(3830.0e6);
+
+    // set identities
+    identity_ft = section4::mac_architecture::identity_t(100, 444, 555);
+    identity_pt = identity_ft;
+    ++identity_pt.LongRadioDeviceID;
+    ++identity_pt.ShortRadioDeviceID;
+
+    app_server = std::make_unique<application::sockets::socket_server_t>(
+        id,
+        tpoint_config.app_server_thread_config,
+        job_queue,
+        std::vector<uint32_t>{TFW_RTT_UDP_PORT_DATA, TFW_RTT_UDP_PORT_PRINT},
+        4UL,
+        1500UL);
+
+    app_client = std::make_unique<application::sockets::socket_client_t>(
+        id,
+        tpoint_config.app_client_thread_config,
+        job_queue,
+        std::vector<uint32_t>{8050},
+        4UL,
+        1500UL);
+
+    a_raw_with_rtt.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
+}
+
+void tfw_rtt_t::work_start_imminent(const int64_t start_time_64) {}
+
+phy::machigh_phy_t tfw_rtt_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
+    return phy::machigh_phy_t();
+}
+
+phy::maclow_phy_t tfw_rtt_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
+    // base pointer to extract PLCF_type=1
+    const auto* plcf_base = phy_maclow.pcc_report.plcf_decoder.get_plcf_base(plcf_type);
+
+    // is this the correct PLCF type?
+    if (plcf_base == nullptr) {
+        return phy::maclow_phy_t();
+    }
+
+    // is this the correct header type?
+    if (plcf_base->get_HeaderFormat() != 0) {
+        return phy::maclow_phy_t();
+    }
+
+    // cast guaranteed to work
+    const auto* plcf_10 = static_cast<const section4::plcf_10_t*>(
+        phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
+
+    dectnrp_assert(plcf_10 != nullptr, "cast ill-formed");
+
+    // is this the correct short network ID?
+    if (plcf_10->ShortNetworkID != identity_ft.ShortNetworkID) {
+        return phy::maclow_phy_t();
+    }
+
+    // expected TransmitterIdentity depends on FT or PT
+    if (tpoint_config.firmware_id == 0) {
+        // FT receives from PT
+        if (plcf_10->TransmitterIdentity != identity_pt.ShortRadioDeviceID) {
+            return phy::maclow_phy_t();
+        }
+    } else {
+        // PT receives from FT
+        if (plcf_10->TransmitterIdentity != identity_ft.ShortRadioDeviceID) {
+            return phy::maclow_phy_t();
+        }
+    }
+
+    return worksub_pcc2pdc(phy_maclow,
+                           plcf_type,
+                           identity_pt.NetworkID,
+                           0,
+                           phy::harq::finalize_rx_t::reset_and_terminate,
+                           phy::maclow_phy_handle_t());
+}
+
+phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
+    // ignore entire PDC if CRC is incorrect
+    if (!phy_machigh.pdc_report.crc_status) {
+        return phy::machigh_phy_t();
+    }
+
+    // PDC was decoded with correct CRC, now define return value
+    phy::machigh_phy_t machigh_phy;
+
+    // FT receives from PT
+    if (tpoint_config.firmware_id == 0) {
+        // measure round-trip time
+        const int64_t rtt = watch.get_elapsed();
+
+        // add to statistics
+        rtt_min = std::min(rtt_min, rtt);
+        rtt_max = std::max(rtt_max, rtt);
+        rms_max = std::max(rms_max, phy_machigh.phy_maclow.sync_report.rms_array.get_max());
+
+        // get pointer to payload of received packet
+        const auto a_raw = phy_machigh.pdc_report.mac_pdu_decoder.get_a_raw();
+
+        // copy first few bytes so rtt_external.cpp can verify the content of the packet
+        memcpy(&a_raw_with_rtt[0], a_raw.first, TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE);
+
+        // insert measured RTT into payload so rtt_external.cpp can log it
+        memcpy(&a_raw_with_rtt[TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE], &rtt, sizeof(rtt));
+
+        // forward to rtt_external.cpp directly
+        app_client->write_immediate(0, &a_raw_with_rtt[0], a_raw.second);
+
+        ++N_measurement_rx_cnt;
+    }
+    // PT receives from FT
+    else {
+        // set pointer to MAC PDU decoder so that we can copy its data
+        mac_pdu_decoder = &phy_machigh.pdc_report.mac_pdu_decoder;
+
+        // declare response packet
+        generate_packet_asap(identity_pt, machigh_phy);
+
+        // reset to nullptr so we don't accidentally use it
+        mac_pdu_decoder = nullptr;
+
+        // base pointer to extract PLCF_type=1
+        const auto* plcf_base =
+            phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(plcf_type);
+
+        // make AGC gain changes right after sending the response packet
+        const int64_t t_agc_change_64 =
+            machigh_phy.tx_descriptor_vec.at(0).buffer_tx_meta.tx_time_64 +
+            duration_lut.get_N_samples_from_subslots(worker_pool_config.radio_device_class.u_min,
+                                                     N_subslots);
+
+        worksub_agc(phy_machigh.phy_maclow.sync_report, *plcf_base, t_agc_change_64);
+    }
+
+    return machigh_phy;
+}
+
+phy::machigh_phy_t tfw_rtt_t::work_upper(const upper::upper_report_t& upper_report) {
+    // only FT with firmware_id=0 triggers measurements
+    if (tpoint_config.firmware_id > 0) {
+        return phy::machigh_phy_t();
+    }
+
+    // connection index 1 to indicate that a measurement was completed and we want a printout
+    if (upper_report.conn_idx == 1) {
+        // convert rtt to us (unused if logging is turned off)
+        [[maybe_unused]] const int64_t rtt_min_us = rtt_min / int64_t{1000};
+        [[maybe_unused]] const int64_t rtt_max_us = rtt_max / int64_t{1000};
+
+        // number of microseconds in our packet (unused if logging is turned off)
+        [[maybe_unused]] const int64_t packet_length_us_64 =
+            duration_lut.get_N_us_from_samples(duration_lut.get_N_samples_from_subslots(
+                worker_pool_config.radio_device_class.u_min, N_subslots));
+
+        // print result
+        dectnrp_log_inf("TX = {} RX = {} | PER = {} | packet_length = {} us  N_TB_byte = {}",
+                        N_measurement_tx_cnt,
+                        N_measurement_rx_cnt,
+                        1.0f - static_cast<float>(N_measurement_rx_cnt) /
+                                   static_cast<float>(N_measurement_tx_cnt),
+                        packet_length_us_64,
+                        N_TB_byte);
+        dectnrp_log_inf("rtt_min = {} us rtt_max: = {} us", rtt_min_us, rtt_max_us);
+        dectnrp_log_inf("rtt_min = {} us rtt_max: = {} us <-- RTT adjusted for packet length",
+                        rtt_min_us - 2 * packet_length_us_64,
+                        rtt_max_us - 2 * packet_length_us_64);
+        dectnrp_log_inf("rms_max: = {}", rms_max);
+
+        N_measurement_tx_cnt = 0;
+        N_measurement_rx_cnt = 0;
+        rtt_min = -common::adt::UNDEFINED_EARLY_64;
+        rtt_max = common::adt::UNDEFINED_EARLY_64;
+        rms_max = -1000.0f;
+
+        // invalidate dummy packet
+        app_server->read_nto(1, nullptr);
+
+        return phy::machigh_phy_t();
+    }
+
+    // save current operating system time
+    watch.reset();
+
+    phy::machigh_phy_t machigh_phy;
+
+    generate_packet_asap(identity_ft, machigh_phy);
+
+    ++N_measurement_tx_cnt;
+
+    return machigh_phy;
+}
+
+phy::machigh_phy_tx_t tfw_rtt_t::work_chscan_async(const phy::chscan_t& chscan) {
+    return phy::machigh_phy_tx_t();
+}
+
+std::vector<std::string> tfw_rtt_t::start_threads() {
+    // first start sink
+    // app_client->start_sc();
+
+    // then start source
+    app_server->start_sc();
+
+    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
+}
+
+std::vector<std::string> tfw_rtt_t::stop_threads() {
+    // first stop accepting new data from upper
+    app_server->stop_sc();
+
+    // finally stop the data sink
+    // app_client->stop_sc();
+
+    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
+}
+
+void tfw_rtt_t::generate_packet_asap(const section4::mac_architecture::identity_t identity,
+                                     phy::machigh_phy_t& machigh_phy) {
+    // define required input to calculate packet dimensions
+    const section3::packet_sizes_def_t psdef = {.u = worker_pool_config.radio_device_class.u_min,
+                                                .b = worker_pool_config.radio_device_class.b_min,
+                                                .PacketLengthType = 0,
+                                                .PacketLength = N_subslots,
+                                                .tm_mode_index = 0,
+                                                .mcs_index = 2,
+                                                .Z = worker_pool_config.radio_device_class.Z_min};
+
+    // request harq process
+    auto* hp_tx = hpp->get_process_tx(
+        1, identity.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
+
+    // every firmware has to decide how to deal with unavailable HARQ process
+    if (hp_tx == nullptr) {
+        dectnrp_log_wrn("HARQ process TX unavailable. Bug in firmware.");
+        return;
+    }
+
+    // save number of bytes in transport block
+    N_TB_byte = hp_tx->get_packet_sizes().N_TB_byte;
+
+    // FT copies from application server to HARQ buffer
+    if (tpoint_config.firmware_id == 0) {
+        // get item size for first connection
+        const auto items_level_report = app_server->get_items_level_report_nto(0, 1);
+
+        dectnrp_assert(items_level_report.N_filled > 0, "no items to transmit");
+        dectnrp_assert(
+            items_level_report.levels[0] <= N_TB_byte, "N_TB_byte is only {}", N_TB_byte);
+
+        // make app_server copy to HARQ buffer
+        app_server->read_nto(0, hp_tx->get_a_tb());
+    }
+    // PT copies from received DECT NR+ packet to HARQ buffer
+    else {
+        dectnrp_assert(mac_pdu_decoder != nullptr, "MAC PDU decoder not defined");
+
+        // make MAC PDU decoder copy to HARQ buffer
+        mac_pdu_decoder->copy_a(hp_tx->get_a_tb());
+    }
+
+    // pick beamforming codebook index, for beacon usually 0 to be used for channel sounding
+    uint32_t codebook_index = 0;
+
+    // define non-dect metadata of transmission
+    section3::tx_meta_t tx_meta = {.optimal_scaling_DAC = false,
+                                   .DAC_scale = agc_tx.get_ofdm_amplitude_factor(),
+                                   .iq_phase_rad = 0.0f,
+                                   .iq_phase_increment_s2s_post_resampling_rad = 0.0f,
+                                   .GI_percentage = 25};
+
+    // required meta data on radio layer
+    radio::buffer_tx_meta_t buffer_tx_meta = {
+        .tx_order_id = tx_order_id,
+        .tx_time_64 = std::max(
+            tx_earliest_64,
+            buffer_rx.get_rx_time_passed() + duration_lut.get_N_samples_from_duration(
+                                                 section3::duration_ec_t::turn_around_time_us))};
+
+    // save the end of the packet, this us our new earliest transmission time
+    tx_earliest_64 = buffer_tx_meta.tx_time_64 + section3::get_N_samples_in_packet_length(
+                                                     hp_tx->get_packet_sizes(), hw.get_samp_rate());
+
+    // define PLCF type 1, content except for ShortNetworkID and TransmitterIdentity irrelevant
+    section4::plcf_10_t plcf_10;
+    plcf_10.HeaderFormat = 0;
+    plcf_10.PacketLengthType = psdef.PacketLengthType;
+    plcf_10.set_PacketLength_m1(psdef.PacketLength);
+    plcf_10.ShortNetworkID = identity.ShortNetworkID;
+    plcf_10.TransmitterIdentity = identity.ShortRadioDeviceID;
+    plcf_10.set_TransmitPower(0);
+    plcf_10.Reserved = 0;
+    plcf_10.DFMCS = psdef.mcs_index;
+
+    // pack PLCF header
+    plcf_10.pack(hp_tx->get_a_plcf());
+
+    // increase tx order id
+    ++tx_order_id;
+
+    // add to tx_descriptor_vec
+    machigh_phy.tx_descriptor_vec.push_back(
+        phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
+}
+
+}  // namespace dectnrp::upper::tfw::rtt

@@ -1,0 +1,73 @@
+{
+    "editor.formatOnSave": true,
+    "[json]": {
+        "editor.formatOnSave": false
+    },
+    "output.smartScroll.enabled": false,
+    "C_Cpp.autoAddFileAssociations": false,
+    "C_Cpp.dimInactiveRegions": true,
+    "C_Cpp.errorSquiggles": "enabled",
+    "doxdocgen.generic.useGitUserName": true,
+    "doxdocgen.generic.useGitUserEmail": true,
+    "doxdocgen.generic.order": [
+        "brief",
+        "empty",
+        "param",
+        "tparam",
+        "return"
+    ],
+    "doxdocgen.generic.briefTemplate": "\\brief ",
+    "doxdocgen.cpp.ctorText": "",
+    "doxdocgen.cpp.dtorText": "",
+    "doxdocgen.c.factoryMethodText": "",
+    "doxdocgen.c.getterText": "",
+    "doxdocgen.c.setterText": "",
+    "doxdocgen.generic.paramTemplate": "\\param {param} ",
+    "doxdocgen.cpp.tparamTemplate": "\\tparam {param} ",
+    "doxdocgen.generic.returnTemplate": "\\return ",
+    "restoreTerminals.terminals": [
+        {
+            "splitTerminals": [
+                {
+                    "name": "bin 0",
+                    "commands": [
+                        "cd bin/"
+                    ],
+                    "shouldRunCommands": true
+                }
+            ]
+        },
+        {
+            "splitTerminals": [
+                {
+                    "name": "bin 1",
+                    "commands": [
+                        "cd bin/"
+                    ],
+                    "shouldRunCommands": true
+                }
+            ]
+        },
+        {
+            "splitTerminals": [
+                {
+                    "name": "scripts 0",
+                    "commands": [
+                        "cd scripts"
+                    ],
+                    "shouldRunCommands": true
+                },
+                {
+                    "name": "scripts 1",
+                    "commands": [
+                        "cd scripts"
+                    ],
+                    "shouldRunCommands": true
+                }
+            ]
+        }
+    ],
+    "cSpell.enabled": true,
+    "workbench.tree.indent": 16,
+    "cmake.options.statusBarVisibility": "visible"
+}

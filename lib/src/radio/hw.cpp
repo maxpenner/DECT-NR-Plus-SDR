@@ -1,0 +1,101 @@
+/*
+ * Copyright 2023-2025 Maxim Penner
+ *
+ * This file is part of DECTNRP.
+ *
+ * DECTNRP is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * DECTNRP is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * A copy of the GNU Affero General Public License can be found in
+ * the LICENSE file in the top-level directory of this distribution
+ * and at http://www.gnu.org/licenses/.
+ */
+
+#include "dectnrp/radio/hw.hpp"
+
+#include <utility>
+#include <vector>
+
+#include "dectnrp/common/adt/decibels.hpp"
+#include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/limits.hpp"
+
+namespace dectnrp::radio {
+
+void hw_t::set_nof_antennas(const uint32_t nof_antennas_) {
+    dectnrp_assert(0 < nof_antennas_ && nof_antennas_ <= nof_antennas_max,
+                   "Number of antennas must be larger 0 and smaller/equal nof_antennas_max");
+    dectnrp_assert(nof_antennas_ <= limits::dectnrp_max_nof_antennas,
+                   "Number of antennas cannot exceed 8");
+    dectnrp_assert((nof_antennas_ & (nof_antennas_ - 1)) == 0,
+                   "Number of antennas must be a power of 2");
+
+    nof_antennas = nof_antennas_;
+
+    rx_power_ant_0dBFS = common::ant_t(nof_antennas);
+}
+
+void hw_t::set_n_samples_gap(const uint32_t n_samples_gap_) {
+    /* We zero the gap in the TX thread of the hw. Zeroing large gaps jeopardizes timing. Instead,
+     * increase the maximum TX buffer size on the PHY layer and do the zeroing there in dedicated
+     * threads.
+     */
+    dectnrp_assert(n_samples_gap_ <= HW_MAXIMUM_GAP_SIZE, "gap too large");
+
+    n_samples_gap = n_samples_gap_;
+}
+
+float hw_t::adjust_tx_power_ant_0dBFS_tc(const float adj_dB) {
+    if (adj_dB == 0.0) {
+        return tx_power_ant_0dBFS;
+    }
+
+    return set_tx_power_ant_0dBFS_tc(tx_power_ant_0dBFS + adj_dB);
+}
+
+const common::ant_t& hw_t::set_rx_power_ant_0dBFS_uniform_tc(const float power_dBm) {
+    for (size_t i = 0; i < nof_antennas; ++i) {
+        set_rx_power_ant_0dBFS_tc(power_dBm, i);
+    }
+
+    return rx_power_ant_0dBFS;
+}
+
+const common::ant_t& hw_t::adjust_rx_power_ant_0dBFS_tc(const common::ant_t& adj_dB) {
+    for (size_t i = 0; i < nof_antennas; ++i) {
+        if (adj_dB.at(i) == 0.0f) {
+            continue;
+        }
+
+        set_rx_power_ant_0dBFS_tc(rx_power_ant_0dBFS.at(i) + adj_dB.at(i), i);
+    }
+
+    return rx_power_ant_0dBFS;
+}
+
+#ifdef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
+void hw_t::schedule_pulse_tc(const pulse_config_t& pulse_config) {
+    dectnrp_assert(pulse_config.rising_edge_64 < pulse_config.falling_edge_64, "pulse not causal");
+
+    set_command_time(pulse_config.rising_edge_64);
+    toggle_gpio_tc();
+    set_command_time(pulse_config.falling_edge_64);
+    toggle_gpio_tc();
+}
+#endif
+
+uint32_t hw_t::get_settling_time_us(const settling_time_property_t stp) const {
+    dectnrp_assert(stp != settling_time_property_t::CARDINALITY, "cardinality");
+    return settling_time_us.at(std::to_underlying(stp));
+}
+
+pps_sync_t hw_t::pps_sync;
+
+}  // namespace dectnrp::radio

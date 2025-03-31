@@ -1,0 +1,16 @@
+{
+  "HW0":
+  {
+    "hw_name": "usrp",
+    "nof_buffer_tx": 4,
+    "turn_around_time_us": 1700,
+    "tx_burst_leading_zero_us": 5,
+    "tx_time_advance_smpl": 0,
+    "rx_prestream_ms": 1000,
+    "rx_notification_period_us": 100,
+    "tx_thread_config": [0, -1],
+    "rx_thread_config": [0, -1],
+    "uspr_args": "type=b200",
+    "usrp_tx_async_helper_thread_config": [-1, -1]
+  }
+}

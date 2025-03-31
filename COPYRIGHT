@@ -1,0 +1,97 @@
+Files: *
+Copyright:  2023-2025 Maxim Penner
+License:    See LICENSE file
+
+The following files are used within DECTNRP:
+
+Files:      File in DECTNRP                           Full or partial copy?                     File srsRAN
+
+            CMakeLists.txt                            partial copy from srsran/srsRAN_Project   CMakeLists.txt
+            All files in cmake/modules                copy from srsran/srsRAN_4G                changed filenames to DECTNRP
+            dectnrp/common/prog/assert.hpp            partial copy from srsran/srsRAN_4G        srsran/support/srsran_assert.h
+            dectnrp/common/thread/threads.hpp         partial copy from srsran/srsRAN_4G        srsran/common/threads.h
+            lib/common/thread/threads.cpp             partial copy from srsran/srsRAN_4G        lib/src/common/threads.c
+            lib/phy/fec/pcc_enc.cpp                   partial copy from srsran/srsRAN_4G        lib/src/phy/phch/sch.c
+            lib/phy/fec/pdc_enc.cpp                   partial copy from srsran/srsRAN_4G        lib/src/phy/phch/sch.c
+            dectnrp/sections_part3/fix/cbsegm.hpp     partial copy from srsran/srsRAN_4G        srsran/phy/fec/cbsegm.h
+            lib/sections_part3/fix/cbsegm.cpp         partial copy from srsran/srsRAN_4G        lib/src/phy/fec/cbsegm.c
+            dectnrp/sections_part3/fix/mod.hpp        partial copy from srsran/srsRAN_4G        srsran/phy/modem/mod.h
+            lib/sections_part3/fix/mod.cpp            partial copy from srsran/srsRAN_4G        lib/src/phy/modem/mod.c
+            dectnrp/sections_part3/fix/scrambling.hpp partial copy from srsran/srsRAN_4G        srsran/phy/scrambling/scrambling.h
+            lib/sections_part3/fix/scrambling.cpp     partial copy from srsran/srsRAN_4G        lib/src/phy/scrambling/scrambling.c
+            utils/masquerade.sh                       copy from srsran/srsRAN_4G                srsRAN_4G/srsepc/srsepc_if_masq.sh
+            utils/kms_polling.sh                      partial copy from srsran/srsRAN_Project   srsRAN_Project/scripts/srsran_performance.sh
+            
+Copyright:  2013-2023 Software Radio Systems Limited
+License:    GNU Affero GPL (same license as DECTNRP, see LICENSE file)
+
+Files:      include/dectnrp/external/nlohmann/json.hpp
+Copyright:  2013-2023 Niels Lohmann
+License:    MIT
+
+Files:      include/dectnrp/external/fmtlog/fmtlog-inl.hpp
+            include/dectnrp/external/fmtlog/fmtlog.hpp
+Copyright:  2021 Meng Rao
+License:    MIT
+
+Files:      include/dectnrp/external/cameron314/blockingconcurrentqueue.hpp
+            include/dectnrp/external/cameron314/concurrentqueue.hpp
+            include/dectnrp/external/cameron314/lightweightsemaphore.hpp
+Copyright:  2013-2023, Cameron Desrochers
+License:    Simplified BSD license
+
+Files:      include/dectnrp/external/hinnant/date.hpp
+Copyright:  2013-2023, Howard Hinnant
+License:    MIT
+
+Files:      include/dectnrp/external/arparse/argparse.hpp
+Copyright:  2018 Pranav Srinivas Kumar
+License:    MIT
+
+License: MIT
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the "Software"),
+  to deal in the Software without restriction, including without limitation
+  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+  and/or sell copies of the Software, and to permit persons to whom the
+  Software is furnished to do so, subject to the following conditions:
+  
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+  
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  DEALINGS IN THE SOFTWARE.
+  
+  --- Optional exception to the license ---
+  
+  As an exception, if, as a result of your compiling your source code,
+  portions of this Software are embedded into a machine-executable object
+  form of such source code, you may redistribute such embedded portions in
+  such object form without including the above copyright and permission notices.
+
+License: Simplified BSD license
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  1. Redistributions of source code must retain the above copyright notice,
+  this list of conditions and the following disclaimer.
+
+  2. Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” 
+  ND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

@@ -1,0 +1,46 @@
+/*
+ * Copyright 2023-2025 Maxim Penner
+ *
+ * This file is part of DECTNRP.
+ *
+ * DECTNRP is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * DECTNRP is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * A copy of the GNU Affero General Public License can be found in
+ * the LICENSE file in the top-level directory of this distribution
+ * and at http://www.gnu.org/licenses/.
+ */
+
+#pragma once
+
+#include <cstdint>
+
+#include "dectnrp/sections_part3/derivative/duration.hpp"
+
+namespace dectnrp::phy::agc {
+
+struct agc_config_t {
+        // number of antennas AGC has to manage
+        uint32_t nof_antennas;
+
+        /// each AGC gain change must be a multiple of this number
+        float gain_step_dB_multiple;
+
+        /// maximum gain change in dB
+        float gain_step_dB_max;
+
+        /// minimum gain change in dB
+        float gain_step_dB_min;
+
+        /// minimum duration between two AGC gain changes
+        section3::duration_t protect_duration;
+};
+
+}  // namespace dectnrp::phy::agc
