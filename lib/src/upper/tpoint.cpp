@@ -77,7 +77,7 @@ void tpoint_t::worksub_agc(const phy::sync_report_t& sync_report,
         // get required TX gain change
         const auto tx_gain_change =
             agc_tx_local.get_gain_step_dB(sync_report.fine_peak_time_64,
-                                          plcf_base.get_TransmitPower_dBm(),
+                                          plcf_base.get_TransmitPower_dBm<float>(),
                                           hw_local.get_tx_power_ant_0dBFS_tc(),
                                           hw_local.get_rx_power_ant_0dBFS_tc(),
                                           sync_report.rms_array);

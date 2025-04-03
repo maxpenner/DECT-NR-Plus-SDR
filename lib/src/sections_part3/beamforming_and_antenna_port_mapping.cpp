@@ -208,19 +208,16 @@ const common::vec2d<cf_t>& W_t::get_W(const uint32_t N_TS, const uint32_t N_TX) 
 float W_t::get_scaling_factor(const uint32_t N_TS,
                               const uint32_t N_TX,
                               const uint32_t codebook_idx) const {
-    // return scaling_factor[N_TS_N_TX_idx[N_TS][N_TX]][codebook_idx];
     return scaling_factor.at(N_TS_N_TX_idx.at(N_TS).at(N_TX)).at(codebook_idx);
 }
 
 float W_t::get_scaling_factor_optimal_DAC(const uint32_t N_TS,
                                           const uint32_t N_TX,
                                           const uint32_t codebook_idx) const {
-    // return scaling_factor_optimal_DAC[N_TS_N_TX_idx[N_TS][N_TX]][codebook_idx];
     return scaling_factor_optimal_DAC.at(N_TS_N_TX_idx.at(N_TS).at(N_TX)).at(codebook_idx);
 }
 
 uint32_t W_t::get_codebook_index_max(const uint32_t N_TS, const uint32_t N_TX) {
-    // return N_TS_N_TX_codebook_index_max[N_TS][N_TX];
     return N_TS_N_TX_codebook_index_max.at(N_TS).at(N_TX);
 }
 

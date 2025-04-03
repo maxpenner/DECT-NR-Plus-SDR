@@ -188,7 +188,7 @@ void tfw_p2p_ft_t::init_packet_beacon() {
         section4::mac_header_type_t::mac_header_type_ec::Beacon;
 
     // define MAC common header
-    plcf_mht_mch_beacon.beacon_header.Network_ID = identity_ft.NetworkID;
+    plcf_mht_mch_beacon.beacon_header.set_Network_ID_3_lsb(identity_ft.NetworkID);
     plcf_mht_mch_beacon.beacon_header.Transmitter_Address = identity_ft.LongRadioDeviceID;
 
     // pick the MAC common header from the MAC header type

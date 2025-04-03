@@ -49,6 +49,11 @@ class identity_t {
 
         uint32_t LongRadioDeviceID;   // 32 bits
         uint32_t ShortRadioDeviceID;  // 16 bits, not related to LongRadioDeviceID
+
+        static bool is_valid_NetworkID(const uint32_t NetworkID);
+        static bool is_valid_ShortNetworkID(const uint32_t ShortNetworkID);
+        static bool is_valid_LongRadioDeviceID(const uint32_t LongRadioDeviceID);
+        static bool is_valid_ShortRadioDeviceID(const uint32_t ShortRadioDeviceID);
 };
 
 }  // namespace dectnrp::section4::mac_architecture

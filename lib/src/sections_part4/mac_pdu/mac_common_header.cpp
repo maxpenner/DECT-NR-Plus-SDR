@@ -21,6 +21,8 @@
 #include "dectnrp/sections_part4/mac_pdu/mac_common_header.hpp"
 
 #include "dectnrp/common/adt/bitbyte.hpp"
+#include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 
 namespace dectnrp::section4 {
 
@@ -31,16 +33,28 @@ void data_mac_pdu_header_t::zero() {
 }
 
 bool data_mac_pdu_header_t::is_valid() const {
-    // ToDo
+    if (Reserved != 0) {
+        return false;
+    }
+
+    if (1 < Reset) {
+        return false;
+    }
+
+    if (common::adt::bitmask_lsb<12>() < Sequence_number) {
+        return false;
+    }
 
     return true;
 }
 
 void data_mac_pdu_header_t::pack(uint8_t* mch_front) const {
+    dectnrp_assert(is_valid(), "invalid");
+
     mch_front[0] = Reserved << 5;
     mch_front[0] |= Reset << 4;
     mch_front[0] |= Sequence_number >> 8;
-    mch_front[1] = Sequence_number & common::adt::bitmask<uint8_t, 8, 0>();
+    mch_front[1] = Sequence_number & common::adt::bitmask_lsb<8>();
 }
 
 bool data_mac_pdu_header_t::unpack(const uint8_t* mch_front) {
@@ -52,26 +66,38 @@ bool data_mac_pdu_header_t::unpack(const uint8_t* mch_front) {
 }
 
 void beacon_header_t::zero() {
-    Network_ID = 0;
+    Network_ID_3_lsb = 0;
     Transmitter_Address = 0;
 }
 
 bool beacon_header_t::is_valid() const {
-    // ToDo
+    if (common::adt::bitmask_lsb<24>() < Network_ID_3_lsb) {
+        return false;
+    }
+
+    if (!mac_architecture::identity_t::is_valid_LongRadioDeviceID(Transmitter_Address)) {
+        return false;
+    }
 
     return true;
 }
 
 void beacon_header_t::pack(uint8_t* mch_front) const {
-    common::adt::l2b_upper(&mch_front[0], Network_ID, 3);
+    dectnrp_assert(is_valid(), "invalid");
+
+    common::adt::l2b_upper(&mch_front[0], Network_ID_3_lsb, 3);
     common::adt::l2b_lower(&mch_front[3], Transmitter_Address, 4);
 }
 
 bool beacon_header_t::unpack(const uint8_t* mch_front) {
-    Network_ID = common::adt::b2l_upper(&mch_front[0], 3);
+    Network_ID_3_lsb = common::adt::b2l_upper(&mch_front[0], 3);
     Transmitter_Address = common::adt::b2l_lower(&mch_front[3], 4);
 
     return is_valid();
+}
+
+void beacon_header_t::set_Network_ID_3_lsb(const uint32_t Network_ID) {
+    Network_ID_3_lsb = Network_ID & common::adt::bitmask_lsb<24>();
 }
 
 void unicast_header_t::zero() {
@@ -83,16 +109,36 @@ void unicast_header_t::zero() {
 }
 
 bool unicast_header_t::is_valid() const {
-    // ToDo
+    if (Reserved != 0) {
+        return false;
+    }
+
+    if (1 < Reset) {
+        return false;
+    }
+
+    if (common::adt::bitmask_lsb<12>() < Sequence_number) {
+        return false;
+    }
+
+    if (!mac_architecture::identity_t::is_valid_LongRadioDeviceID(Transmitter_Address)) {
+        return false;
+    }
+
+    if (!mac_architecture::identity_t::is_valid_LongRadioDeviceID(Receiver_Address)) {
+        return false;
+    }
 
     return true;
 }
 
 void unicast_header_t::pack(uint8_t* mch_front) const {
+    dectnrp_assert(is_valid(), "invalid");
+
     mch_front[0] = Reserved << 5;
     mch_front[0] |= Reset << 4;
     mch_front[0] |= Sequence_number >> 8;
-    mch_front[1] = Sequence_number & common::adt::bitmask<uint8_t, 8, 0>();
+    mch_front[1] = Sequence_number & common::adt::bitmask_lsb<8>();
     common::adt::l2b_lower(&mch_front[2], Receiver_Address, 4);
     common::adt::l2b_lower(&mch_front[6], Transmitter_Address, 4);
 }
@@ -115,16 +161,32 @@ void rd_broadcasting_header_t::zero() {
 }
 
 bool rd_broadcasting_header_t::is_valid() const {
-    // ToDo
+    if (Reserved != 0) {
+        return false;
+    }
+
+    if (1 < Reset) {
+        return false;
+    }
+
+    if (common::adt::bitmask_lsb<12>() < Sequence_number) {
+        return false;
+    }
+
+    if (!mac_architecture::identity_t::is_valid_LongRadioDeviceID(Transmitter_Address)) {
+        return false;
+    }
 
     return true;
 }
 
 void rd_broadcasting_header_t::pack(uint8_t* mch_front) const {
+    dectnrp_assert(is_valid(), "invalid");
+
     mch_front[0] = (Reserved << 5);
     mch_front[0] |= Reset << 4;
     mch_front[0] |= Sequence_number >> 8;
-    mch_front[1] = Sequence_number & common::adt::bitmask<uint8_t, 8, 0>();
+    mch_front[1] = Sequence_number & common::adt::bitmask_lsb<8>();
     common::adt::l2b_lower(&mch_front[2], Transmitter_Address, 4);
 }
 

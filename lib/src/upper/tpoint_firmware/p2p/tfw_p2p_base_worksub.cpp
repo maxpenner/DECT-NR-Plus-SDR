@@ -107,11 +107,11 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                                        packet_sizes.N_TB_byte - a_cnt_w);
 
     // pick beamforming codebook index, for beacon usually 0 to be used for channel sounding
-    uint32_t codebook_index = 0;
+    const uint32_t codebook_index = 0;
 
     // required meta data on radio layer
-    radio::buffer_tx_meta_t buffer_tx_meta = {.tx_order_id = tx_order_id,
-                                              .tx_time_64 = tx_opportunity.tx_time_64};
+    const radio::buffer_tx_meta_t buffer_tx_meta = {.tx_order_id = tx_order_id,
+                                                    .tx_time_64 = tx_opportunity.tx_time_64};
 
     // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(

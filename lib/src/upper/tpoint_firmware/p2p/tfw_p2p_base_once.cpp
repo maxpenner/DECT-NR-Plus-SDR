@@ -173,7 +173,6 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
     plcf_21.set_NumberOfSpatialStreams(1);
     plcf_21.Reserved = 0;
     plcf_21.FeedbackFormat = section4::feedback_info_f1_t::No_feedback;
-    plcf_21.FeedbackInfo = 0;
 
     // pick one PLCF
     plcf_mht_mch_unicast.plcf_base_effective = &plcf_mht_mch_unicast.plcf_21;

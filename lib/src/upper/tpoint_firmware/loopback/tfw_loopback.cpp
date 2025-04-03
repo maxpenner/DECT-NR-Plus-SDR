@@ -415,7 +415,6 @@ void tfw_loopback_t::generate_one_new_packet(const int64_t now_64,
             plcf_20.DFNewDataIndication = 0;
             plcf_20.DFHARQProcessNumber = 0;
             plcf_20.FeedbackFormat = 0;
-            plcf_20.FeedbackInfo = 0;
 
             plcf_20.pack(hp_tx->get_a_plcf());
 
@@ -432,7 +431,6 @@ void tfw_loopback_t::generate_one_new_packet(const int64_t now_64,
             plcf_21.set_NumberOfSpatialStreams(packet_sizes.tm_mode.N_SS);
             plcf_21.Reserved = 0;
             plcf_21.FeedbackFormat = 0;
-            plcf_21.FeedbackInfo = 0;
 
             plcf_21.pack(hp_tx->get_a_plcf());
         }

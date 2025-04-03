@@ -54,7 +54,7 @@ class mac_header_type_t final : public packing_t {
         };
 
         void zero() override final;
-        bool is_valid() const override final { return true; };
+        bool is_valid() const override final;
         uint32_t get_packed_size() const override final { return 1; };
         void pack(uint8_t* mac_pdu_front) const override final;
         bool unpack(const uint8_t* mac_pdu_front) override final;
@@ -72,7 +72,7 @@ class mac_header_type_t final : public packing_t {
         }
 
         static inline mac_header_type_ec get_mac_header_type_ec(const uint32_t val) {
-            // Escape is a failure
+            // Escape is not valid
             return val <= 4 ? static_cast<mac_header_type_ec>(val)
                             : mac_header_type_ec::not_defined;
         }

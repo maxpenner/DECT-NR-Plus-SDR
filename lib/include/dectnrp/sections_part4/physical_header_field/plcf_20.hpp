@@ -28,7 +28,7 @@ namespace dectnrp::section4 {
 class plcf_20_t final : public plcf_base_t {
     public:
         void zero() override final;
-        // bool is_valid()
+        bool is_valid() const override final;
         uint32_t get_packed_size() const override final { return 10; }
         void pack(uint8_t* plcf_front) const override final;
         bool unpack(const uint8_t* plcf_front) override final;
@@ -46,17 +46,14 @@ class plcf_20_t final : public plcf_base_t {
         uint32_t DFNewDataIndication;
         uint32_t DFHARQProcessNumber;
         uint32_t FeedbackFormat;
-        mutable uint32_t FeedbackInfo;
-        mutable section4::feedback_info_pool_t feedback_info_pool;
-
-        // ##################################################
-        // convenience functions
+        section4::feedback_info_pool_t feedback_info_pool;
 
         void set_NumberOfSpatialStreams(const int32_t N_SS);
-        uint32_t get_N_SS() const override final;
-        uint32_t get_DFRedundancyVersion() const override final;
+
         uint32_t get_Type() const override final { return 2; };
         uint32_t get_HeaderFormat() const override final { return 0; };
+        uint32_t get_N_SS() const override final;
+        uint32_t get_DFRedundancyVersion() const override final;
 };
 
 }  // namespace dectnrp::section4

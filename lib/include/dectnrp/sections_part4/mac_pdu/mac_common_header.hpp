@@ -56,7 +56,9 @@ class beacon_header_t final : public mac_common_header_t {
         virtual void pack(uint8_t* mch_front) const override final;
         virtual bool unpack(const uint8_t* mch_front) override final;
 
-        uint32_t Network_ID;
+        void set_Network_ID_3_lsb(const uint32_t Network_ID);
+
+        uint32_t Network_ID_3_lsb;
         uint32_t Transmitter_Address;
 };
 

@@ -1,1 +1,0 @@
-Extensions that aren't part of the standard and only used within this project for testing purposes. Part of namespace extension.

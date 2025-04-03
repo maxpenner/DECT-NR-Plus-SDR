@@ -28,15 +28,15 @@
 #include <unordered_map>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
+#include "dectnrp/sections_part4/packing.hpp"
 
 namespace dectnrp::section4 {
 
-class feedback_info_t {
+class feedback_info_t : public packing_t {
     public:
         virtual ~feedback_info_t() = default;
 
         static constexpr uint32_t No_feedback{0};
-        static constexpr uint32_t Escape{0b1111};
 
         enum class transmission_feedback_t : uint32_t {
             NACK = 0,
@@ -55,17 +55,34 @@ class feedback_info_t {
         static constexpr int32_t MCS_out_of_range{-1};
 
         static uint32_t buffer_size_2_buffer_status(const uint32_t buffer_size);
+
         static constexpr std::array<uint32_t, 16> buffer_status_2_buffer_size_lower = {
             0, 0, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
-        // clang-format off
+
         static constexpr std::array<uint32_t, 16> buffer_status_2_buffer_size_upper = {
-            0, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, std::numeric_limits<uint32_t>::max()};
-        // clang-format on
+            0,
+            16,
+            32,
+            64,
+            128,
+            256,
+            512,
+            1024,
+            2048,
+            4096,
+            8192,
+            16384,
+            32768,
+            65536,
+            131072,
+            std::numeric_limits<uint32_t>::max()};
 
     protected:
-        virtual void pack(uint32_t& feedback_info) const = 0;
-        virtual void unpack(const uint32_t feedback_info) = 0;
-        virtual void zero() = 0;
+        virtual void zero() override = 0;
+        virtual bool is_valid() const override = 0;
+        virtual uint32_t get_packed_size() const override final;
+        virtual void pack(uint8_t* a_ptr) const override = 0;
+        virtual bool unpack(const uint8_t* a_ptr) override = 0;
 
         static uint32_t mcs_2_cqi(const int32_t mcs);
         static int32_t cqi_2_mcs(const uint32_t cqi);
@@ -81,9 +98,10 @@ class feedback_info_f1_t final : public feedback_info_t {
         friend class feedback_info_pool_t;
 
     private:
-        void pack(uint32_t& feedback_info) const override final;
-        void unpack(const uint32_t feedback_info) override final;
         void zero() override final;
+        bool is_valid() const override final;
+        void pack(uint8_t* a_ptr) const override final;
+        bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_f2_t final : public feedback_info_t {
@@ -96,9 +114,10 @@ class feedback_info_f2_t final : public feedback_info_t {
         friend class feedback_info_pool_t;
 
     private:
-        void pack(uint32_t& feedback_info) const override final;
-        void unpack(const uint32_t feedback_info) override final;
         void zero() override final;
+        bool is_valid() const override final;
+        void pack(uint8_t* a_ptr) const override final;
+        bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_f3_t final : public feedback_info_t {
@@ -112,9 +131,10 @@ class feedback_info_f3_t final : public feedback_info_t {
         friend class feedback_info_pool_t;
 
     private:
-        void pack(uint32_t& feedback_info) const override final;
-        void unpack(const uint32_t feedback_info) override final;
         void zero() override final;
+        bool is_valid() const override final;
+        void pack(uint8_t* a_ptr) const override final;
+        bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_f4_t final : public feedback_info_t {
@@ -125,9 +145,10 @@ class feedback_info_f4_t final : public feedback_info_t {
         friend class feedback_info_pool_t;
 
     private:
-        void pack(uint32_t& feedback_info) const override final;
-        void unpack(const uint32_t feedback_info) override final;
         void zero() override final;
+        bool is_valid() const override final;
+        void pack(uint8_t* a_ptr) const override final;
+        bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_f5_t final : public feedback_info_t {
@@ -140,22 +161,39 @@ class feedback_info_f5_t final : public feedback_info_t {
         friend class feedback_info_pool_t;
 
     private:
-        void pack(uint32_t& feedback_info) const override final;
-        void unpack(const uint32_t feedback_info) override final;
         void zero() override final;
+        bool is_valid() const override final;
+        void pack(uint8_t* a_ptr) const override final;
+        bool unpack(const uint8_t* a_ptr) override final;
+};
+
+class feedback_info_f6_t final : public feedback_info_t {
+    public:
+        uint32_t HARQ_Process_number;
+        uint32_t Reserved;
+        uint32_t Buffer_Size;  // Buffer_Status;
+        int32_t MCS;           // CQI;
+
+        friend class feedback_info_pool_t;
+
+    private:
+        void zero() override final;
+        bool is_valid() const override final;
+        void pack(uint8_t* a_ptr) const override final;
+        bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_pool_t {
     public:
-        /// RX
-        void pack(const uint32_t feedback_format, uint32_t& feedback_info);
-        bool unpack(const uint32_t feedback_format, const uint32_t feedback_info);
+        void pack(const uint32_t feedback_format, uint8_t* a_ptr) const;
+        bool unpack(const uint32_t feedback_format, const uint8_t* a_ptr);
 
         feedback_info_f1_t feedback_info_f1;
         feedback_info_f2_t feedback_info_f2;
         feedback_info_f3_t feedback_info_f3;
         feedback_info_f4_t feedback_info_f4;
         feedback_info_f5_t feedback_info_f5;
+        feedback_info_f6_t feedback_info_f6;
 };
 
 }  // namespace dectnrp::section4

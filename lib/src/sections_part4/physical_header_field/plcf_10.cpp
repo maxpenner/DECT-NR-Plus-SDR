@@ -22,6 +22,7 @@
 
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 
 namespace dectnrp::section4 {
 
@@ -30,11 +31,44 @@ void plcf_10_t::zero() {
 
     ShortNetworkID = 0;
     TransmitterIdentity = 0;
+    TransmitPower = 0;
     Reserved = 0;
+    DFMCS = 0;
+}
+
+bool plcf_10_t::is_valid() const {
+    if (HeaderFormat != 0) {
+        return false;
+    }
+
+    if (!mac_architecture::identity_t::is_valid_ShortNetworkID(ShortNetworkID)) {
+        return false;
+    }
+
+    if (!mac_architecture::identity_t::is_valid_ShortRadioDeviceID(TransmitterIdentity)) {
+        return false;
+    }
+
+    if (common::adt::bitmask_lsb<4>() < TransmitPower) {
+        return false;
+    }
+
+    if (Reserved != 0) {
+        return false;
+    }
+
+    // has only three bits
+    if (common::adt::bitmask_lsb<3>() < DFMCS) {
+        return false;
+    }
+
+    return true;
 }
 
 void plcf_10_t::pack(uint8_t* plcf_front) const {
     plcf_base_t::pack(plcf_front);
+
+    dectnrp_assert(is_valid(), "invalid");
 
     plcf_front[1] = ShortNetworkID;
     common::adt::l2b_lower(&plcf_front[2], TransmitterIdentity, 2);
@@ -48,16 +82,13 @@ bool plcf_10_t::unpack(const uint8_t* plcf_front) {
         return false;
     }
 
-    // dectnrp_assert(HeaderFormat == 0, "header format should be 0");
-
     ShortNetworkID = plcf_front[1];
     TransmitterIdentity = common::adt::b2l_lower(&plcf_front[2], 2);
     TransmitPower = (plcf_front[4] >> 4) & 0b1111;
     Reserved = (plcf_front[4] >> 3) & 0b1;
     DFMCS = plcf_front[4] & 0b111;
 
-    // values are always well defined
-    return true;
+    return is_valid();
 }
 
 }  // namespace dectnrp::section4

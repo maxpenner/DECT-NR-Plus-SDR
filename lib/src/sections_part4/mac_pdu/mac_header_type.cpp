@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
+#include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::section4 {
 
@@ -32,31 +33,36 @@ void mac_header_type_t::zero() {
     MAC_header_type = mac_header_type_ec::not_defined;
 }
 
+bool mac_header_type_t::is_valid() const {
+    if (Version == version_ec::not_defined) {
+        return false;
+    }
+
+    if (MAC_security == mac_security_ec::not_defined) {
+        return false;
+    }
+
+    if (MAC_header_type == mac_header_type_ec::not_defined) {
+        return false;
+    }
+
+    return true;
+}
+
 void mac_header_type_t::pack(uint8_t* mac_pdu_front) const {
+    dectnrp_assert(is_valid(), "invalid");
+
     mac_pdu_front[0] = std::to_underlying(Version) << 6;
     mac_pdu_front[0] |= std::to_underlying(MAC_security) << 4;
     mac_pdu_front[0] |= std::to_underlying(MAC_header_type);
 }
 
 bool mac_header_type_t::unpack(const uint8_t* mac_pdu_front) {
-    uint32_t val = 0;
+    Version = get_version_ec((mac_pdu_front[0] >> 6) & 0b11);
+    MAC_security = get_mac_security_ec((mac_pdu_front[0] >> 4) & 0b11);
+    MAC_header_type = get_mac_header_type_ec(mac_pdu_front[0] & 0b1111);
 
-    val = (mac_pdu_front[0] >> 6) & 0b11;
-    if ((Version = get_version_ec(val)) == version_ec::not_defined) {
-        return false;
-    }
-
-    val = (mac_pdu_front[0] >> 4) & 0b11;
-    if ((MAC_security = get_mac_security_ec(val)) == mac_security_ec::not_defined) {
-        return false;
-    }
-
-    val = mac_pdu_front[0] & 0b1111;
-    if ((MAC_header_type = get_mac_header_type_ec(val)) == mac_header_type_ec::not_defined) {
-        return false;
-    }
-
-    return true;
+    return is_valid();
 }
 
 }  // namespace dectnrp::section4

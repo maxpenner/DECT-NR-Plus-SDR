@@ -23,8 +23,10 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+#define ASSERT_PLCF_TYPE \
+    dectnrp_assert(PLCF_type == 1 || PLCF_type == 2, "unknown PLCF type {}", PLCF_type)
 
+namespace dectnrp::section4 {
 plcf_decoder_t::plcf_decoder_t(uint32_t PacketLength_max_,
                                uint32_t mcs_index_max_,
                                uint32_t N_SS_max_)
@@ -40,19 +42,18 @@ void plcf_decoder_t::set_configuration() {
 }
 
 section3::fec_cfg_t& plcf_decoder_t::get_fec_cfg(const uint32_t PLCF_type) {
-    dectnrp_assert(PLCF_type == 1 || PLCF_type == 2, "unknown PLCF type");
+    ASSERT_PLCF_TYPE;
+
     return PLCF_type == 1 ? fec_cfg_type1 : fec_cfg_type2;
 }
 
 void plcf_decoder_t::decode_and_rdc_check(const uint32_t PLCF_type, const uint8_t* plcf_front) {
+    ASSERT_PLCF_TYPE;
+
     // extract header format
     const uint32_t HeaderFormat_candidate = (plcf_front[0] >> 5) & 0b111;
 
-    // lambda to check limits of radio device class (rdc)
-    auto check_rdc_limits = [this](plcf_base_t* plcf_base, const uint8_t* plcf_front_) -> bool {
-        *plcf_base << plcf_front_;
-
-        // check radio class limits
+    auto check_rdc_limits = [this](const plcf_base_t* plcf_base) -> bool {
         if (plcf_base->get_PacketLength() > PacketLength_max || plcf_base->DFMCS > mcs_index_max ||
             plcf_base->get_N_SS() > N_SS_max) {
             return false;
@@ -61,45 +62,49 @@ void plcf_decoder_t::decode_and_rdc_check(const uint32_t PLCF_type, const uint8_
         return true;
     };
 
-    dectnrp_assert(PLCF_type == 1 || PLCF_type == 2, "unknown PLCF type");
-
     switch (PLCF_type) {
         case 1:
             dectnrp_assert(HeaderFormat_type1 == common::adt::UNDEFINED_NUMERIC_32,
-                           "Header format already defined. Reset called?");
+                           "Header format already defined. Function set_configuration() called?");
 
-            // validity condition 0: PLCF must be implemented, but this is a non-fatal error as the
-            // bits can be flipped despite correct CRC
+            // validity condition 0: PLCF with HeaderFormat_candidate must be implemented
             if (HeaderFormat_candidate >= array_plcf_type1.size()) {
                 return;
             }
 
-            // validity condition 1: PLCF fields must stay within radio device class
-            if (!check_rdc_limits(array_plcf_type1.at(HeaderFormat_candidate), plcf_front)) {
+            // unpack
+            if (!array_plcf_type1.at(HeaderFormat_candidate)->unpack(plcf_front)) {
                 return;
             }
 
-            // save header format
+            // validity condition 1: PLCF fields must stay within radio device class
+            if (!check_rdc_limits(array_plcf_type1.at(HeaderFormat_candidate))) {
+                return;
+            }
+
             HeaderFormat_type1 = HeaderFormat_candidate;
 
             break;
 
         case 2:
             dectnrp_assert(HeaderFormat_type2 == common::adt::UNDEFINED_NUMERIC_32,
-                           "Header format already defined. Reset called?");
+                           "Header format already defined. Function set_configuration() called?");
 
-            // validity condition 0: PLCF must be implemented, but this is a non-fatal error as the
-            // bits can be flipped despite correct CRC
+            // validity condition 0: PLCF with HeaderFormat_candidate must be implemented
             if (HeaderFormat_candidate >= array_plcf_type2.size()) {
                 return;
             }
 
-            // validity condition 2: PLCF fields must stay within radio device class
-            if (!check_rdc_limits(array_plcf_type2.at(HeaderFormat_candidate), plcf_front)) {
+            // unpack
+            if (!array_plcf_type2.at(HeaderFormat_candidate)->unpack(plcf_front)) {
                 return;
             }
 
-            // save header format
+            // validity condition 1: PLCF fields must stay within radio device class
+            if (!check_rdc_limits(array_plcf_type2.at(HeaderFormat_candidate))) {
+                return;
+            }
+
             HeaderFormat_type2 = HeaderFormat_candidate;
 
             break;
@@ -121,7 +126,7 @@ uint32_t plcf_decoder_t::has_any_plcf() const {
 }
 
 const plcf_base_t* plcf_decoder_t::get_plcf_base(const uint32_t PLCF_type) const {
-    dectnrp_assert(PLCF_type == 1 || PLCF_type == 2, "unknown PLCF type");
+    ASSERT_PLCF_TYPE;
 
     switch (PLCF_type) {
         case 1:
@@ -145,11 +150,6 @@ const plcf_base_t* plcf_decoder_t::get_plcf_base(const uint32_t PLCF_type) const
     }
 
     return nullptr;
-}
-
-uint32_t plcf_decoder_t::get_headerformat(const uint32_t PLCF_type) const {
-    dectnrp_assert(PLCF_type == 1 || PLCF_type == 2, "unknown PLCF type");
-    return PLCF_type == 1 ? HeaderFormat_type1 : HeaderFormat_type2;
 }
 
 }  // namespace dectnrp::section4

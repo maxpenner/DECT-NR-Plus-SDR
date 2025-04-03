@@ -24,7 +24,6 @@
 #include <cstdint>
 
 #include "dectnrp/sections_part3/derivative/fec_cfg.hpp"
-#include "dectnrp/sections_part4/physical_header_field/extension/plcf_22.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_10.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_20.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_21.hpp"
@@ -34,10 +33,10 @@ namespace dectnrp::section4 {
 class plcf_decoder_t {
     public:
         /**
-         * \brief The PLCF pool takes packed bits from PHY for either PLCF type 1 or 2 after CRC has
-         * been confirmed, and extracts the content of the PLCF depending on header format. Also
-         * checks whether the extracted values stay within the limits set by the radio device class,
-         * which is a prerequisite to proceeding with the PDC.
+         * \brief The PLCF pool takes packed bits from PHY for either PLCF type 1 or 2 after the CRC
+         * has been confirmed, and extracts the content of the PLCF depending on the header format.
+         * Also checks whether the extracted values stay within the limits set by the radio device
+         * class, which is a prerequisite for proceeding with the PDC.
          *
          * \param PacketLength_max_ maximum packet length supported by radio device class
          * \param mcs_index_max_ maximum MCS index supported by radio device class
@@ -58,10 +57,8 @@ class plcf_decoder_t {
         // PLCF decoding
 
         /**
-         * \brief Must be called for every packet befor decoding, internally should set both PLCF
+         * \brief Must be called for every packet before decoding, internally should set both PLCF
          * types to an undefined state.
-         *
-         * \param sync_report in case the configuration depends on physical properties of the packet
          */
         void set_configuration();
 
@@ -69,7 +66,7 @@ class plcf_decoder_t {
          * \brief Called once with PLCF_type=1 and once with PLCF_type=2 for every packet. Every
          * PLCF's CRC can be masked to indicate "closed loop" and/or "beamforming", which we extract
          * into instances of fec_cfg_t. To provide it alongside with the PLCF's binary content, we
-         * keep the structures in this pool.
+         * keep the structures in this decoder.
          *
          * \param PLCF_type either 1 or 2
          * \return separate fec_cfg_t for either type 1 or type 2
@@ -106,14 +103,6 @@ class plcf_decoder_t {
          */
         [[nodiscard]] const plcf_base_t* get_plcf_base(const uint32_t PLCF_type) const;
 
-        /**
-         * \brief get decoded header format, can also be requested with plcf_base_t method
-         *
-         * \param PLCF_type either 1 or 2
-         * \return 0, 1, 2 etc., depends on which header formats are defined
-         */
-        [[nodiscard]] uint32_t get_headerformat(const uint32_t PLCF_type) const;
-
     private:
         const uint32_t PacketLength_max;
         const uint32_t mcs_index_max;
@@ -129,12 +118,12 @@ class plcf_decoder_t {
         uint32_t HeaderFormat_type2;
         plcf_20_t plcf_20;
         plcf_21_t plcf_21;
-        extension::plcf_22_t plcf_22;
 
         /// container with base pointers, must be ordered by header format
         const std::array<plcf_base_t*, 1> array_plcf_type1{&plcf_10};
+
         /// container with base pointers, must be ordered by header format
-        const std::array<plcf_base_t*, 3> array_plcf_type2{&plcf_20, &plcf_21, &plcf_22};
+        const std::array<plcf_base_t*, 2> array_plcf_type2{&plcf_20, &plcf_21};
 };
 
 }  // namespace dectnrp::section4

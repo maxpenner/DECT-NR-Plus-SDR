@@ -288,7 +288,7 @@ std::optional<sync_report_t> sync_chunk_t::search() {
                 return sync_report;
             } else {
                 // reset all values of sync_report
-                sync_report = {};
+                sync_report = sync_report_t(nof_antennas_limited);
             }
         }
     }

@@ -27,7 +27,7 @@ namespace dectnrp::section4 {
 class plcf_10_t final : public plcf_base_t {
     public:
         void zero() override final;
-        // bool is_valid()
+        bool is_valid() const override final;
         uint32_t get_packed_size() const override final { return 5; }
         void pack(uint8_t* plcf_front) const override final;
         bool unpack(const uint8_t* plcf_front) override final;
@@ -41,15 +41,10 @@ class plcf_10_t final : public plcf_base_t {
         uint32_t Reserved;
         // uint32_t DFMCS;
 
-        // ##################################################
-        // convenience functions
-
-        // Table 6.2.1-1 in part 4 has no field for the nof spatial streams, but is defined as 1
-        uint32_t get_N_SS() const override final { return 1; };
-        // Table 6.2.1-1 in part 4 has no field for DFRedundancyVersion, but it is defined to be 0
-        uint32_t get_DFRedundancyVersion() const override final { return 0; };
         uint32_t get_Type() const override final { return 1; };
         uint32_t get_HeaderFormat() const override final { return 0; };
+        uint32_t get_N_SS() const override final { return 1; };
+        uint32_t get_DFRedundancyVersion() const override final { return 0; };
 };
 
 }  // namespace dectnrp::section4
