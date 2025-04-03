@@ -261,11 +261,11 @@ void vspace_t::realign_realtime_with_simulationtime(const common::watch_t& watch
                                                     const int64_t samp_rate_64,
                                                     const int64_t now_simulation_64) {
     // determine how many samples we should have created by now in real time
-    int64_t now_realtime_target_64 =
-        (samp_rate_speedup >= 1)
-            ? watch.get_elapsed() * samp_rate_64 * int64_t{samp_rate_speedup} / int64_t{1000000000}
-            : watch.get_elapsed() * samp_rate_64 / int64_t{-samp_rate_speedup} /
-                  int64_t{1000000000};
+    const int64_t now_realtime_target_64 =
+        (samp_rate_speedup >= 0) ? watch.get_elapsed<int64_t, common::milli>() * samp_rate_64 *
+                                       int64_t{10 + samp_rate_speedup} / int64_t{10} / int64_t{1000}
+                                 : watch.get_elapsed<int64_t, common::milli>() * samp_rate_64 /
+                                       int64_t{-samp_rate_speedup} / int64_t{1000};
 
     /* Sleep until realtime has caught up with simulation time. This only makes sense if the CPU
      * processes the simulation faster than realtime. Otherwise this section is skipped and the

@@ -29,7 +29,7 @@ namespace dectnrp::limits {
 
 /// simulation speed change
 static constexpr int32_t simulation_samp_rate_speedup_minimum = -1000;
-static constexpr int32_t simulation_samp_rate_speedup_maximum = 8;
+static constexpr int32_t simulation_samp_rate_speedup_maximum = 100;
 
 // ##################################################
 // PHY

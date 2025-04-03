@@ -111,8 +111,6 @@ class vspace_t {
         uint32_t samp_rate_common;
         uint32_t spp_size_common;
 
-        /// samp_rate_speedup >=  1: simulation time = real time * samp_rate_speedup
-        /// samp_rate_speedup <= -2: simulation time = real time * 1/(-samp_rate_speedup)
         common::watch_t watch;  // real time
         int64_t now_64;         // simulation time
 

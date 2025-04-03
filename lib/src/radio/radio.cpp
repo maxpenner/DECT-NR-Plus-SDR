@@ -88,7 +88,6 @@ void radio_t::vspace_check_validity_and_init() {
         dectnrp_assert(
             limits::simulation_samp_rate_speedup_minimum <= hw_config_t::sim_samp_rate_speedup &&
                 hw_config_t::sim_samp_rate_speedup != -1 &&
-                hw_config_t::sim_samp_rate_speedup != 0 &&
                 hw_config_t::sim_samp_rate_speedup <= limits::simulation_samp_rate_speedup_maximum,
             "HW samp_rate_speedup_min out of bound.");
 
