@@ -30,7 +30,7 @@
 
 #include "dectnrp/common/thread/watch.hpp"
 
-namespace dectnrp::application {
+namespace dectnrp::apps {
 
 class udp_t {
     public:
@@ -70,4 +70,4 @@ class udp_t {
         std::vector<connection_t> conn_rx;
 };
 
-}  // namespace dectnrp::application
+}  // namespace dectnrp::apps

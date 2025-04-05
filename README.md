@@ -17,13 +17,14 @@ While commonly referred to as DECT NR+, the standard's official designation is D
 Advanced Topics
 
 1. [Architecture](#architecture)
-2. [Resampling](#resampling)
-3. [Synchronization](#synchronization)
-4. [Compatibility](#compatibility)
-5. [JSON Export](#json-export)
-6. [PPS Export and PTP](#pps-export-and-ptp)
-7. [Host Tuning](#host-tuning)
-8. [Firmware P2P](#firmware-p2p)
+2. [AGC](#agc)
+3. [Resampling](#resampling)
+4. [Synchronization](#synchronization)
+5. [Compatibility](#compatibility)
+6. [JSON Export](#json-export)
+7. [PPS Export and PTP](#pps-export-and-ptp)
+8. [Host Tuning](#host-tuning)
+9. [Firmware P2P](#firmware-p2p)
 
 ## Core Idea
 
@@ -36,14 +37,16 @@ The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware
 
 Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for termination point which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
-1. work_start_imminent()
-2. work_regular()
-3. work_pcc()
-4. work_pdc_async()
-5. work_upper()
-6. work_chscan_async()
-7. start_threads()
-8. stop_threads()
+|   | **Virtual Function**  | **Properties**                                                           |
+|---|-----------------------|--------------------------------------------------------------------------|
+| 1 | work_start_imminent() | called once immediately before IQ sample processing begins               |
+| 2 | work_regular()        | called regularly (polling)                                               |
+| 3 | work_pcc()            | called upon PCC reception (event-driven)                                 |
+| 4 | work_pdc_async()      | called upon PDC reception (event-driven)                                 |
+| 5 | work_upper()          | called upon availability of new data on application layer (event-driven) |
+| 6 | work_chscan_async()   | called upon finished channel measurement (event-driven)                  |
+| 7 | start_threads()       | called once to start application layer threads                           |
+| 8 | stop_threads()        | called once to stop application layer threads                            |
 
 ## Directories
 
@@ -154,6 +157,21 @@ The key takeaways are:
 5. The firmware of the SDR is not executed in an independent thread. Instead, the firmware is equivalent to a thread-safe state machine whose state changes are triggered by calls of the work_*() functions. The type of firmware executed is defined in `upper.json`.
 6. Each firmware starts and controls its own application layer interface ([app_t](lib/include/dectnrp/application/app.hpp)). To allow immediate action for new application layer data, [app_t](lib/include/dectnrp/application/app.hpp) is given access to [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp). The job type created by [app_t](lib/include/dectnrp/application/app.hpp) contains an [upper_report_t](lib/include/dectnrp/upper/upper_report.hpp) with the number and size of data items available on the application layer.
 7. The application layer interface is either a [set of UDP ports](lib/include/dectnrp/application/socket/) or a [virtual NIC](lib/include/dectnrp/application/vnic/).
+
+## AGC
+
+An ideal AGC receives a packet and adjusts its sensitivity within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts the sensitivity 50 times per second.
+
+It is typically best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels.
+
+One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated by a guard interval (GI). Since synchronization is based on several correlations of the length of the STF, and the STF for $\mu$ < 8 is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
+
+| **$\mu$** | **GI length ($\mu s$)** | **STF length ($\mu s$)**  |
+|:---------:|:-----------------------:|:-------------------------:|
+|     1     |          18.52          |           64.81           |
+|     2     |          20.83          |           41.67           |
+|     4     |          10.42          |           20.83           |
+|     8     |          10.42          |           10.42           |
 
 ## Resampling
 

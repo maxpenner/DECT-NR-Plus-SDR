@@ -32,7 +32,7 @@ static uint8_t buffer_tx[1500];
 static uint8_t buffer_rx[1500];
 
 int main(int argc, char** argv) {
-    application::udp_t udp;
+    apps::udp_t udp;
 
     udp.add_connection_tx("127.0.0.1", 8080);
     udp.add_connection_rx("127.0.0.1", 8080, 10000);

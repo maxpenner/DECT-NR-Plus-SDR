@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::application {
+namespace dectnrp::apps {
 
 udp_t::~udp_t() {
     for (size_t i = 0; i < conn_tx.size(); ++i) {
@@ -113,4 +113,4 @@ ssize_t udp_t::rx(const std::size_t idx, const uint8_t* buffer, const std::size_
     return recvfrom(conn_rx.at(idx).socked_fd, (char*)buffer, buffer_len, MSG_WAITALL, nullptr, 0);
 }
 
-}  // namespace dectnrp::application
+}  // namespace dectnrp::apps

@@ -56,7 +56,7 @@ static void signal_handler(int signo) { ctrl_c_pressed.store(true); }
 static pthread_t udp_thread;
 
 // UDP
-static dectnrp::application::udp_t udp;
+static dectnrp::apps::udp_t udp;
 static constexpr std::size_t udp_data_idx{0};
 static constexpr std::size_t udp_print_idx{1};
 
