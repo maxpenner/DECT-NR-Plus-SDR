@@ -34,16 +34,9 @@ using seconds = std::chrono::seconds;
 using steady_clock = std::chrono::steady_clock;
 using system_clock = std::chrono::system_clock;
 
-// #define WATCH_UTC_TAI_GPS_SUPPORTED
-#ifdef WATCH_UTC_TAI_GPS_SUPPORTED
 using utc_clock = std::chrono::utc_clock;
 using tai_clock = std::chrono::tai_clock;
 using gps_clock = std::chrono::gps_clock;
-#else
-using utc_clock = std::chrono::steady_clock;
-using tai_clock = std::chrono::steady_clock;
-using gps_clock = std::chrono::steady_clock;
-#endif
 
 class watch_t {
     public:
