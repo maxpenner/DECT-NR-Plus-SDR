@@ -38,13 +38,13 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
         return false;
     }
 
-    // OPTIONAL: change packet dimensions of unicast (psdef)
+    // OPTIONAL: change dimensions of PLCF and MAC PDU (psdef)
     // -
 
     // request harq process
-    auto* hp_tx = hpp->get_process_tx(plcf_mht_mch_unicast.plcf_base_effective->get_Type(),
+    auto* hp_tx = hpp->get_process_tx(ppmp_unicast.plcf_base_effective->get_Type(),
                                       identity_ft.NetworkID,
-                                      plcf_mht_mch_unicast.psdef,
+                                      ppmp_unicast.psdef,
                                       phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process
@@ -56,9 +56,11 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     // this is now a well-defined packet size
     const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    // pack first headers for DEC NR+ packet
-    uint32_t a_cnt_w =
-        plcf_mht_mch_unicast.pack_first_3_header(hp_tx->get_a_plcf(), hp_tx->get_a_tb());
+    // OPTIONAL: change content of PLCF, MAC header type and MAC common header
+    // -
+
+    // pack headers
+    uint32_t a_cnt_w = ppmp_unicast.pack_first_3_header(hp_tx->get_a_plcf(), hp_tx->get_a_tb());
 
     // then attach as many user plane data MMIEs as possible
     for (uint32_t i = 0; i < items_level_report.N_filled; ++i) {
@@ -96,8 +98,8 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
         a_cnt_w += a_cnt_w_inc;
     }
 
-    // in case not user plane data was written
-    if (plcf_mht_mch_unicast.get_packed_size_mht_mch() == a_cnt_w) {
+    // in case no user plane data was written
+    if (ppmp_unicast.get_packed_size_mht_mch() == a_cnt_w) {
         hp_tx->finalize();
         return false;
     }
@@ -106,22 +108,26 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     mmie_pool_tx.fill_with_padding_ies(hp_tx->get_a_tb() + a_cnt_w,
                                        packet_sizes.N_TB_byte - a_cnt_w);
 
-    // pick beamforming codebook index, for beacon usually 0 to be used for channel sounding
+    // pick beamforming codebook index
     const uint32_t codebook_index = 0;
 
-    // required meta data on radio layer
+    // PHY meta
+    const phy::tx_meta_t& tx_meta = {.optimal_scaling_DAC = false,
+                                     .DAC_scale = agc_tx.get_ofdm_amplitude_factor(),
+                                     .iq_phase_rad = 0.0f,
+                                     .iq_phase_increment_s2s_post_resampling_rad = 0.0f,
+                                     .GI_percentage = 25};
+
+    // radio meta
     const radio::buffer_tx_meta_t buffer_tx_meta = {.tx_order_id = tx_order_id,
                                                     .tx_time_64 = tx_opportunity.tx_time_64};
 
+    ++tx_order_id;
+    tx_earliest_64 = tx_opportunity.get_end();
+
     // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
-        phy::tx_descriptor_t(*hp_tx, codebook_index, plcf_mht_mch_unicast.tx_meta, buffer_tx_meta));
-
-    // increase tx order id
-    ++tx_order_id;
-
-    // set end of packet as earliest next transmission time
-    tx_earliest_64 = tx_opportunity.get_end();
+        phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
 
     return true;
 }

@@ -133,7 +133,7 @@ class tx_t final : public tx_rx_t {
         /// readability pointer to elements of tx_descriptor_t
         const tx_descriptor_t* tx_descriptor;
         const section3::packet_sizes_t* packet_sizes;
-        const section3::tx_meta_t* tx_meta;
+        const tx_meta_t* tx_meta;
         harq::buffer_tx_t* hb_plcf;
         harq::buffer_tx_t* hb_tb;
 

@@ -336,56 +336,14 @@ void tfw_loopback_t::generate_one_new_packet(const int64_t now_64,
 
     // every firmware has to decide how to deal with unavailable HARQ process
     if (hp_tx == nullptr) {
-        dectnrp_log_wrn("HARQ process TX unavailable. Bug in firmware.");
+        dectnrp_log_wrn("HARQ process TX unavailable");
         return;
     }
 
     // this is now a well-defined packet size
     const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    // save number of bits in transport block directly into results container
-    TB_bits[mcs_cnt] = packet_sizes.N_TB_bits;
-
-    // pick beamforming codebook index, for beacon usually 0 to be used for channel sounding
-    uint32_t codebook_index = 0;
-
-    // random number to have some variation of the CFO
-    randomgen.shuffle();
-
-    // find a random CFO
-    const float cfo_Hz = randomgen.rand_m1p1() * cfo_symmetric_range_subc_multiple *
-                         static_cast<float>(psdef.u * constants::subcarrier_spacing_min_u_b);
-
-    // define non-dect metadata of transmission
-    section3::tx_meta_t tx_meta = {
-        .optimal_scaling_DAC = false,
-        .DAC_scale = phy::agc::agc_t::OFDM_AMPLITUDE_FACTOR_MINUS_00dB,
-        .iq_phase_rad = 0.0f,
-        .iq_phase_increment_s2s_post_resampling_rad =
-            common::adt::get_sample2sample_phase_inc(cfo_Hz, hw.get_samp_rate()),
-        .GI_percentage = 25};
-
-    // jitter of TX time
-    const int64_t random_jitter_64 = static_cast<int64_t>(randomgen.randi(
-        0,
-        static_cast<uint32_t>(
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::us100))));
-
-    // required meta data on radio layer
-    radio::buffer_tx_meta_t buffer_tx_meta = {
-        .tx_order_id = tx_order_id,
-        .tx_time_64 =
-            now_64 +
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::turn_around_time_us) +
-            random_jitter_64};
-
-    // force transmission time to multiple of packet_tx_time_multiple
-    const int64_t res = buffer_tx_meta.tx_time_64 % packet_tx_time_multiple;
-    if (res != 0) {
-        buffer_tx_meta.tx_time_64 += packet_tx_time_multiple - res;
-    }
-
-    // define PLCF type 1, header format 0
+    // define and pack one of the PLCF types and formats
     section4::plcf_10_t plcf_10;
     plcf_10.HeaderFormat = 0;
     plcf_10.PacketLengthType = psdef.PacketLengthType;
@@ -396,7 +354,6 @@ void tfw_loopback_t::generate_one_new_packet(const int64_t now_64,
     plcf_10.Reserved = 0;
     plcf_10.DFMCS = psdef.mcs_index;
 
-    // choose PLCF type 1 or 2
     if (PLCF_type == 1) {
         plcf_10.pack(hp_tx->get_a_plcf());
     } else {
@@ -436,16 +393,52 @@ void tfw_loopback_t::generate_one_new_packet(const int64_t now_64,
         }
     }
 
-    // increase tx order id
-    ++tx_order_id;
-
-    // fill transport block with random data
+    // fill MAC PDU random data
     uint8_t* a_tb = hp_tx->get_a_tb();
     for (uint32_t i = 0; i < packet_sizes.N_TB_byte; ++i) {
         a_tb[i] = std::rand() % 256;
     }
 
-    // add to tx_descriptor_vec
+    // save number of bits in transport block directly into results container
+    TB_bits[mcs_cnt] = packet_sizes.N_TB_bits;
+
+    // pick beamforming codebook index
+    uint32_t codebook_index = 0;
+
+    // determine a random CFO
+    const float cfo_Hz = randomgen.rand_m1p1() * cfo_symmetric_range_subc_multiple *
+                         static_cast<float>(psdef.u * constants::subcarrier_spacing_min_u_b);
+
+    // PHY meta
+    const phy::tx_meta_t tx_meta = {
+        .optimal_scaling_DAC = false,
+        .DAC_scale = phy::agc::agc_t::OFDM_AMPLITUDE_FACTOR_MINUS_00dB,
+        .iq_phase_rad = 0.0f,
+        .iq_phase_increment_s2s_post_resampling_rad =
+            common::adt::get_sample2sample_phase_inc(cfo_Hz, hw.get_samp_rate()),
+        .GI_percentage = 25};
+
+    // radio meta
+    radio::buffer_tx_meta_t buffer_tx_meta = {
+        .tx_order_id = tx_order_id,
+        .tx_time_64 = now_64 + duration_lut.get_N_samples_from_duration(
+                                   section3::duration_ec_t::turn_around_time_us)};
+
+    // add a random jitter to the transmission time
+    buffer_tx_meta.tx_time_64 += static_cast<int64_t>(randomgen.randi(
+        0,
+        static_cast<uint32_t>(
+            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::us100))));
+
+    // force transmission time to multiple of packet_tx_time_multiple
+    const int64_t res = buffer_tx_meta.tx_time_64 % packet_tx_time_multiple;
+    if (res != 0) {
+        buffer_tx_meta.tx_time_64 += packet_tx_time_multiple - res;
+    }
+
+    ++tx_order_id;
+
+    // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
 }

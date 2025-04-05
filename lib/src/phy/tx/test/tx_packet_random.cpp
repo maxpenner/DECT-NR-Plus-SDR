@@ -138,7 +138,7 @@ int generate_random_TX_packet_within_rdc_limits(std::string radio_device_class_s
 #endif
 
     // define additional PHY packet metadata
-    const dectnrp::section3::tx_meta_t tx_meta = {
+    const dectnrp::phy::tx_meta_t tx_meta = {
         .optimal_scaling_DAC = false,
         .DAC_scale = 1.0f,
         .iq_phase_rad = random_phase_rad,

@@ -279,12 +279,27 @@ void tfw_rtt_t::generate_packet_asap(const section4::mac_architecture::identity_
 
     // every firmware has to decide how to deal with unavailable HARQ process
     if (hp_tx == nullptr) {
-        dectnrp_log_wrn("HARQ process TX unavailable. Bug in firmware.");
+        dectnrp_log_wrn("HARQ process TX unavailable");
         return;
     }
 
+    // this is now a well-defined packet size
+    const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
+
     // save number of bytes in transport block
-    N_TB_byte = hp_tx->get_packet_sizes().N_TB_byte;
+    N_TB_byte = packet_sizes.N_TB_byte;
+
+    // define and pack one of the PLCF types and formats
+    section4::plcf_10_t plcf_10;
+    plcf_10.HeaderFormat = 0;
+    plcf_10.PacketLengthType = psdef.PacketLengthType;
+    plcf_10.set_PacketLength_m1(psdef.PacketLength);
+    plcf_10.ShortNetworkID = identity.ShortNetworkID;
+    plcf_10.TransmitterIdentity = identity.ShortRadioDeviceID;
+    plcf_10.set_TransmitPower(0);
+    plcf_10.Reserved = 0;
+    plcf_10.DFMCS = psdef.mcs_index;
+    plcf_10.pack(hp_tx->get_a_plcf());
 
     // FT copies from application server to HARQ buffer
     if (tpoint_config.firmware_id == 0) {
@@ -306,17 +321,17 @@ void tfw_rtt_t::generate_packet_asap(const section4::mac_architecture::identity_
         mac_pdu_decoder->copy_a(hp_tx->get_a_tb());
     }
 
-    // pick beamforming codebook index, for beacon usually 0 to be used for channel sounding
+    // pick beamforming codebook index
     uint32_t codebook_index = 0;
 
-    // define non-dect metadata of transmission
-    section3::tx_meta_t tx_meta = {.optimal_scaling_DAC = false,
-                                   .DAC_scale = agc_tx.get_ofdm_amplitude_factor(),
-                                   .iq_phase_rad = 0.0f,
-                                   .iq_phase_increment_s2s_post_resampling_rad = 0.0f,
-                                   .GI_percentage = 25};
+    // PHY meta
+    const phy::tx_meta_t tx_meta = {.optimal_scaling_DAC = false,
+                                    .DAC_scale = agc_tx.get_ofdm_amplitude_factor(),
+                                    .iq_phase_rad = 0.0f,
+                                    .iq_phase_increment_s2s_post_resampling_rad = 0.0f,
+                                    .GI_percentage = 25};
 
-    // required meta data on radio layer
+    // radio meta
     radio::buffer_tx_meta_t buffer_tx_meta = {
         .tx_order_id = tx_order_id,
         .tx_time_64 = std::max(
@@ -324,26 +339,9 @@ void tfw_rtt_t::generate_packet_asap(const section4::mac_architecture::identity_
             buffer_rx.get_rx_time_passed() + duration_lut.get_N_samples_from_duration(
                                                  section3::duration_ec_t::turn_around_time_us))};
 
-    // save the end of the packet, this us our new earliest transmission time
+    ++tx_order_id;
     tx_earliest_64 = buffer_tx_meta.tx_time_64 + section3::get_N_samples_in_packet_length(
                                                      hp_tx->get_packet_sizes(), hw.get_samp_rate());
-
-    // define PLCF type 1, content except for ShortNetworkID and TransmitterIdentity irrelevant
-    section4::plcf_10_t plcf_10;
-    plcf_10.HeaderFormat = 0;
-    plcf_10.PacketLengthType = psdef.PacketLengthType;
-    plcf_10.set_PacketLength_m1(psdef.PacketLength);
-    plcf_10.ShortNetworkID = identity.ShortNetworkID;
-    plcf_10.TransmitterIdentity = identity.ShortRadioDeviceID;
-    plcf_10.set_TransmitPower(0);
-    plcf_10.Reserved = 0;
-    plcf_10.DFMCS = psdef.mcs_index;
-
-    // pack PLCF header
-    plcf_10.pack(hp_tx->get_a_plcf());
-
-    // increase tx order id
-    ++tx_order_id;
 
     // add to tx_descriptor_vec
     machigh_phy.tx_descriptor_vec.push_back(

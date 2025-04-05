@@ -132,13 +132,13 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
 bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     ++stats.beacon_cnt;
 
-    // OPTIONAL: change packet dimensions of beacon (psdef)
+    // OPTIONAL: change dimensions of PLCF and MAC PDU (psdef)
     // -
 
     // request harq process
-    auto* hp_tx = hpp->get_process_tx(plcf_mht_mch_beacon.plcf_base_effective->get_Type(),
+    auto* hp_tx = hpp->get_process_tx(ppmp_beacon.plcf_base_effective->get_Type(),
                                       identity_ft.NetworkID,
-                                      plcf_mht_mch_beacon.psdef,
+                                      ppmp_beacon.psdef,
                                       phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process
@@ -147,15 +147,14 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
         return false;
     }
 
-    // this is now a well-defined, generatable packet size
+    // this is now a well-defined packet size
     const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    // OPTIONAL: change content of headers
+    // OPTIONAL: change content of PLCF, MAC header type and MAC common header
     // -
 
     // pack headers
-    uint32_t a_cnt_w =
-        plcf_mht_mch_beacon.pack_first_3_header(hp_tx->get_a_plcf(), hp_tx->get_a_tb());
+    uint32_t a_cnt_w = ppmp_beacon.pack_first_3_header(hp_tx->get_a_plcf(), hp_tx->get_a_tb());
 
     // change content of cluster_beacon_message_t
     auto& cbm = mmie_pool_tx.get<section4::cluster_beacon_message_t>();
@@ -172,20 +171,29 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     mmie_pool_tx.fill_with_padding_ies(hp_tx->get_a_tb() + a_cnt_w,
                                        packet_sizes.N_TB_byte - a_cnt_w);
 
-    // pick beamforming codebook index, for beacon usually 0 to be used for channel sounding
+    // pick beamforming codebook index
     uint32_t codebook_index = 0;
 
-    // required meta data on radio layer
+    // PHY meta
+    const phy::tx_meta_t& tx_meta = {.optimal_scaling_DAC = false,
+                                     .DAC_scale = agc_tx.get_ofdm_amplitude_factor(),
+                                     .iq_phase_rad = 0.0f,
+                                     .iq_phase_increment_s2s_post_resampling_rad = 0.0f,
+                                     .GI_percentage = 25};
+
+    // radio meta
     radio::buffer_tx_meta_t buffer_tx_meta = {
         .tx_order_id = tx_order_id, .tx_time_64 = allocation_ft.get_beacon_time_scheduled()};
 
     ++tx_order_id;
     tx_earliest_64 = allocation_ft.get_beacon_time_scheduled();
-    allocation_ft.set_beacon_time_next();
 
     // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
-        phy::tx_descriptor_t(*hp_tx, codebook_index, plcf_mht_mch_beacon.tx_meta, buffer_tx_meta));
+        phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
+
+    // set tranmission time of next beacon
+    allocation_ft.set_beacon_time_next();
 
     return true;
 }
@@ -193,7 +201,7 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
 void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy) {
     // number of definable packets is limited
     for (uint32_t i = 0; i < max_simultaneous_tx_unicast; ++i) {
-        // go over the connection index which represent different devices
+        // go over the connection indexes which represent different devices
         for (uint32_t conn_idx = 0; conn_idx < N_pt; ++conn_idx) {
             // first map connection index to PT
             const auto lrdid = contact_list_p2p.app_server_idx.get_k(conn_idx);
@@ -216,9 +224,9 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
             }
 
             // change content of headers
-            section4::plcf_21_t& plcf_21 = plcf_mht_mch_unicast.plcf_21;
+            section4::plcf_21_t& plcf_21 = ppmp_unicast.plcf_21;
             plcf_21.ReceiverIdentity = ShortRadioDeviceID;
-            plcf_mht_mch_unicast.unicast_header.Receiver_Address = lrdid;
+            ppmp_unicast.unicast_header.Receiver_Address = lrdid;
 
             // change feedback info in PLCF
             // -

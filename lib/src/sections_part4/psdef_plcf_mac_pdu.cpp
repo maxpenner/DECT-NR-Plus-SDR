@@ -18,14 +18,14 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/sections_part4/plcf_mht_mch.hpp"
+#include "dectnrp/sections_part4/psdef_plcf_mac_pdu.hpp"
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/sections_part4/mac_pdu/mac_multiplexing_header.hpp"
 
 namespace dectnrp::section4 {
 
-uint32_t plcf_mht_mch_t::pack_first_3_header(uint8_t* a_plcf, uint8_t* a_mac_pdu) const {
+uint32_t psdef_plcf_mac_pdu_t::pack_first_3_header(uint8_t* a_plcf, uint8_t* a_mac_pdu) const {
     dectnrp_assert(a_plcf != nullptr, "destination nullptr");
     dectnrp_assert(a_mac_pdu != nullptr, "destination nullptr");
     dectnrp_assert(plcf_base_effective != nullptr, "source nullptr");

@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section3 {
+namespace dectnrp::phy {
 
 /**
  * \brief Meta information of a DECT NR+ packet that are not strictly related to the DECT NR+
@@ -57,4 +57,4 @@ using tx_meta_t = struct tx_meta_t {
         uint32_t GI_percentage;
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::phy

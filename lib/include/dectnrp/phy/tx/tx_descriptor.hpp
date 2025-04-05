@@ -23,8 +23,8 @@
 #include <cstdint>
 
 #include "dectnrp/phy/harq/process_tx.hpp"
+#include "dectnrp/phy/tx/tx_meta.hpp"
 #include "dectnrp/radio/buffer_tx_meta.hpp"
-#include "dectnrp/sections_part3/derivative/tx_meta.hpp"
 
 namespace dectnrp::phy {
 
@@ -42,7 +42,7 @@ class tx_descriptor_t {
          */
         explicit tx_descriptor_t(harq::process_tx_t& hp_tx_,
                                  const uint32_t codebook_index_,
-                                 const section3::tx_meta_t tx_meta_,
+                                 const tx_meta_t tx_meta_,
                                  const radio::buffer_tx_meta_t buffer_tx_meta_,
                                  const int32_t hw_id_ = hw_id_associated)
             : hp_tx(hp_tx_),
@@ -62,7 +62,7 @@ class tx_descriptor_t {
         const uint32_t codebook_index;
 
         /// additional PHY meta data that is not strictly DECTNRP related
-        const section3::tx_meta_t tx_meta;
+        const tx_meta_t tx_meta;
 
         /// additional radio layer meta data that is not strictly DECTNRP related
         const radio::buffer_tx_meta_t buffer_tx_meta;

@@ -33,7 +33,7 @@
 #include "dectnrp/radio/hw_simulator.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie_pool_tx.hpp"
-#include "dectnrp/sections_part4/plcf_mht_mch.hpp"
+#include "dectnrp/sections_part4/psdef_plcf_mac_pdu.hpp"
 #include "dectnrp/upper/tpoint.hpp"
 
 #define APPLICATION_INTERFACE_VNIC_OR_SOCKET
@@ -117,10 +117,10 @@ class tfw_p2p_base_t : public tpoint_t {
 #endif
 
         /// part 2 defines five MAC PDU types, these are generators for each type
-        section4::plcf_mht_mch_data_t plcf_mht_mch_data;
-        section4::plcf_mht_mch_beacon_t plcf_mht_mch_beacon;
-        section4::plcf_mht_mch_unicast_t plcf_mht_mch_unicast;
-        section4::plcf_mht_mch_rd_broadcast_t plcf_mht_mch_rd_broadcast;
+        section4::ppmp_data_t ppmp_data;
+        section4::ppmp_beacon_t ppmp_beacon;
+        section4::ppmp_unicast_t ppmp_unicast;
+        section4::ppmp_rd_broadcast_t ppmp_rd_broadcast;
         section4::mmie_pool_tx_t mmie_pool_tx;
 
         /// FT and PT both generate unicast packets, however with different identities

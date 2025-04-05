@@ -20,18 +20,20 @@
 
 #pragma once
 
+#include "dectnrp/sections_part3/derivative/packet_sizes_def.hpp"
 #include "dectnrp/sections_part4/mac_pdu/mac_common_header.hpp"
 #include "dectnrp/sections_part4/mac_pdu/mac_header_type.hpp"
-#include "dectnrp/sections_part4/packet_meta.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_10.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_20.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_21.hpp"
 
 namespace dectnrp::section4 {
 
-/// mht = MAC header type, mch = MAC common header
-class plcf_mht_mch_t {
+class psdef_plcf_mac_pdu_t {
     public:
+        /// defines all sizes of the transmission (bits, bytes and IQ samples)
+        section3::packet_sizes_def_t psdef;
+
         /// returns byte offset of MAC header type and MAC common header
         [[nodiscard]] uint32_t pack_first_3_header(uint8_t* a_plcf, uint8_t* a_mac_pdu) const;
 
@@ -49,7 +51,8 @@ class plcf_mht_mch_t {
         }
 };
 
-class plcf_mht_mch_data_t final : public packet_meta_t, public plcf_mht_mch_t {
+/// ppmp = psdef_plcf_mac_pdu
+class ppmp_data_t final : public psdef_plcf_mac_pdu_t {
     public:
         section4::plcf_20_t plcf_20;
         section4::plcf_21_t plcf_21;
@@ -57,18 +60,26 @@ class plcf_mht_mch_data_t final : public packet_meta_t, public plcf_mht_mch_t {
         /// base class contains MAC header type
 
         section4::data_mac_pdu_header_t data_mac_pdu_header;
+
+        // add restrictions as to which MMIEs can be attached
+        // ToDo
 };
 
-class plcf_mht_mch_beacon_t final : public packet_meta_t, public plcf_mht_mch_t {
+/// ppmp = psdef_plcf_mac_pdu
+class ppmp_beacon_t final : public psdef_plcf_mac_pdu_t {
     public:
         section4::plcf_10_t plcf_10;
 
         /// base class contains MAC header type
 
         section4::beacon_header_t beacon_header;
+
+        // add restrictions as to which MMIEs can be attached
+        // ToDo
 };
 
-class plcf_mht_mch_unicast_t final : public packet_meta_t, public plcf_mht_mch_t {
+/// ppmp = psdef_plcf_mac_pdu
+class ppmp_unicast_t final : public psdef_plcf_mac_pdu_t {
     public:
         section4::plcf_20_t plcf_20;
         section4::plcf_21_t plcf_21;
@@ -77,15 +88,22 @@ class plcf_mht_mch_unicast_t final : public packet_meta_t, public plcf_mht_mch_t
 
         section4::mch_empty_t mch_empty;
         section4::unicast_header_t unicast_header;
+
+        // add restrictions as to which MMIEs can be attached
+        // ToDo
 };
 
-class plcf_mht_mch_rd_broadcast_t final : public packet_meta_t, public plcf_mht_mch_t {
+/// ppmp = psdef_plcf_mac_pdu
+class ppmp_rd_broadcast_t final : public psdef_plcf_mac_pdu_t {
     public:
         section4::plcf_10_t plcf_10;
 
         /// base class contains MAC header type
 
         section4::rd_broadcasting_header_t rd_broadcasting_header;
+
+        // add restrictions as to which MMIEs can be attached
+        // ToDo
 };
 
 }  // namespace dectnrp::section4

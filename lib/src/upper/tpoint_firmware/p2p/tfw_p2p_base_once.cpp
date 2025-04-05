@@ -143,7 +143,7 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
                                          const uint32_t LongRadioDeviceID_tx,
                                          const uint32_t LongRadioDeviceID_rx) {
     // meta packet size
-    section3::packet_sizes_def_t& psdef = plcf_mht_mch_unicast.psdef;
+    section3::packet_sizes_def_t& psdef = ppmp_unicast.psdef;
     psdef.u = worker_pool_config.radio_device_class.u_min;
     psdef.b = worker_pool_config.radio_device_class.b_min;
     psdef.PacketLengthType = 1;
@@ -152,16 +152,8 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
     psdef.mcs_index = 4;
     psdef.Z = worker_pool_config.radio_device_class.Z_min;
 
-    // meta PHY
-    section3::tx_meta_t& tx_meta = plcf_mht_mch_unicast.tx_meta;
-    tx_meta.optimal_scaling_DAC = false;
-    tx_meta.DAC_scale = agc_tx.get_ofdm_amplitude_factor();
-    tx_meta.iq_phase_rad = 0.0f;
-    tx_meta.iq_phase_increment_s2s_post_resampling_rad = 0.0f;
-    tx_meta.GI_percentage = 25;
-
     // define PLCFs
-    section4::plcf_21_t& plcf_21 = plcf_mht_mch_unicast.plcf_21;
+    section4::plcf_21_t& plcf_21 = ppmp_unicast.plcf_21;
     plcf_21.HeaderFormat = 1;
     plcf_21.PacketLengthType = psdef.PacketLengthType;
     plcf_21.set_PacketLength_m1(psdef.PacketLength);
@@ -175,25 +167,24 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
     plcf_21.FeedbackFormat = section4::feedback_info_f1_t::No_feedback;
 
     // pick one PLCF
-    plcf_mht_mch_unicast.plcf_base_effective = &plcf_mht_mch_unicast.plcf_21;
+    ppmp_unicast.plcf_base_effective = &ppmp_unicast.plcf_21;
 
     // define MAC header type
-    plcf_mht_mch_unicast.mac_header_type.Version = section4::mac_header_type_t::version_ec::v00;
-    plcf_mht_mch_unicast.mac_header_type.MAC_security =
+    ppmp_unicast.mac_header_type.Version = section4::mac_header_type_t::version_ec::v00;
+    ppmp_unicast.mac_header_type.MAC_security =
         section4::mac_header_type_t::mac_security_ec::macsec_not_used;
-    plcf_mht_mch_unicast.mac_header_type.MAC_header_type =
+    ppmp_unicast.mac_header_type.MAC_header_type =
         section4::mac_header_type_t::mac_header_type_ec::mch_empty;
 
     // define MAC common header
-    plcf_mht_mch_unicast.unicast_header.Reserved = 0;
-    plcf_mht_mch_unicast.unicast_header.Reset = 1;
-    plcf_mht_mch_unicast.unicast_header.Sequence_number = 0;
-    plcf_mht_mch_unicast.unicast_header.Receiver_Address = LongRadioDeviceID_rx;
-    plcf_mht_mch_unicast.unicast_header.Transmitter_Address = LongRadioDeviceID_tx;
+    ppmp_unicast.unicast_header.Reserved = 0;
+    ppmp_unicast.unicast_header.Reset = 1;
+    ppmp_unicast.unicast_header.Sequence_number = 0;
+    ppmp_unicast.unicast_header.Receiver_Address = LongRadioDeviceID_rx;
+    ppmp_unicast.unicast_header.Transmitter_Address = LongRadioDeviceID_tx;
 
-    // pick the MAC common header from the MAC header type
-    // plcf_mht_mch_unicast.mch_base_effective = &plcf_mht_mch_unicast.unicast_header;
-    plcf_mht_mch_unicast.mch_base_effective = &plcf_mht_mch_unicast.mch_empty;
+    // pick one MAC common header
+    ppmp_unicast.mch_base_effective = &ppmp_unicast.mch_empty;
 }
 
 }  // namespace dectnrp::upper::tfw::p2p
