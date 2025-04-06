@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <memory>
 
-// #define PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#define PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
 #ifdef PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
 #include <condition_variable>
 #include <mutex>

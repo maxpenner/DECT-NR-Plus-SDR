@@ -97,6 +97,7 @@ class watch_t {
             }
         }
 
+#ifdef DECTNRP_WATCH_ENABLE_BUSYWAIT
         template <typename Res = micro>
         static void busywait(const int64_t target) {
             if constexpr (std::is_same_v<Res, micro>) {
@@ -108,6 +109,7 @@ class watch_t {
                 busywait_us(target * int64_t{1000000});
             }
         }
+#endif
 
         /**
          * \brief Sleep until the specified target time. Target time is given as time elapsed since
@@ -132,6 +134,7 @@ class watch_t {
             return true;
         }
 
+#ifdef DECTNRP_WATCH_ENABLE_BUSYWAIT
         template <typename Res = micro, typename Clock = utc_clock>
         static bool busywait_until(const int64_t target) {
             const int64_t elapsed = get_elapsed_since_epoch<int64_t, Res, Clock>();
@@ -144,6 +147,7 @@ class watch_t {
 
             return true;
         }
+#endif
 
         /**
          * \brief A busywait as an alternative to sleep. The internals of this busywait function are
