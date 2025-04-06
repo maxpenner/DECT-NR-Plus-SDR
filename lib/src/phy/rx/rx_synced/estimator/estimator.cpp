@@ -18,7 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/phy/rx/rx_synced/estimator.hpp"
+#include "dectnrp/phy/rx/rx_synced/estimator/estimator.hpp"
 
 #include <algorithm>
 

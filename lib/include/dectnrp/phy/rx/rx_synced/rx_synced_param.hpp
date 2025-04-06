@@ -86,7 +86,7 @@ namespace dectnrp::phy {
  */
 #define RX_SYNCED_PARAM_RMS_FILL_COMPLETELY_OR_KEEP_WHAT_SYNCHRONIZATION_PROVIDED
 
-/// if the RMS value is estimated for each antenna , we can limit the total length of the estimation
+/// if the RMS value is estimated for each antenna, we can limit the total length of the estimation
 #define RX_SYNCED_PARAM_RMS_PERCENTAGE_OF_STF_USED_FOR_RMS_ESTIMATION 100
 
 /// if activated, any RMS values provided by sync are kept and only the gaps are filled
@@ -131,7 +131,7 @@ namespace dectnrp::phy {
 #define RX_SYNCED_PARAM_AMPLITUDE_SCALING
 
 // ####################################################
-// Fractional and Residual STO (as an result of an SCO)
+// Fractional and Residual STO (as a result of an SCO)
 // ####################################################
 
 /**
@@ -166,7 +166,7 @@ namespace dectnrp::phy {
  * \brief The residual CFO estimation is based on two OFDM symbols with STO and/or DRS cells. In
  * case of two OFDM with DRS cells are compared, their separation in time domain is N_step. The
  * phase rotation due to the residual CFO is the same for each subcarrier of an OFDM symbol, but
- * increases with over time.
+ * increases over time.
  *
  * https://de.mathworks.com/help/wlan/ug/joint-sampling-rate-and-carrier-frequency-offset-tracking.html
  */
@@ -263,7 +263,7 @@ extern "C" {
  * always use the final DRS cells at the very end of the packet, as these represent the latest state
  * of the channel.
  */
-#define RX_SYNCED_PARAM_MIMO_BASED_ON_DRS_AT_PACKET_END
+#define RX_SYNCED_PARAM_MIMO_BASED_ON_STF_AND_DRS_AT_PACKET_END
 
 // ########################################################################################################
 // Temporary System Restrictions

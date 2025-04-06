@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "dectnrp/phy/rx/rx_synced/estimator.hpp"
+#include "dectnrp/phy/rx/rx_synced/estimator/estimator.hpp"
 #include "dectnrp/phy/rx/rx_synced/mimo/mimo_report.hpp"
 #include "dectnrp/sections_part3/beamforming_and_antenna_port_mapping.hpp"
 
@@ -48,7 +48,8 @@ class estimator_mimo_t final : public estimator_t {
          *
          * \param channel_antennas
          */
-        virtual void process_stf(const channel_antennas_t& channel_antennas) override final;
+        virtual void process_stf(const channel_antennas_t& channel_antennas,
+                                 const process_stf_meta_t& process_stf_meta) override final;
 
         /**
          * \brief Called once at the end of a packet.

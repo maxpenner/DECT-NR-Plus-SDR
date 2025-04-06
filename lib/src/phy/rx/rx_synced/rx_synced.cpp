@@ -416,12 +416,11 @@ pdc_report_t rx_synced_t::demoddecod_rx_pdc(const maclow_phy_t& maclow_phy_) {
         return pdc_report_t(mac_pdu_decoder);
     }
 
-#ifdef RX_SYNCED_PARAM_MIMO_BASED_ON_DRS_AT_PACKET_END
+#ifdef RX_SYNCED_PARAM_MIMO_BASED_ON_STF_AND_DRS_AT_PACKET_END
     /* At this point, the latest transmit stream indices are not relevant, as at the end of a packet
      * it is always guaranteed that all transmit streams are present in the channel estimate.
      */
-    const estimator_t::process_drs_meta_t process_drs_meta(
-        TS_idx_first, TS_idx_last, ofdm_symb_idx);
+    const process_drs_meta_t process_drs_meta(TS_idx_first, TS_idx_last, ofdm_symb_idx);
 
     dectnrp_assert(TS_idx_last == sync_report->N_eff_TX - 1,
                    "last transmit stream incorrect {} {}",
@@ -570,9 +569,16 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
     // estimate channel of STF based on ofdm_symbol_now
     run_stf_chestim_zf();
 
+#if defined(RX_SYNCED_PARAM_STO_FRACTIONAL_BASED_ON_STF) || \
+    defined(RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_STF) ||   \
+    defined(RX_SYNCED_PARAM_SNR_BASED_ON_STF) ||            \
+    defined(RX_SYNCED_PARAM_MIMO_BASED_ON_STF_AND_DRS_AT_PACKET_END)
+    const process_stf_meta_t process_stf_meta(sync_report_.fine_peak_time_64);
+#endif
+
 #ifdef RX_SYNCED_PARAM_STO_FRACTIONAL_BASED_ON_STF
     // run estimator_sto estimation based on STF
-    estimator_sto->process_stf(channel_antennas);
+    estimator_sto->process_stf(channel_antennas, process_stf_meta);
 
     // immediately correct phase rotation of the current OFDM symbol for upcoming CFO estimation
     estimator_sto->apply_full_phase_rotation(ofdm_symbol_now);
@@ -588,7 +594,7 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
 #endif
 
 #ifdef RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_STF
-    estimator_cfo->process_stf(channel_antennas);
+    estimator_cfo->process_stf(channel_antennas, process_stf_meta);
 
     /* At this point, estimator_cfo was provided with the STF only. Two measure the common phase
      * error, it requires at least two distinct OFDM symbols to measure the rotation. Thus, at this
@@ -599,7 +605,11 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
 
 #ifdef RX_SYNCED_PARAM_SNR_BASED_ON_STF
     // the current SNR value is required for LUT choice and for reporting to MAC
-    estimator_snr->process_stf(channel_antennas);
+    estimator_snr->process_stf(channel_antennas, process_stf_meta);
+#endif
+
+#ifdef RX_SYNCED_PARAM_MIMO_BASED_ON_STF_AND_DRS_AT_PACKET_END
+    estimator_mimo->process_stf(channel_antennas, process_stf_meta);
 #endif
 }
 
@@ -822,8 +832,7 @@ void rx_synced_t::run_drs_chestim_zf() {
 #if defined(RX_SYNCED_PARAM_STO_RESIDUAL_BASED_ON_DRS) || \
     defined(RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_DRS) || \
     defined(RX_SYNCED_PARAM_SNR_BASED_ON_DRS)
-    const estimator_t::process_drs_meta_t process_drs_meta(
-        TS_idx_first, TS_idx_last, ofdm_symb_idx);
+    const process_drs_meta_t process_drs_meta(TS_idx_first, TS_idx_last, ofdm_symb_idx);
 #endif
 
 #ifdef RX_SYNCED_PARAM_STO_RESIDUAL_BASED_ON_DRS
@@ -1067,8 +1076,7 @@ void rx_synced_t::run_pdc_ps_in_chestim_mode_lr_t() {
             ++ofdm_symb_ps_idx;
         }
 
-#if defined(RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_STF) || \
-    defined(RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_DRS)
+#if defined(RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_DRS)
         run_pdc_ps_in_chestim_mode_lr_t_residual_cfo_post_correction();
 #endif
 

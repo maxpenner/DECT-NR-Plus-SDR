@@ -350,7 +350,6 @@ class rx_synced_t final : public tx_rx_t, public rx_pacer_t {
          * right of the processing stage which gives us the best possible residual CFO estimation.
          * Immediately after obtaining the right DRS symbol, the mixer's phase rotation is adjusted.
          *
-         *
          * However, at that point mixing and the FFT for all symbol in between the DRS symbols have
          * already been executed, so the mixer adjustment can't take effect. As a solution, we have
          * rotation the phase of all symbols in frequency domain.

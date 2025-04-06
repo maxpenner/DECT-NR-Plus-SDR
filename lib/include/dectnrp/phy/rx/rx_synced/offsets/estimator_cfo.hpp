@@ -26,7 +26,7 @@ extern "C" {
 #include "srsran/config.h"
 }
 
-#include "dectnrp/phy/rx/rx_synced/estimator.hpp"
+#include "dectnrp/phy/rx/rx_synced/estimator/estimator.hpp"
 
 namespace dectnrp::phy {
 
@@ -41,7 +41,8 @@ class estimator_cfo_t final : public estimator_t {
         estimator_cfo_t& operator=(estimator_cfo_t&&) = delete;
 
         /// can be called for every RX antenna
-        virtual void process_stf(const channel_antennas_t& channel_antennas) override final;
+        virtual void process_stf(const channel_antennas_t& channel_antennas,
+                                 const process_stf_meta_t& process_stf_meta) override final;
 
         virtual void process_drs(const channel_antennas_t& channel_antennas,
                                  const process_drs_meta_t& process_drs_meta) override final;

@@ -20,10 +20,3 @@
 
 file(GLOB DECTNRP_PHY_SOURCES "*.cpp")
 target_sources(dectnrp_phy PRIVATE ${DECTNRP_PHY_SOURCES})
-
-add_subdirectory(aoa)
-add_subdirectory(channel_estimation)
-add_subdirectory(estimator)
-add_subdirectory(mimo)
-add_subdirectory(offsets)
-add_subdirectory(snr)

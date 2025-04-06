@@ -26,7 +26,8 @@
 
 namespace dectnrp::phy {
 
-void estimator_cfo_t::process_stf(const channel_antennas_t& channel_antennas) {}
+void estimator_cfo_t::process_stf(const channel_antennas_t& channel_antennas,
+                                  const process_stf_meta_t& process_stf_meta) {}
 
 void estimator_cfo_t::process_drs(const channel_antennas_t& channel_antennas,
                                   const process_drs_meta_t& process_drs_meta) {

@@ -56,11 +56,13 @@ estimator_mimo_t::~estimator_mimo_t() {
     }
 }
 
-void estimator_mimo_t::process_stf(const channel_antennas_t& channel_antennas) {
+void estimator_mimo_t::process_stf(const channel_antennas_t& channel_antennas,
+                                   const process_stf_meta_t& process_stf_meta) {
     /* The STF uses only transmit stream 0, thus we can't estimate the complete channel estimate if
      * more than one transmit stream is used.
      */
-    dectnrp_assert_failure("MIMO report can be based on STF");
+
+    mimo_report.fine_peak_time_64 = process_stf_meta.fine_peak_time_64;
 }
 
 void estimator_mimo_t::process_drs(const channel_antennas_t& channel_antennas,
@@ -69,7 +71,8 @@ void estimator_mimo_t::process_drs(const channel_antennas_t& channel_antennas,
 
     /* Before running the actual MIMO algorithms, we put all common information required by all
      * algorithms onto the stage. We collect individual transmit streams of each RX antenna onto
-     * a single stage.
+     * a single stage. This operation does not take long since the spectrum is considered only
+     * across n_wideband_point number of cells of the entire spectrum.
      */
 
     // transmit streams
