@@ -1,1 +1,1 @@
-Executables are copies into this folder after compilation.
+Executables are copied into this folder after compilation.
