@@ -20,7 +20,7 @@
 
 #pragma once
 
-namespace dectnrp::section4 {
+namespace dectnrp::common {
 
 class testing_t {
     public:
@@ -30,4 +30,4 @@ class testing_t {
         virtual void set_valid_random_configuration() = 0;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::common

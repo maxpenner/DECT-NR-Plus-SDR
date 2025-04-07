@@ -22,7 +22,6 @@
 #pragma once
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
-#include "dectnrp/sections_part4/packing.hpp"
 
 namespace dectnrp::section4 {
 

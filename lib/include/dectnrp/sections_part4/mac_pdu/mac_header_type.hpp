@@ -24,11 +24,11 @@
 #include <limits>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
-#include "dectnrp/sections_part4/packing.hpp"
+#include "dectnrp/common/serdes/packing.hpp"
 
 namespace dectnrp::section4 {
 
-class mac_header_type_t final : public packing_t {
+class mac_header_type_t final : public common::packing_t {
     public:
         enum class version_ec : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,

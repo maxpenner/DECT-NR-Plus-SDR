@@ -22,11 +22,11 @@
 
 #include <cstdint>
 
-#include "dectnrp/sections_part4/packing.hpp"
+#include "dectnrp/common/serdes/packing.hpp"
 
 namespace dectnrp::section4 {
 
-class mac_common_header_t : public packing_t {
+class mac_common_header_t : public common::packing_t {
     public:
         virtual void zero() override = 0;
         virtual bool is_valid() const override = 0;
