@@ -175,6 +175,17 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     }
 #endif
 
+    // update MCS sent to FT as feedback
+    ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f4.MCS =
+        cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB);
+
+    // update codebook index sent to FT as feedback
+    ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index =
+        phy_machigh.pdc_report.mimo_report.tm_3_7_beamforming_idx;
+
+    // convert MIMO report to CSI
+    mimo_csi.update(phy_machigh.pdc_report.mimo_report);
+
     // check if we can generate any uplink
     phy::machigh_phy_t machigh_phy;
 

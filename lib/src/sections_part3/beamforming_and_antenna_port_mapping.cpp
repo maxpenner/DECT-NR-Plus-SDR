@@ -211,10 +211,19 @@ float W_t::get_scaling_factor(const uint32_t N_TS,
     return scaling_factor.at(N_TS_N_TX_idx.at(N_TS).at(N_TX)).at(codebook_idx);
 }
 
+const std::vector<float>& W_t::get_scaling_factor(const uint32_t N_TS, const uint32_t N_TX) const {
+    return scaling_factor.at(N_TS_N_TX_idx.at(N_TS).at(N_TX));
+}
+
 float W_t::get_scaling_factor_optimal_DAC(const uint32_t N_TS,
                                           const uint32_t N_TX,
                                           const uint32_t codebook_idx) const {
     return scaling_factor_optimal_DAC.at(N_TS_N_TX_idx.at(N_TS).at(N_TX)).at(codebook_idx);
+}
+
+const std::vector<float>& W_t::get_scaling_factor_optimal_DAC(const uint32_t N_TS,
+                                                              const uint32_t N_TX) const {
+    return scaling_factor_optimal_DAC.at(N_TS_N_TX_idx.at(N_TS).at(N_TX));
 }
 
 uint32_t W_t::get_codebook_index_max(const uint32_t N_TS, const uint32_t N_TX) {

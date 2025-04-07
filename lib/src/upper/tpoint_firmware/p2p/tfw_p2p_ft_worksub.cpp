@@ -70,7 +70,21 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
     // load long radio device ID of sending PT
     const auto lrdid = contact_list_p2p.lrdid2srdid.get_k(plcf_21->TransmitterIdentity);
 
+    // save sync_report
     contact_list_p2p.sync_report_last_known.at(lrdid) = phy_maclow.sync_report;
+
+    // save information from feedback
+    switch (plcf_21->FeedbackFormat) {
+        case 4:
+            contact_list_p2p.mimo_csi_last_known.at(lrdid).update(
+                plcf_21->feedback_info_pool.feedback_info_f4.MCS);
+            break;
+
+        case 5:
+            contact_list_p2p.mimo_csi_last_known.at(lrdid).update(
+                plcf_21->feedback_info_pool.feedback_info_f5.Codebook_index);
+            break;
+    }
 
     return worksub_pcc2pdc(phy_maclow,
                            2,
@@ -98,8 +112,6 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
 
     // long radio device ID used as key
     const auto lrdid = phy_machigh.maclow_phy.get_handle_lrdid();
-
-    contact_list_p2p.mimo_report_last_known.at(lrdid) = phy_machigh.pdc_report.mimo_report;
 
     const uint32_t conn_idx = contact_list_p2p.app_client_idx.get_v(lrdid);
 

@@ -18,18 +18,34 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/mac/contact_list.hpp"
+#pragma once
 
-#include "dectnrp/common/prog/assert.hpp"
+#include <cstdint>
 
-namespace dectnrp::mac {
+#include "dectnrp/common/adt/miscellaneous.hpp"
+#include "dectnrp/phy/rx/rx_synced/mimo/mimo_report.hpp"
 
-bool contact_list_t::is_lrdid_known(const key_lrdid_t key_lrdid) const {
-    return lrdid2srdid.is_k_known(key_lrdid);
-}
+namespace dectnrp::phy {
 
-bool contact_list_t::is_srdid_known(const uint32_t srdid) const {
-    return lrdid2srdid.is_v_known(srdid);
-}
+class mimo_csi_t {
+    public:
+        mimo_csi_t() = default;
 
-}  // namespace dectnrp::mac
+        template <typename T>
+        class expiring_t {
+                int64_t time_64;
+                T val{};
+        };
+
+        /// provided by MAC through a received PLCF
+        void update(const uint32_t MCS_);
+
+        /// provided by PHY
+        void update(const mimo_report_t& mimo_report);
+
+        expiring_t<uint32_t> MCS{};
+        expiring_t<uint32_t> tm_mode{};
+        expiring_t<uint32_t> codebook_index{};
+};
+
+}  // namespace dectnrp::phy

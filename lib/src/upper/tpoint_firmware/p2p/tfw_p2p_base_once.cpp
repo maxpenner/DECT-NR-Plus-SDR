@@ -27,11 +27,14 @@ namespace dectnrp::upper::tfw::p2p {
 
 tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {
+    dectnrp_assert(mac_lower.lower_ctrl_vec.size() == 1,
+                   "firmware written for a single pair of physical and radio layer");
+
     // ##################################################
     // Radio Layer + PHY
 
     cqi_lut =
-        phy::indicators::cqi_lut_t(3, worker_pool_config.radio_device_class.mcs_index_min, 5.0f);
+        phy::indicators::cqi_lut_t(4, worker_pool_config.radio_device_class.mcs_index_min, 8.0f);
 
     hw_simulator = dynamic_cast<radio::hw_simulator_t*>(&hw);
 
@@ -148,8 +151,12 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
     psdef.b = worker_pool_config.radio_device_class.b_min;
     psdef.PacketLengthType = 1;
     psdef.PacketLength = 2;
+#ifdef TFW_P2P_MIMO
+    psdef.tm_mode_index = section3::tmmode::get_single_antenna_mode(buffer_rx.nof_antennas);
+#else
     psdef.tm_mode_index = 0;
-    psdef.mcs_index = 4;
+#endif
+    psdef.mcs_index = cqi_lut.get_highest_mcs_possible(-1000.0f);
     psdef.Z = worker_pool_config.radio_device_class.Z_min;
 
     // define PLCFs
@@ -164,7 +171,19 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
     plcf_21.ReceiverIdentity = ShortRadioDeviceID_rx;
     plcf_21.set_NumberOfSpatialStreams(1);
     plcf_21.Reserved = 0;
-    plcf_21.FeedbackFormat = section4::feedback_info_f1_t::No_feedback;
+
+    // pick a feedback format
+    plcf_21.FeedbackFormat = 5;
+    // prepare feedback format 4
+    plcf_21.feedback_info_pool.feedback_info_f4.HARQ_feedback_bitmap = 0;
+    plcf_21.feedback_info_pool.feedback_info_f4.MCS = psdef.mcs_index;
+    // prepare feedback format 5
+    plcf_21.feedback_info_pool.feedback_info_f5.HARQ_Process_number = 0;
+    plcf_21.feedback_info_pool.feedback_info_f5.Transmission_feedback =
+        section4::feedback_info_f1_t::transmission_feedback_t::ACK;
+    plcf_21.feedback_info_pool.feedback_info_f5.MIMO_feedback =
+        section4::feedback_info_f1_t::mimo_feedback_t::single_layer;
+    plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index = 0;
 
     // pick one PLCF
     ppmp_unicast.plcf_base_effective = &ppmp_unicast.plcf_21;

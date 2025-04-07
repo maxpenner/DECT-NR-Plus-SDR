@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 
 #define TFW_P2P_PT_AGC_ENABLED
@@ -78,6 +79,9 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
 
         /// uplink and downlink, FT has the same information in its contact list
         mac::allocation::allocation_pt_t allocation_pt;
+
+        /// measured for received beacons
+        phy::mimo_csi_t mimo_csi;
 
         // clang-format off
         std::optional<phy::maclow_phy_t> worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) override final;

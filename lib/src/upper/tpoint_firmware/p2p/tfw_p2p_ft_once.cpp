@@ -40,6 +40,11 @@ const std::string tfw_p2p_ft_t::firmware_name("p2p_ft");
 
 tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tfw_p2p_base_t(tpoint_config_, mac_lower_) {
+#ifdef TFW_P2P_MIMO
+    dectnrp_assert(1 < buffer_rx.nof_antennas,
+                   "MIMO requires that FT is able to transmit at least two transmit streams");
+#endif
+
     // ##################################################
     // Radio Layer + PHY
 
@@ -71,8 +76,8 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
         contact_list_p2p.sync_report_last_known.insert(
             {identity_pt.LongRadioDeviceID, phy::sync_report_t(buffer_rx.nof_antennas)});
 
-        contact_list_p2p.mimo_report_last_known.insert(
-            {identity_pt.LongRadioDeviceID, phy::mimo_report_t()});
+        contact_list_p2p.mimo_csi_last_known.insert(
+            {identity_pt.LongRadioDeviceID, phy::mimo_csi_t()});
 
         contact_list_p2p.app_server_idx.insert(identity_pt.LongRadioDeviceID, firmware_id_pt);
         contact_list_p2p.app_client_idx.insert(identity_pt.LongRadioDeviceID, firmware_id_pt);
@@ -154,7 +159,11 @@ void tfw_p2p_ft_t::init_packet_beacon() {
     psdef.b = worker_pool_config.radio_device_class.b_min;
     psdef.PacketLengthType = 1;
     psdef.PacketLength = 2;
+#ifdef TFW_P2P_MIMO
+    psdef.tm_mode_index = section3::tmmode::get_tx_div_mode(buffer_rx.nof_antennas);
+#else
     psdef.tm_mode_index = 0;
+#endif
     psdef.mcs_index = 2;
     psdef.Z = worker_pool_config.radio_device_class.Z_min;
 

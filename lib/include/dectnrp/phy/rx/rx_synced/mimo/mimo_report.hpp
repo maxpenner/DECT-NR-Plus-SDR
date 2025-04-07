@@ -37,11 +37,14 @@ class mimo_report_t {
          */
         int64_t fine_peak_time_64{common::adt::UNDEFINED_EARLY_64};
 
+        /// own number of physical antennas
+        uint32_t N_RX;
+
         /**
          * \brief Number of transmit streams N_TS, i.e. number of effective antennas N_eff_TX, as
          * received from the opposite site.
          */
-        uint32_t N_TS_tx{};
+        uint32_t N_TS_other{};
 
         /**
          * \brief These are the recommended beamforming matrix indices for MIMO modes with a single
@@ -51,6 +54,7 @@ class mimo_report_t {
 
         /// recommendation mode 3
         uint32_t tm_3_7_beamforming_idx{};
+        uint32_t tm_3_7_beamforming_reciprocal_idx{};
 
         /**
          * \brief These are the recommended beamforming matrix indices for MIMO modes with more than

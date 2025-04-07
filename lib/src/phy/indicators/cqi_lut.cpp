@@ -39,15 +39,18 @@ uint32_t cqi_lut_t::get_highest_mcs_possible(const float snr_dB_measured) const 
     // assume we have received a lower SNR than we actually did
     const float snr_pessimistic = snr_dB_measured - snr_offset;
 
+    uint32_t ret = mcs_min;
+
     // find highest MCS that is possible at snr_pessimistic
-    for (uint32_t i = mcs_min; i <= mcs_max; ++i) {
+    for (uint32_t i = mcs_min + 1; i <= mcs_max; ++i) {
         if (snr_required[i] <= snr_pessimistic) {
-            return i;
+            ret = i;
+        } else {
+            break;
         }
     }
 
-    // snr_pessimistic is too low for any MCS, still assume minimum
-    return mcs_min;
+    return ret;
 }
 
 uint32_t cqi_lut_t::clamp_mcs(const uint32_t mcs_candidate) const {

@@ -420,7 +420,8 @@ pdc_report_t rx_synced_t::demoddecod_rx_pdc(const maclow_phy_t& maclow_phy_) {
     /* At this point, the latest transmit stream indices are not relevant, as at the end of a packet
      * it is always guaranteed that all transmit streams are present in the channel estimate.
      */
-    const process_drs_meta_t process_drs_meta(TS_idx_first, TS_idx_last, ofdm_symb_idx);
+    const process_drs_meta_t process_drs_meta(
+        sync_report->N_eff_TX, TS_idx_first, TS_idx_last, ofdm_symb_idx);
 
     dectnrp_assert(TS_idx_last == sync_report->N_eff_TX - 1,
                    "last transmit stream incorrect {} {}",
@@ -832,7 +833,8 @@ void rx_synced_t::run_drs_chestim_zf() {
 #if defined(RX_SYNCED_PARAM_STO_RESIDUAL_BASED_ON_DRS) || \
     defined(RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_DRS) || \
     defined(RX_SYNCED_PARAM_SNR_BASED_ON_DRS)
-    const process_drs_meta_t process_drs_meta(TS_idx_first, TS_idx_last, ofdm_symb_idx);
+    const process_drs_meta_t process_drs_meta(
+        sync_report->N_eff_TX, TS_idx_first, TS_idx_last, ofdm_symb_idx);
 #endif
 
 #ifdef RX_SYNCED_PARAM_STO_RESIDUAL_BASED_ON_DRS

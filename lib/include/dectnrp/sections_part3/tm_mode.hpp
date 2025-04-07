@@ -66,8 +66,11 @@ tm_mode_t get_tm_mode(const uint32_t index);
  */
 uint32_t get_max_tm_mode_index_depending_on_N_TX(const uint32_t N_TX);
 
-// TX diversity mode for a given number of antennas
-uint32_t get_tx_div(const uint32_t N_TX);
+/// Table 7.2-1: TX diversity mode for a given number of antennas
+uint32_t get_tx_div_mode(const uint32_t N_TX);
+
+/// Table 7.2-1: single antenna mode
+uint32_t get_single_antenna_mode(const uint32_t N_TX);
 
 /// Table 7.2-1: Transmission modes and transmission mode signalling
 uint32_t get_equivalent_tm_mode(const uint32_t N_eff_TX, const uint32_t N_SS);

@@ -47,6 +47,8 @@
 #include "dectnrp/mac/ppx/ppx_pll.hpp"
 #endif
 
+// #define TFW_P2P_MIMO
+
 namespace dectnrp::upper::tfw::p2p {
 
 class tfw_p2p_base_t : public tpoint_t {

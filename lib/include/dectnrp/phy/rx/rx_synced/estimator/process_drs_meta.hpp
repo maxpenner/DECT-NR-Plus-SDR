@@ -32,10 +32,12 @@ namespace dectnrp::phy {
  */
 class process_drs_meta_t {
     public:
-        process_drs_meta_t(const std::size_t TS_idx_first_,
+        process_drs_meta_t(const std::size_t N_TS_,
+                           const std::size_t TS_idx_first_,
                            const std::size_t TS_idx_last_,
                            const std::size_t ofdm_symb_idx_)
-            : TS_idx_first(TS_idx_first_),
+            : N_TS(N_TS_),
+              TS_idx_first(TS_idx_first_),
               TS_idx_last(TS_idx_last_),
               ofdm_symb_idx(ofdm_symb_idx_) {}
 
@@ -44,6 +46,9 @@ class process_drs_meta_t {
         process_drs_meta_t& operator=(const process_drs_meta_t&) = delete;
         process_drs_meta_t(process_drs_meta_t&&) = delete;
         process_drs_meta_t& operator=(process_drs_meta_t&&) = delete;
+
+        /// number of transmit streams received
+        const std::size_t N_TS;
 
         /// index of first transmit stream, can be 0 or 4
         const std::size_t TS_idx_first;

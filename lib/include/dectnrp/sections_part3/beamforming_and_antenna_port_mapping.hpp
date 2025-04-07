@@ -45,9 +45,15 @@ class W_t {
                                  const uint32_t N_TX,
                                  const uint32_t codebook_idx) const;
 
+        const std::vector<float>& get_scaling_factor(const uint32_t N_TS,
+                                                     const uint32_t N_TX) const;
+
         float get_scaling_factor_optimal_DAC(const uint32_t N_TS,
                                              const uint32_t N_TX,
                                              const uint32_t codebook_idx) const;
+
+        const std::vector<float>& get_scaling_factor_optimal_DAC(const uint32_t N_TS,
+                                                                 const uint32_t N_TX) const;
 
         static uint32_t get_codebook_index_max(const uint32_t N_TS, const uint32_t N_TX);
 

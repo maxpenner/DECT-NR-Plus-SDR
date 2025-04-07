@@ -18,18 +18,16 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/mac/contact_list.hpp"
+#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 
-#include "dectnrp/common/prog/assert.hpp"
+namespace dectnrp::phy {
 
-namespace dectnrp::mac {
-
-bool contact_list_t::is_lrdid_known(const key_lrdid_t key_lrdid) const {
-    return lrdid2srdid.is_k_known(key_lrdid);
+void mimo_csi_t::update(const uint32_t MCS_) {
+    // ToDO
 }
 
-bool contact_list_t::is_srdid_known(const uint32_t srdid) const {
-    return lrdid2srdid.is_v_known(srdid);
+void mimo_csi_t::update(const mimo_report_t& mimo_report) {
+    // ToDO
 }
 
-}  // namespace dectnrp::mac
+}  // namespace dectnrp::phy

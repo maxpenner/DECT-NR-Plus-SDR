@@ -24,7 +24,7 @@
 #include <unordered_map>
 
 #include "dectnrp/common/adt/bimap.hpp"
-#include "dectnrp/phy/rx/rx_synced/mimo/mimo_report.hpp"
+#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 #include "dectnrp/phy/rx/sync/sync_report.hpp"
 
 namespace dectnrp::mac {
@@ -38,15 +38,12 @@ class contact_list_t {
         // Radio Layer + PHY
 
         std::unordered_map<key_lrdid_t, phy::sync_report_t> sync_report_last_known;
-
-        bool have_heard_from_at_or_after(const key_lrdid_t key_lrdid, const int64_t time_64) const;
-
-        std::unordered_map<key_lrdid_t, phy::mimo_report_t> mimo_report_last_known;
+        std::unordered_map<key_lrdid_t, phy::mimo_csi_t> mimo_csi_last_known;
 
         // ##################################################
         // MAC Layer
 
-        /// long to short radio device mapping
+        /// long to short radio device ID mapping
         common::adt::bimap_t<key_lrdid_t, uint32_t, true> lrdid2srdid;
 
         bool is_lrdid_known(const key_lrdid_t key_lrdid) const;

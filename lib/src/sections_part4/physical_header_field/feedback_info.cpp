@@ -117,7 +117,7 @@ bool feedback_info_f1_t::is_valid() const {
 void feedback_info_f1_t::pack(uint8_t* a_ptr) const {
     dectnrp_assert(is_valid(), "invalid");
 
-    a_ptr[0] &= common::adt::bitmask<uint8_t, 8, 4>();
+    a_ptr[0] &= common::adt::bitmask_msb<4, uint8_t>();
 
     a_ptr[0] |= HARQ_Process_number << 1;
     a_ptr[0] |= std::to_underlying(Transmission_feedback);
@@ -165,9 +165,9 @@ bool feedback_info_f2_t::is_valid() const {
 void feedback_info_f2_t::pack(uint8_t* a_ptr) const {
     dectnrp_assert(is_valid(), "invalid");
 
-    a_ptr[0] &= common::adt::bitmask<uint8_t, 8, 4>();
+    a_ptr[0] &= common::adt::bitmask_msb<4, uint8_t>();
 
-    a_ptr[0] = Codebook_index << 1;
+    a_ptr[0] |= Codebook_index << 1;
     a_ptr[0] |= std::to_underlying(MIMO_feedback);
     a_ptr[1] = buffer_size_2_buffer_status(Buffer_Size) << 4;
     a_ptr[1] |= mcs_2_cqi(MCS);
@@ -217,7 +217,7 @@ bool feedback_info_f3_t::is_valid() const {
 void feedback_info_f3_t::pack(uint8_t* a_ptr) const {
     dectnrp_assert(is_valid(), "invalid");
 
-    a_ptr[0] &= common::adt::bitmask<uint8_t, 8, 4>();
+    a_ptr[0] &= common::adt::bitmask_msb<4, uint8_t>();
 
     a_ptr[0] |= HARQ_Process_number_0 << 1;
     a_ptr[0] |= std::to_underlying(Transmission_feedback_0);
@@ -256,7 +256,7 @@ bool feedback_info_f4_t::is_valid() const {
 void feedback_info_f4_t::pack(uint8_t* a_ptr) const {
     dectnrp_assert(is_valid(), "invalid");
 
-    a_ptr[0] &= common::adt::bitmask<uint8_t, 8, 4>();
+    a_ptr[0] &= common::adt::bitmask_msb<4, uint8_t>();
 
     a_ptr[0] |= (HARQ_feedback_bitmap >> 4);
     a_ptr[1] = (HARQ_feedback_bitmap & 0b1111) << 4;
@@ -302,9 +302,9 @@ bool feedback_info_f5_t::is_valid() const {
 void feedback_info_f5_t::pack(uint8_t* a_ptr) const {
     dectnrp_assert(is_valid(), "invalid");
 
-    a_ptr[0] &= common::adt::bitmask<uint8_t, 8, 4>();
+    a_ptr[0] &= common::adt::bitmask_msb<4, uint8_t>();
 
-    a_ptr[0] = (HARQ_Process_number << 1);
+    a_ptr[0] |= (HARQ_Process_number << 1);
     a_ptr[0] |= std::to_underlying(Transmission_feedback);
     a_ptr[1] = std::to_underlying(MIMO_feedback) << 6;
     a_ptr[1] |= Codebook_index;
@@ -349,9 +349,9 @@ bool feedback_info_f6_t::is_valid() const {
 void feedback_info_f6_t::pack(uint8_t* a_ptr) const {
     dectnrp_assert(is_valid(), "invalid");
 
-    a_ptr[0] &= common::adt::bitmask<uint8_t, 8, 4>();
+    a_ptr[0] &= common::adt::bitmask_msb<4, uint8_t>();
 
-    a_ptr[0] = (HARQ_Process_number << 1);
+    a_ptr[0] |= (HARQ_Process_number << 1);
     a_ptr[0] |= Reserved;
     a_ptr[1] = buffer_size_2_buffer_status(Buffer_Size) << 4;
     a_ptr[1] |= mcs_2_cqi(MCS);
@@ -369,7 +369,7 @@ bool feedback_info_f6_t::unpack(const uint8_t* a_ptr) {
 void feedback_info_pool_t::pack(const uint32_t feedback_format, uint8_t* a_ptr) const {
     switch (feedback_format) {
         case feedback_info_t::No_feedback:
-            a_ptr[0] &= common::adt::bitmask<uint8_t, 8, 4>();
+            a_ptr[0] &= common::adt::bitmask_msb<4, uint8_t>();
             a_ptr[1] = 0;
             break;
         case 1:
@@ -409,23 +409,17 @@ bool feedback_info_pool_t::unpack(const uint32_t feedback_format, const uint8_t*
 
             return true;
         case 1:
-            feedback_info_f1.unpack(a_ptr);
-            return true;
+            return feedback_info_f1.unpack(a_ptr);
         case 2:
-            feedback_info_f2.unpack(a_ptr);
-            return true;
+            return feedback_info_f2.unpack(a_ptr);
         case 3:
-            feedback_info_f3.unpack(a_ptr);
-            return true;
+            return feedback_info_f3.unpack(a_ptr);
         case 4:
-            feedback_info_f4.unpack(a_ptr);
-            return true;
+            return feedback_info_f4.unpack(a_ptr);
         case 5:
-            feedback_info_f5.unpack(a_ptr);
-            return true;
+            return feedback_info_f5.unpack(a_ptr);
         case 6:
-            feedback_info_f6.unpack(a_ptr);
-            return true;
+            return feedback_info_f6.unpack(a_ptr);
         default:
             return false;
     }
