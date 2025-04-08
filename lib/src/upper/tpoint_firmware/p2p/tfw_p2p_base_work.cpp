@@ -28,10 +28,8 @@ namespace dectnrp::upper::tfw::p2p {
 phy::maclow_phy_t tfw_p2p_base_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     ++stats.rx_pcc_success;
 
-    // base pointer to extract type
     const section4::plcf_base_t* plcf_base = nullptr;
 
-    // processing type 1 has three outcomes
     std::optional<phy::maclow_phy_t> optret;
 
     // test PLCF type 1
@@ -41,8 +39,7 @@ phy::maclow_phy_t tfw_p2p_base_t::work_pcc(const phy::phy_maclow_t& phy_maclow) 
                 optret = worksub_pcc_10(phy_maclow);
                 break;
             case 1:
-                optret = worksub_pcc_11(phy_maclow);
-                break;
+                [[fallthrough]];
             case 2:
                 [[fallthrough]];
             case 3:
@@ -138,8 +135,6 @@ phy::machigh_phy_t tfw_p2p_base_t::work_pdc_async(const phy::phy_machigh_t& phy_
         using enum phy::handle_pcc2pdc_t;
         case th10:
             return worksub_pdc_10(phy_machigh);
-        case th11:
-            return worksub_pdc_11(phy_machigh);
         case th20:
             return worksub_pdc_20(phy_machigh);
         case th21:

@@ -56,14 +56,19 @@ class allocation_ft_t final : public allocation_t {
             beacon_time_scheduled_64 += beacon_period.N_samples_64;
         }
 
+        uint32_t get_N_beacons_per_second() const { return N_beacons_per_second; };
+
     private:
-        section3::duration_t beacon_prepare_duration;
+        section3::duration_t beacon_prepare_duration{};
 
         /// start time of last beacon transmitted
-        int64_t beacon_time_transmitted_64;
+        int64_t beacon_time_transmitted_64{};
 
         /// start time of next scheduled beacon
-        int64_t beacon_time_scheduled_64;
+        int64_t beacon_time_scheduled_64{};
+
+        /// number of beacons transmitted per second
+        uint32_t N_beacons_per_second{};
 };
 
 }  // namespace dectnrp::mac::allocation

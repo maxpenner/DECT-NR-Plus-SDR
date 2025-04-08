@@ -30,6 +30,7 @@ allocation_ft_t::allocation_ft_t(const section3::duration_lut_t* duration_lut_,
     : allocation_t(duration_lut_, beacon_period_),
       beacon_prepare_duration(beacon_prepare_duration_),
       beacon_time_transmitted_64(std::numeric_limits<int64_t>::max()),
-      beacon_time_scheduled_64(std::numeric_limits<int64_t>::max()) {}
+      beacon_time_scheduled_64(std::numeric_limits<int64_t>::max()),
+      N_beacons_per_second(duration_lut->get_N_duration_in_second(beacon_period)) {}
 
 }  // namespace dectnrp::mac::allocation

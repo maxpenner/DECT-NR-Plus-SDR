@@ -72,7 +72,7 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
 
     dectnrp_assert(plcf_10 != nullptr, "cast ill-formed");
 
-    // must have the correct network, and a known TransmitterIdentity
+    // is this a packet from the correct network, and from the FT?
     if (plcf_10->ShortNetworkID != identity_pt.ShortNetworkID ||
         plcf_10->TransmitterIdentity != identity_ft.ShortRadioDeviceID) {
         return std::nullopt;
@@ -88,7 +88,7 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
 
 #ifdef TFW_P2P_PT_AGC_ENABLED
 #ifdef TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
-    // apply AGC change for RX and TX just before the next beacon
+    // apply AGC change for RX and TX immediately before the next beacon
     const int64_t t_agc_change_64 =
         allocation_pt.get_beacon_time_last_known() + allocation_pt.get_beacon_period() -
         duration_lut.get_N_samples_from_duration(section3::duration_ec_t::settling_time_gain_us);
@@ -97,7 +97,7 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
     const int64_t t_agc_change_64 = common::adt::UNDEFINED_EARLY_64;
 #endif
 
-    // make AGC settings based on the received beacon
+    // apply AGC settings
     worksub_agc(phy_maclow.sync_report, *plcf_10, t_agc_change_64);
 #endif
 
@@ -108,10 +108,6 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
         0,
         phy::harq::finalize_rx_t::reset_and_terminate,
         phy::maclow_phy_handle_t(phy::handle_pcc2pdc_t::th10, identity_ft.ShortRadioDeviceID));
-}
-
-std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_11(const phy::phy_maclow_t& phy_maclow) {
-    return std::nullopt;
 }
 
 phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) {
@@ -125,8 +121,10 @@ phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
 
     dectnrp_assert(plcf_21 != nullptr, "cast ill-formed");
 
-    // must have the correct ReceiverIdentity, and a known TransmitterIdentity
-    if (plcf_21->ReceiverIdentity != identity_pt.ShortRadioDeviceID) {
+    // is this a packet from the correct network, from the FT and for this PT?
+    if (plcf_21->ShortNetworkID != identity_pt.ShortNetworkID ||
+        plcf_21->TransmitterIdentity != identity_ft.ShortRadioDeviceID ||
+        plcf_21->ReceiverIdentity != identity_pt.ShortRadioDeviceID) {
         return phy::maclow_phy_t();
     }
 
@@ -143,7 +141,7 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     // readability
     const auto& mac_pdu_decoder = phy_machigh.pdc_report.mac_pdu_decoder;
 
-    // request vector with base pointer to MMIE
+    // request vector with base pointer to all decoded MMIEs
     const auto& mmie_decoded_vec = mac_pdu_decoder.get_mmie_decoded_vec();
 
     // go over each MMIE
@@ -192,10 +190,6 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     worksub_tx_unicast_consecutive(machigh_phy);
 
     return machigh_phy;
-}
-
-phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_11(const phy::phy_machigh_t& phy_machigh) {
-    return phy::machigh_phy_t();
 }
 
 phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_20(const phy::phy_machigh_t& phy_machigh) {
@@ -256,13 +250,13 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
 void tfw_p2p_pt_t::worksub_mmie_cluster_beacon_message(
     const phy::phy_machigh_t& phy_machigh,
     const section4::cluster_beacon_message_t& cluster_beacon_message) {
-    //
+    // ToDo
 }
 
 void tfw_p2p_pt_t::worksub_mmie_time_announce(
     const phy::phy_machigh_t& phy_machigh,
     const section4::extensions::time_announce_ie_t& time_announce_ie) {
-    //
+    // ToDo
 }
 
 void tfw_p2p_pt_t::worksub_callback_log(const int64_t now_64) const {

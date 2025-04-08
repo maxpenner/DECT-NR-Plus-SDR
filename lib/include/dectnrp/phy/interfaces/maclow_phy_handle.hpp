@@ -27,7 +27,6 @@ namespace dectnrp::phy {
 /// handles connecting the decoding of PCC and a PDC
 enum class handle_pcc2pdc_t : uint32_t {
     th10 = 0,  // type 1, format 0
-    th11,      // type 1, format 1
     th20,      // type 2, format 0
     th21,      // type 2, format 1
     CARDINALITY

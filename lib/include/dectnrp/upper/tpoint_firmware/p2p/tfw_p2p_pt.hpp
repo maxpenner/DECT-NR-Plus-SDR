@@ -85,12 +85,10 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
 
         // clang-format off
         std::optional<phy::maclow_phy_t> worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) override final;
-        std::optional<phy::maclow_phy_t> worksub_pcc_11(const phy::phy_maclow_t& phy_maclow) override final;
         phy::maclow_phy_t worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) override final;
         phy::maclow_phy_t worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) override final;
         
         phy::machigh_phy_t worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) override final;
-        phy::machigh_phy_t worksub_pdc_11(const phy::phy_machigh_t& phy_machigh) override final;
         phy::machigh_phy_t worksub_pdc_20(const phy::phy_machigh_t& phy_machigh) override final;
         phy::machigh_phy_t worksub_pdc_21(const phy::phy_machigh_t& phy_machigh) override final;
         // clang-format on

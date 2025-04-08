@@ -146,4 +146,10 @@ int64_t duration_lut_t::get_N_ns_from_samples(const int64_t N_samples_64) const 
     return A * int64_t{1000000000} + B * int64_t{1000000000} / static_cast<int64_t>(samp_rate);
 }
 
+uint32_t duration_lut_t::get_N_duration_in_second(const duration_t duration) const {
+    dectnrp_assert(samp_rate % duration.N_samples == 0, "second not a multiple of duration");
+
+    return samp_rate / duration.N_samples;
+}
+
 }  // namespace dectnrp::section3

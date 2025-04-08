@@ -46,10 +46,6 @@ std::optional<phy::maclow_phy_t> tfw_p2p_ft_t::worksub_pcc_10(const phy::phy_mac
     return std::nullopt;
 }
 
-std::optional<phy::maclow_phy_t> tfw_p2p_ft_t::worksub_pcc_11(const phy::phy_maclow_t& phy_maclow) {
-    return std::nullopt;
-}
-
 phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
@@ -61,9 +57,10 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
 
     dectnrp_assert(plcf_21 != nullptr, "cast ill-formed");
 
-    // must have the correct ReceiverIdentity, and a known TransmitterIdentity
-    if (plcf_21->ReceiverIdentity != identity_ft.ShortRadioDeviceID ||
-        !contact_list_p2p.is_srdid_known(plcf_21->TransmitterIdentity)) {
+    // is this a packet from the correct network, from a known PT, and for this FT?
+    if (plcf_21->ShortNetworkID != identity_ft.ShortNetworkID ||
+        !contact_list_p2p.is_srdid_known(plcf_21->TransmitterIdentity) ||
+        plcf_21->ReceiverIdentity != identity_ft.ShortRadioDeviceID) {
         return phy::maclow_phy_t();
     }
 
@@ -86,10 +83,6 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) {
-    return phy::machigh_phy_t();
-}
-
-phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_11(const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
@@ -133,8 +126,6 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
 }
 
 bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
-    ++stats.beacon_cnt;
-
     // OPTIONAL: change dimensions of PLCF and MAC PDU (psdef)
     // -
 
@@ -164,11 +155,14 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     cbm.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
     a_cnt_w += cbm.get_packed_size_of_mmh_sdu();
 
-    // set values in time_announce_ie_t
-    auto& tan = mmie_pool_tx.get<section4::extensions::time_announce_ie_t>();
-    tan.set_time(section4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
-    tan.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
-    a_cnt_w += tan.get_packed_size_of_mmh_sdu();
+    // one time_announce_ie_t per second
+    if (stats.beacon_cnt % allocation_ft.get_N_beacons_per_second() == 0) {
+        // set values in time_announce_ie_t
+        auto& tan = mmie_pool_tx.get<section4::extensions::time_announce_ie_t>();
+        tan.set_time(section4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
+        tan.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
+        a_cnt_w += tan.get_packed_size_of_mmh_sdu();
+    }
 
     // fill up with padding IEs
     mmie_pool_tx.fill_with_padding_ies(hp_tx->get_a_tb() + a_cnt_w,
@@ -197,6 +191,8 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
 
     // set tranmission time of next beacon
     allocation_ft.set_beacon_time_next();
+
+    ++stats.beacon_cnt;
 
     return true;
 }

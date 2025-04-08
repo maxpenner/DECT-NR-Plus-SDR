@@ -149,12 +149,10 @@ class tfw_p2p_base_t : public tpoint_t {
          */
         // clang-format off
         virtual std::optional<phy::maclow_phy_t> worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) = 0;
-        virtual std::optional<phy::maclow_phy_t> worksub_pcc_11(const phy::phy_maclow_t& phy_maclow) = 0;
         virtual phy::maclow_phy_t worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) = 0;
         virtual phy::maclow_phy_t worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) = 0;
 
         virtual phy::machigh_phy_t worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) = 0;
-        virtual phy::machigh_phy_t worksub_pdc_11(const phy::phy_machigh_t& phy_machigh) = 0;
         virtual phy::machigh_phy_t worksub_pdc_20(const phy::phy_machigh_t& phy_machigh) = 0;
         virtual phy::machigh_phy_t worksub_pdc_21(const phy::phy_machigh_t& phy_machigh) = 0;
         // clang-format on
