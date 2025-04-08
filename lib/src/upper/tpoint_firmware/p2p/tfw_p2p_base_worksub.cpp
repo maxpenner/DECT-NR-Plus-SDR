@@ -28,6 +28,7 @@ namespace dectnrp::upper::tfw::p2p {
 
 bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                                         const mac::allocation::tx_opportunity_t& tx_opportunity,
+                                        const phy::mimo_csi_t& mimo_csi,
                                         const uint32_t conn_idx) {
     // first check if there even is any data to transmit
     const auto items_level_report = app_server->get_items_level_report_try(

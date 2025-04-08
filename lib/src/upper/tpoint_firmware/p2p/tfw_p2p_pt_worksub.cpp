@@ -238,8 +238,11 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
             break;
         }
 
-        // we have an opportunity, but no more HARQ processes or data
-        if (!worksub_tx_unicast(machigh_phy, tx_opportunity, 0)) {
+        // change feedback info in PLCF
+        ppmp_unicast.plcf_21.FeedbackFormat = ppmp_unicast.plcf_21.FeedbackFormat == 4 ? 5 : 4;
+
+        // try to send a packet, may return false if no data of HARQ processes are available
+        if (!worksub_tx_unicast(machigh_phy, tx_opportunity, mimo_csi, 0)) {
             break;
         }
     }

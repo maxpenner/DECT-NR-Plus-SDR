@@ -250,9 +250,6 @@ pcc_report_t rx_synced_t::demoddecod_rx_pcc(sync_report_t& sync_report_) {
     estimator_mimo->reset(sync_report->b, sync_report->N_eff_TX);
     estimator_aoa->reset(sync_report->b, sync_report->N_eff_TX);
 
-    // process STF
-    run_stf(sync_report_);
-
     /* At this point, we know the OFDM symbol sizes but we don't know yet how many OFDM symbols
      * there are in the current packet. To retrieve that information, we have to collect the PCC and
      * decode it. Every PCC cell has to be channel corrected, and chestim_mode_lr=false is mandatory
@@ -271,6 +268,9 @@ pcc_report_t rx_synced_t::demoddecod_rx_pcc(sync_report_t& sync_report_) {
      * of 1. The first relative symbol index within the processing stage is 0.
      */
     ofdm_symb_ps_idx = 0;
+
+    // process STF
+    run_stf(sync_report_);
 
     /* With the given packet configuration so far, we can also determine the maximum OFDM symbol
      * index to contain PCC cells.

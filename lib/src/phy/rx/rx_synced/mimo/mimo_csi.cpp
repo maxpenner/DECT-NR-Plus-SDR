@@ -30,26 +30,21 @@ void mimo_csi_t::update(const uint32_t feedback_format,
 
     switch (feedback_format) {
         case section4::feedback_info_t::No_feedback:
+            break;
         case 1:
             break;
-
         case 2:
             break;
-
         case 3:
             break;
-
         case 4:
             update_mcs(feedback_info_pool.feedback_info_f4.MCS, time_64);
             break;
-
         case 5:
             update_ci(feedback_info_pool.feedback_info_f5.Codebook_index, time_64);
             break;
-
         case 6:
             break;
-
         default:
             dectnrp_assert_failure("undefined feedback format");
             break;

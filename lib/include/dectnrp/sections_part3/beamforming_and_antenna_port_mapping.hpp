@@ -28,12 +28,19 @@ extern "C" {
 }
 
 #include "dectnrp/common/multidim.hpp"
+#include "dectnrp/sections_part3/tm_mode.hpp"
 
 namespace dectnrp::section3 {
 
 class W_t {
     public:
         W_t();
+
+        static uint32_t clamp_W(const uint32_t N_TS,
+                                const uint32_t N_TX,
+                                const uint32_t codebook_idx);
+
+        static uint32_t clamp_W(const tmmode::tm_mode_t& tm_mode, const uint32_t codebook_idx);
 
         const std::vector<cf_t>& get_W(const uint32_t N_TS,
                                        const uint32_t N_TX,

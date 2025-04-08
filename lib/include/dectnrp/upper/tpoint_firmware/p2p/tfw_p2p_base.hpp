@@ -30,6 +30,7 @@
 #include "dectnrp/mac/allocation/allocation_pt.hpp"
 #include "dectnrp/mac/allocation/tx_opportunity.hpp"
 #include "dectnrp/phy/indicators/cqi_lut.hpp"
+#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 #include "dectnrp/radio/hw_simulator.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie_pool_tx.hpp"
@@ -164,6 +165,7 @@ class tfw_p2p_base_t : public tpoint_t {
         /// common procedure for FT and PT generating a single packet with multiple MAC PDUs
         bool worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                                 const mac::allocation::tx_opportunity_t& tx_opportunity,
+                                const phy::mimo_csi_t& mimo_csi,
                                 const uint32_t conn_idx);
 
         // ##################################################

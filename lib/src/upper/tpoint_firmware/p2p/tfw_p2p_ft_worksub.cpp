@@ -126,7 +126,7 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
 }
 
 bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
-    // OPTIONAL: change dimensions of PLCF and MAC PDU (psdef)
+    // OPTIONAL: change MIMO mode and dimensions of PLCF and MAC PDU (psdef)
     // -
 
     // request harq process
@@ -228,10 +228,13 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
             ppmp_unicast.unicast_header.Receiver_Address = lrdid;
 
             // change feedback info in PLCF
-            // -
+            plcf_21.FeedbackFormat = section4::feedback_info_t::No_feedback;
 
-            // we have an opportunity, but no more HARQ processes or data
-            if (!worksub_tx_unicast(machigh_phy, tx_opportunity, conn_idx)) {
+            // load latest channel state information
+            const auto& mimo_csi = contact_list_p2p.mimo_csi_last_known.at(lrdid);
+
+            // try to send a packet, may return false if no data of HARQ processes are available
+            if (!worksub_tx_unicast(machigh_phy, tx_opportunity, mimo_csi, conn_idx)) {
                 // break;
             }
         }

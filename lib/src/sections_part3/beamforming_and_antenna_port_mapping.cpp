@@ -193,6 +193,16 @@ W_t::W_t() {
     dectnrp_assert(scaling_factor_optimal_DAC[6].size() == 1, "incorrect size");
 }
 
+uint32_t W_t::clamp_W(const uint32_t N_TS, const uint32_t N_TX, const uint32_t codebook_idx) {
+    return std::min(
+        codebook_idx,
+        static_cast<decltype(codebook_idx)>(N_TS_N_TX_codebook_index_max.at(N_TS).at(N_TX)));
+}
+
+uint32_t W_t::clamp_W(const tmmode::tm_mode_t& tm_mode, const uint32_t codebook_idx) {
+    return clamp_W(tm_mode.N_TS, tm_mode.N_TX, codebook_idx);
+}
+
 const std::vector<cf_t>& W_t::get_W(const uint32_t N_TS,
                                     const uint32_t N_TX,
                                     const uint32_t codebook_idx) const {
