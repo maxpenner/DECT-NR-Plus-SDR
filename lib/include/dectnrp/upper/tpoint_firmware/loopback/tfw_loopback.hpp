@@ -60,8 +60,15 @@ class tfw_loopback_t final : public tpoint_t {
         // ##################################################
         // MAC Layer
 
+        section3::packet_sizes_def_t psdef;
+
         section4::mac_architecture::identity_t identity;
-        uint32_t ShortRadioDeviceID_rx;
+
+        section4::plcf_10_t plcf_10;
+        section4::plcf_20_t plcf_20;
+        section4::plcf_21_t plcf_21;
+
+        /// PLCF to test
         uint32_t PLCF_type;
         uint32_t PLCF_type_header_format;
 
@@ -69,6 +76,7 @@ class tfw_loopback_t final : public tpoint_t {
         // measurement logic
 
         enum class STATE_t {
+            SET_MCS,
             SET_SNR,
             SET_SMALL_SCALE_FADING,
             GENERATE_PACKET,
@@ -128,7 +136,7 @@ class tfw_loopback_t final : public tpoint_t {
 
         common::randomgen_t randomgen;
         void reset_for_new_run();
-        void generate_one_new_packet(const int64_t now_64, phy::machigh_phy_t& machigh_phy);
+        void generate_packet(const int64_t now_64, phy::machigh_phy_t& machigh_phy);
         void save_to_files() const;
 };
 

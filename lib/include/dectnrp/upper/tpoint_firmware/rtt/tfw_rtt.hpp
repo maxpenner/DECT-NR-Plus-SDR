@@ -54,7 +54,7 @@ class tfw_rtt_t final : public tpoint_t {
         std::vector<std::string> start_threads() override final;
         std::vector<std::string> stop_threads() override final;
 
-        /// number of transmitted and received packets per print
+        /// number of transmitted and received packets per run
         uint32_t N_measurement_tx_cnt{0};
         uint32_t N_measurement_rx_cnt{0};
 
@@ -62,34 +62,31 @@ class tfw_rtt_t final : public tpoint_t {
         int64_t rtt_min{-common::adt::UNDEFINED_EARLY_64};
         int64_t rtt_max{common::adt::UNDEFINED_EARLY_64};
 
-        /// measured rms
+        /// measured maximum rms
         float rms_max{-1000.0f};
 
-        /// we use the operating system's clock to measure time
+        /// operating system clock to measure rtt
         common::watch_t watch;
 
-        /// packet and PLCF identities (PLCF_type 1, header format 0)
-        const uint32_t plcf_type{1};
-        const uint32_t N_subslots{2};
+        // packet dimensions
+        section3::packet_sizes_def_t psdef;
+
+        /// FT and PT must know both identities
         section4::mac_architecture::identity_t identity_ft;
         section4::mac_architecture::identity_t identity_pt;
 
-        /// FT receives data from and forwards data to application layer
+        // PLCF fixed to type 1 and header format 0
+        section4::plcf_10_t plcf_10;
+
+        /// FT receives data from application layer, and forwards data to application layer
         std::unique_ptr<application::app_server_t> app_server;
         std::unique_ptr<application::app_client_t> app_client;
 
-        /// PT receives data in NR+ packets and sends its back to FT
-        const section4::mac_pdu_decoder_t* mac_pdu_decoder{nullptr};
-
-        /// size of payload
-        uint32_t N_TB_byte;
-
-        /// working copy that we use to insert the measured RTT into the payload
-        std::vector<uint8_t> a_raw_with_rtt;
+        /// working copy to transfer payloads
+        std::vector<uint8_t> stage_a;
 
         /// used at FT and PT
-        void generate_packet_asap(const section4::mac_architecture::identity_t identity,
-                                  phy::machigh_phy_t& machigh_phy);
+        void generate_packet_asap(phy::machigh_phy_t& machigh_phy);
 };
 
 }  // namespace dectnrp::upper::tfw::rtt
