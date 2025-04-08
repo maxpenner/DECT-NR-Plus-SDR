@@ -28,7 +28,7 @@
 
 namespace dectnrp::section4 {
 
-class plcf_base_t : public common::packing_t {
+class plcf_base_t : public common::serdes::packing_t {
     public:
         virtual void zero() override;
         virtual bool is_valid() const override;

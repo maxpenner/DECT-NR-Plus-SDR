@@ -28,7 +28,7 @@
 
 namespace dectnrp::section4 {
 
-class mac_multiplexing_header_t final : public common::packing_t {
+class mac_multiplexing_header_t final : public common::serdes::packing_t {
     public:
         /// MAC extension field encoding (Table 6.3.4-1).
         enum class mac_ext_t : uint32_t {

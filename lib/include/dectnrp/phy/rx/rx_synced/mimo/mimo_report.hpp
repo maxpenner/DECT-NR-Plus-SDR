@@ -31,12 +31,6 @@ class mimo_report_t {
         mimo_report_t() = default;
         ~mimo_report_t() = default;
 
-        /**
-         * \brief Upper must know whether a report is still valid. It becomes invalid if too much
-         * time has passed since the creation of the report.
-         */
-        int64_t fine_peak_time_64{common::adt::UNDEFINED_EARLY_64};
-
         /// own number of physical antennas
         uint32_t N_RX;
 

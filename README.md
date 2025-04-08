@@ -13,6 +13,7 @@ While commonly referred to as DECT NR+, the standard's official designation is D
 5. [Contributing](#contributing)
 6. [Citation](#citation)
 7. [Known Issues](#known-issues)
+8. [To Do](#to-do)
 
 Advanced Topics
 
@@ -134,11 +135,29 @@ If you use this repository for any publication, please cite the repository accor
 ## Known Issues
 
 1. The channel coding requires verification. It is based on [srsRAN 4G](https://github.com/srsran/srsRAN_4G) with multiple changes, for instance, an additional maximum code block size Z=2048. Furthermore, channel coding with a limited number of soft bits is not implemented yet.
-2. [MAC messages and information elements (MMIEs)](lib/include/dectnrp/sections_part4/mac_messages_and_ie) in the standard are subject to frequent changes. Previously completed MMIEs are currently being revised and will be added soon.
+2. [MAC messages and information elements (MMIEs)](lib/include/dectnrp/sections_part4/mac_messages_and_ie) in the standard are subject to frequent changes. Previously completed MMIEs are currently being revised and will be updated soon.
 3. If asserts are enabled, the program may stop abruptly if IQ samples are not processed fast enough. This is triggered by a backlog of unprocessed IQ samples within synchronization.
 4. For some combinations of operating system, CPU and DPDK, pressing control+C does not stop the SDR. The SDR process must then be stopped manually.
 5. With gcc 12 and above, a [warning is issued in relation to fmt](https://github.com/fmtlib/fmt/issues/3354) which becomes an error due to the compiler flag *Werror* being used by default. It can be disabled in [CMakeLists.txt](CMakeLists.txt) by turning off the option *ENABLE_WERROR*.
 6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclical rotation of the STF in frequency domain. This function will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
+
+## To Do
+
+### Physical Layer
+
+- [ ] **$\mu$** detection
+- [ ] integer CFO
+- [ ] residual STO based on DRS
+- [ ] residual CFO based on STF
+- [ ] residual CFO based on DRS
+- [ ] MIMO modes with two or more spatial streams
+- [ ] 1024-QAM
+
+### Upper layers
+
+- [ ] reusable firmware procedures (retransmission, association etc.)
+- [ ] DLC and Convergence layers
+- [ ] enhance application layer interface to DECT NR+ stack (multiplexing addresses, streams, control information etc.)
 
 ## Architecture
 
@@ -218,6 +237,10 @@ A PPS signal itself is a frequently used clock for other systems. For example, a
 - The SDR's [host computer can synchronize to PTP](https://github.com/maxpenner/pi5-pps-ptp/blob/main/docs/client.md) such that the operating system time and the USRP sample count run synchronously.
 - The PPS is stable enough to allow deriving higher clock speeds, for instance 48kHz for distributed wireless audio applications.
 - The SDR can also be synchronized to an existing PTP network by converting [PTP to a 10MHz and 1PPS signal](https://www.meinberg.de/german/products/ntp-ptp-signalkonverter.htm), and feeding these to the USRP.
+
+<p align="center">
+  <img src="docs/synchronization.drawio.png" style="width: 75%; background-color: transparent;" alt="docs/synchronization.drawio.png"/>
+</p>
 
 ## Host and SDR Tuning
 

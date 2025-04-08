@@ -76,13 +76,10 @@ void estimator_mimo_t::process_stf(const channel_antennas_t& channel_antennas,
 
     // reset complete MIMO report
     mimo_report = mimo_report_t();
-
-    mimo_report.fine_peak_time_64 = process_stf_meta.fine_peak_time_64;
 }
 
 void estimator_mimo_t::process_drs(const channel_antennas_t& channel_antennas,
                                    const process_drs_meta_t& process_drs_meta) {
-    dectnrp_assert(0 <= mimo_report.fine_peak_time_64, "invalid STF time");
     dectnrp_assert(N_RX == channel_antennas.size(), "incorrect size");
     dectnrp_assert(process_drs_meta.TS_idx_first == 0, "incorrect number of transmit streams");
     dectnrp_assert(process_drs_meta.N_TS == process_drs_meta.TS_idx_last + 1,

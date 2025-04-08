@@ -1,35 +1,35 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.2.2 Chrome/134.0.6998.178 Electron/35.1.2 Safari/537.36" version="26.2.2">
   <diagram id="aQhpeuAyKN3efvRNQwSn" name="Draft 0">
-    <mxGraphModel dx="948" dy="624" grid="1" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+    <mxGraphModel dx="862" dy="567" grid="1" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="Bj_DQetzVouuPHAo5OsP-259" value="&lt;b&gt;Option B: Isolated DECT NR+ Network with USRP FT providing the Master Clock&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=none;verticalAlign=top;dashed=1;" parent="1" vertex="1">
-          <mxGeometry x="40" y="520" width="520" height="240" as="geometry" />
+          <mxGeometry x="40" y="320" width="520" height="240" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-258" value="&lt;b&gt;Option A: Synchronize to external PTP Master&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=none;verticalAlign=top;dashed=1;" parent="1" vertex="1">
-          <mxGeometry x="40" y="240" width="520" height="240" as="geometry" />
+          <mxGeometry x="40" y="40" width="520" height="240" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-234" value="&lt;b&gt;FT&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=default;strokeColor=#000000;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="200" y="590" width="320" height="130" as="geometry" />
+          <mxGeometry x="200" y="390" width="320" height="130" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-231" value="&lt;b&gt;FT&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=default;strokeColor=#000000;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="200" y="270" width="320" height="130" as="geometry" />
+          <mxGeometry x="200" y="70" width="320" height="130" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-204" value="&lt;b&gt;PT&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=default;strokeColor=#000000;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="680" y="270" width="320" height="130" as="geometry" />
+          <mxGeometry x="680" y="70" width="320" height="130" as="geometry" />
         </mxCell>
         <mxCell id="gou46OdMyQ_DH9dvmqBt-38" value="PTP&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;to&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: rgb(251, 251, 251);&quot;&gt;1PPS/10MHz&lt;/span&gt;&lt;div&gt;(e.g. SyncBox/N2X)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="240" y="300" width="120" height="40" as="geometry" />
+          <mxGeometry x="240" y="100" width="120" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-90" value="USRP FT" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="400" y="620" width="80" height="40" as="geometry" />
+          <mxGeometry x="400" y="420" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-92" value="Host PC" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="400" y="660" width="80" height="40" as="geometry" />
+          <mxGeometry x="400" y="460" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-94" value="Legend" style="swimlane;whiteSpace=wrap;html=1;rounded=1;strokeColor=default;swimlaneFillColor=light-dark(#ffffff, #212121);" parent="1" vertex="1">
-          <mxGeometry x="800" y="40" width="200" height="200" as="geometry">
+          <mxGeometry x="1160" y="40" width="200" height="200" as="geometry">
             <mxRectangle x="880" y="80" width="140" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -79,55 +79,55 @@
           <mxGeometry x="98" y="30" width="94" height="25" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-113" value="USRP FT" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="400" y="300" width="80" height="40" as="geometry" />
+          <mxGeometry x="400" y="100" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-118" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.875;exitY=0.5;exitDx=0;exitDy=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitPerimeter=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-120" target="gou46OdMyQ_DH9dvmqBt-38" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="120" y="340" as="sourcePoint" />
-            <mxPoint x="203" y="340" as="targetPoint" />
+            <mxPoint x="120" y="140" as="sourcePoint" />
+            <mxPoint x="203" y="140" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="180" y="360" />
-              <mxPoint x="180" y="320" />
+              <mxPoint x="180" y="160" />
+              <mxPoint x="180" y="120" />
             </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-120" value="External&lt;div&gt;PTP Master&lt;/div&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="40" y="330" width="120" height="60" as="geometry" />
+          <mxGeometry x="40" y="130" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-123" value="1PPS&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;to&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;PTP&lt;/span&gt;&lt;div&gt;(e.g. Raspberry Pi 5)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="240" y="640" width="120" height="40" as="geometry" />
+          <mxGeometry x="240" y="440" width="120" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-124" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#009900,#EDEDED);strokeWidth=3;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-90" target="Bj_DQetzVouuPHAo5OsP-123" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="160" y="670" as="sourcePoint" />
-            <mxPoint x="383" y="585" as="targetPoint" />
+            <mxPoint x="160" y="470" as="sourcePoint" />
+            <mxPoint x="383" y="385" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-125" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-123" target="Bj_DQetzVouuPHAo5OsP-92" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="300" y="554" as="sourcePoint" />
-            <mxPoint x="160" y="650" as="targetPoint" />
+            <mxPoint x="300" y="354" as="sourcePoint" />
+            <mxPoint x="160" y="450" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-127" value="Host PC" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="720" y="340" width="80" height="40" as="geometry" />
+          <mxGeometry x="720" y="140" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-128" value="1PPS&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;to&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;PTP&lt;/span&gt;&lt;div&gt;(e.g. Raspberry Pi 5)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="840" y="320" width="120" height="40" as="geometry" />
+          <mxGeometry x="840" y="120" width="120" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-129" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#009900,#EDEDED);strokeWidth=3;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-126" target="Bj_DQetzVouuPHAo5OsP-128" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="1020" y="350" as="sourcePoint" />
-            <mxPoint x="820" y="390" as="targetPoint" />
+            <mxPoint x="1020" y="150" as="sourcePoint" />
+            <mxPoint x="820" y="190" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-149" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.25;exitDx=0;exitDy=0;strokeColor=light-dark(#CC6600,#EDEDED);strokeWidth=3;entryX=0.875;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-123" target="Bj_DQetzVouuPHAo5OsP-245" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="580" y="700" as="sourcePoint" />
-            <mxPoint x="145" y="590" as="targetPoint" />
+            <mxPoint x="580" y="500" as="sourcePoint" />
+            <mxPoint x="145" y="390" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="190" y="650" />
-              <mxPoint x="190" y="580" />
+              <mxPoint x="190" y="450" />
+              <mxPoint x="190" y="380" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -138,204 +138,212 @@
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-154" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeColor=light-dark(#33FFFF,#EDEDED);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-113" target="Bj_DQetzVouuPHAo5OsP-126" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="940" y="375" as="sourcePoint" />
-            <mxPoint x="1023" y="375" as="targetPoint" />
+            <mxPoint x="940" y="175" as="sourcePoint" />
+            <mxPoint x="1023" y="175" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-115" value="Host PC" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="400" y="340" width="80" height="40" as="geometry" />
+          <mxGeometry x="400" y="140" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-166" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.875;exitY=0.5;exitDx=0;exitDy=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitPerimeter=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-120" target="Bj_DQetzVouuPHAo5OsP-115" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="155" y="370" as="sourcePoint" />
-            <mxPoint x="210" y="330" as="targetPoint" />
+            <mxPoint x="155" y="170" as="sourcePoint" />
+            <mxPoint x="210" y="130" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-167" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeColor=light-dark(#000000,#EDEDED);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="gou46OdMyQ_DH9dvmqBt-38" target="Bj_DQetzVouuPHAo5OsP-113" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="390" y="330" as="sourcePoint" />
-            <mxPoint x="473" y="330" as="targetPoint" />
+            <mxPoint x="390" y="130" as="sourcePoint" />
+            <mxPoint x="473" y="130" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-168" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-128" target="Bj_DQetzVouuPHAo5OsP-127" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="820" y="330" as="sourcePoint" />
-            <mxPoint x="700" y="330" as="targetPoint" />
+            <mxPoint x="820" y="130" as="sourcePoint" />
+            <mxPoint x="700" y="130" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-126" value="USRP PT" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="720" y="300" width="80" height="40" as="geometry" />
+          <mxGeometry x="720" y="100" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-185" value="External&lt;div&gt;PTP Slaves&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="80" y="400" width="80" height="40" as="geometry" />
+          <mxGeometry x="80" y="200" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-187" value="External&lt;div&gt;PTP Slaves&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="80" y="640" width="80" height="40" as="geometry" />
+          <mxGeometry x="80" y="440" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-192" value="External&lt;div&gt;PTP Slaves&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="1040" y="320" width="80" height="40" as="geometry" />
+          <mxGeometry x="1040" y="120" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-193" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-128" target="Bj_DQetzVouuPHAo5OsP-192" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="980" y="340" as="sourcePoint" />
-            <mxPoint x="790" y="360" as="targetPoint" />
+            <mxPoint x="980" y="140" as="sourcePoint" />
+            <mxPoint x="790" y="160" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-214" value="&lt;b&gt;PT&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=default;strokeColor=#000000;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="680" y="430" width="320" height="130" as="geometry" />
+          <mxGeometry x="680" y="230" width="320" height="130" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-215" value="Host PC" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="720" y="500" width="80" height="40" as="geometry" />
+          <mxGeometry x="720" y="300" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-216" value="1PPS&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;to&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;PTP&lt;/span&gt;&lt;div&gt;(e.g. Raspberry Pi 5)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="830" y="480" width="130" height="40" as="geometry" />
+          <mxGeometry x="830" y="280" width="130" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-217" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#009900,#EDEDED);strokeWidth=3;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-219" target="Bj_DQetzVouuPHAo5OsP-216" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="1020" y="510" as="sourcePoint" />
-            <mxPoint x="820" y="550" as="targetPoint" />
+            <mxPoint x="1020" y="310" as="sourcePoint" />
+            <mxPoint x="820" y="350" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-218" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-216" target="Bj_DQetzVouuPHAo5OsP-215" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="820" y="490" as="sourcePoint" />
-            <mxPoint x="700" y="490" as="targetPoint" />
+            <mxPoint x="820" y="290" as="sourcePoint" />
+            <mxPoint x="700" y="290" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-219" value="USRP PT" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="720" y="460" width="80" height="40" as="geometry" />
+          <mxGeometry x="720" y="260" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-220" value="External&lt;div&gt;PTP Slaves&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="1040" y="480" width="80" height="40" as="geometry" />
+          <mxGeometry x="1040" y="280" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-221" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-216" target="Bj_DQetzVouuPHAo5OsP-220" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="980" y="500" as="sourcePoint" />
-            <mxPoint x="790" y="520" as="targetPoint" />
+            <mxPoint x="980" y="300" as="sourcePoint" />
+            <mxPoint x="790" y="320" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-222" value="&lt;b&gt;PT/FT&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=default;strokeColor=#000000;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="680" y="590" width="320" height="130" as="geometry" />
+          <mxGeometry x="680" y="390" width="320" height="130" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-223" value="Host PC" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="720" y="660" width="80" height="40" as="geometry" />
+          <mxGeometry x="720" y="460" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-224" value="1PPS&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;to&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;PTP&lt;/span&gt;&lt;div&gt;(e.g. Raspberry Pi 5)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="830" y="640" width="130" height="40" as="geometry" />
+          <mxGeometry x="830" y="440" width="130" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-225" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#009900,#EDEDED);strokeWidth=3;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-227" target="Bj_DQetzVouuPHAo5OsP-224" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="1020" y="670" as="sourcePoint" />
-            <mxPoint x="820" y="710" as="targetPoint" />
+            <mxPoint x="1020" y="470" as="sourcePoint" />
+            <mxPoint x="820" y="510" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-226" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-224" target="Bj_DQetzVouuPHAo5OsP-223" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="820" y="650" as="sourcePoint" />
-            <mxPoint x="700" y="650" as="targetPoint" />
+            <mxPoint x="820" y="450" as="sourcePoint" />
+            <mxPoint x="700" y="450" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-227" value="USRP PT/FT" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="720" y="620" width="80" height="40" as="geometry" />
+          <mxGeometry x="720" y="420" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-228" value="External&lt;div&gt;PTP Slaves&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="1040" y="640" width="80" height="40" as="geometry" />
+          <mxGeometry x="1040" y="440" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-229" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-224" target="Bj_DQetzVouuPHAo5OsP-228" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="980" y="660" as="sourcePoint" />
-            <mxPoint x="790" y="680" as="targetPoint" />
+            <mxPoint x="980" y="460" as="sourcePoint" />
+            <mxPoint x="790" y="480" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-233" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.875;exitY=0.5;exitDx=0;exitDy=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;exitPerimeter=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-120" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="155" y="370" as="sourcePoint" />
-            <mxPoint x="160" y="430" as="targetPoint" />
+            <mxPoint x="155" y="170" as="sourcePoint" />
+            <mxPoint x="160" y="230" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="180" y="360" />
-              <mxPoint x="180" y="430" />
+              <mxPoint x="180" y="160" />
+              <mxPoint x="180" y="230" />
             </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-245" value="External&lt;div&gt;NTP Master&lt;/div&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="40" y="550" width="120" height="60" as="geometry" />
+          <mxGeometry x="40" y="350" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="Bj_DQetzVouuPHAo5OsP-247" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeColor=light-dark(#33FFFF,#EDEDED);strokeWidth=3;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-113" target="Bj_DQetzVouuPHAo5OsP-227" edge="1">
+        <mxCell id="Bj_DQetzVouuPHAo5OsP-247" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#33FFFF,#EDEDED);strokeWidth=3;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" target="Bj_DQetzVouuPHAo5OsP-227" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="490" y="290" as="sourcePoint" />
-            <mxPoint x="650" y="450" as="targetPoint" />
+            <mxPoint x="660" y="280" as="sourcePoint" />
+            <mxPoint x="650" y="250" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="640" y="320" />
-              <mxPoint x="640" y="630" />
+              <mxPoint x="660" y="430" />
             </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-248" value="&lt;b&gt;PT&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=default;strokeColor=#000000;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="680" y="750" width="320" height="130" as="geometry" />
+          <mxGeometry x="680" y="550" width="320" height="130" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-249" value="Host PC" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="720" y="820" width="80" height="40" as="geometry" />
+          <mxGeometry x="720" y="620" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-250" value="1PPS&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;to&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;PTP&lt;/span&gt;&lt;div&gt;(e.g. Raspberry Pi 5)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="830" y="800" width="130" height="40" as="geometry" />
+          <mxGeometry x="830" y="600" width="130" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-251" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#009900,#EDEDED);strokeWidth=3;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-253" target="Bj_DQetzVouuPHAo5OsP-250" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="1020" y="830" as="sourcePoint" />
-            <mxPoint x="820" y="870" as="targetPoint" />
+            <mxPoint x="1020" y="630" as="sourcePoint" />
+            <mxPoint x="820" y="670" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-252" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-250" target="Bj_DQetzVouuPHAo5OsP-249" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="820" y="810" as="sourcePoint" />
-            <mxPoint x="700" y="810" as="targetPoint" />
+            <mxPoint x="820" y="610" as="sourcePoint" />
+            <mxPoint x="700" y="610" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-253" value="USRP PT" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="720" y="780" width="80" height="40" as="geometry" />
+          <mxGeometry x="720" y="580" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-254" value="External&lt;div&gt;PTP Slaves&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=3;" parent="1" vertex="1">
-          <mxGeometry x="1040" y="800" width="80" height="40" as="geometry" />
+          <mxGeometry x="1040" y="600" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-255" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-250" target="Bj_DQetzVouuPHAo5OsP-254" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="980" y="820" as="sourcePoint" />
-            <mxPoint x="790" y="840" as="targetPoint" />
+            <mxPoint x="980" y="620" as="sourcePoint" />
+            <mxPoint x="790" y="640" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-256" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#33FFFF,#EDEDED);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-227" target="Bj_DQetzVouuPHAo5OsP-253" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="490" y="290" as="sourcePoint" />
-            <mxPoint x="650" y="610" as="targetPoint" />
+            <mxPoint x="490" y="90" as="sourcePoint" />
+            <mxPoint x="650" y="410" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="640" y="650" />
-              <mxPoint x="640" y="800" />
+              <mxPoint x="660" y="450" />
+              <mxPoint x="660" y="600" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="Bj_DQetzVouuPHAo5OsP-155" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeColor=light-dark(#33FFFF,#EDEDED);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-113" target="Bj_DQetzVouuPHAo5OsP-219" edge="1">
+        <mxCell id="Bj_DQetzVouuPHAo5OsP-155" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#33FFFF,#EDEDED);strokeWidth=3;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" target="Bj_DQetzVouuPHAo5OsP-219" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="490" y="310" as="sourcePoint" />
-            <mxPoint x="510" y="410" as="targetPoint" />
+            <mxPoint x="660" y="120" as="sourcePoint" />
+            <mxPoint x="510" y="210" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="640" y="320" />
-              <mxPoint x="640" y="480" />
+              <mxPoint x="660" y="280" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="4LTYbAETsp32oEr3xXqk-1" value="" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#CC6600,#EDEDED);strokeWidth=3;startFill=0;" edge="1" parent="1" source="Bj_DQetzVouuPHAo5OsP-92">
+        <mxCell id="4LTYbAETsp32oEr3xXqk-1" value="" style="endArrow=none;html=1;rounded=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;strokeColor=light-dark(#CC6600,#EDEDED);strokeWidth=3;startFill=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-92" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="250" y="660" as="sourcePoint" />
-            <mxPoint x="190" y="650" as="targetPoint" />
+            <mxPoint x="250" y="460" as="sourcePoint" />
+            <mxPoint x="190" y="450" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="190" y="690" />
+              <mxPoint x="190" y="490" />
             </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="Bj_DQetzVouuPHAo5OsP-191" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="Bj_DQetzVouuPHAo5OsP-123" target="Bj_DQetzVouuPHAo5OsP-187" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="200" y="660" as="sourcePoint" />
-            <mxPoint x="410" y="680" as="targetPoint" />
+            <mxPoint x="200" y="460" as="sourcePoint" />
+            <mxPoint x="410" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="L0JmcwTu3CGs8fRhvsvm-2" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeColor=light-dark(#33FFFF,#EDEDED);strokeWidth=3;dashed=1;dashPattern=1 1;" edge="1" parent="1" source="Bj_DQetzVouuPHAo5OsP-90">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="490" y="130" as="sourcePoint" />
+            <mxPoint x="630" y="140" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="580" y="440" />
+              <mxPoint x="580" y="140" />
+            </Array>
           </mxGeometry>
         </mxCell>
       </root>

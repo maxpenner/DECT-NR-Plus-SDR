@@ -121,7 +121,8 @@ class tpoint_t : public common::layer_unit_t {
         virtual phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) = 0;
 
         /**
-         * \brief Function called to notify MAC of new data being available on higher layers.
+         * \brief Function called to notify lower layer of new data being available on the
+         * application layer.
          *
          * 1. Call rate depends on settings on application layer.
          * 2. Called in the same FIFO order as put into the job_queue (upper_report_).
@@ -148,7 +149,7 @@ class tpoint_t : public common::layer_unit_t {
         /**
          * \brief Once the entire stack (radio, PHY and upper) has been fully initialized and all
          * constructors called, this function is called by the main thread of the executable
-         * dectnrp. It can be used to start threads. Most firmwares with need to start threads for
+         * dectnrp. It can be used to start threads. Most firmwares will need to start threads for
          * the application layer interface.
          *
          * \return lines to log
@@ -196,8 +197,8 @@ class tpoint_t : public common::layer_unit_t {
          *
          * AGC gain changes can be applied ASAP (t_agc_change_64 < 0), or at a fixed point in time
          * in the future (t_agc_change_64 >= 0). Typically, the AGC settings should be applied when
-         * it is guaranteed that no packet will be received while the changes are made, for
-         * instance, in a GI at the end of a packet.
+         * it is guaranteed that no packet will be transmitted or received while the changes are
+         * made, for instance, in a GI at the end of a packet.
          *
          * Note that even if this function is called, AGC settings may be ignored if the protection
          * duration of agc_tx is still active (protection duration of agc_rx is ignored).
@@ -225,7 +226,7 @@ class tpoint_t : public common::layer_unit_t {
          * instruction of type maclow_phy_t for the PHY. For the PDC, a new HARQ buffer is
          * requested.
          *
-         * \param phy_maclow provided by PHY
+         * \param phy_maclow provided by PHY, contains sync_report and PLCF
          * \param PLCF_type PLCF type to decode
          * \param network_id network ID for scrambling on PHY
          * \param rv redundancy version for decoding on PHY
@@ -274,7 +275,7 @@ class tpoint_t : public common::layer_unit_t {
          * \brief Convenience function to convert a structure phy_maclow_t to an unequivocal packet
          * size based on the PCC choice made by the calling firmware.
          *
-         * \param phy_maclow provided by PHY
+         * \param phy_maclow provided by PHY, contains sync_report and PLCF
          * \param PLCF_type PLCF type to decode
          * \return
          */

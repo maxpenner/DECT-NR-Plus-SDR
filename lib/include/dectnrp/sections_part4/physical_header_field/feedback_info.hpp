@@ -32,7 +32,7 @@
 
 namespace dectnrp::section4 {
 
-class feedback_info_t : public common::packing_t {
+class feedback_info_t : public common::serdes::packing_t {
     public:
         virtual ~feedback_info_t() = default;
 

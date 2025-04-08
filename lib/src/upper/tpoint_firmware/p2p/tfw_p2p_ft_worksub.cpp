@@ -73,18 +73,9 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
     // save sync_report
     contact_list_p2p.sync_report_last_known.at(lrdid) = phy_maclow.sync_report;
 
-    // save information from feedback
-    switch (plcf_21->FeedbackFormat) {
-        case 4:
-            contact_list_p2p.mimo_csi_last_known.at(lrdid).update(
-                plcf_21->feedback_info_pool.feedback_info_f4.MCS);
-            break;
-
-        case 5:
-            contact_list_p2p.mimo_csi_last_known.at(lrdid).update(
-                plcf_21->feedback_info_pool.feedback_info_f5.Codebook_index);
-            break;
-    }
+    // udpate CSI
+    contact_list_p2p.mimo_csi_last_known.at(lrdid).update(
+        plcf_21->FeedbackFormat, plcf_21->feedback_info_pool, phy_maclow.sync_report);
 
     return worksub_pcc2pdc(phy_maclow,
                            2,

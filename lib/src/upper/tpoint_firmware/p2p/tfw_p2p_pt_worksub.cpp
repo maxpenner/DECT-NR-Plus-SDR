@@ -184,7 +184,7 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
         phy_machigh.pdc_report.mimo_report.tm_3_7_beamforming_idx;
 
     // convert MIMO report to CSI
-    mimo_csi.update(phy_machigh.pdc_report.mimo_report);
+    mimo_csi.update(phy_machigh.pdc_report.mimo_report, phy_machigh.phy_maclow.sync_report);
 
     // check if we can generate any uplink
     phy::machigh_phy_t machigh_phy;

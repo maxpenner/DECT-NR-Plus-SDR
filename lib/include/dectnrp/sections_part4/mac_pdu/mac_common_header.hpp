@@ -26,7 +26,7 @@
 
 namespace dectnrp::section4 {
 
-class mac_common_header_t : public common::packing_t {
+class mac_common_header_t : public common::serdes::packing_t {
     public:
         virtual void zero() override = 0;
         virtual bool is_valid() const override = 0;

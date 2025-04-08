@@ -59,7 +59,7 @@ class mmie_t {
         mac_multiplexing_header_t mac_mux_header;
 };
 
-class mmie_packing_t : public mmie_t, public common::packing_t {
+class mmie_packing_t : public mmie_t, public common::serdes::packing_t {
     public:
         uint32_t get_packed_size_of_mmh_sdu() const override final;
         void pack_mmh_sdu(uint8_t* mac_pdu_offset) override final;

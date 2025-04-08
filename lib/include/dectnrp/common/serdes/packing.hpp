@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::common {
+namespace dectnrp::common::serdes {
 
 class packing_t {
     public:
@@ -48,4 +48,4 @@ class packing_t {
         void operator<<(const uint8_t* a_ptr) { unpack(a_ptr); }
 };
 
-}  // namespace dectnrp::common
+}  // namespace dectnrp::common::serdes
