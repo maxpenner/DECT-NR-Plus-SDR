@@ -47,6 +47,10 @@ job_queue_t::job_queue_t(const uint32_t id_, const uint32_t capacity_)
 }
 
 bool job_queue_t::enqueue_nto(job_t&& job) {
+    if (!permeable.load(std::memory_order_acquire)) {
+        return true;
+    }
+
     bool ret = false;
 
     lockv.lock();
@@ -246,6 +250,10 @@ job_queue_t::job_queue_t(const uint32_t id_, const uint32_t capacity_)
 }
 
 bool job_queue_t::enqueue_nto(job_t&& job) {
+    if (!permeable.load(std::memory_order_acquire)) {
+        return true;
+    }
+
     // producer token must be thread-safe
     lockv.lock();
 

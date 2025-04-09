@@ -118,6 +118,12 @@ std::vector<std::string> tfw_p2p_ft_t::start_threads() {
 }
 
 std::vector<std::string> tfw_p2p_ft_t::stop_threads() {
+    // gracefully shut down any DECT NR+ connections, block this function until done
+    // ToDo
+
+    // close job queue so work functions will no longer be called
+    job_queue.set_impermeable();
+
     // first stop accepting new data from upper
     app_server->stop_sc();
 

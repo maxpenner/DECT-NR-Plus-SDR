@@ -105,6 +105,9 @@ class job_queue_t final : public common::reporting_t {
          */
         bool enqueue_nto(job_t&& job);
 
+        void set_permeable() { permeable.store(true, std::memory_order_release); }
+        void set_impermeable() { permeable.store(false, std::memory_order_release); }
+
         const uint32_t id;
         const uint32_t capacity;
 
@@ -114,6 +117,8 @@ class job_queue_t final : public common::reporting_t {
     private:
         std::vector<std::string> report_start() const override final;
         std::vector<std::string> report_stop() const override final;
+
+        std::atomic<bool> permeable{false};
 
         // assigned in job_queue_t
         int64_t fifo_cnt;
@@ -157,6 +162,7 @@ class job_queue_t final : public common::reporting_t {
 // ######################################################################### MOODYCAMEL
 // ######################################################################### MOODYCAMEL
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 
@@ -196,6 +202,9 @@ class job_queue_t final : public common::reporting_t {
          */
         bool enqueue_nto(job_t&& job);
 
+        void set_permeable() { permeable.store(true, std::memory_order_release); }
+        void set_impermeable() { permeable.store(false, std::memory_order_release); }
+
         const uint32_t id;
         const uint32_t capacity;
 
@@ -205,6 +214,8 @@ class job_queue_t final : public common::reporting_t {
     private:
         std::vector<std::string> report_start() const override final;
         std::vector<std::string> report_stop() const override final;
+
+        std::atomic<bool> permeable{false};
 
         // assigned in job_queue_t
         int64_t fifo_cnt{0};

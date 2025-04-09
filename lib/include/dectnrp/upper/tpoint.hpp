@@ -67,9 +67,10 @@ class tpoint_t : public common::layer_unit_t {
         tpoint_t& operator=(tpoint_t&&) = delete;
 
         /**
-         * \brief Function will be called about 100ms before PHY and radio layer become operational
-         * and start processing IQ samples. It should be used to make time-critical settings, e.g.
-         * settings the time of the first beacon. Should return ASAP.
+         * \brief Function is called shortly before PHY and radio layer become operational and start
+         * processing IQ samples. At the same time, the other work-functions will start being
+         * called. This function should be used to make time-critical settings, e.g. setting the
+         * time of the first beacon. It must return ASAP.
          *
          * 1. Called exactly once.
          * 2. Called before any other work-function.
