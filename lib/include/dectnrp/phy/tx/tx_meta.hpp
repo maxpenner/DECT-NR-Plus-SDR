@@ -43,7 +43,7 @@ struct tx_meta_t {
 
         /**
          * \brief Value can never be 0 as there must be at least one zero sample. Otherwise we stop
-         * transmission at an arbitrary amplitude and might a transient response when using real
+         * transmission at an arbitrary amplitude and might see a transient response when using real
          * hardware.
          *
          * The minimum number of samples in the GI is reached for critical sampling at the lowest

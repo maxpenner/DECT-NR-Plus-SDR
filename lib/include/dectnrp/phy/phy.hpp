@@ -45,7 +45,7 @@ class phy_t final : public common::layer_t<worker_pool_t> {
         const phy_config_t& phy_config;
 
     private:
-        // structure given to each worker pool for cross controlling transmission
+        /// structure given to each worker pool for cross controlling transmission
         phy_radio_t phy_radio;
 };
 

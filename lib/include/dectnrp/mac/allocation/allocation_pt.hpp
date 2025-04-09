@@ -65,7 +65,7 @@ class allocation_pt_t final : public allocation_t {
 
         bool is_orthogonal(const direction_t direction, const resource_vec_t& others) const;
 
-        // FTs request downlink resources of the PTs, PTs request uplink resources
+        /// FTs request downlink resources of the PTs, PTs request uplink resources
         tx_opportunity_t get_tx_opportunity(const direction_t direction,
                                             const int64_t now_64,
                                             const int64_t tx_earliest_64) const;
