@@ -20,26 +20,29 @@
 
 #pragma once
 
+#include <cstdint>
+#include <vector>
+
 #include "dectnrp/mac/allocation/allocation_pt.hpp"
-#include "dectnrp/mac/contact_list.hpp"
+#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
+#include "dectnrp/phy/rx/sync/sync_report.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 
-namespace dectnrp::upper::tfw::p2p {
+namespace dectnrp::mac {
 
-class contact_list_p2p_t final : public mac::contact_list_t {
+class contact_t {
     public:
         // ##################################################
         // Radio Layer + PHY
-        // -
+
+        phy::sync_report_t sync_report;
 
         // ##################################################
         // MAC Layer
 
-        /// allocation of each radio device class (um = unordered map)
-        std::unordered_map<key_lrdid_t, section4::mac_architecture::identity_t> identity_pt_um;
-
-        /// allocation of each radio device class (um = unordered map)
-        std::unordered_map<key_lrdid_t, mac::allocation::allocation_pt_t> allocation_pt_um;
+        section4::mac_architecture::identity_t identity;
+        mac::allocation::allocation_pt_t allocation_pt;
+        phy::mimo_csi_t mimo_csi;
 
         // ##################################################
         // DLC and Convergence Layer
@@ -47,12 +50,7 @@ class contact_list_p2p_t final : public mac::contact_list_t {
 
         // ##################################################
         // Application Layer
-
-        /// from app to lower layers
-        common::adt::bimap_t<key_lrdid_t, uint32_t, true> app_server_idx;
-
-        /// from lower layers to app
-        common::adt::bimap_t<key_lrdid_t, uint32_t, true> app_client_idx;
+        // -
 };
 
-}  // namespace dectnrp::upper::tfw::p2p
+}  // namespace dectnrp::mac

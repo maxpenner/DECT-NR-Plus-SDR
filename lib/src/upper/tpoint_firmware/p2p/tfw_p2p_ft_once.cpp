@@ -41,8 +41,9 @@ const std::string tfw_p2p_ft_t::firmware_name("p2p_ft");
 tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tfw_p2p_base_t(tpoint_config_, mac_lower_) {
 #ifdef TFW_P2P_MIMO
-    dectnrp_assert(1 < buffer_rx.nof_antennas,
-                   "MIMO requires that FT is able to transmit at least two transmit streams");
+    dectnrp_assert(
+        1 < buffer_rx.nof_antennas,
+        "MIMO requires that FT is able to transmit at least two transmit streams. Change to a radio device class with N_TX larger one.");
 #endif
 
     // ##################################################
@@ -62,25 +63,26 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
         // load identity of one PT
         const auto identity_pt = init_identity_pt(firmware_id_pt);
 
-        // fill entry for this PT
+        // add PT as new contact
+        contact_list.add_new_contact(identity_pt.LongRadioDeviceID,
+                                     identity_pt.ShortRadioDeviceID,
+                                     firmware_id_pt,
+                                     firmware_id_pt);
 
-        contact_list_p2p.lrdid2srdid.insert(identity_pt.LongRadioDeviceID,
-                                            identity_pt.ShortRadioDeviceID);
+        auto& contact = contact_list.get_contact(identity_pt.LongRadioDeviceID);
 
-        contact_list_p2p.identity_pt_um.insert_or_assign(identity_pt.LongRadioDeviceID,
-                                                         identity_pt);
+        contact.identity = identity_pt;
+        contact.allocation_pt = init_allocation_pt(firmware_id_pt);
+        contact.sync_report = phy::sync_report_t(buffer_rx.nof_antennas);
+        contact.mimo_csi = phy::mimo_csi_t();
 
-        contact_list_p2p.allocation_pt_um.insert_or_assign(identity_pt.LongRadioDeviceID,
-                                                           init_allocation_pt(firmware_id_pt));
-
-        contact_list_p2p.sync_report_last_known.insert(
-            {identity_pt.LongRadioDeviceID, phy::sync_report_t(buffer_rx.nof_antennas)});
-
-        contact_list_p2p.mimo_csi_last_known.insert(
-            {identity_pt.LongRadioDeviceID, phy::mimo_csi_t()});
-
-        contact_list_p2p.app_server_idx.insert(identity_pt.LongRadioDeviceID, firmware_id_pt);
-        contact_list_p2p.app_client_idx.insert(identity_pt.LongRadioDeviceID, firmware_id_pt);
+        dectnrp_assert(contact.identity.NetworkID == identity_pt.NetworkID, "id not equal");
+        dectnrp_assert(contact.identity.ShortNetworkID == identity_pt.ShortNetworkID,
+                       "id not equal");
+        dectnrp_assert(contact.identity.LongRadioDeviceID == identity_pt.LongRadioDeviceID,
+                       "id not equal");
+        dectnrp_assert(contact.identity.ShortRadioDeviceID == identity_pt.ShortRadioDeviceID,
+                       "id not equal");
     }
 
     init_packet_beacon();

@@ -18,18 +18,29 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/mac/contact_list.hpp"
+#pragma once
 
-#include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/mac/contact.hpp"
 
-namespace dectnrp::mac {
+namespace dectnrp::upper::tfw::p2p {
 
-bool contact_list_t::is_lrdid_known(const key_lrdid_t key_lrdid) const {
-    return lrdid2srdid.is_k_known(key_lrdid);
-}
+class contact_p2p_t final : public mac::contact_t {
+    public:
+        // ##################################################
+        // Radio Layer + PHY
+        // -
 
-bool contact_list_t::is_srdid_known(const uint32_t srdid) const {
-    return lrdid2srdid.is_v_known(srdid);
-}
+        // ##################################################
+        // MAC Layer
+        // -
 
-}  // namespace dectnrp::mac
+        // ##################################################
+        // DLC and Convergence Layer
+        // -
+
+        // ##################################################
+        // Application Layer
+        // -
+};
+
+}  // namespace dectnrp::upper::tfw::p2p

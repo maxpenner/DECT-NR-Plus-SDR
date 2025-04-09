@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include "dectnrp/upper/tpoint_firmware/p2p/contact_list_p2p.hpp"
+#include "dectnrp/mac/contact_list.hpp"
+#include "dectnrp/upper/tpoint_firmware/p2p/contact_p2p.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
@@ -68,7 +69,7 @@ class tfw_p2p_ft_t final : public tfw_p2p_base_t {
         // MAC Layer
 
         /// fast lookup of all PTs and their properties the FT requires for uplink and downlink
-        contact_list_p2p_t contact_list_p2p;
+        mac::contact_list_t<contact_p2p_t> contact_list;
 
         // besides unicast for downlink, the FT also requires a beacon packet
         void init_packet_beacon();
