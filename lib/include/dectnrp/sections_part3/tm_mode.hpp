@@ -24,7 +24,7 @@
 
 namespace dectnrp::section3::tmmode {
 
-using tm_mode_t = struct tm_mode_t {
+struct tm_mode_t {
         uint32_t index{};
         uint32_t N_eff_TX{};
         uint32_t N_SS{};

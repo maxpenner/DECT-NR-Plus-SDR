@@ -29,7 +29,7 @@ namespace dectnrp::phy {
  * standard. An instance of this structure is member of tx_descriptor_t, which contains the full
  * configuration.
  */
-using tx_meta_t = struct tx_meta_t {
+struct tx_meta_t {
         /// determines power and ADC dynamic range
         bool optimal_scaling_DAC;
         float DAC_scale;

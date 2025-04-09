@@ -39,7 +39,7 @@ class vnic_server_t final : public app_server_t, public vnic_t {
          * To use a TUN, the value of tun_name has to be non-zero and tap_name is left empty.
          * To use a TAP, the value of tap_name has to be non-zero and tun_name is left empty.
          */
-        using vnic_config_t = struct vnic_config_t {
+        struct vnic_config_t {
                 std::string tun_name;    // TUN
                 int MTU;                 // TUN
                 std::string ip_address;  // TUN
@@ -83,10 +83,10 @@ class vnic_server_t final : public app_server_t, public vnic_t {
         /// file descriptor (fd) of virtual network device used to poll, read and write datagrams
         int tuntap_fd;
 
-        // file descriptor (fd) of socket used to manipulate above network device
+        /// file descriptor (fd) of socket used to manipulate above network device
         int socket_fd;
 
-        // structure used for ioctls on the above socket
+        /// structure used for ioctls on the above socket
         struct ifreq ifr;
 
         /// TUN

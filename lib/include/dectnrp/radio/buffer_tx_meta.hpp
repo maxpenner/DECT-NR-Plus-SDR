@@ -24,7 +24,7 @@
 
 namespace dectnrp::radio {
 
-using buffer_tx_meta_t = struct buffer_tx_meta_t {
+struct buffer_tx_meta_t {
         /// first tx packet has order 0
         int64_t tx_order_id{-1};
 

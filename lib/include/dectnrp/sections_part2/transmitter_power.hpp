@@ -24,7 +24,7 @@
 
 namespace dectnrp::section2 {
 
-using maximum_output_power_t = struct maximum_output_power_t {
+struct maximum_output_power_t {
         uint32_t operating_channel_bandwidth;
         uint32_t RD_power_class;
         int32_t outputer_power_dBm;
@@ -32,7 +32,7 @@ using maximum_output_power_t = struct maximum_output_power_t {
         uint32_t measurement_bandwidth;
 };
 
-using minimum_output_power_t = struct minimum_output_power_t {
+struct minimum_output_power_t {
         uint32_t operating_channel_bandwidth;
         int32_t outputer_power_dBm;
 };

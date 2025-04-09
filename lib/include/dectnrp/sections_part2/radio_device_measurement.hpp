@@ -24,14 +24,14 @@
 
 namespace dectnrp::section2 {
 
-using rssi_x_measurement_report_t = struct rssi_x_measurement_report_t {
+struct rssi_x_measurement_report_t {
         float measured_value_dBm;
         uint32_t reported_value;
 };
 
-constexpr float RSSI_2_leaky_integrator_alpha = 0.1f;
+constexpr float RSSI_2_leaky_integrator_alpha{0.1f};
 
-using snr_measurement_report_t = struct snr_measurement_report_t {
+struct snr_measurement_report_t {
         float measured_value_dB;
         uint32_t reported_value;
 };

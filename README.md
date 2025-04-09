@@ -53,14 +53,14 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
 
     ├─ .vscode/                 VS Code settings
     ├─ apps/                    apps sources
-    ├─ bin/                     apps post-compilation binary executables
+    ├─ bin/                     apps post-compilation binaries
     ├─ cmake/                   CMake modules
     ├─ configurations/          configuration files required to start the SDR
     ├─ docs/                    documentation (doxygen, graphics etc.)
     ├─ gnuradio/                flow graphs (SDR oscilloscope, USRP calibration etc.)
     ├─ json/                    submodule to analyze exported JSON files in Matlab
     ├─ lib/                     library code used by applications
-    │  ├─ include/              include folder
+    │  ├─ include/
     │  |  ├─ application/       application layer interfaces
     │  |  ├─ apps/              utilities for apps in directory apps/
     │  |  ├─ common/            common functionality across all layers/directories
@@ -73,8 +73,8 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
     │  |  ├─ sections_part3/    sections of ETSI TS 103 636-3
     │  |  ├─ sections_part4/    sections of ETSI TS 103 636-4
     │  |  ├─ sections_part5/    sections of ETSI TS 103 636-5
-    │  |  ├─ simulation/        wireless environment simulation
-    │  |  ├─ upper/             upper layers, i.e. between PHY and application layer
+    │  |  ├─ simulation/        wireless simulation
+    │  |  ├─ upper/             upper layers, i.e. layers between PHY and application layer
     │  ├─ src/                  source code (same directories as in include/)
     └─ scripts/                 shell scripts
 

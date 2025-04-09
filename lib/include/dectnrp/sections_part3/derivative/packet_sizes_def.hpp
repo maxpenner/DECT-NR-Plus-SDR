@@ -24,7 +24,7 @@
 
 namespace dectnrp::section3 {
 
-using packet_sizes_def_t = struct packet_sizes_def_t {
+struct packet_sizes_def_t {
         /// freely selected during operation (max values defined by radio device class)
         uint32_t u{};
         uint32_t b{};

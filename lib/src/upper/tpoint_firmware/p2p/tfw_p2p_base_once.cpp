@@ -49,7 +49,6 @@ tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     // how often does the FT send beacons, how often does the PT expect beacons?
     const auto beacon_period = duration_lut.get_duration(section3::duration_ec_t::ms001, 10);
 
-    // set allocation
     allocation_ft = mac::allocation::allocation_ft_t(
         &duration_lut, beacon_period, duration_lut.get_duration(section3::duration_ec_t::ms001, 2));
 
@@ -83,7 +82,6 @@ section4::mac_architecture::identity_t tfw_p2p_base_t::init_identity_pt(
 }
 
 mac::allocation::allocation_pt_t tfw_p2p_base_t::init_allocation_pt(const uint32_t firmware_id_) {
-    // empty allocation for one specific pt
     mac::allocation::allocation_pt_t allocation_pt = mac::allocation::allocation_pt_t(
         &duration_lut,
         allocation_ft.get_beacon_period_as_duration(),
@@ -114,10 +112,8 @@ mac::allocation::allocation_pt_t tfw_p2p_base_t::init_allocation_pt(const uint32
     const uint32_t stride = ul_gap_dl_gap * N_pt;
 
 #ifdef APPLICATION_INTERFACE_VNIC_OR_SOCKET
-    // number of allocations per PT we can fit in a single frame
     const uint32_t N_resources = 4;
 #else
-    // number of allocations per PT we can fit in a single frame
     const uint32_t N_resources = 2;
 #endif
 

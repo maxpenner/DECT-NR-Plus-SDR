@@ -58,6 +58,8 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     // ##################################################
     // MAC Layer
 
+    contact_list.reserve(10);
+
     // init contact list
     for (uint32_t firmware_id_pt = 0; firmware_id_pt < N_pt; ++firmware_id_pt) {
         // load identity of one PT

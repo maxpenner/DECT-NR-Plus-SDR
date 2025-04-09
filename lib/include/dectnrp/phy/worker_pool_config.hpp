@@ -32,7 +32,7 @@
 
 namespace dectnrp::phy {
 
-using worker_pool_config_t = struct worker_pool_config_t {
+struct worker_pool_config_t {
         /// identifier used in JSON and log file
         static const std::string json_log_key;
 
@@ -45,19 +45,18 @@ using worker_pool_config_t = struct worker_pool_config_t {
         section3::packet_sizes_t maximum_packet_sizes;
 
         /**
-         * \brief When generating individual packets from PHY to radio layer in different
-         * threads, the gap between consecutive packets can be zero or very small (e.g. a
-         * few samples for timing/clock correction). When that happens, we don't want the
-         * hardware to switch from TX to RX and (almost) immediately back to TX. Instead,
-         * the radio layer can detect these small gaps and fill them with zeros to remain in
-         * TX mode. To detect gaps, both packets and their respective buffers must be
-         * available to the hardware when the final samples of the first packet are read.
-         * See hw_usrp.cpp for details.
+         * \brief When generating individual packets from PHY to radio layer in different, the gap
+         * between consecutive packets can be zero or very small (e.g. a few samples for
+         * timing/clock correction). When that happens, the hardware should not switch from TX to RX
+         * and (almost) immediately back to TX. Instead, the radio layer can detect these small gaps
+         * and fill them with zeros to remain in TX mode. To detect gaps, both packets and their
+         * respective buffers must be available to the hardware when the final samples of the first
+         * packet are read.
          */
         uint32_t nof_samples_interpacket_gap_max;
 
         /**
-         * \brief The PHY always provides the Radio layer with signals of the same sample
+         * \brief The PHY always provides the radio layer with signals of the same sample
          * rate, irrespective of bandwidth or subcarrier spacing of a specific DECTNRP
          * packet. Therefore, depending on the values of u and b, the actual oversampling
          * can be much larger. The minimum oversampling is used for the maximum values of u
@@ -86,19 +85,39 @@ using worker_pool_config_t = struct worker_pool_config_t {
          */
         bool enforce_dectnrp_samp_rate_by_resampling;
 
-        /// number of jobs in queue postable to worker_tx_rx
+        /// number of jobs in queue postable to worker_tx_rx, typical value is 64 and more
         uint32_t nof_jobs;
 
-        /// length of the RX ring buffer on radio layer in slots, 24 slots are 10ms
+        /**
+         * \brief The length of the RX ring buffer on radio layer in slots. 24 slots correspond to
+         * 10ms. Typical values are between 24 (10ms) and 120 (50ms). The length also determines how
+         * long instantaneous channel measurements can be. For instance, if 10ms are buffered, the
+         * channel measurement must be shorter to avoid that samples are overwritten while measuring
+         * the channel.
+         */
         uint32_t rx_ant_streams_length_slots;
 
-        /// how long is a chunk processed by a single worker_sync in u=8-subslots?
+        /**
+         * \brief How long is a chunk processed by a single instance of worker_sync_t in
+         * u=8-subslots? A value of 32 corresponds to two slots. Note that the length defined by
+         * rx_ant_streams_length_slots must be divisible by the number of instances of worker_sync_t
+         * times the length defined by rx_chunk_length_u8subslot.
+         */
         uint32_t rx_chunk_length_u8subslot;
 
-        /// how long is a resampling unit for each worker_sync in u=8-subslots?
+        /**
+         * \brief How long is a resampling unit in u=8-subslots? A value of 2 corresponds to
+         * 416/16*2=52us. Typical values are 1, 2 and 4.
+         */
         uint32_t rx_chunk_unit_length_u8subslot;
 
-        /// how often do worker_sync instances post regular jobs in multiples of chunks?
+        /**
+         * \brief How often do instances of worker_sync_t post regular jobs in multiples of chunks?
+         * The chunk length is defined by rx_chunk_length_u8subslot. If rx_chunk_length_u8subslot=32
+         * and job_regular_period=1, a regular job is created every two slots. If
+         * job_regular_period=2, a regular job is created every 4 slots. For the maximum number of
+         * regular jobs, job_regular_period must be set to 1.
+         */
         uint32_t job_regular_period;
 
         /// thread configurations
@@ -110,8 +129,8 @@ using worker_pool_config_t = struct worker_pool_config_t {
         uint32_t chestim_mode_lr_t_stride_default;
 
         /**
-         * \brief If set to zero, not JSON are exported. If set to positive value, it
-         * defines the number of JSON that are collected before writing to disk.
+         * \brief If set to zero, no JSON are exported. If set to positive value, it defines the
+         * number of JSON that are collected before writing to disk.
          */
         uint32_t json_export_length;
 

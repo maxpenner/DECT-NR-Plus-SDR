@@ -30,7 +30,7 @@ extern "C" {
 
 namespace dectnrp::phy::dft {
 
-using ofdm_t = struct ofdm_t {
+struct ofdm_t {
         uint32_t N_b_DFT_os;
         srsran_dft_plan_t plan_tx;
         srsran_dft_plan_t plan_rx;

@@ -194,10 +194,8 @@ void tx_t::generate_tx_packet(const tx_descriptor_t& tx_descriptor_,
         antenna_ports_now[i] = antenna_ports[i];
     }
 
-    // prepare fec
     fec->segmentate_and_pick_scrambling_sequence(fec_cfg);
 
-    // run FEC for PLCF
     fec->encode_plcf(fec_cfg, *hb_plcf);
 
 #ifndef PHY_TX_FEC_OF_PDC_CODEBLOCK_FOR_CODEBLOCK_OR_COMPLETE_AT_THE_BEGINNING

@@ -27,7 +27,7 @@
 
 namespace dectnrp::radio {
 
-using hw_config_t = struct hw_config_t {
+struct hw_config_t {
         /// identifiers used in JSON and log file
         static const std::string json_log_key;
         static const std::string json_log_key_simulation;
@@ -38,22 +38,40 @@ using hw_config_t = struct hw_config_t {
         /// simulator, USRP
         std::string hw_name;
 
-        /// TX buffers that can be assigned to PHY threads
+        /// TX buffers that can be assigned to PHY threads, typical value is 16
         uint32_t nof_buffer_tx;
 
-        /// hardware + driver properties
-        uint32_t turn_around_time_us;  // B210 2ms, N- and X-series as low as 100us
+        /// hardware + driver properties, B210 2ms, N- and X-series as low as 100us
+        uint32_t turn_around_time_us;
 
-        /// mitigate effects of transient responses at burst starts
+        /**
+         * \brief The radio layer can send zeros before transmitting a packet received from PHY to
+         * mitigate effects of transient responses at burst starts. If set to 0, no zeros are
+         * prepended. Given in microseconds. A typical value is 5.
+         */
         uint32_t tx_burst_leading_zero_us;
 
-        /// time advance for each packet in samples
+        /**
+         * \brief The radio layer can send packets received from PHY slightly earlier to compensate
+         * delays in the radio hardware. The exact amount of time advance samples depends on the
+         * radio hardware and its settings such are sample rate, filter stages etc.
+         */
         uint32_t tx_time_advance_smpl;
 
-        /// RX thread streams for a time before passing samples to PHY
+        /**
+         * \brief Instead of passing samples directly to PHY, the radio layer can prestream for some
+         * time which can help to avoid initial underruns or overflows. Given in milliseconds,
+         * typical values are 1000ms to 2000ms.
+         */
         uint32_t rx_prestream_ms;
 
-        /// RX thread notifies threads waiting for new IQ samples
+        /**
+         * \brief The RX thread may receive IQ samples from the radio hardware in very small chunks.
+         * Instead of notifying the PHY every single time, the minimum notification time can be
+         * limited. This avoids waking up thread on PHY for a small number of new IQ samples. Given
+         * in microseconds. If set to 0, the PHY threads are notified at the maximum rate possible
+         * which minimizes latency at the cost of higher CPU usage.
+         */
         uint32_t rx_notification_period_us;
 
         /// cpu core and priority for TX/RX threads
@@ -69,12 +87,16 @@ using hw_config_t = struct hw_config_t {
 
         /// simulation variables are the same for every tpoint
         static bool sim_samp_rate_lte;
+
         /// >1 for speedup, <-1 for slowdown
         static int32_t sim_samp_rate_speedup;
+
         /// channel between tpoints
         static std::string sim_channel_name_inter;
+
         /// TX/RX leakage channel within tpoint
         static std::string sim_channel_name_intra;
+
         /// relative to 0dBFS or thermal noise
         static std::string sim_noise_type;
 };

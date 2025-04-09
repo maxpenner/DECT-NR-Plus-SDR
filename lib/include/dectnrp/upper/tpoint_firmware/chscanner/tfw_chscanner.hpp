@@ -21,6 +21,7 @@
 #pragma once
 
 #include <array>
+#include <vector>
 
 #include "dectnrp/common/ant.hpp"
 #include "dectnrp/upper/tpoint.hpp"
@@ -54,19 +55,14 @@ class tfw_chscanner_t final : public tpoint_t {
         /// timing between states
         int64_t next_measurement_time_64;
 
-        /// frequency to measure
-        const std::array<float, 11> freq{1880.0e6,
-                                         1882.0e6,
-                                         1884.0e6,
-                                         1886.0e6,
-                                         1888.0e6,
-                                         1890.0e6,
-                                         1892.0e6,
-                                         1894.0e6,
-                                         1896.0e6,
-                                         1898.0e6,
-                                         1900.0e6};
-        uint32_t freq_idx{0};
+        /// bands to measure
+        std::array<uint32_t, 3> bands{1, 2, 3};
+
+        /// frequencies to measure
+        std::vector<float> freqs{};
+
+        /// index of next frequency to measure
+        uint32_t freqs_idx{};
 
         /// number of measurements per run
         const uint32_t N_measurement{50};

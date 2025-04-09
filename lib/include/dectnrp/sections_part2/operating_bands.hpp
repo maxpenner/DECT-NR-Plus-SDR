@@ -24,7 +24,7 @@
 
 namespace dectnrp::section2 {
 
-using operating_band_t = struct operating_band_t {
+struct operating_band_t {
         uint32_t band_number;
         double f_low;
         double f_high;

@@ -95,7 +95,6 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
             break;
         }
 
-        // increment counter only if we actually wrote data to the MMIE
         a_cnt_w += a_cnt_w_inc;
     }
 

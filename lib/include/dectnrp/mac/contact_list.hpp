@@ -33,6 +33,15 @@ namespace dectnrp::mac {
 template <std::derived_from<contact_t> T>
 class contact_list_t {
     public:
+        void reserve(const std::size_t N_entries) {
+            srdid_bimap.reserve(N_entries);
+            conn_idx_server_bimap.reserve(N_entries);
+            conn_idx_client_bimap.reserve(N_entries);
+
+            contact_idx_um.reserve(N_entries);
+            contacts_vec.reserve(N_entries);
+        }
+
         void add_new_contact(const uint32_t lrdid,
                              const uint32_t srdid,
                              const uint32_t conn_idx_server,
