@@ -156,6 +156,16 @@ class tpoint_t : public common::layer_unit_t {
          * \return lines to log
          */
         virtual std::vector<std::string> start_threads() override = 0;
+
+        /**
+         * \brief Function will be called by the main thread when the SDR is supposed to shut down
+         * because the used pressed ctrl+c. A firmware may block this function until all DECT NR+
+         * connections have been shut down gracefully. After that, all job queues should be made
+         * impermeable so that the work-function will no longer be called. Lastly, all threads must
+         * be shut down.
+         *
+         * \return
+         */
         virtual std::vector<std::string> stop_threads() override = 0;
 
         // ##################################################
