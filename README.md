@@ -1,4 +1,6 @@
-# DECT NR+ Software Defined Radio
+<p align="center">
+  <img src="docs/logo.png" style="width: 100%; background-color: transparent;" alt="logo.png"/>
+</p>
 
 This repository contains a work-in-progress SDR implementation of DECT NR+ ([ETSI TS 103 636, Part 1 to 5](https://www.etsi.org/committee/1394-dect)). DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](https://www.etsi.org/newsroom/press-releases/1988-2021-10-world-s-first-non-cellular-5g-technology-etsi-dect-2020-gets-itu-r-approval-setting-example-of-new-era-connectivity). Introductions are available at [ETSI](https://www.etsi.org/technologies/dect), [DECT Forum](https://www.dect.org/nrplus) and [Wikipedia](https://en.wikipedia.org/wiki/DECT-2020).
 
@@ -181,9 +183,7 @@ The key takeaways are:
 
 An ideal AGC receives a packet and adjusts its sensitivity within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts the sensitivity 50 times per second.
 
-It is typically best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels.
-
-One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated by a guard interval (GI). Since synchronization is based on several correlations of the length of the STF, and the STF for $\mu$ < 8 is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
+One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu$ < 8 is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
 
 | **$\mu$** | **GI length ($\mu s$)** | **STF length ($\mu s$)**  |
 |:---------:|:-----------------------:|:-------------------------:|
@@ -191,6 +191,8 @@ One drawback of a software AGC is that packets can be masked. This happens when 
 |     2     |          20.83          |           41.67           |
 |     4     |          10.42          |           20.83           |
 |     8     |          10.42          |           10.42           |
+
+It is typically best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels.
 
 ## Resampling
 
