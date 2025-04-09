@@ -40,6 +40,8 @@ class ppx_pll_t {
                   const section3::duration_t raster_,
                   const section3::duration_t time_deviation_max_);
 
+        bool has_ppx_time() const { return 0 <= ppx_time_estimation_64; };
+
         void set_ppx_time(const int64_t ppx_time_64);
 
         void set_ppx_time_extrapolation(const int64_t now_64);

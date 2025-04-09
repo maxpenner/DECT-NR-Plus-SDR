@@ -163,13 +163,8 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     }
 
 #ifdef TFW_P2P_EXPORT_1PPS
-    if (stats.beacon_cnt > 1) [[likely]] {
+    if (ppx_pll.has_ppx_time()) {
         ppx_pll.set_ppx_time_in_raster(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
-    } else [[unlikely]] {
-        dectnrp_assert(stats.beacon_cnt == 1, "must be first beacon received");
-
-        // for now, we assume the first ever received beacon is the only master beacon
-        worksub_pps_first_beacon(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
     }
 #endif
 
@@ -259,7 +254,11 @@ void tfw_p2p_pt_t::worksub_mmie_cluster_beacon_message(
 void tfw_p2p_pt_t::worksub_mmie_time_announce(
     const phy::phy_machigh_t& phy_machigh,
     const section4::extensions::time_announce_ie_t& time_announce_ie) {
-    // ToDo
+#ifdef TFW_P2P_EXPORT_1PPS
+    if (!ppx_pll.has_ppx_time()) {
+        worksub_pps_first_beacon(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
+    }
+#endif
 }
 
 void tfw_p2p_pt_t::worksub_callback_log(const int64_t now_64) const {

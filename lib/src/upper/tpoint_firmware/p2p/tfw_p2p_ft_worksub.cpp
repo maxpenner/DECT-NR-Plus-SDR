@@ -35,10 +35,7 @@ void tfw_p2p_ft_t::worksub_callback_pps(const int64_t now_64, const size_t idx, 
     // called shortly before the next full second, what is the time of next full second?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(now_64);
 
-    const radio::pulse_config_t pulse_config{
-        .rising_edge_64 = A, .falling_edge_64 = A + ppx_pll.get_ppx_length_samples()};
-
-    hw.schedule_pulse_tc(pulse_config);
+    hw.schedule_pulse_tc(radio::pulse_config_t(A, A + ppx_pll.get_ppx_length_samples()));
 }
 #endif
 
