@@ -26,7 +26,7 @@
 
 namespace dectnrp::mac::ppx {
 
-ppx_t::ppx_t(section3::duration_t ppx_period_,
+ppx_t::ppx_t(const section3::duration_t ppx_period_,
              const section3::duration_t ppx_length_,
              const section3::duration_t ppx_time_advance_,
              const section3::duration_t default_raster_,
@@ -36,7 +36,7 @@ ppx_t::ppx_t(section3::duration_t ppx_period_,
       ppx_time_advance(ppx_time_advance_),
       default_raster(default_raster_),
       time_deviation_max(time_deviation_max_),
-      ppx_period_observed_64(ppx_period.N_samples_64) {
+      ppx_period_warped_64(ppx_period.N_samples_64) {
     dectnrp_assert(ppx_length < ppx_period, "ppx_period must be longest");
     dectnrp_assert(ppx_time_advance < ppx_period, "ppx_period must be longest");
     dectnrp_assert(default_raster < ppx_period, "ppx_period must be longest");
@@ -46,7 +46,7 @@ void ppx_t::set_ppx_rising_edge(const int64_t ppx_rising_edge_64) {
     dectnrp_assert(
         !((0 <= ppx_rising_edge_estimation_64) &&
           std::abs(determine_offset(
-              ppx_rising_edge_estimation_64, ppx_period_observed_64, ppx_rising_edge_64)) <=
+              ppx_rising_edge_estimation_64, ppx_period_warped_64, ppx_rising_edge_64)) <=
               time_deviation_max.N_samples_64),
         "synchronization lost");
 
@@ -57,7 +57,7 @@ void ppx_t::set_ppx_rising_edge(const int64_t ppx_rising_edge_64) {
 void ppx_t::extrapolate_next_rising_edge(const int64_t now_64) {
     dectnrp_assert(ppx_rising_edge_estimation_64 < now_64, "too early");
 
-    ppx_rising_edge_estimation_64 += ppx_period_observed_64;
+    ppx_rising_edge_estimation_64 += ppx_period_warped_64;
 
     dectnrp_assert(now_64 < ppx_rising_edge_estimation_64, "too late");
 }
@@ -83,7 +83,7 @@ void ppx_t::provide_reference_in_custom_raster(const int64_t time_assumed_in_ras
 radio::pulse_config_t ppx_t::get_ppx_imminent(const int64_t now_64) {
     dectnrp_assert(ppx_rising_edge_estimation_64 < now_64, "too early");
 
-    const int64_t A = ppx_rising_edge_estimation_64 + ppx_period_observed_64;
+    const int64_t A = ppx_rising_edge_estimation_64 + ppx_period_warped_64;
 
     dectnrp_assert(now_64 < A, "too late");
 

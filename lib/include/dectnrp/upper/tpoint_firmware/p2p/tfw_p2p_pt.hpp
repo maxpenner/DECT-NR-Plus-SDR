@@ -58,12 +58,6 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
         void init_radio() override final;
         void init_simulation_if_detected() override final;
 
-#ifdef TFW_P2P_EXPORT_1PPS
-        void worksub_callback_pps(const int64_t now_64,
-                                  const size_t idx,
-                                  int64_t& next_64) override final;
-#endif
-
         // ##################################################
         // MAC Layer
 

@@ -30,15 +30,6 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-#ifdef TFW_P2P_EXPORT_1PPS
-void tfw_p2p_ft_t::worksub_callback_pps(const int64_t now_64, const size_t idx, int64_t& next_64) {
-    // called shortly before the next full second, what is the time of next full second?
-    const int64_t A = duration_lut.get_N_samples_at_next_full_second(now_64);
-
-    hw.schedule_pulse_tc(radio::pulse_config_t(A, A + ppx.get_ppx_length_samples()));
-}
-#endif
-
 std::optional<phy::maclow_phy_t> tfw_p2p_ft_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
     return std::nullopt;
 }

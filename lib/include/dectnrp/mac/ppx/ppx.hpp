@@ -34,7 +34,7 @@ namespace dectnrp::mac::ppx {
 class ppx_t {
     public:
         ppx_t() = default;
-        ppx_t(section3::duration_t ppx_period_,
+        ppx_t(const section3::duration_t ppx_period_,
               const section3::duration_t ppx_length_,
               const section3::duration_t ppx_time_advance_,
               const section3::duration_t default_raster_,
@@ -69,7 +69,7 @@ class ppx_t {
         section3::duration_t time_deviation_max;
 
         /// observed long term ppx period
-        int64_t ppx_period_observed_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t ppx_period_warped_64{common::adt::UNDEFINED_EARLY_64};
 
         /// current best estimation for when the next ppx is due
         int64_t ppx_rising_edge_estimation_64{common::adt::UNDEFINED_EARLY_64};

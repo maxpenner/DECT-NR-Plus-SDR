@@ -31,13 +31,10 @@ void tfw_p2p_pt_t::work_start_imminent(const int64_t start_time_64) {
     // what is the next full second after PHY becomes operational?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
 
-    // some headroom is required to set the PPS aligned with the first beacon
-    const int64_t B = A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
-
     // initialize regular callback for prints
     callbacks.add_callback(
         std::bind(&tfw_p2p_pt_t::worksub_callback_log, this, std::placeholders::_1),
-        B,
+        A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001),
         duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001,
                                                  worksub_callback_log_period_sec));
 }

@@ -43,6 +43,8 @@ void time_announce_ie_t::set_time(const time_type_t time_type_,
     time_type = time_type_;
     N_frames_until_full_sec = N_frames_until_full_sec_;
     full_sec = full_sec_;
+
+    tai_minus_utc_seconds = 0;
 }
 
 void time_announce_ie_t::zero() {
@@ -57,7 +59,7 @@ bool time_announce_ie_t::is_valid() const {
         return false;
     }
 
-    if (N_frames_until_full_sec <= 255) {
+    if (255 < N_frames_until_full_sec) {
         return false;
     }
 
@@ -65,7 +67,7 @@ bool time_announce_ie_t::is_valid() const {
         return false;
     }
 
-    if (tai_minus_utc_seconds <= 255) {
+    if (255 < tai_minus_utc_seconds) {
         return false;
     }
 

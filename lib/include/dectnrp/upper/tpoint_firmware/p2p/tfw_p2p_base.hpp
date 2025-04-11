@@ -39,13 +39,13 @@
 
 #define APPLICATION_INTERFACE_VNIC_OR_SOCKET
 
-// #define TFW_P2P_EXPORT_1PPS
+// #define TFW_P2P_EXPORT_PPX
 #ifndef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
-#undef TFW_P2P_EXPORT_1PPS
+#undef TFW_P2P_EXPORT_PPX
 #endif
 
-#ifdef TFW_P2P_EXPORT_1PPS
-#include "dectnrp/mac/ppx/ppx_pll.hpp"
+#ifdef TFW_P2P_EXPORT_PPX
+#include "dectnrp/mac/ppx/ppx.hpp"
 #endif
 
 // #define TFW_P2P_MIMO
@@ -86,7 +86,7 @@ class tfw_p2p_base_t : public tpoint_t {
         // ##################################################
         // MAC Layer
 
-        /// used for regular callbacks (logging, PPS generation etc.)
+        /// used for regular callbacks (logging, PPX generation etc.)
         common::adt::callbacks_t<void> callbacks;
 
         /// both FT and PT must know the FT's identity
@@ -109,14 +109,12 @@ class tfw_p2p_base_t : public tpoint_t {
         /// all PT allocations have to be known at FT, individual PTs only need their own allocation
         mac::allocation::allocation_pt_t init_allocation_pt(const uint32_t firmware_id_);
 
-#ifdef TFW_P2P_EXPORT_1PPS
-        // convert beacons starts to a PPS signal
-        mac::ppx::ppx_pll_t ppx_pll;
+#ifdef TFW_P2P_EXPORT_PPX
+        /// convert beacons beginnings to a PPX
+        mac::ppx::ppx_t ppx;
 
-        /// FT and PT both generate PPS, but in different ways. Function is added to callbacks.
-        virtual void worksub_callback_pps(const int64_t now_64,
-                                          const size_t idx,
-                                          int64_t& next_64) = 0;
+        /// FT and PT both generate a PPX
+        void worksub_callback_ppx(const int64_t now_64, const size_t idx, int64_t& next_64);
 #endif
 
         /// part 2 defines five MAC PDU types, these are generators for each type
