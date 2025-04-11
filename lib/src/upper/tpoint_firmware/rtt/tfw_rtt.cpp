@@ -320,8 +320,7 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
         .tx_order_id = tx_order_id,
         .tx_time_64 = std::max(
             tx_earliest_64,
-            buffer_rx.get_rx_time_passed() + duration_lut.get_N_samples_from_duration(
-                                                 section3::duration_ec_t::turn_around_time_us))};
+            buffer_rx.get_rx_time_passed() + hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround))};
 
     ++tx_order_id;
     tx_earliest_64 = buffer_tx_meta.tx_time_64 + section3::get_N_samples_in_packet_length(

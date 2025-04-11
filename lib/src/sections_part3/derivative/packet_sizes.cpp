@@ -27,7 +27,7 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
-#include "dectnrp/sections_part3/derivative/duration_lut.hpp"
+#include "dectnrp/sections_part3/derivative/duration.hpp"
 #include "dectnrp/sections_part3/fix/cbsegm.hpp"
 #include "dectnrp/sections_part3/pdc.hpp"
 #include "dectnrp/sections_part3/radio_device_class.hpp"
@@ -254,8 +254,7 @@ uint32_t get_N_samples_in_packet_length_max(const packet_sizes_t& packet_sizes,
     // Slots are longer than subslots, so when looking for the maximum duration of a packet in
     // seconds, we need the maximum number of slots.
     return packet_sizes.psdef.PacketLength *
-           static_cast<uint32_t>(
-               duration_lut_t::get_N_samples_from_duration(samp_rate, duration_ec_t::slot001));
+           static_cast<uint32_t>(duration_t(samp_rate, duration_ec_t::slot001).get_N_samples());
 }
 
 packet_sizes_t get_random_packet_sizes_within_rdc(const std::string& radio_device_class_string,
@@ -266,7 +265,7 @@ packet_sizes_t get_random_packet_sizes_within_rdc(const std::string& radio_devic
     // this structure will describe a packet within the boundaries of the radio device class
     packet_sizes_def_t psdef;
 
-    //                               1  2     4           8          12          16
+    //                                      1  2     4           8          12          16
     static const uint32_t val2idx[17] = {0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5};
     static const uint32_t idx2val[6] = {1, 2, 4, 8, 12, 16};
 

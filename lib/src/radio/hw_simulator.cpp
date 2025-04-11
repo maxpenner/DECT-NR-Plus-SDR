@@ -51,10 +51,12 @@ hw_simulator_t::hw_simulator_t(const hw_config_t& hw_config_, simulation::vspace
     nof_antennas_max = 8;
     ADC_bits = 12;
     DAC_bits = 12;
-    settling_time_us.at(std::to_underlying(settling_time_property_t::freq)) = 250;
-    settling_time_us.at(std::to_underlying(settling_time_property_t::gain)) = 50;
+    tmin_samples.at(std::to_underlying(tmin_t::freq)) = 250;
+    tmin_samples.at(std::to_underlying(tmin_t::gain)) = 50;
+    tmin_samples.at(std::to_underlying(tmin_t::turnaround)) =
+        get_samples_in_us(hw_config.turnaround_time_us);
     ppm = 0.0f;
-    time_advance_fpga2ant_ns = 0;
+    time_advance_fpga2ant_samples = 0;
 
     gain_lut.freqs_Hz = calibration::simulator::freqs_Hz;
 

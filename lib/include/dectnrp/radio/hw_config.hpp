@@ -42,7 +42,7 @@ struct hw_config_t {
         uint32_t nof_buffer_tx;
 
         /// hardware + driver properties, B210 2ms, N- and X-series as low as 100us
-        uint32_t turn_around_time_us;
+        uint32_t turnaround_time_us;
 
         /**
          * \brief The radio layer can send zeros before transmitting a packet received from PHY to

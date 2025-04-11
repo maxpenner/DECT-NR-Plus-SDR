@@ -234,14 +234,15 @@ class hw_t : public common::layer_unit_t {
          * \brief Changing hardware properties does not happen instantaneously. Depending on what is
          * changed, different minimum settling times must be used on the MAC layer.
          */
-        enum class settling_time_property_t : uint32_t {
+        enum class tmin_t : uint32_t {
             freq = 0,
             gain,
+            turnaround,
             CARDINALITY
         };
 
         /// generic settling time getter
-        uint32_t get_settling_time_us(const settling_time_property_t stp) const;
+        uint32_t get_tmin_samples(const tmin_t tmin) const;
 
         /// can be used to limit the CFO search range
         float get_ppm() const { return ppm; };
@@ -263,9 +264,8 @@ class hw_t : public common::layer_unit_t {
         uint32_t nof_antennas_max;
         uint32_t ADC_bits;
         uint32_t DAC_bits;
-        std::array<uint32_t, std::to_underlying(settling_time_property_t::CARDINALITY)>
-            settling_time_us{};
-        float ppm{0.0f};
+        std::array<uint32_t, std::to_underlying(tmin_t::CARDINALITY)> tmin_samples{};
+        float ppm;
 
         /**
          * \brief In an USRP, once the IQ signal has arrived in FPGA it is shortly buffered
@@ -274,7 +274,7 @@ class hw_t : public common::layer_unit_t {
          * at the antenna. We save that value in nanoseconds and let the TX thread calculate the
          * respective number of samples at the given sample rate and correct it.
          */
-        int32_t time_advance_fpga2ant_ns{0};
+        int32_t time_advance_fpga2ant_samples;
 
         /// must be negotiated with PHY
         uint32_t nof_antennas;
@@ -291,6 +291,8 @@ class hw_t : public common::layer_unit_t {
         static pps_sync_t pps_sync;
 
         antenna_array_t antenna_array;
+
+        uint32_t get_samples_in_us(const uint32_t us) const;
 
         // ##################################################
         // threading

@@ -35,9 +35,9 @@ class allocation_pt_t final : public allocation_t {
 
         explicit allocation_pt_t(const section3::duration_lut_t* duration_lut_,
                                  const section3::duration_t beacon_period_,
-                                 const section3::duration_t turn_around_time_,
                                  const section3::duration_t allocation_validity_after_beacon_,
-                                 const section3::duration_t allocation_validity_after_now_);
+                                 const section3::duration_t allocation_validity_after_now_,
+                                 const int64_t turnaround_time_);
 
         typedef std::vector<resource_t> resource_vec_t;
 
@@ -74,17 +74,17 @@ class allocation_pt_t final : public allocation_t {
         int64_t get_tx_opportunity_ul_time_closest(const int64_t reference_time_64) const;
 
     private:
-        /// common SDR terminology
-        section3::duration_t turn_around_time;
-
-        /// start time of the last beacon we heard from our FT
-        int64_t beacon_time_last_known_64;
-
         /// duration after receiving a beacon in which we are allowed to transmit
         section3::duration_t allocation_validity_after_beacon;
 
         /// duration after current time in which we are allowed to transmit
         section3::duration_t allocation_validity_after_now;
+
+        /// common SDR terminology
+        int64_t turnaround_time;
+
+        /// start time of the last beacon we heard from our FT
+        int64_t beacon_time_last_known_64;
 
         resource_vec_t resource_ul_vec;
         resource_vec_t resource_dl_vec;

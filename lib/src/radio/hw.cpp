@@ -91,11 +91,17 @@ void hw_t::schedule_pulse_tc(const pulse_config_t& pulse_config) {
 }
 #endif
 
-uint32_t hw_t::get_settling_time_us(const settling_time_property_t stp) const {
-    dectnrp_assert(stp != settling_time_property_t::CARDINALITY, "cardinality");
-    return settling_time_us.at(std::to_underlying(stp));
+uint32_t hw_t::get_tmin_samples(const tmin_t tmin) const {
+    dectnrp_assert(tmin != tmin_t::CARDINALITY, "cardinality");
+    return tmin_samples.at(std::to_underlying(tmin));
 }
 
 pps_sync_t hw_t::pps_sync;
+
+uint32_t hw_t::get_samples_in_us(const uint32_t us) const {
+    dectnrp_assert(us <= 1000000, "should not be larger than one second");
+
+    return static_cast<int64_t>(samp_rate) * static_cast<int64_t>(us) / int64_t{1000000};
+}
 
 }  // namespace dectnrp::radio

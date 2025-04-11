@@ -22,6 +22,7 @@
 
 #include <cstdint>
 
+#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/sections_part3/derivative/duration_ec.hpp"
 
 namespace dectnrp::section3 {
@@ -31,21 +32,15 @@ class duration_t {
         duration_t() = default;
 
         /**
-         * \brief Creating an instance of duration_t is only possible if the hardware sample rate is
-         * known, otherwise N_samples cannot be determined. The sample rate is determined at
-         * runtime. Hence, durations should be requested from duration_lut_t.
+         * \brief The length represented by duration_ec must divide one second without remainder.
          *
+         * \param samp_rate_ hardware sample rate
          * \param duration_ec_
-         * \param mult_
-         * \param N_samples
+         * \param mult_ multiplier
          */
-        explicit duration_t(const duration_ec_t duration_ec_,
-                            const uint32_t mult_,
-                            const uint32_t N_samples_)
-            : duration_ec(duration_ec_),
-              mult(mult_),
-              N_samples(N_samples_),
-              N_samples_64(static_cast<int64_t>(N_samples_)) {}
+        explicit duration_t(const uint32_t samp_rate_,
+                            const duration_ec_t duration_ec_,
+                            const uint32_t mult_ = 1);
 
         friend bool operator>(duration_t& lhs, duration_t& rhs) {
             return lhs.N_samples_64 > rhs.N_samples_64 ? true : false;
@@ -55,10 +50,18 @@ class duration_t {
             return lhs.N_samples_64 < rhs.N_samples_64 ? true : false;
         }
 
-        duration_ec_t duration_ec{duration_ec_t::CARDINALITY};
-        uint32_t mult{1};
-        uint32_t N_samples{0};
-        int64_t N_samples_64{0};
+        uint32_t get_samp_rate() const { return samp_rate; };
+        uint32_t get_N_samples() const { return N_samples; };
+        int64_t get_N_samples_64() const { return N_samples_64; };
+
+    private:
+        uint32_t samp_rate{};
+
+        [[maybe_unused]] duration_ec_t duration_ec{};
+        [[maybe_unused]] uint32_t mult{};
+
+        uint32_t N_samples{};
+        int64_t N_samples_64{};
 };
 
 }  // namespace dectnrp::section3

@@ -32,22 +32,11 @@ namespace dectnrp::section3 {
 class duration_lut_t {
     public:
         duration_lut_t() = default;
-        explicit duration_lut_t(const uint32_t samp_rate_,
-                                const uint32_t turn_around_time_us = 0,
-                                const uint32_t settling_time_freq_us = 0,
-                                const uint32_t settling_time_gain_us = 0);
-
-        static int64_t get_N_samples_from_duration(const uint32_t samp_rate,
-                                                   const duration_ec_t duration_ec,
-                                                   const uint32_t mult = 1);
-
-        static int64_t get_N_samples_from_us(const uint32_t samp_rate, const uint32_t us);
-
-        duration_ec_t get_duration_ec_subslots(const uint32_t u) const;
+        explicit duration_lut_t(const uint32_t samp_rate_);
 
         /// create an instance of duration_t
         duration_t get_duration(const duration_ec_t duration_ec, const uint32_t mult = 1) const {
-            return duration_t(duration_ec, mult, get_N_samples_from_duration(duration_ec, mult));
+            return duration_t(samp_rate, duration_ec, mult);
         }
 
         /// number of samples in a duration

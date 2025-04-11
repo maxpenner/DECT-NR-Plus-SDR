@@ -85,9 +85,9 @@ mac::allocation::allocation_pt_t tfw_p2p_base_t::init_allocation_pt(const uint32
     mac::allocation::allocation_pt_t allocation_pt = mac::allocation::allocation_pt_t(
         &duration_lut,
         allocation_ft.get_beacon_period_as_duration(),
-        duration_lut.get_duration(section3::duration_ec_t::turn_around_time_us),
         duration_lut.get_duration(section3::duration_ec_t::ms001, 16),
-        duration_lut.get_duration(section3::duration_ec_t::ms001, 11));
+        duration_lut.get_duration(section3::duration_ec_t::ms001, 11),
+        hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround));
 
     /* If firmware ID is larger than the number of PTs we want to support, we simply leave the
      * allocation empty. This way we can use the same code for different number of PTs, which is

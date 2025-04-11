@@ -50,11 +50,7 @@ class lower_ctrl_t {
               buffer_rx(*hw.buffer_rx.get()),
               worker_pool_config(worker_pool_config_),
               job_queue(job_queue_),
-              duration_lut(section3::duration_lut_t(
-                  hw.get_samp_rate(),
-                  hw.hw_config.turn_around_time_us,
-                  hw.get_settling_time_us(radio::hw_t::settling_time_property_t::freq),
-                  hw.get_settling_time_us(radio::hw_t::settling_time_property_t::gain))),
+              duration_lut(section3::duration_lut_t(hw.get_samp_rate())),
               // generic values for a software TX AGC
               agc_tx(phy::agc::agc_tx_t(
                   phy::agc::agc_config_t{
@@ -72,7 +68,7 @@ class lower_ctrl_t {
                       1.0f,
                       8.0f,
                       2.0f,
-                      duration_lut.get_duration(section3::duration_ec_t::ms001, 0)},
+                      duration_lut.get_duration(section3::duration_ec_t::ms001, 1)},
                   phy::agc::agc_t::OFDM_AMPLITUDE_FACTOR_MINUS_20dB,
                   20.0f)) {}
 

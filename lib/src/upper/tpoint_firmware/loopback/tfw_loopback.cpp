@@ -428,14 +428,13 @@ void tfw_loopback_t::generate_packet(const int64_t now_64, phy::machigh_phy_t& m
     // radio meta
     radio::buffer_tx_meta_t buffer_tx_meta = {
         .tx_order_id = tx_order_id,
-        .tx_time_64 = now_64 + duration_lut.get_N_samples_from_duration(
-                                   section3::duration_ec_t::turn_around_time_us)};
+        .tx_time_64 = now_64 + hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround)};
 
     // add a random jitter to the transmission time
     buffer_tx_meta.tx_time_64 += static_cast<int64_t>(randomgen.randi(
         0,
         static_cast<uint32_t>(
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::us100))));
+            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::subslot_u1_001))));
 
     // force transmission time to multiple of packet_tx_time_multiple
     const int64_t res = buffer_tx_meta.tx_time_64 % packet_tx_time_multiple;

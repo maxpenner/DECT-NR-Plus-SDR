@@ -18,23 +18,25 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#pragma once
+#include "dectnrp/sections_part3/derivative/duration_ec.hpp"
 
-#include <cstdint>
+#include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::section3 {
 
-enum class duration_ec_t : uint32_t {
-    ms001,
-    s001,
-    slot001,
-    subslot_u1_001,
-    subslot_u2_001,
-    subslot_u4_001,
-    subslot_u8_001,
-    CARDINALITY
-};
+duration_ec_t get_duration_ec_depending_on_mu(const uint32_t u) {
+    dectnrp_assert(std::has_single_bit(u) && u <= 8, "u undefined");
 
-duration_ec_t get_duration_ec_depending_on_mu(const uint32_t u);
+    switch (u) {
+        case 1:
+            return duration_ec_t::subslot_u1_001;
+        case 2:
+            return duration_ec_t::subslot_u2_001;
+        case 4:
+            return duration_ec_t::subslot_u4_001;
+    }
+
+    return duration_ec_t::subslot_u8_001;
+}
 
 }  // namespace dectnrp::section3

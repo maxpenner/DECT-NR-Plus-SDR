@@ -54,9 +54,9 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
 #ifdef TFW_P2P_PT_AGC_ENABLED
 #ifdef TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
     // apply AGC change for RX and TX immediately before the next beacon
-    const int64_t t_agc_change_64 =
-        allocation_pt.get_beacon_time_last_known() + allocation_pt.get_beacon_period() -
-        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::settling_time_gain_us);
+    const int64_t t_agc_change_64 = allocation_pt.get_beacon_time_last_known() +
+                                    allocation_pt.get_beacon_period() -
+                                    hw.get_tmin_samples(radio::hw_t::tmin_t::gain);
 #else
     // immediate AGC gain change
     const int64_t t_agc_change_64 = common::adt::UNDEFINED_EARLY_64;

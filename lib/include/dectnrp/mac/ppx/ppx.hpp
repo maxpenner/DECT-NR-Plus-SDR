@@ -53,9 +53,11 @@ class ppx_t {
 
         radio::pulse_config_t get_ppx_imminent(const int64_t now_64);
 
-        int64_t get_ppx_period_samples() const { return ppx_period.N_samples_64; };
-        int64_t get_ppx_length_samples() const { return ppx_length.N_samples_64; };
-        int64_t get_ppx_time_advance_samples() const { return ppx_time_advance.N_samples_64; };
+        int64_t get_ppx_period_samples() const { return ppx_period.get_N_samples_64(); };
+        int64_t get_ppx_length_samples() const { return ppx_length.get_N_samples_64(); };
+        int64_t get_ppx_time_advance_samples() const {
+            return ppx_time_advance.get_N_samples_64();
+        };
 
     private:
         section3::duration_t ppx_period;

@@ -36,7 +36,7 @@ ppx_t::ppx_t(const section3::duration_t ppx_period_,
       ppx_time_advance(ppx_time_advance_),
       default_raster(default_raster_),
       time_deviation_max(time_deviation_max_),
-      ppx_period_warped_64(ppx_period.N_samples_64) {
+      ppx_period_warped_64(ppx_period.get_N_samples_64()) {
     dectnrp_assert(ppx_length < ppx_period, "ppx_period must be longest");
     dectnrp_assert(ppx_time_advance < ppx_period, "ppx_period must be longest");
     dectnrp_assert(default_raster < ppx_period, "ppx_period must be longest");
@@ -47,7 +47,7 @@ void ppx_t::set_ppx_rising_edge(const int64_t ppx_rising_edge_64) {
         !((0 <= ppx_rising_edge_estimation_64) &&
           std::abs(determine_offset(
               ppx_rising_edge_estimation_64, ppx_period_warped_64, ppx_rising_edge_64)) <=
-              time_deviation_max.N_samples_64),
+              time_deviation_max.get_N_samples_64()),
         "synchronization lost");
 
     // we consider the beacon time to be our new reference
@@ -63,7 +63,8 @@ void ppx_t::extrapolate_next_rising_edge(const int64_t now_64) {
 }
 
 void ppx_t::provide_reference_in_default_raster(const int64_t time_assumed_in_raster_64) {
-    provide_reference_in_custom_raster(time_assumed_in_raster_64, default_raster.N_samples_64);
+    provide_reference_in_custom_raster(time_assumed_in_raster_64,
+                                       default_raster.get_N_samples_64());
 }
 
 void ppx_t::provide_reference_in_custom_raster(const int64_t time_assumed_in_raster_64,
@@ -74,7 +75,8 @@ void ppx_t::provide_reference_in_custom_raster(const int64_t time_assumed_in_ras
     const auto deviation = determine_offset(
         ppx_rising_edge_estimation_64, custom_raster_64, time_assumed_in_raster_64);
 
-    dectnrp_assert(std::abs(deviation) <= time_deviation_max.N_samples_64, "synchronization lost");
+    dectnrp_assert(std::abs(deviation) <= time_deviation_max.get_N_samples_64(),
+                   "synchronization lost");
 
     // slightly adjust the master beacon time
     ppx_rising_edge_estimation_64 += deviation;
@@ -87,7 +89,7 @@ radio::pulse_config_t ppx_t::get_ppx_imminent(const int64_t now_64) {
 
     dectnrp_assert(now_64 < A, "too late");
 
-    return radio::pulse_config_t(A, A + ppx_length.N_samples_64);
+    return radio::pulse_config_t(A, A + ppx_length.get_N_samples_64());
 }
 
 int64_t ppx_t::determine_offset(const int64_t ref_64,

@@ -49,9 +49,8 @@ void tfw_timesync_t::work_start_imminent(const int64_t start_time_64) {
 
     // time of first time offset measurement
     sample_count_at_next_measurement_64 =
-        start_time_64 +
-        section3::duration_lut_t::get_N_samples_from_duration(
-            hw.get_samp_rate(), section3::duration_ec_t::s001, measurement_start_delay_s);
+        start_time_64 + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001,
+                                                                 measurement_start_delay_s);
 
     dectnrp_log_inf(
         "Time is {}. Starting PPS export. Time offset measurements will start in {} seconds.",
@@ -106,9 +105,8 @@ phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::phy_mac_reg_t& phy_ma
         ++N_measurements_cnt;
 
         // update time of next measurement
-        sample_count_at_next_measurement_64 +=
-            section3::duration_lut_t::get_N_samples_from_duration(
-                hw.get_samp_rate(), section3::duration_ec_t::ms001, measurement_interval_ms);
+        sample_count_at_next_measurement_64 += duration_lut.get_N_samples_from_duration(
+            section3::duration_ec_t::ms001, measurement_interval_ms);
     }
 
     return phy::machigh_phy_t();
