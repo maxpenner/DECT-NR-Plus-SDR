@@ -32,8 +32,10 @@ void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
     // what is the next full second after PHY becomes operational?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
 
+#ifdef TFW_P2P_EXPORT_PPX
     // set virtual time of first rising edge
     ppx.set_ppx_rising_edge(A);
+#endif
 
     // some headroom is required to set the PPX aligned with the first beacon
     const int64_t B = A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
