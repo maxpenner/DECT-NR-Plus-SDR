@@ -23,6 +23,7 @@
 #include <array>
 #include <utility>
 
+#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
 namespace dectnrp::section4::extensions {
@@ -34,9 +35,8 @@ class time_announce_ie_t final : public mmie_packing_t {
         enum class time_type_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             LOCAL = 0,
-            UTC,
-            GPS,
             TAI,
+            GPS,
             upper
         };
 
@@ -52,8 +52,15 @@ class time_announce_ie_t final : public mmie_packing_t {
         bool unpack(const uint8_t* mac_pdu_offset) override;
 
         time_type_t time_type{time_type_t::not_defined};
-        int32_t N_frames_until_full_sec{-1};
+
+        /// if set to 0, packet start coincided with full seconds start
+        uint32_t N_frames_until_full_sec{common::adt::UNDEFINED_NUMERIC_32};
+
+        /// elapsed seconds since epoch for given time type
         int64_t full_sec{-1};
+
+        /// in 2017, the offset was 37 seconds
+        uint32_t tai_minus_utc_seconds{common::adt::UNDEFINED_NUMERIC_32};
 };
 
 }  // namespace dectnrp::section4::extensions

@@ -26,7 +26,7 @@ Advanced Topics
 5. [Compatibility](#compatibility)
 6. [JSON Export](#json-export)
 7. [PPS Export and PTP](#pps-export-and-ptp)
-8. [Host Tuning](#host-tuning)
+8. [Host and SDR Tuning](#host-and-sdr-tuning)
 9. [Firmware P2P](#firmware-p2p)
 
 ## Core Idea
@@ -40,16 +40,16 @@ The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware
 
 Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for termination point which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
-|   | **Virtual Function**  | **Properties**                                                           |
-|---|-----------------------|--------------------------------------------------------------------------|
-| 1 | work_start_imminent() | called once immediately before IQ sample processing begins               |
-| 2 | work_regular()        | called regularly (polling)                                               |
-| 3 | work_pcc()            | called upon PCC reception (event-driven)                                 |
-| 4 | work_pdc_async()      | called upon PDC reception (event-driven)                                 |
-| 5 | work_upper()          | called upon availability of new data on application layer (event-driven) |
-| 6 | work_chscan_async()   | called upon finished channel measurement (event-driven)                  |
-| 7 | start_threads()       | called once to start application layer threads                           |
-| 8 | stop_threads()        | called once to stop application layer threads                            |
+|   | **Virtual Function**  | **Properties**                                                            |
+|---|-----------------------|---------------------------------------------------------------------------|
+| 1 | work_start_imminent() | called once immediately before IQ sample processing begins                |
+| 2 | work_regular()        | called regularly (polling)                                                |
+| 3 | work_pcc()            | called upon PCC reception (event-driven)                                  |
+| 4 | work_pdc_async()      | called upon PDC reception (event-driven)                                  |
+| 5 | work_upper()          | called upon availability of new data on application layer (event-driven)  |
+| 6 | work_chscan_async()   | called upon finished channel measurement (event-driven)                   |
+| 7 | start_threads()       | called once during SDR startup to start application layer threads         |
+| 8 | stop_threads()        | called once during SDR shutdown to stop application layer threads         |
 
 ## Directories
 
@@ -248,14 +248,14 @@ A PPS signal itself is a frequently used clock for other systems. For example, a
 
 The following tuning tips have been tested with Ubuntu and help achieving low-latency real-time performance:
 
-1. Increase thread priority
-2. [Disable CPU sleep states and CPU frequency scaling](https://gitlab.eurecom.fr/oai/openairinterface5g/-/wikis/OpenAirKernelMainSetup#power-management)
-3. [Isolate CPU cores and disable interrupts](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD#Isolate_Cores.2FCPUs)
+1. Elevated thread priority through [threads_core_prio_config_t](lib/include/dectnrp/common/thread/threads.hpp)
+2. SDR threads on [isolated CPU cores with disabled interrupts](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD#Isolate_Cores.2FCPUs) through [threads_core_prio_config_t](lib/include/dectnrp/common/thread/threads.hpp)
+2. [Disabled CPU sleep states and CPU frequency scaling](https://gitlab.eurecom.fr/oai/openairinterface5g/-/wikis/OpenAirKernelMainSetup#power-management)
 5. Interface to SDR
-    1. [Use DPDK with UHD](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD)
-    2. [Adjust send_frame_size and recv_frame_size](https://files.ettus.com/manual/page_transport.html#transport_param_overrides) in `radio.json`
-    3. [Increase buffer sizes](https://kb.ettus.com/USRP_Host_Performance_Tuning_Tips_and_Tricks#Adjust_Network_Buffers)
-    4. In each `radio.json`, the value `“turn_around_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR time. That means the smaller the number, the lower the latency. Under optimal conditions, between 80 and 150us are possible.
+    1. [DPDK with UHD](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD)
+    2. [Adjusted send_frame_size and recv_frame_size](https://files.ettus.com/manual/page_transport.html#transport_param_overrides) in `radio.json`
+    3. [Increased buffer sizes](https://kb.ettus.com/USRP_Host_Performance_Tuning_Tips_and_Tricks#Adjust_Network_Buffers)
+    4. In each `radio.json`, the value `“turn_around_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR timestamp. For UHD, the SDR time is a [64-bit counter in the FPGA](https://kb.ettus.com/Synchronizing_USRP_Events_Using_Timed_Commands_in_UHD#Radio_Core_Block_Timing). The smaller the turn around time, the lower the latency. Under optimal conditions, between 80 and 150 microseconds are possible.
 6. Low-latency kernel
 
 ## Firmware P2P

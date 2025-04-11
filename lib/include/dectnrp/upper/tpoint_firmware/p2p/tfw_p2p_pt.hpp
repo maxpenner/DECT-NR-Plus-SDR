@@ -62,13 +62,6 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
         void worksub_callback_pps(const int64_t now_64,
                                   const size_t idx,
                                   int64_t& next_64) override final;
-
-        /**
-         * \brief For the PPS signal to be aligned with a full second, the FT has to indicate
-         * whenever a transmitted beacon is aligned to a full second. This beacon will be called
-         * time alignment beacon fow now.
-         */
-        void worksub_pps_first_beacon(const int64_t fine_peak_time_64);
 #endif
 
         // ##################################################

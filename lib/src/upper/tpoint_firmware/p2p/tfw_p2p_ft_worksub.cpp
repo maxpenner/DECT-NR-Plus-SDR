@@ -35,7 +35,7 @@ void tfw_p2p_ft_t::worksub_callback_pps(const int64_t now_64, const size_t idx, 
     // called shortly before the next full second, what is the time of next full second?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(now_64);
 
-    hw.schedule_pulse_tc(radio::pulse_config_t(A, A + ppx_pll.get_ppx_length_samples()));
+    hw.schedule_pulse_tc(radio::pulse_config_t(A, A + ppx.get_ppx_length_samples()));
 }
 #endif
 
@@ -158,10 +158,10 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     // one time_announce_ie_t per second
     if (stats.beacon_cnt % allocation_ft.get_N_beacons_per_second() == 0) {
         // set values in time_announce_ie_t
-        auto& tan = mmie_pool_tx.get<section4::extensions::time_announce_ie_t>();
-        tan.set_time(section4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
-        tan.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
-        a_cnt_w += tan.get_packed_size_of_mmh_sdu();
+        auto& taie = mmie_pool_tx.get<section4::extensions::time_announce_ie_t>();
+        taie.set_time(section4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
+        taie.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
+        a_cnt_w += taie.get_packed_size_of_mmh_sdu();
     }
 
     // fill up with padding IEs

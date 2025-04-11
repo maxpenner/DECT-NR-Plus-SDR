@@ -98,7 +98,9 @@ void worker_sync_t::work() {
 
     sync_chunk->wait_for_first_chunk_nto(start_time_64);
 
-    job_queue.set_permeable();
+    if (id == 0) {
+        job_queue.set_permeable();
+    }
 
     while (keep_running.load(std::memory_order_acquire)) {
         /* At this point, we know that keep_running is true and we are expected to continue our

@@ -33,35 +33,15 @@ namespace dectnrp::upper::tfw::p2p {
 #ifdef TFW_P2P_EXPORT_1PPS
 void tfw_p2p_pt_t::worksub_callback_pps(const int64_t now_64, const size_t idx, int64_t& next_64) {
     // when is the next PPS due?
-    const auto pulse_config = ppx_pll.get_ppx_imminent(now_64);
+    const auto pulse_config = ppx.get_ppx_imminent(now_64);
 
     // send commands to hardware
     hw.schedule_pulse_tc(pulse_config);
 
-    ppx_pll.set_ppx_time_extrapolation(now_64);
+    ppx.extrapolate_next_rising_edge(now_64);
 
     // adjust time of next callback
-    next_64 = pulse_config.rising_edge_64 - ppx_pll.get_ppx_time_advance_samples();
-}
-
-void tfw_p2p_pt_t::worksub_pps_first_beacon(const int64_t fine_peak_time_64) {
-    // when is the next time alignment beacon due?
-    const int64_t A = fine_peak_time_64 + ppx_pll.get_ppx_period_samples();
-
-    // the callback for the PPS has to be called slightly earlier to queue up the GPIO commands
-    const int64_t B = A - ppx_pll.get_ppx_time_advance_samples();
-
-    // put callback in queue
-    callbacks.add_callback(std::bind(&tfw_p2p_pt_t::worksub_callback_pps,
-                                     this,
-                                     std::placeholders::_1,
-                                     std::placeholders::_2,
-                                     std::placeholders::_3),
-                           B,
-                           duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001));
-
-    // init PLL
-    ppx_pll.set_ppx_time(fine_peak_time_64);
+    next_64 = pulse_config.rising_edge_64 - ppx.get_ppx_time_advance_samples();
 }
 #endif
 
@@ -163,8 +143,9 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     }
 
 #ifdef TFW_P2P_EXPORT_1PPS
-    if (ppx_pll.has_ppx_time()) {
-        ppx_pll.set_ppx_time_in_raster(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
+    if (ppx.has_ppx_rising_edge()) {
+        ppx.provide_reference_in_default_raster(
+            phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
     }
 #endif
 
@@ -255,9 +236,27 @@ void tfw_p2p_pt_t::worksub_mmie_time_announce(
     const phy::phy_machigh_t& phy_machigh,
     const section4::extensions::time_announce_ie_t& time_announce_ie) {
 #ifdef TFW_P2P_EXPORT_1PPS
-    if (!ppx_pll.has_ppx_time()) {
-        worksub_pps_first_beacon(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
+    // is this the first time_announce_ie ever received?
+    if (!ppx.has_ppx_rising_edge()) {
+        // when is the next time alignment beacon due?
+        const int64_t A =
+            phy_machigh.phy_maclow.sync_report.fine_peak_time_64 + ppx.get_ppx_period_samples();
+
+        // the callback for the PPS has to be called slightly earlier to queue up the GPIO command
+        const int64_t B = A - ppx.get_ppx_time_advance_samples();
+
+        // put callback in queue
+        callbacks.add_callback(
+            std::bind(&tfw_p2p_pt_t::worksub_callback_pps,
+                      this,
+                      std::placeholders::_1,
+                      std::placeholders::_2,
+                      std::placeholders::_3),
+            B,
+            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001));
     }
+
+    ppx.set_ppx_rising_edge(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
 #endif
 }
 

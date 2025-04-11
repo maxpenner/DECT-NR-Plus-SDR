@@ -53,11 +53,11 @@ tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_l
         &duration_lut, beacon_period, duration_lut.get_duration(section3::duration_ec_t::ms001, 2));
 
 #ifdef TFW_P2P_EXPORT_1PPS
-    ppx_pll = mac::ppx::ppx_pll_t(duration_lut.get_duration(section3::duration_ec_t::s001),
-                                  duration_lut.get_duration(section3::duration_ec_t::ms001, 250),
-                                  duration_lut.get_duration(section3::duration_ec_t::ms001, 100),
-                                  beacon_period,
-                                  duration_lut.get_duration(section3::duration_ec_t::ms001, 10));
+    ppx = mac::ppx::ppx_t(duration_lut.get_duration(section3::duration_ec_t::s001),
+                          duration_lut.get_duration(section3::duration_ec_t::ms001, 250),
+                          duration_lut.get_duration(section3::duration_ec_t::ms001, 100),
+                          beacon_period,
+                          duration_lut.get_duration(section3::duration_ec_t::ms001, 10));
 #endif
 
     // ##################################################

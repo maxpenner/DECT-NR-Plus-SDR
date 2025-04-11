@@ -31,25 +31,25 @@
 
 namespace dectnrp::mac::ppx {
 
-class ppx_pll_t {
+class ppx_t {
     public:
-        ppx_pll_t() = default;
-        ppx_pll_t(section3::duration_t ppx_period_,
-                  const section3::duration_t ppx_length_,
-                  const section3::duration_t ppx_time_advance_,
-                  const section3::duration_t raster_,
-                  const section3::duration_t time_deviation_max_);
+        ppx_t() = default;
+        ppx_t(section3::duration_t ppx_period_,
+              const section3::duration_t ppx_length_,
+              const section3::duration_t ppx_time_advance_,
+              const section3::duration_t default_raster_,
+              const section3::duration_t time_deviation_max_);
 
-        bool has_ppx_time() const { return 0 <= ppx_time_estimation_64; };
+        bool has_ppx_rising_edge() const { return 0 <= ppx_rising_edge_estimation_64; };
 
-        void set_ppx_time(const int64_t ppx_time_64);
+        void set_ppx_rising_edge(const int64_t ppx_rising_edge_64);
 
-        void set_ppx_time_extrapolation(const int64_t now_64);
+        void extrapolate_next_rising_edge(const int64_t now_64);
 
-        void set_ppx_time_in_raster(const int64_t time_in_raster_64);
+        void provide_reference_in_default_raster(const int64_t time_assumed_in_raster_64);
 
-        void set_ppx_time_in_raster_custom(const int64_t time_in_raster_custom_64,
-                                           const int64_t raster_64);
+        void provide_reference_in_custom_raster(const int64_t time_assumed_in_raster_64,
+                                                const int64_t custom_raster_64);
 
         radio::pulse_config_t get_ppx_imminent(const int64_t now_64);
 
@@ -63,17 +63,29 @@ class ppx_pll_t {
         section3::duration_t ppx_time_advance;
 
         /// time updates are given in a specific raster, for instance every 10ms
-        section3::duration_t raster;
+        section3::duration_t default_raster;
 
         /// how much time deviation is acceptable before assuming synchronization is lost?
         section3::duration_t time_deviation_max;
 
-        /// current best estimation for when the next ppx is due
-        int64_t ppx_time_estimation_64{common::adt::UNDEFINED_EARLY_64};
+        /// observed long term ppx period
+        int64_t ppx_period_observed_64{common::adt::UNDEFINED_EARLY_64};
 
+        /// current best estimation for when the next ppx is due
+        int64_t ppx_rising_edge_estimation_64{common::adt::UNDEFINED_EARLY_64};
+
+        /**
+         * \brief Given a reference time and a raster, by how much does the time to test deviate
+         * from its closest pointer in the raster?
+         *
+         * \param ref_64
+         * \param raster_64
+         * \param now_64
+         * \return
+         */
         static int64_t determine_offset(const int64_t ref_64,
                                         const int64_t raster_64,
-                                        const int64_t now_64);
+                                        const int64_t time_to_test_64);
 };
 
 }  // namespace dectnrp::mac::ppx
