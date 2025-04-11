@@ -22,40 +22,58 @@
 
 #include <cmath>
 
+#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/mac/ppx/pll_pps_param.hpp"
 
 namespace dectnrp::mac::ppx {
 
-pll_t::pll_t(const int64_t ppx_period_64_)
-    : ppx_period_64(ppx_period_64_) {
-    dectnrp_assert(0 < PPX_PPS_PLL_PARAM_NUMBER_OF_PPS_FOR_ESTIMATION, "ill-defined");
-    dectnrp_assert(PPX_PPS_PLL_PARAM_NUMBER_OF_PPS_FOR_ESTIMATION <= 60, "ill-defined");
+pll_t::pll_t(const section3::duration_t beacon_period_)
+    : beacon_period(beacon_period_),
+      new_value_64(beacon_period.get_samp_rate() / 1000 * PPX_PPS_PLL_PARAM_NEW_VALUE_MS),
+      separation_min_64(beacon_period.get_samp_rate() / 1000 * PPX_PPS_PLL_PARAM_MIN_SEPARATION_MS),
+      separation_max_64(beacon_period.get_samp_rate() / 1000 *
+                        PPX_PPS_PLL_PARAM_MAX_SEPARATION_MS) {
+    dectnrp_assert(beacon_period.get_samp_rate() % 1000 == 0, "ill-defined");
+    dectnrp_assert(new_value_64 < separation_min_64, "ill-defined");
+    dectnrp_assert(separation_min_64 < separation_max_64, "ill-defined");
 
-    ppx_rising_edge_vec.resize(PPX_PPS_PLL_PARAM_NUMBER_OF_PPS_FOR_ESTIMATION);
+    dectnrp_assert(separation_min_64 + beacon_period.get_N_samples_64() * 5 <= separation_max_64,
+                   "ill-defined");
+    dectnrp_assert(separation_min_64 % new_value_64 == 0, "ill-defined");
+
+    beacon_time_vec.resize(separation_min_64 / new_value_64, common::adt::UNDEFINED_EARLY_64);
 };
 
-void pll_t::provide_measured_ppx_rising_edge(const int64_t ppx_rising_edge_64) {
-    ppx_rising_edge_vec.at(idx) = ppx_rising_edge_64;
-    ++idx;
-    idx %= ppx_rising_edge_vec.size();
-}
+void pll_t::provide_measured_beacon_time(const int64_t beacon_time_64) {
+    const int64_t A = beacon_time_64 - beacon_time_vec.at(prev_idx());
 
-int64_t pll_t::warp_duration(const int64_t duration_64) const {
-    const std::size_t oldest = idx == (ppx_rising_edge_vec.size() - 1) ? 0 : idx + 1;
-
-    // do we have the corresponding oldest value?
-    if (ppx_rising_edge_vec[oldest] < 0) {
-        return duration_64;
+    if (A < new_value_64) {
+        return;
     }
 
-    const int64_t range_64 = ppx_rising_edge_vec[idx] - ppx_rising_edge_vec[oldest];
+    beacon_time_vec.at(idx) = beacon_time_64;
 
-    const int64_t likely_number_of_ppx_64 = common::adt::round_integer(range_64, ppx_period_64);
+    if (beacon_time_vec.at(next_idx()) < 0) {
+        idx = next_idx();
+        return;
+    }
 
-    const int64_t samp_rate_warped_64 = range_64 / likely_number_of_ppx_64;
+    const int64_t separation_64 = beacon_time_vec.at(idx) - beacon_time_vec.at(next_idx());
 
-    return duration_64 * samp_rate_warped_64 / ppx_period_64;
+    idx = next_idx();
+
+    const int64_t B = common::adt::round_integer(separation_64, beacon_period.get_N_samples_64());
+
+    warp_factor =
+        warp_factor * ema_alpha + (1.0 - ema_alpha) * static_cast<float>(separation_64) /
+                                      static_cast<float>(B * beacon_period.get_N_samples_64());
+}
+
+int64_t pll_t::get_warped(const int64_t length) const {
+    const float A = std::round(static_cast<float>(length) * warp_factor);
+
+    return static_cast<int64_t>(A);
 }
 
 }  // namespace dectnrp::mac::ppx

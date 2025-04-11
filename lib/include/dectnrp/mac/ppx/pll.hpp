@@ -24,22 +24,34 @@
 #include <vector>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
+#include "dectnrp/sections_part3/derivative/duration.hpp"
 
 namespace dectnrp::mac::ppx {
 
 class pll_t {
     public:
-        pll_t(const int64_t ppx_period_64_);
+        pll_t() = default;
+        pll_t(const section3::duration_t beacon_period_);
 
-        void provide_measured_ppx_rising_edge(const int64_t ppx_rising_edge_64);
+        void provide_measured_beacon_time(const int64_t beacon_time_64);
 
-        int64_t warp_duration(const int64_t duration_64) const;
+        int64_t get_warped(const int64_t length) const;
 
     private:
-        int64_t ppx_period_64{common::adt::UNDEFINED_EARLY_64};
+        section3::duration_t beacon_period;
 
-        std::vector<int64_t> ppx_rising_edge_vec;
+        int64_t new_value_64;
+        int64_t separation_min_64;
+        int64_t separation_max_64;
+
+        std::vector<int64_t> beacon_time_vec;
         std::size_t idx{};
+
+        float warp_factor{1.0f};
+        static constexpr float ema_alpha{0.95f};
+
+        std::size_t prev_idx() const { return idx == 0 ? beacon_time_vec.size() - 1 : idx - 1; };
+        std::size_t next_idx() const { return idx == beacon_time_vec.size() - 1 ? 0 : idx + 1; };
 };
 
 }  // namespace dectnrp::mac::ppx

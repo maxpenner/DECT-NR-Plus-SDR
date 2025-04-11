@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
+#include "dectnrp/mac/ppx/pll.hpp"
 #include "dectnrp/radio/pulse_config.hpp"
 #include "dectnrp/sections_part3/derivative/duration.hpp"
 #include "dectnrp/sections_part3/derivative/duration_lut.hpp"
@@ -37,7 +38,7 @@ class ppx_t {
         ppx_t(const section3::duration_t ppx_period_,
               const section3::duration_t ppx_length_,
               const section3::duration_t ppx_time_advance_,
-              const section3::duration_t default_raster_,
+              const section3::duration_t beacon_period_,
               const section3::duration_t time_deviation_max_);
 
         bool has_ppx_rising_edge() const { return 0 <= ppx_rising_edge_estimation_64; };
@@ -46,7 +47,7 @@ class ppx_t {
 
         void extrapolate_next_rising_edge(const int64_t now_64);
 
-        void provide_reference_in_default_raster(const int64_t time_assumed_in_raster_64);
+        void provide_reference_in_beacon_raster(const int64_t time_assumed_in_raster_64);
 
         void provide_reference_in_custom_raster(const int64_t time_assumed_in_raster_64,
                                                 const int64_t custom_raster_64);
@@ -65,10 +66,13 @@ class ppx_t {
         section3::duration_t ppx_time_advance;
 
         /// time updates are given in a specific raster, for instance every 10ms
-        section3::duration_t default_raster;
+        section3::duration_t beacon_period;
 
         /// how much time deviation is acceptable before assuming synchronization is lost?
         section3::duration_t time_deviation_max;
+
+        /// for estimation of ppx_period_warped_64
+        pll_t pll;
 
         /// observed long term ppx period
         int64_t ppx_period_warped_64{common::adt::UNDEFINED_EARLY_64};

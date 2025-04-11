@@ -129,7 +129,7 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
 
 #ifdef TFW_P2P_EXPORT_PPX
     if (ppx.has_ppx_rising_edge()) {
-        ppx.provide_reference_in_default_raster(
+        ppx.provide_reference_in_beacon_raster(
             phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
     }
 #endif
