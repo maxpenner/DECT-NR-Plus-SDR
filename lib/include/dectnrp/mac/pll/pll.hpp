@@ -36,12 +36,19 @@ class pll_t {
 
         void provide_beacon_time(const int64_t beacon_time_64);
 
+        int64_t get_beacon_time_last_known() const { return beacon_time_vec.at(prev_idx()); };
+        int64_t get_beacon_time_oldest_known() const { return beacon_time_vec.at(next_idx()); };
+
+        void reset();
+
         template <typename T>
             requires(std::is_arithmetic_v<T>)
         T get_warped(const T length) const {
             const float A = std::round(static_cast<float>(length) * warp_factor_ema.get_val());
             return static_cast<T>(A);
         }
+
+        float convert_warp_factor_to_ppm() const;
 
     private:
         section3::duration_t beacon_period;

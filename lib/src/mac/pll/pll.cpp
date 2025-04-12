@@ -50,7 +50,7 @@ pll_t::pll_t(const section3::duration_t beacon_period_)
 };
 
 void pll_t::provide_beacon_time(const int64_t beacon_time_64) {
-    const int64_t A = beacon_time_64 - beacon_time_vec.at(prev_idx());
+    const int64_t A = beacon_time_64 - get_beacon_time_last_known();
 
     // is the dist between this beacon and the past beacon large enough?
     if (A < dist_min_accept_64) {
@@ -66,7 +66,7 @@ void pll_t::provide_beacon_time(const int64_t beacon_time_64) {
     }
 
     // time dist to known oldest value
-    const int64_t dist_64 = beacon_time_vec.at(idx) - beacon_time_vec.at(next_idx());
+    const int64_t dist_64 = beacon_time_vec.at(idx) - get_beacon_time_oldest_known();
 
     // ignore if dist is too large
     if (dist_max_64 < dist_64) {
@@ -94,5 +94,15 @@ void pll_t::provide_beacon_time(const int64_t beacon_time_64) {
     dectnrp_assert(1.0f - PLL_PARAM_PPM_OUT_OF_SYNC / 1.0e6 < warp_factor_ema.get_val(),
                    "warp_factor too small");
 }
+
+void pll_t::reset() {
+    std::fill(beacon_time_vec.begin(), beacon_time_vec.end(), common::adt::UNDEFINED_EARLY_64);
+    idx = 0;
+    warp_factor_ema.set_val(1.0f);
+}
+
+float pll_t::convert_warp_factor_to_ppm() const {
+    return warp_factor_ema.get_val() * 1.0e6 - 1.0e6;
+};
 
 }  // namespace dectnrp::mac

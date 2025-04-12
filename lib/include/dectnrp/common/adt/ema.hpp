@@ -32,7 +32,10 @@ class ema_t {
         ema_t() = default;
         ema_t(const T val_, const F alpha_)
             : val(val_),
-              alpha(alpha_) {};
+              alpha(alpha_) {
+            dectnrp_assert(0.0f <= alpha, "too small");
+            dectnrp_assert(alpha <= 1.0, "too large");
+        };
 
         T update(const T val_new) {
             return val = static_cast<T>(static_cast<F>(val) * alpha +
@@ -40,6 +43,7 @@ class ema_t {
         }
 
         T get_val() const { return val; };
+        void set_val(const T val_) { val = val_; };
 
     private:
         T val{};
