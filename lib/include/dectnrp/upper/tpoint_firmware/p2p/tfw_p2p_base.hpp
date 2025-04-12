@@ -29,6 +29,8 @@
 #include "dectnrp/mac/allocation/allocation_ft.hpp"
 #include "dectnrp/mac/allocation/allocation_pt.hpp"
 #include "dectnrp/mac/allocation/tx_opportunity.hpp"
+#include "dectnrp/mac/pll/pll.hpp"
+#include "dectnrp/mac/ppx/ppx.hpp"
 #include "dectnrp/phy/indicators/cqi_lut.hpp"
 #include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 #include "dectnrp/radio/hw_simulator.hpp"
@@ -109,9 +111,12 @@ class tfw_p2p_base_t : public tpoint_t {
         /// all PT allocations have to be known at FT, individual PTs only need their own allocation
         mac::allocation::allocation_pt_t init_allocation_pt(const uint32_t firmware_id_);
 
+        /// for estimation of ppx_period_warped_64
+        mac::pll_t pll;
+
 #ifdef TFW_P2P_EXPORT_PPX
         /// convert beacons beginnings to a PPX
-        mac::ppx::ppx_t ppx;
+        mac::ppx_t ppx;
 
         /// FT and PT both generate a PPX
         void worksub_callback_ppx(const int64_t now_64, const size_t idx, int64_t& next_64);

@@ -25,12 +25,11 @@
 #include <utility>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
-#include "dectnrp/mac/ppx/pll.hpp"
 #include "dectnrp/radio/pulse_config.hpp"
 #include "dectnrp/sections_part3/derivative/duration.hpp"
 #include "dectnrp/sections_part3/derivative/duration_lut.hpp"
 
-namespace dectnrp::mac::ppx {
+namespace dectnrp::mac {
 
 class ppx_t {
     public:
@@ -52,12 +51,17 @@ class ppx_t {
         void provide_beacon_time_out_of_raster(const int64_t beacon_time_64,
                                                const int64_t beacon_period_custom_64);
 
-        radio::pulse_config_t get_ppx_imminent();
+        radio::pulse_config_t get_ppx_imminent() const;
 
         int64_t get_ppx_period_samples() const { return ppx_period.get_N_samples<int64_t>(); };
         int64_t get_ppx_length_samples() const { return ppx_length.get_N_samples<int64_t>(); };
         int64_t get_ppx_time_advance_samples() const {
             return ppx_time_advance.get_N_samples<int64_t>();
+        };
+
+        int64_t get_ppx_period_warped() const { return ppx_period_warped_64; };
+        void set_ppx_period_warped(const int64_t ppx_period_warped_64_) {
+            ppx_period_warped_64 = ppx_period_warped_64_;
         };
 
     private:
@@ -70,9 +74,6 @@ class ppx_t {
 
         /// how much time deviation is acceptable before assuming synchronization is lost?
         section3::duration_t time_deviation_max;
-
-        /// for estimation of ppx_period_warped_64
-        pll_t pll;
 
         /// observed long term beacon period
         int64_t ppx_period_warped_64{common::adt::UNDEFINED_EARLY_64};
@@ -94,4 +95,4 @@ class ppx_t {
                                         const int64_t time_to_test_64);
 };
 
-}  // namespace dectnrp::mac::ppx
+}  // namespace dectnrp::mac

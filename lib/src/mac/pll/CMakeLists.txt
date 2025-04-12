@@ -18,12 +18,5 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-add_library(dectnrp_mac STATIC)
-target_link_libraries(dectnrp_mac dectnrp_common dectnrp_part2 dectnrp_part4)
-
 file(GLOB DECTNRP_MAC_SOURCES "*.cpp")
 target_sources(dectnrp_mac PRIVATE ${DECTNRP_MAC_SOURCES})
-
-add_subdirectory(allocation)
-add_subdirectory(pll)
-add_subdirectory(ppx)

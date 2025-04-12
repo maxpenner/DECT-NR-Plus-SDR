@@ -51,6 +51,15 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
     // it's the beacon, so update beacon time
     allocation_pt.set_beacon_time_last_known(phy_maclow.sync_report.fine_peak_time_64);
 
+    pll.provide_beacon_time(phy_maclow.sync_report.fine_peak_time_correct_by_sto_fractional_64);
+
+#ifdef TFW_P2P_EXPORT_PPX
+    if (ppx.has_ppx_rising_edge()) {
+        ppx.provide_beacon_time(phy_maclow.sync_report.fine_peak_time_correct_by_sto_fractional_64);
+        ppx.set_ppx_period_warped(pll.get_warped(ppx.get_ppx_period_samples()));
+    }
+#endif
+
 #ifdef TFW_P2P_PT_AGC_ENABLED
 #ifdef TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
     // apply AGC change for RX and TX immediately before the next beacon
@@ -126,12 +135,6 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
             continue;
         }
     }
-
-#ifdef TFW_P2P_EXPORT_PPX
-    if (ppx.has_ppx_rising_edge()) {
-        ppx.provide_beacon_time(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
-    }
-#endif
 
     // update MCS sent to FT as feedback
     ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f4.MCS =
@@ -227,7 +230,7 @@ void tfw_p2p_pt_t::worksub_mmie_time_announce(
 
         // when is the next PPX due?
         const int64_t A =
-            phy_machigh.phy_maclow.sync_report.fine_peak_time_64 + ppx.get_ppx_period_samples();
+            phy_machigh.phy_maclow.sync_report.fine_peak_time_64 + ppx.get_ppx_period_warped();
 
         callbacks.add_callback(std::bind(&tfw_p2p_pt_t::worksub_callback_ppx,
                                          this,
@@ -235,7 +238,7 @@ void tfw_p2p_pt_t::worksub_mmie_time_announce(
                                          std::placeholders::_2,
                                          std::placeholders::_3),
                                A - ppx.get_ppx_time_advance_samples(),
-                               ppx.get_ppx_period_samples());
+                               ppx.get_ppx_period_warped());
     }
 #endif
 }

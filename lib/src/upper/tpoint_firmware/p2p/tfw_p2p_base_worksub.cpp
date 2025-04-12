@@ -37,12 +37,12 @@ void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
     hw.schedule_pulse_tc(pulse_config);
 
     dectnrp_assert(now_64 < pulse_config.rising_edge_64, "time out-of-order");
-    dectnrp_assert(pulse_config.rising_edge_64 < now_64 + ppx.get_ppx_period_samples(),
+    dectnrp_assert(pulse_config.rising_edge_64 < now_64 + ppx.get_ppx_period_warped(),
                    "time out-of-order");
 
     ppx.extrapolate_next_rising_edge();
 
-    dectnrp_assert(now_64 + ppx.get_ppx_period_samples() < ppx.get_ppx_imminent().rising_edge_64,
+    dectnrp_assert(now_64 + ppx.get_ppx_period_warped() < ppx.get_ppx_imminent().rising_edge_64,
                    "time out-of-order");
 
     dectnrp_assert(

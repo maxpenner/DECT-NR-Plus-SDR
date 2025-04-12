@@ -584,6 +584,17 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
     // immediately correct phase rotation of the current OFDM symbol for upcoming CFO estimation
     estimator_sto->apply_full_phase_rotation(ofdm_symbol_now);
 
+    // overwrite fractional STO in sync_report
+    sync_report_.sto_fractional = estimator_sto->get_fractional_sto_in_samples(N_b_DFT_os);
+
+    dectnrp_assert(std::abs(sync_report_.sto_fractional) < static_cast<float>(N_b_DFT / 4),
+                   "fractional STO very large");
+
+    // overwrite exact fine peak time in sync_report
+    sync_report_.fine_peak_time_correct_by_sto_fractional_64 =
+        sync_report_.fine_peak_time_64 +
+        static_cast<int64_t>(std::round(sync_report_.sto_fractional));
+
 #if defined(RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_STF) || defined(RX_SYNCED_PARAM_SNR_BASED_ON_STF)
     /* At this point, we have correct the phase rotation of ofdm_symbol_now. If the STF is required
      * for either estimator_cfo or estimator_snr, we must reestimate the channel of the STF to

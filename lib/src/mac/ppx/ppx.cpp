@@ -24,7 +24,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::mac::ppx {
+namespace dectnrp::mac {
 
 ppx_t::ppx_t(const section3::duration_t ppx_period_,
              const section3::duration_t ppx_length_,
@@ -36,7 +36,6 @@ ppx_t::ppx_t(const section3::duration_t ppx_period_,
       ppx_time_advance(ppx_time_advance_),
       beacon_period(beacon_period_),
       time_deviation_max(time_deviation_max_),
-      pll(pll_t(beacon_period)),
       ppx_period_warped_64(ppx_period.get_N_samples<int64_t>()) {
     dectnrp_assert(ppx_length < ppx_period, "ill-defined");
     dectnrp_assert(ppx_time_advance < ppx_period, "ill-defined");
@@ -59,12 +58,6 @@ void ppx_t::extrapolate_next_rising_edge() {
 
 void ppx_t::provide_beacon_time(const int64_t beacon_time_64) {
     provide_beacon_time_out_of_raster(beacon_time_64, beacon_period.get_N_samples<int64_t>());
-
-    // give PLL new time beacon so it can update the warp_factor
-    pll.provide_beacon_time(beacon_time_64);
-
-    // get improved estimation of the actual beacon period
-    ppx_period_warped_64 = pll.get_warped(ppx_period.get_N_samples<int64_t>());
 }
 
 void ppx_t::provide_beacon_time_out_of_raster(const int64_t beacon_time_64,
@@ -82,7 +75,7 @@ void ppx_t::provide_beacon_time_out_of_raster(const int64_t beacon_time_64,
     ppx_rising_edge_estimation_64 += deviation;
 }
 
-radio::pulse_config_t ppx_t::get_ppx_imminent() {
+radio::pulse_config_t ppx_t::get_ppx_imminent() const {
     const int64_t A = ppx_rising_edge_estimation_64 + ppx_period_warped_64;
 
     return radio::pulse_config_t(A, A + ppx_length.get_N_samples<int64_t>());
@@ -102,4 +95,4 @@ int64_t ppx_t::determine_offset(const int64_t ref_64,
     return time_to_test_64 - C;
 }
 
-}  // namespace dectnrp::mac::ppx
+}  // namespace dectnrp::mac

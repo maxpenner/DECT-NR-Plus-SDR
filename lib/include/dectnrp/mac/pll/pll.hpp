@@ -23,10 +23,11 @@
 #include <cstdint>
 #include <vector>
 
+#include "dectnrp/common/adt/ema.hpp"
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/sections_part3/derivative/duration.hpp"
 
-namespace dectnrp::mac::ppx {
+namespace dectnrp::mac {
 
 class pll_t {
     public:
@@ -38,25 +39,29 @@ class pll_t {
         template <typename T>
             requires(std::is_arithmetic_v<T>)
         T get_warped(const T length) const {
-            const float A = std::round(static_cast<float>(length) * warp_factor);
+            const float A = std::round(static_cast<float>(length) * warp_factor_ema.get_val());
             return static_cast<T>(A);
         }
 
     private:
         section3::duration_t beacon_period;
 
-        int64_t new_value_64;
-        int64_t separation_min_64;
-        int64_t separation_max_64;
+        /// minimum time distance between two beacons to accept the latter one
+        int64_t dist_min_accept_64;
+
+        /// minimum time dist distance two beacons to measure the warping
+        int64_t dist_min_64;
+
+        /// maximum time dist distance two beacons to measure the warping
+        int64_t dist_max_64;
 
         std::vector<int64_t> beacon_time_vec;
         std::size_t idx{};
 
-        /// observed time base warping between TX and RX, value will be very close to 1.0f
-        float warp_factor{1.0f};
+        common::adt::ema_t<float, float> warp_factor_ema;
 
         std::size_t prev_idx() const { return idx == 0 ? beacon_time_vec.size() - 1 : idx - 1; };
         std::size_t next_idx() const { return idx == beacon_time_vec.size() - 1 ? 0 : idx + 1; };
 };
 
-}  // namespace dectnrp::mac::ppx
+}  // namespace dectnrp::mac

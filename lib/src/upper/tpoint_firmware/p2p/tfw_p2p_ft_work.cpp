@@ -57,7 +57,7 @@ void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
                                      std::placeholders::_2,
                                      std::placeholders::_3),
                            B - ppx.get_ppx_time_advance_samples(),
-                           ppx.get_ppx_period_samples());
+                           ppx.get_ppx_period_warped());
 #endif
 }
 

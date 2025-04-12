@@ -45,7 +45,7 @@ class sync_report_t {
         float detection_metric{-1.0f};
         uint32_t detection_time_local{std::numeric_limits<uint32_t>::max()};
 
-        // mu
+        /// mu
         uint32_t u{0};
 
         // ##################################################
@@ -57,16 +57,16 @@ class sync_report_t {
         /// average of individual coarse peak times weighted by coarse peak height
         uint32_t coarse_peak_time_local{std::numeric_limits<uint32_t>::max()};
 
-        // synchronization measures the RMS only for antennas with a valid coarse peak
+        /// synchronization measures the RMS only for antennas with a valid coarse peak
         common::ant_t rms_array{};
 
         /// average of individual fractional CFOs weighted by coarse peak height
         float cfo_fractional_rad{std::numeric_limits<float>::max()};
 
-        // estimated in frequency domain at coarse peak
+        /// estimated in frequency domain at coarse peak
         uint32_t b{0};
 
-        // estimated in frequency domain at coarse peak
+        /// estimated in frequency domain at coarse peak
         float cfo_integer_rad{std::numeric_limits<float>::max()};
 
         /// global coarse peak time
@@ -85,8 +85,17 @@ class sync_report_t {
         /// average of individual fine peak times (for N_eff_TX) weighted by fine peak height
         uint32_t fine_peak_time_local{std::numeric_limits<uint32_t>::max()};
 
-        // global fine peak time, equivalent to an integer Symbol Time Offset (STO)
+        /// global fine peak time, equivalent to an integer Symbol Time Offset (STO)
         int64_t fine_peak_time_64{common::adt::UNDEFINED_EARLY_64};
+
+        // ##################################################
+        // determined and overwritten post FFT
+
+        // based on STF and DRS phase rotation in frequency domain
+        float sto_fractional{};
+
+        /// may deviate a few samples from fine_peak_time_64
+        int64_t fine_peak_time_correct_by_sto_fractional_64{common::adt::UNDEFINED_EARLY_64};
 };
 
 }  // namespace dectnrp::phy
