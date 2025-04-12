@@ -64,10 +64,9 @@ hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
         nof_antennas_max = 4;
         ADC_bits = 16;
         DAC_bits = 14;
-        tmin_samples.at(std::to_underlying(tmin_t::freq)) = get_samples_in_us(250);
-        tmin_samples.at(std::to_underlying(tmin_t::gain)) = get_samples_in_us(200);
-        tmin_samples.at(std::to_underlying(tmin_t::turnaround)) =
-            get_samples_in_us(hw_config.turnaround_time_us);
+        tmin_us.at(std::to_underlying(tmin_t::freq)) = 250;
+        tmin_us.at(std::to_underlying(tmin_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::turnaround)) = hw_config.turnaround_time_us;
         ppm = 1.0f;
         time_advance_fpga2ant_samples = 0;
 
@@ -90,10 +89,9 @@ hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
         nof_antennas_max = 2;
         ADC_bits = 14;
         DAC_bits = 16;
-        tmin_samples.at(std::to_underlying(tmin_t::freq)) = get_samples_in_us(250);
-        tmin_samples.at(std::to_underlying(tmin_t::gain)) = get_samples_in_us(200);
-        tmin_samples.at(std::to_underlying(tmin_t::turnaround)) =
-            get_samples_in_us(hw_config.turnaround_time_us);
+        tmin_us.at(std::to_underlying(tmin_t::freq)) = 250;
+        tmin_us.at(std::to_underlying(tmin_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::turnaround)) = hw_config.turnaround_time_us;
         ppm = 1.0f;
         time_advance_fpga2ant_samples = 0;
 
@@ -117,10 +115,9 @@ hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
         nof_antennas_max = 2;
         ADC_bits = 12;
         DAC_bits = 12;
-        tmin_samples.at(std::to_underlying(tmin_t::freq)) = get_samples_in_us(250);
-        tmin_samples.at(std::to_underlying(tmin_t::gain)) = get_samples_in_us(200);
-        tmin_samples.at(std::to_underlying(tmin_t::turnaround)) =
-            get_samples_in_us(hw_config.turnaround_time_us);
+        tmin_us.at(std::to_underlying(tmin_t::freq)) = 250;
+        tmin_us.at(std::to_underlying(tmin_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::turnaround)) = hw_config.turnaround_time_us;
         ppm = 2.0f;
         time_advance_fpga2ant_samples = 0;
 
@@ -143,10 +140,9 @@ hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
         nof_antennas_max = 4;
         ADC_bits = 12;
         DAC_bits = 14;
-        tmin_samples.at(std::to_underlying(tmin_t::freq)) = get_samples_in_us(250);
-        tmin_samples.at(std::to_underlying(tmin_t::gain)) = get_samples_in_us(200);
-        tmin_samples.at(std::to_underlying(tmin_t::turnaround)) =
-            get_samples_in_us(hw_config.turnaround_time_us);
+        tmin_us.at(std::to_underlying(tmin_t::freq)) = 250;
+        tmin_us.at(std::to_underlying(tmin_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::turnaround)) = hw_config.turnaround_time_us;
         ppm = 2.0f;
         time_advance_fpga2ant_samples = 0;
 
@@ -199,6 +195,11 @@ void hw_usrp_t::set_samp_rate(const uint32_t samp_rate_in) {
     dectnrp_assert(
         (samp_rate / 2 + USRP_DIGITAL_LO_TUNING_OFFSET_FREQUENCY_HZ) <= master_clock_rate / 2,
         "sample rate + digital tuning offset too large");
+
+    // convert from us to samples
+    for (std::size_t i = 0; i < std::to_underlying(tmin_t::CARDINALITY); ++i) {
+        tmin_samples.at(i) = get_samples_in_us(tmin_us.at(i));
+    }
 }
 
 void hw_usrp_t::initialize_device() {

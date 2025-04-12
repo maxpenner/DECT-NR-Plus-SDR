@@ -264,7 +264,7 @@ class hw_t : public common::layer_unit_t {
         uint32_t nof_antennas_max;
         uint32_t ADC_bits;
         uint32_t DAC_bits;
-        std::array<uint32_t, std::to_underlying(tmin_t::CARDINALITY)> tmin_samples{};
+        std::array<uint32_t, std::to_underlying(tmin_t::CARDINALITY)> tmin_us{}, tmin_samples{};
         float ppm;
 
         /**
