@@ -21,6 +21,8 @@
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 //
 
+#include <cmath>
+
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/limits.hpp"
 
@@ -30,12 +32,25 @@ namespace dectnrp::upper::tfw::p2p {
 void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
                                           const size_t idx,
                                           int64_t& next_64) {
-    const auto pulse_config = ppx.get_ppx_imminent(now_64);
+    const auto pulse_config = ppx.get_ppx_imminent();
 
     hw.schedule_pulse_tc(pulse_config);
 
-    ppx.extrapolate_next_rising_edge(now_64);
+    dectnrp_assert(now_64 < pulse_config.rising_edge_64, "time out-of-order");
+    dectnrp_assert(pulse_config.rising_edge_64 < now_64 + ppx.get_ppx_period_samples(),
+                   "time out-of-order");
 
+    ppx.extrapolate_next_rising_edge();
+
+    dectnrp_assert(now_64 + ppx.get_ppx_period_samples() < ppx.get_ppx_imminent().rising_edge_64,
+                   "time out-of-order");
+
+    dectnrp_assert(
+        std::abs(pulse_config.rising_edge_64 - ppx.get_ppx_time_advance_samples() - next_64) <
+            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 5),
+        "callback adjustment time too large");
+
+    // set time of next callback
     next_64 = pulse_config.rising_edge_64 - ppx.get_ppx_time_advance_samples();
 }
 #endif

@@ -45,30 +45,30 @@ struct hw_config_t {
         uint32_t turnaround_time_us;
 
         /**
-         * \brief The radio layer can send zeros before transmitting a packet received from PHY to
-         * mitigate effects of transient responses at burst starts. If set to 0, no zeros are
-         * prepended. Given in microseconds. A typical value is 5.
+         * \brief The radio layer can send zeros before transmitting a packet to mitigate effects of
+         * transient responses at burst starts. If set to 0, no zeros are prepended. Given in
+         * microseconds. A typical value is 5.
          */
         uint32_t tx_burst_leading_zero_us;
 
         /**
-         * \brief The radio layer can send packets received from PHY slightly earlier to compensate
-         * delays in the radio hardware. The exact amount of time advance samples depends on the
-         * radio hardware and its settings such are sample rate, filter stages etc.
+         * \brief The radio layer can send packets slightly earlier to compensate delays in the
+         * radio hardware. The exact amount of time advance samples depends on the radio hardware
+         * and its settings such as sample rate, filter stages etc.
          */
         uint32_t tx_time_advance_smpl;
 
         /**
-         * \brief Instead of passing samples directly to PHY, the radio layer can prestream for some
-         * time which can help to avoid initial underruns or overflows. Given in milliseconds,
-         * typical values are 1000ms to 2000ms.
+         * \brief Immediately after the SDR has started, the radio layer can prestream for some
+         * time instead of passing samples directly to PHY. This can help to avoid initial underruns
+         * or overflows. Given in milliseconds, typical values are 1000ms to 2000ms.
          */
         uint32_t rx_prestream_ms;
 
         /**
-         * \brief The RX thread may receive IQ samples from the radio hardware in very small chunks.
+         * \brief The RX thread is provided IQ samples by the radio hardware in very small chunks.
          * Instead of notifying the PHY every single time, the minimum notification time can be
-         * limited. This avoids waking up thread on PHY for a small number of new IQ samples. Given
+         * limited. This avoids waking up threads on PHY for a small number of new IQ samples. Given
          * in microseconds. If set to 0, the PHY threads are notified at the maximum rate possible
          * which minimizes latency at the cost of higher CPU usage.
          */
@@ -81,7 +81,7 @@ struct hw_config_t {
         /// simulator specifics
         /// nothing so far
 
-        /// USRP specifics
+        /// USRP arguments, must be specific enough to identify exactly one USRP
         std::string uspr_args;
         common::threads_core_prio_config_t usrp_tx_async_helper_thread_config;
 

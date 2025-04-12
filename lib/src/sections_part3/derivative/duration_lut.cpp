@@ -36,7 +36,7 @@ duration_lut_t::duration_lut_t(const uint32_t samp_rate_)
          i < static_cast<dt>(duration_ec_t::CARDINALITY);
          ++i) {
         duration_vec.at(i) =
-            duration_t(samp_rate, static_cast<duration_ec_t>(i)).get_N_samples_64();
+            duration_t(samp_rate, static_cast<duration_ec_t>(i)).get_N_samples<int64_t>();
     }
 }
 

@@ -45,19 +45,19 @@ class ppx_t {
 
         void set_ppx_rising_edge(const int64_t ppx_rising_edge_64);
 
-        void extrapolate_next_rising_edge(const int64_t now_64);
+        void extrapolate_next_rising_edge();
 
-        void provide_reference_in_beacon_raster(const int64_t time_assumed_in_raster_64);
+        void provide_beacon_time(const int64_t beacon_time_64);
 
-        void provide_reference_in_custom_raster(const int64_t time_assumed_in_raster_64,
-                                                const int64_t custom_raster_64);
+        void provide_beacon_time_out_of_raster(const int64_t beacon_time_64,
+                                               const int64_t beacon_period_custom_64);
 
-        radio::pulse_config_t get_ppx_imminent(const int64_t now_64);
+        radio::pulse_config_t get_ppx_imminent();
 
-        int64_t get_ppx_period_samples() const { return ppx_period.get_N_samples_64(); };
-        int64_t get_ppx_length_samples() const { return ppx_length.get_N_samples_64(); };
+        int64_t get_ppx_period_samples() const { return ppx_period.get_N_samples<int64_t>(); };
+        int64_t get_ppx_length_samples() const { return ppx_length.get_N_samples<int64_t>(); };
         int64_t get_ppx_time_advance_samples() const {
-            return ppx_time_advance.get_N_samples_64();
+            return ppx_time_advance.get_N_samples<int64_t>();
         };
 
     private:
@@ -74,7 +74,7 @@ class ppx_t {
         /// for estimation of ppx_period_warped_64
         pll_t pll;
 
-        /// observed long term ppx period
+        /// observed long term beacon period
         int64_t ppx_period_warped_64{common::adt::UNDEFINED_EARLY_64};
 
         /// current best estimation for when the next ppx is due
@@ -84,9 +84,9 @@ class ppx_t {
          * \brief Given a reference time and a raster, by how much does the time to test deviate
          * from its closest pointer in the raster?
          *
-         * \param ref_64
-         * \param raster_64
-         * \param now_64
+         * \param ref_64 can be negative
+         * \param raster_64 must be positive
+         * \param time_to_test_64 can be larger or smaller than ref_64
          * \return
          */
         static int64_t determine_offset(const int64_t ref_64,

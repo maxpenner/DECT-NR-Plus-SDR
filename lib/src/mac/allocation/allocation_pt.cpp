@@ -138,9 +138,10 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity(const direction_t direction
                 dectnrp_assert(beacon_time_last_known_64 <= now_64, "uplink times out-of-order");
 
                 // maximum transmission time
-                const int64_t tx_latest_local_64 = std::min(
-                    beacon_time_last_known_64 + allocation_validity_after_beacon.get_N_samples_64(),
-                    now_64 + allocation_validity_after_now.get_N_samples_64());
+                const int64_t tx_latest_local_64 =
+                    std::min(beacon_time_last_known_64 +
+                                 allocation_validity_after_beacon.get_N_samples<int64_t>(),
+                             now_64 + allocation_validity_after_now.get_N_samples<int64_t>());
 
                 return get_tx_opportunity_generic(
                     tx_earliest_local_64, tx_latest_local_64, resource_ul_vec);
@@ -150,7 +151,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity(const direction_t direction
             {
                 // maximum transmission time
                 const int64_t tx_latest_local_64 =
-                    beacon_time_last_known_64 + beacon_period.get_N_samples_64();
+                    beacon_time_last_known_64 + beacon_period.get_N_samples<int64_t>();
 
                 return get_tx_opportunity_generic(
                     tx_earliest_local_64, tx_latest_local_64, resource_dl_vec);
@@ -170,14 +171,14 @@ int64_t allocation_pt_t::get_tx_opportunity_ul_time_closest(const int64_t refere
 
     dectnrp_assert(
         beacon_time_last_known_64 < reference_time_64 &&
-            reference_time_64 < beacon_time_last_known_64 + beacon_period.get_N_samples_64(),
+            reference_time_64 < beacon_time_last_known_64 + beacon_period.get_N_samples<int64_t>(),
         "must lie between two beacons");
 
     int64_t ret = common::adt::UNDEFINED_EARLY_64;
 
     for (const auto& elem : resource_ul_vec) {
         const int64_t A =
-            reference_time_64 - (beacon_time_last_known_64 + elem.offset.get_N_samples_64());
+            reference_time_64 - (beacon_time_last_known_64 + elem.offset.get_N_samples<int64_t>());
         if (std::abs(A) < std::abs(ret)) {
             ret = A;
         }
@@ -230,7 +231,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity_generic(const int64_t tx_ea
     // lower drawing
     if (tx_earliest_local_64 > beacon_time_last_known_64) {
         const int64_t B = tx_earliest_local_64 - beacon_time_last_known_64;
-        const int64_t C = common::adt::multiple_leq(B, beacon_period.get_N_samples_64());
+        const int64_t C = common::adt::multiple_leq(B, beacon_period.get_N_samples<int64_t>());
 
         A = beacon_time_last_known_64 + C;
 
@@ -247,12 +248,12 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity_generic(const int64_t tx_ea
     // keep searching until ...
     while (1) {
         // potential transmission time
-        const int64_t D = A + rvec.at(idx).offset.get_N_samples_64();
+        const int64_t D = A + rvec.at(idx).offset.get_N_samples<int64_t>();
 
         // ... we either found the first possible transmission time within the limits or ...
         if (tx_earliest_local_64 <= D && D < tx_latest_local_64) {
             tx_time_64 = D;
-            N_samples_64 = rvec.at(idx).length.get_N_samples_64();
+            N_samples_64 = rvec.at(idx).length.get_N_samples<int64_t>();
             break;
         }
 
@@ -267,7 +268,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity_generic(const int64_t tx_ea
             idx = 0;
 
             // increase base time by one beacon period
-            A += beacon_period.get_N_samples_64();
+            A += beacon_period.get_N_samples<int64_t>();
         }
     }
 

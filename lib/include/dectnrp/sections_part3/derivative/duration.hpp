@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstdint>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
@@ -43,16 +44,22 @@ class duration_t {
                             const uint32_t mult_ = 1);
 
         friend bool operator>(duration_t& lhs, duration_t& rhs) {
-            return lhs.N_samples_64 > rhs.N_samples_64 ? true : false;
+            return lhs.N_samples > rhs.N_samples ? true : false;
         }
 
         friend bool operator<(duration_t& lhs, duration_t& rhs) {
-            return lhs.N_samples_64 < rhs.N_samples_64 ? true : false;
+            return lhs.N_samples < rhs.N_samples ? true : false;
         }
 
-        uint32_t get_samp_rate() const { return samp_rate; };
-        uint32_t get_N_samples() const { return N_samples; };
-        int64_t get_N_samples_64() const { return N_samples_64; };
+        template <std::integral T = uint32_t>
+        T get_samp_rate() const {
+            return static_cast<T>(samp_rate);
+        };
+
+        template <std::integral T = uint32_t>
+        T get_N_samples() const {
+            return static_cast<T>(N_samples);
+        };
 
     private:
         uint32_t samp_rate{};
@@ -61,7 +68,6 @@ class duration_t {
         [[maybe_unused]] uint32_t mult{};
 
         uint32_t N_samples{};
-        int64_t N_samples_64{};
 };
 
 }  // namespace dectnrp::section3

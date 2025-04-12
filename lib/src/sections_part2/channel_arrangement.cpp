@@ -174,29 +174,6 @@ center_frequency_t get_center_frequency(const uint32_t band_number, const uint32
     return get_center_frequency(get_absolute_channel_frequency_numbering(band_number), n);
 }
 
-reference_time_accuracy_t get_reference_time_accuracy(const uint32_t reference_time_category,
-                                                      const bool extreme_condition) {
-    dectnrp_assert(reference_time_category == 1 || reference_time_category == 2,
-                   "reference time category must be 1 or 2");
-
-    reference_time_accuracy_t reference_time_accuracy{.reference_time_category =
-                                                          reference_time_category};
-
-    if (reference_time_category == 1) {
-        reference_time_accuracy.accuracy_ppm = 10;
-    } else {
-        reference_time_accuracy.accuracy_ppm = 25;
-    }
-
-    reference_time_accuracy.extreme_condition = extreme_condition;
-
-    if (extreme_condition) {
-        reference_time_accuracy.accuracy_ppm += 5;
-    }
-
-    return reference_time_accuracy;
-}
-
 bool is_absolute_channel_number_in_range(const uint32_t channel_number) {
     // absolute channel numbers are signalled with 13-bit number
     if (channel_number > common::adt::bitmask_lsb<13>()) {

@@ -50,12 +50,6 @@ struct center_frequency_t {
         double FC;
 };
 
-struct reference_time_accuracy_t {
-        uint32_t reference_time_category;
-        uint32_t accuracy_ppm;
-        bool extreme_condition;
-};
-
 constexpr uint32_t operating_channel_change_time_requirement_us{200};
 
 absolute_channel_frequency_numbering_t get_absolute_channel_frequency_numbering(
@@ -65,9 +59,6 @@ center_frequency_t get_center_frequency(const absolute_channel_frequency_numberi
                                         const uint32_t n);
 
 center_frequency_t get_center_frequency(const uint32_t band_number, const uint32_t n);
-
-reference_time_accuracy_t get_reference_time_accuracy(const uint32_t reference_time_category,
-                                                      const bool extreme_condition);
 
 bool is_absolute_channel_number_in_range(const uint32_t channel_number);
 

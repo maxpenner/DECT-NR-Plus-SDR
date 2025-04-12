@@ -33,9 +33,14 @@ class pll_t {
         pll_t() = default;
         pll_t(const section3::duration_t beacon_period_);
 
-        void provide_measured_beacon_time(const int64_t beacon_time_64);
+        void provide_beacon_time(const int64_t beacon_time_64);
 
-        int64_t get_warped(const int64_t length) const;
+        template <typename T>
+            requires(std::is_arithmetic_v<T>)
+        T get_warped(const T length) const {
+            const float A = std::round(static_cast<float>(length) * warp_factor);
+            return static_cast<T>(A);
+        }
 
     private:
         section3::duration_t beacon_period;
@@ -47,8 +52,8 @@ class pll_t {
         std::vector<int64_t> beacon_time_vec;
         std::size_t idx{};
 
+        /// observed time base warping between TX and RX, value will be very close to 1.0f
         float warp_factor{1.0f};
-        static constexpr float ema_alpha{0.95f};
 
         std::size_t prev_idx() const { return idx == 0 ? beacon_time_vec.size() - 1 : idx - 1; };
         std::size_t next_idx() const { return idx == beacon_time_vec.size() - 1 ? 0 : idx + 1; };

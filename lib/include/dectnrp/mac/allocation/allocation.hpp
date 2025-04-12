@@ -32,7 +32,7 @@ namespace dectnrp::mac::allocation {
 class allocation_t {
     public:
         const section3::duration_t& get_beacon_period_as_duration() const { return beacon_period; };
-        int64_t get_beacon_period() const { return beacon_period.get_N_samples_64(); };
+        int64_t get_beacon_period() const { return beacon_period.get_N_samples<int64_t>(); };
 
     protected:
         /// abstract class

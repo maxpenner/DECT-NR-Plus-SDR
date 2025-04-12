@@ -37,64 +37,55 @@ ppx_t::ppx_t(const section3::duration_t ppx_period_,
       beacon_period(beacon_period_),
       time_deviation_max(time_deviation_max_),
       pll(pll_t(beacon_period)),
-      ppx_period_warped_64(ppx_period.get_N_samples_64()) {
+      ppx_period_warped_64(ppx_period.get_N_samples<int64_t>()) {
     dectnrp_assert(ppx_length < ppx_period, "ill-defined");
     dectnrp_assert(ppx_time_advance < ppx_period, "ill-defined");
     dectnrp_assert(beacon_period < ppx_period, "ill-defined");
-    dectnrp_assert(ppx_period.get_N_samples_64() % beacon_period.get_N_samples_64() == 0,
-                   "ill-defined");
+    dectnrp_assert(
+        ppx_period.get_N_samples<int64_t>() % beacon_period.get_N_samples<int64_t>() == 0,
+        "ill-defined");
 };
 
 void ppx_t::set_ppx_rising_edge(const int64_t ppx_rising_edge_64) {
-    dectnrp_assert(
-        !((0 <= ppx_rising_edge_estimation_64) &&
-          std::abs(determine_offset(
-              ppx_rising_edge_estimation_64, ppx_period_warped_64, ppx_rising_edge_64)) <=
-              time_deviation_max.get_N_samples_64()),
-        "synchronization lost");
+    dectnrp_assert(ppx_rising_edge_estimation_64 < 0, "already initialized");
+    dectnrp_assert(0 < ppx_rising_edge_64, "rising edge time must be positive");
 
     ppx_rising_edge_estimation_64 = ppx_rising_edge_64;
 }
 
-void ppx_t::extrapolate_next_rising_edge(const int64_t now_64) {
-    dectnrp_assert(ppx_rising_edge_estimation_64 < now_64, "too early");
-
+void ppx_t::extrapolate_next_rising_edge() {
     ppx_rising_edge_estimation_64 += ppx_period_warped_64;
-
-    dectnrp_assert(now_64 < ppx_rising_edge_estimation_64, "too late");
 }
 
-void ppx_t::provide_reference_in_beacon_raster(const int64_t time_assumed_in_raster_64) {
-    provide_reference_in_custom_raster(time_assumed_in_raster_64, beacon_period.get_N_samples_64());
+void ppx_t::provide_beacon_time(const int64_t beacon_time_64) {
+    provide_beacon_time_out_of_raster(beacon_time_64, beacon_period.get_N_samples<int64_t>());
 
-    pll.provide_measured_beacon_time(time_assumed_in_raster_64);
+    // give PLL new time beacon so it can update the warp_factor
+    pll.provide_beacon_time(beacon_time_64);
 
-    ppx_period_warped_64 = pll.get_warped(ppx_period.get_N_samples_64());
+    // get improved estimation of the actual beacon period
+    ppx_period_warped_64 = pll.get_warped(ppx_period.get_N_samples<int64_t>());
 }
 
-void ppx_t::provide_reference_in_custom_raster(const int64_t time_assumed_in_raster_64,
-                                               const int64_t custom_raster_64) {
-    dectnrp_assert(0 <= ppx_rising_edge_estimation_64, "first beacon must be time align beacon");
+void ppx_t::provide_beacon_time_out_of_raster(const int64_t beacon_time_64,
+                                              const int64_t beacon_period_custom_64) {
+    dectnrp_assert(0 <= ppx_rising_edge_estimation_64, "not initialized yet");
 
     // determine deviation between received beacon time and extrapolated beacon time
-    const auto deviation = determine_offset(
-        ppx_rising_edge_estimation_64, custom_raster_64, time_assumed_in_raster_64);
+    const auto deviation =
+        determine_offset(ppx_rising_edge_estimation_64, beacon_period_custom_64, beacon_time_64);
 
-    dectnrp_assert(std::abs(deviation) <= time_deviation_max.get_N_samples_64(),
+    dectnrp_assert(std::abs(deviation) <= time_deviation_max.get_N_samples<int64_t>(),
                    "synchronization lost");
 
     // slight adjustment
     ppx_rising_edge_estimation_64 += deviation;
 }
 
-radio::pulse_config_t ppx_t::get_ppx_imminent(const int64_t now_64) {
-    dectnrp_assert(ppx_rising_edge_estimation_64 < now_64, "too early");
-
+radio::pulse_config_t ppx_t::get_ppx_imminent() {
     const int64_t A = ppx_rising_edge_estimation_64 + ppx_period_warped_64;
 
-    dectnrp_assert(now_64 < A, "too late");
-
-    return radio::pulse_config_t(A, A + ppx_length.get_N_samples_64());
+    return radio::pulse_config_t(A, A + ppx_length.get_N_samples<int64_t>());
 }
 
 int64_t ppx_t::determine_offset(const int64_t ref_64,

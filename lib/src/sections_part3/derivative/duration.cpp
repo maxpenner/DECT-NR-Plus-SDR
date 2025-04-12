@@ -81,8 +81,6 @@ duration_t::duration_t(const uint32_t samp_rate_,
                    "out-of-bound");
 
     N_samples *= mult;
-
-    N_samples_64 = static_cast<int64_t>(N_samples);
 }
 
 }  // namespace dectnrp::section3
