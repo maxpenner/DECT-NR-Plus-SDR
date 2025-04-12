@@ -69,7 +69,7 @@ class hw_usrp_t final : public hw_t {
 
         /// set in constructor
         uhd::device_addrs_t device_addrs;
-        uint32_t master_clock_rate;
+        uint32_t master_clock_rate{};
         std::vector<uint32_t> decimation_factors;
 
         /// set in initialize_device()
@@ -112,8 +112,8 @@ class hw_usrp_t final : public hw_t {
         // statistics
 
         struct tx_stats_t {
-                int64_t buffer_tx_sent{0};
-                int64_t buffer_tx_sent_consecutive{0};
+                int64_t buffer_tx_sent{};
+                int64_t buffer_tx_sent_consecutive{};
         } tx_stats;
 };
 

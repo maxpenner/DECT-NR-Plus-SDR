@@ -288,7 +288,7 @@ class hw_t : public common::layer_unit_t {
         float tx_power_ant_0dBFS{};
         common::ant_t rx_power_ant_0dBFS{};
 
-        static pps_sync_t pps_sync{};
+        static pps_sync_t pps_sync;
 
         antenna_array_t antenna_array{};
 
