@@ -48,7 +48,7 @@ class estimator_cfo_t final : public estimator_t {
                                  const process_drs_meta_t& process_drs_meta) override final;
 
         // we require the phase shift in time domain from sample to sample (s2s)
-        float get_residual_CFO_s2s_rad(const uint32_t N_DF_symbol_samples) const;
+        [[nodiscard]] float get_residual_CFO_s2s_rad(const uint32_t N_DF_symbol_samples) const;
 
     private:
         virtual void reset_internal() override final;

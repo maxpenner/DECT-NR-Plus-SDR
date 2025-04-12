@@ -43,7 +43,7 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
 #ifdef TFW_P2P_MIMO
     dectnrp_assert(
         1 < buffer_rx.nof_antennas,
-        "MIMO requires that FT is able to transmit at least two transmit streams. Change to a radio device class with N_TX larger one.");
+        "MIMO requires an FT able to transmit at least two transmit streams. Change to a radio device class with N_TX larger one.");
 #endif
 
     // ##################################################

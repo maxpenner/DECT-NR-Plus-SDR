@@ -141,7 +141,7 @@ If you use this repository for any publication, please cite the repository accor
 3. If asserts are enabled, the program may stop abruptly if IQ samples are not processed fast enough. This is triggered by a backlog of unprocessed IQ samples within synchronization.
 4. For some combinations of operating system, CPU and DPDK, pressing control+C does not stop the SDR. The SDR process must then be stopped manually.
 5. With gcc 12 and above, a [warning is issued in relation to fmt](https://github.com/fmtlib/fmt/issues/3354) which becomes an error due to the compiler flag *Werror* being used by default. It can be disabled in [CMakeLists.txt](CMakeLists.txt) by turning off the option *ENABLE_WERROR*.
-6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclical rotation of the STF in frequency domain. This function will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
+6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclical rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
 
 ## To Do
 
