@@ -100,6 +100,7 @@ pps_sync_t hw_t::pps_sync;
 
 uint32_t hw_t::get_samples_in_us(const uint32_t us) const {
     dectnrp_assert(us <= 1000000, "should not be larger than one second");
+    dectnrp_assert(0 < samp_rate, "samp_rate not initialized");
 
     return static_cast<int64_t>(samp_rate) * static_cast<int64_t>(us) / int64_t{1000000};
 }
