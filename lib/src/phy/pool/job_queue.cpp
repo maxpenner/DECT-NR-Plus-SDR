@@ -47,6 +47,10 @@ job_queue_t::job_queue_t(const uint32_t id_, const uint32_t capacity_)
 }
 
 bool job_queue_t::enqueue_nto(job_t&& job) {
+    if (!permeable.load(std::memory_order_acquire)) {
+        return true;
+    }
+
     bool ret = false;
 
     lockv.lock();
@@ -240,12 +244,17 @@ job_queue_t::job_queue_t(const uint32_t id_, const uint32_t capacity_)
       capacity(capacity_) {
     dectnrp_assert(capacity >= 32, "moodycamel capacity must be at least 32");
 
+    // https://github.com/cameron314/concurrentqueue/blob/master/blockingconcurrentqueue.h#L58
     job_vec = moodycamel::BlockingConcurrentQueue<job_t>(capacity * 6);
 
     ptok = std::make_unique<moodycamel::ProducerToken>(job_vec);
 }
 
 bool job_queue_t::enqueue_nto(job_t&& job) {
+    if (!permeable.load(std::memory_order_acquire)) {
+        return true;
+    }
+
     // producer token must be thread-safe
     lockv.lock();
 

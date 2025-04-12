@@ -32,7 +32,7 @@
 
 namespace dectnrp::section3 {
 
-using packet_sizes_t = struct packet_sizes_t {
+struct packet_sizes_t {
         packet_sizes_def_t psdef{};
 
         numerologies_t numerology{};

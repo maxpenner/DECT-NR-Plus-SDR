@@ -33,7 +33,7 @@ namespace dectnrp::common {
  * cpu_core: If set to value between 0 and n_cores-1, thread will start on respective core. If
  * smaller 0, scheduler picks core.
  */
-using threads_core_prio_config_t = struct threads_core_prio_config_t {
+struct threads_core_prio_config_t {
         int prio_offset{-1};
         int cpu_core{-1};
 };

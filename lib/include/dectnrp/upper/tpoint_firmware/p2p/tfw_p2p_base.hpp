@@ -29,7 +29,10 @@
 #include "dectnrp/mac/allocation/allocation_ft.hpp"
 #include "dectnrp/mac/allocation/allocation_pt.hpp"
 #include "dectnrp/mac/allocation/tx_opportunity.hpp"
+#include "dectnrp/mac/pll/pll.hpp"
+#include "dectnrp/mac/ppx/ppx.hpp"
 #include "dectnrp/phy/indicators/cqi_lut.hpp"
+#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 #include "dectnrp/radio/hw_simulator.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie_pool_tx.hpp"
@@ -38,14 +41,16 @@
 
 #define APPLICATION_INTERFACE_VNIC_OR_SOCKET
 
-// #define TFW_P2P_EXPORT_1PPS
+// #define TFW_P2P_EXPORT_PPX
 #ifndef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
-#undef TFW_P2P_EXPORT_1PPS
+#undef TFW_P2P_EXPORT_PPX
 #endif
 
-#ifdef TFW_P2P_EXPORT_1PPS
-#include "dectnrp/mac/ppx/ppx_pll.hpp"
+#ifdef TFW_P2P_EXPORT_PPX
+#include "dectnrp/mac/ppx/ppx.hpp"
 #endif
+
+// #define TFW_P2P_MIMO
 
 namespace dectnrp::upper::tfw::p2p {
 
@@ -83,7 +88,7 @@ class tfw_p2p_base_t : public tpoint_t {
         // ##################################################
         // MAC Layer
 
-        /// used for regular callbacks (logging, PPS generation etc.)
+        /// used for regular callbacks (logging, PPX generation etc.)
         common::adt::callbacks_t<void> callbacks;
 
         /// both FT and PT must know the FT's identity
@@ -106,14 +111,15 @@ class tfw_p2p_base_t : public tpoint_t {
         /// all PT allocations have to be known at FT, individual PTs only need their own allocation
         mac::allocation::allocation_pt_t init_allocation_pt(const uint32_t firmware_id_);
 
-#ifdef TFW_P2P_EXPORT_1PPS
-        // convert beacons starts to a PPS signal
-        mac::ppx::ppx_pll_t ppx_pll;
+        /// for estimation of ppx_period_warped_64
+        mac::pll_t pll;
 
-        /// FT and PT both generate PPS, but in different ways. Function is added to callbacks.
-        virtual void worksub_callback_pps(const int64_t now_64,
-                                          const size_t idx,
-                                          int64_t& next_64) = 0;
+#ifdef TFW_P2P_EXPORT_PPX
+        /// convert beacons beginnings to a PPX
+        mac::ppx_t ppx;
+
+        /// FT and PT both generate a PPX
+        void worksub_callback_ppx(const int64_t now_64, const size_t idx, int64_t& next_64);
 #endif
 
         /// part 2 defines five MAC PDU types, these are generators for each type
@@ -147,12 +153,10 @@ class tfw_p2p_base_t : public tpoint_t {
          */
         // clang-format off
         virtual std::optional<phy::maclow_phy_t> worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) = 0;
-        virtual std::optional<phy::maclow_phy_t> worksub_pcc_11(const phy::phy_maclow_t& phy_maclow) = 0;
         virtual phy::maclow_phy_t worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) = 0;
         virtual phy::maclow_phy_t worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) = 0;
 
         virtual phy::machigh_phy_t worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) = 0;
-        virtual phy::machigh_phy_t worksub_pdc_11(const phy::phy_machigh_t& phy_machigh) = 0;
         virtual phy::machigh_phy_t worksub_pdc_20(const phy::phy_machigh_t& phy_machigh) = 0;
         virtual phy::machigh_phy_t worksub_pdc_21(const phy::phy_machigh_t& phy_machigh) = 0;
         // clang-format on
@@ -164,6 +168,7 @@ class tfw_p2p_base_t : public tpoint_t {
         /// common procedure for FT and PT generating a single packet with multiple MAC PDUs
         bool worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                                 const mac::allocation::tx_opportunity_t& tx_opportunity,
+                                const phy::mimo_csi_t& mimo_csi,
                                 const uint32_t conn_idx);
 
         // ##################################################

@@ -25,7 +25,7 @@
 
 namespace dectnrp::section3 {
 
-using mcs_t = struct mcs_t {
+struct mcs_t {
         uint32_t index;
         uint32_t N_bps;
         uint32_t R_numerator;

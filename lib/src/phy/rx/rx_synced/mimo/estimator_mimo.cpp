@@ -23,6 +23,7 @@
 #include <volk/volk.h>
 
 #include <bit>
+#include <cmath>
 
 extern "C" {
 #include "srsran/phy/utils/vector.h"
@@ -37,21 +38,32 @@ estimator_mimo_t::estimator_mimo_t(const uint32_t N_RX_, const uint32_t N_TS_max
     : estimator_t(),
       N_RX(N_RX_),
       N_TS_max(N_TS_max_) {
-    dectnrp_assert(0 < n_wideband_point, "must be positive");
-    dectnrp_assert(n_wideband_point <= 8, "should not be more than 8");
-    dectnrp_assert(n_wideband_point % 2 == 0, "must be even");
+    dectnrp_assert(0 < RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS, "must be positive");
+    dectnrp_assert(RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS <= 8, "too large");
+    dectnrp_assert(RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS % 2 == 0, "must be even");
 
-    for (std::size_t i = 0; i < N_TS_max; ++i) {
-        stage_vec.push_back(srsran_vec_cf_malloc(N_RX * n_wideband_point));
+    for (std::size_t i = 0; i < N_RX; ++i) {
+        stage_rx_ts_vec.push_back(
+            srsran_vec_cf_malloc(N_TS_max * RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS));
     }
 
-    stage_multiplication = srsran_vec_cf_malloc(N_RX * n_wideband_point);
+    for (std::size_t i = 0; i < N_TS_max; ++i) {
+        stage_rx_ts_transpose_vec.push_back(
+            srsran_vec_cf_malloc(N_RX * RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS));
+    }
+
+    stage_multiplication =
+        srsran_vec_cf_malloc(std::max(N_RX, N_TS_max) * RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS);
 }
 
 estimator_mimo_t::~estimator_mimo_t() {
     free(stage_multiplication);
 
-    for (auto elem : stage_vec) {
+    for (auto elem : stage_rx_ts_transpose_vec) {
+        free(elem);
+    }
+
+    for (auto elem : stage_rx_ts_vec) {
         free(elem);
     }
 }
@@ -62,122 +74,158 @@ void estimator_mimo_t::process_stf(const channel_antennas_t& channel_antennas,
      * more than one transmit stream is used.
      */
 
-    mimo_report.fine_peak_time_64 = process_stf_meta.fine_peak_time_64;
+    // reset complete MIMO report
+    mimo_report = mimo_report_t();
 }
 
 void estimator_mimo_t::process_drs(const channel_antennas_t& channel_antennas,
                                    const process_drs_meta_t& process_drs_meta) {
     dectnrp_assert(N_RX == channel_antennas.size(), "incorrect size");
+    dectnrp_assert(process_drs_meta.TS_idx_first == 0, "incorrect number of transmit streams");
+    dectnrp_assert(process_drs_meta.N_TS == process_drs_meta.TS_idx_last + 1,
+                   "incorrect number of transmit streams");
 
-    /* Before running the actual MIMO algorithms, we put all common information required by all
-     * algorithms onto the stage. We collect individual transmit streams of each RX antenna onto
-     * a single stage. This operation does not take long since the spectrum is considered only
-     * across n_wideband_point number of cells of the entire spectrum.
-     */
+    mimo_report.N_RX = N_RX;
+    mimo_report.N_TS_other = process_drs_meta.N_TS;
 
-    // transmit streams
-    for (std::size_t ts = 0; ts <= process_drs_meta.TS_idx_last; ++ts) {
-        // destination stage
-        cf_t* const stage = stage_vec.at(ts);
+    // extract selected cells of OFDM spectrum onto stages
+    set_stages(channel_antennas, process_drs_meta);
 
-        // RX antennas
-        for (std::size_t rx = 0; rx < N_RX; ++rx) {
-            // channel estimates of a single transmit stream
-            const cf_t* tsptr = channel_antennas.at(rx)->get_chestim_drs_zf(ts);
-
-            // cells
-            for (std::size_t cell = 0; cell < n_wideband_point; ++cell) {
-                stage[rx * n_wideband_point + cell] = tsptr[step_offset + cell * step_width];
-            }
-        }
+    // optional beamforming matrix for other side to use
+    if (process_drs_meta.N_TS == 1) {
+        mimo_report.tm_3_7_beamforming_idx = 0;
+    } else {
+        mimo_report.tm_3_7_beamforming_idx = mode_single_spatial_stream_3_7(
+            W, process_drs_meta.N_TS, N_RX, stage_rx_ts_vec, stage_multiplication);
     }
 
-    // reset
-    mimo_report = mimo_report_t();
-
-    mode_single_spatial_stream_3_7();
-    mode_multi_spatial_steam_2_4_6_8_9_11();
+    // optional beamforming matrix for this receiver to use if channel is reciprocal
+    if (N_RX == 1) {
+        mimo_report.tm_3_7_beamforming_reciprocal_idx = 0;
+    } else {
+        mimo_report.tm_3_7_beamforming_reciprocal_idx = mode_single_spatial_stream_3_7(
+            W, N_RX, process_drs_meta.N_TS, stage_rx_ts_transpose_vec, stage_multiplication);
+    }
 }
 
 const mimo_report_t& estimator_mimo_t::get_mimo_report() const { return mimo_report; }
 
 void estimator_mimo_t::reset_internal() {
-    step_width = N_DRS_cells_b / n_wideband_point;
+    step_width = N_DRS_cells_b / RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS;
     step_offset = step_width / 2;
 
     dectnrp_assert(0 < step_width, "step_width too small");
 }
 
-void estimator_mimo_t::mode_single_spatial_stream_3_7() {
-    /* MIMO modes 3 and 7 work regardless of the number of antennas at the opposite site. A single
-     * transmit stream (index 0) if spread across the antenna streams.
-     *
-     *                                            A
-     *      TS0_opposite = [Ch0, Ch1, Ch1, Ch3] * B * TS0
-     *                                            C
-     *                                            D
-     *
-     *                                            A
-     *      TS0_opposite = [Ch0, Ch1, Ch1, Ch3] * B * TS0
-     *      TS1_opposite   [Ch4, Ch5, Ch6, Ch7]   C
-     *                                            D
+void estimator_mimo_t::set_stages(const channel_antennas_t& channel_antennas,
+                                  const process_drs_meta_t& process_drs_meta) {
+    /* Before running the actual MIMO algorithms, we put all common information required by all
+     * algorithms onto the stages. This operation does not take long since the spectrum is
+     * considered only at RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS number of cells of the entire
+     * spectrum.
      */
 
-    // get reference to all available beamforming matrices, we transmit one TS
-    const auto& W_mat = W.get_W(1, N_RX);
+    // RX antennas
+    for (std::size_t rx = 0; rx < N_RX; ++rx) {
+        // destination stage
+        cf_t* const stage = stage_rx_ts_vec.at(rx);
 
-    // What is the index of the first W_mat without any zero elements?
-    const uint32_t A = W.get_codebook_index_nonzero(1, N_RX);
+        // transmit streams
+        for (std::size_t ts = 0; ts <= process_drs_meta.TS_idx_last; ++ts) {
+            // channel estimates of a single transmit stream
+            const cf_t* tsptr = channel_antennas.at(rx)->get_chestim_drs_zf(ts);
+
+            // cells
+            for (std::size_t cell = 0; cell < RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS; ++cell) {
+                stage[ts * RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS + cell] =
+                    tsptr[step_offset + cell * step_width];
+            }
+        }
+    }
+
+    // transmit streams
+    for (std::size_t ts = 0; ts <= process_drs_meta.TS_idx_last; ++ts) {
+        // destination stage
+        cf_t* const stage = stage_rx_ts_transpose_vec.at(ts);
+
+        // RX antennas
+        for (std::size_t rx = 0; rx < N_RX; ++rx) {
+            // destination stage
+            const cf_t* stage_src = stage_rx_ts_vec.at(rx);
+
+            srsran_vec_cf_copy(&stage[rx * RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS],
+                               &stage_src[ts * RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS],
+                               RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS);
+        }
+    }
+}
+
+uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W,
+                                                          const uint32_t N_TX_virt,
+                                                          const uint32_t N_RX_virt,
+                                                          const std::vector<cf_t*>& stage,
+                                                          cf_t* stage_multiplication) {
+    dectnrp_assert(1 < N_TX_virt, "single TX antenna does not allow beamforming");
+
+    // get reference to all available beamforming matrices for a single transmit stream
+    const auto& W_mat = W.get_W(1, N_TX_virt);
+    const auto& scaling_factor = W.get_scaling_factor(1, N_TX_virt);
+
+// What is the index of the first W_mat without any zero elements?
+#ifdef RX_SYNCED_PARAM_MIMO_USE_ALL_W_MATRICES_OR_ONLY_NON_ZERO
+    const uint32_t A = 0;
+#else
+    const uint32_t A = W.get_codebook_index_nonzero(1, N_TX_virt);
+#endif
 
     dectnrp_assert(A < W_mat.size(), "no matrices to use");
 
     // every beamforming matrix is tested, the one with the highest receive power is picked
     float power_max = -1000.0f;
-    int32_t W_mat_best_idx = -1;
+    int32_t ret = -1;
 
-    // subset of W_mat
     for (std::size_t wm = A; wm < W_mat.size(); ++wm) {
-        float power = 0.0f;
-
+        // single beamforming matrix to test
         const auto& W_mat_single = W_mat[wm];
 
+        // sum of power across all RX antennas
+        float power = 0.0f;
+
         // RX antennas of opposite size
-        for (std::size_t rxo = 0; rxo < N_eff_TX; ++rxo) {
+        for (std::size_t rx = 0; rx < N_RX_virt; ++rx) {
+            // sum of power across all TS for a single RX antenna
             lv_32fc_t sum = lv_cmake(0.0f, 0.0f);
 
-            for (std::size_t rx = 0; rx < N_RX; ++rx) {
-                const std::size_t offset = rx * n_wideband_point;
-
-                volk_32fc_s32fc_multiply2_32fc((lv_32fc_t*)stage_multiplication,
-                                               (const lv_32fc_t*)&stage_vec.at(rxo)[offset],
-                                               (const lv_32fc_t*)&W_mat_single.at(rx),
-                                               n_wideband_point);
+            for (std::size_t tx = 0; tx < N_TX_virt; ++tx) {
+                volk_32fc_s32fc_multiply2_32fc(
+                    (lv_32fc_t*)stage_multiplication,
+                    (const lv_32fc_t*)&stage.at(rx)[tx * RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS],
+                    (const lv_32fc_t*)&W_mat_single.at(tx),
+                    RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS);
 
                 lv_32fc_t sum_partial;
 
-                volk_32fc_accumulator_s32fc(
-                    &sum_partial, (const lv_32fc_t*)stage_multiplication, n_wideband_point);
+                volk_32fc_accumulator_s32fc(&sum_partial,
+                                            (const lv_32fc_t*)stage_multiplication,
+                                            RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS);
 
                 sum += sum_partial;
             }
 
-            // determine total receiver power
             power += std::abs(sum);
         }
 
-        // does it lead to more receive power?
+        power *= scaling_factor[wm];
+
         if (power_max < power) {
             power_max = power;
-            W_mat_best_idx = wm;
+            ret = wm;
         }
     }
 
-    // add all information to the beamforming report
-    mimo_report.tm_3_7_beamforming_idx = W_mat_best_idx;
-}
+    dectnrp_assert(0 <= ret, "invalid matrix index");
 
-void estimator_mimo_t::mode_multi_spatial_steam_2_4_6_8_9_11() {
-    // ToDo
+    return ret;
 }
 
 }  // namespace dectnrp::phy

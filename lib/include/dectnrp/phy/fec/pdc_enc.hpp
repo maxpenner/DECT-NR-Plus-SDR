@@ -34,7 +34,7 @@ extern "C" {
 
 namespace dectnrp::section3 {
 
-using pdc_enc_t = struct pdc_enc_t {
+struct pdc_enc_t {
         /// encoding intermediary steps
         uint8_t* c_systematic;
         uint8_t* c_parity;

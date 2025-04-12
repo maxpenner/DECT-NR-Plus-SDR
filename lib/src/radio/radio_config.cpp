@@ -43,8 +43,8 @@ radio_config_t::radio_config_t(const std::string directory)
 
             hw_config.nof_buffer_tx = common::jsonparse::read_int(it, "nof_buffer_tx", 1, 16);
 
-            hw_config.turn_around_time_us =
-                common::jsonparse::read_int(it, "turn_around_time_us", 10, 5000);
+            hw_config.turnaround_time_us =
+                common::jsonparse::read_int(it, "turnaround_time_us", 10, 5000);
 
             hw_config.tx_burst_leading_zero_us =
                 common::jsonparse::read_int(it, "tx_burst_leading_zero_us", 0, 500);

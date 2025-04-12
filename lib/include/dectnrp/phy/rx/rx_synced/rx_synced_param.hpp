@@ -265,6 +265,18 @@ extern "C" {
  */
 #define RX_SYNCED_PARAM_MIMO_BASED_ON_STF_AND_DRS_AT_PACKET_END
 
+/**
+ * \brief Running all MIMO algorithms across the full bandwidth is not necessary. Instead, a few
+ * cells across the spectrum are extracted and all algorithms are based on this selection.
+ */
+#define RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS 4
+
+/**
+ * \brief We can maximize power by emitting only non-zero signals from all antennas, and ignoring
+ * the beamforming matrix scaling factor.
+ */
+#define RX_SYNCED_PARAM_MIMO_USE_ALL_W_MATRICES_OR_ONLY_NON_ZERO
+
 // ########################################################################################################
 // Temporary System Restrictions
 // ########################################################################################################

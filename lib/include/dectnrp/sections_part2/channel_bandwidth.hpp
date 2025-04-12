@@ -24,7 +24,7 @@
 
 namespace dectnrp::section2 {
 
-using channel_bandwidth_t = struct channel_bandwidth_t {
+struct channel_bandwidth_t {
         uint32_t operating_channel_bandwidth_index;
         double nominal_channel_bandwidth;
         double transmission_channel_bandwidth;

@@ -40,8 +40,6 @@ class estimator_mimo_t final : public estimator_t {
         estimator_mimo_t(estimator_mimo_t&&) = delete;
         estimator_mimo_t& operator=(estimator_mimo_t&&) = delete;
 
-        static constexpr std::size_t n_wideband_point{4};
-
         /**
          * \brief Actually not used, as the STF does not allow a complete channel measurement for
          * packets with more than one transmit stream.
@@ -60,7 +58,7 @@ class estimator_mimo_t final : public estimator_t {
         virtual void process_drs(const channel_antennas_t& channel_antennas,
                                  const process_drs_meta_t& process_drs_meta) override final;
 
-        const mimo_report_t& get_mimo_report() const;
+        [[nodiscard]] const mimo_report_t& get_mimo_report() const;
 
     private:
         virtual void reset_internal() override final;
@@ -79,11 +77,19 @@ class estimator_mimo_t final : public estimator_t {
         uint32_t step_offset;
 
         // for SIMD
-        std::vector<cf_t*> stage_vec;
+        std::vector<cf_t*> stage_rx_ts_vec;
+        std::vector<cf_t*> stage_rx_ts_transpose_vec;
         cf_t* stage_multiplication;
 
-        void mode_single_spatial_stream_3_7();
-        void mode_multi_spatial_steam_2_4_6_8_9_11();
+        void set_stages(const channel_antennas_t& channel_antennas,
+                        const process_drs_meta_t& process_drs_meta);
+
+        [[nodiscard]] static uint32_t mode_single_spatial_stream_3_7(
+            const section3::W_t& W,
+            const uint32_t N_TX_virt,
+            const uint32_t N_RX_virt,
+            const std::vector<cf_t*>& stage,
+            cf_t* stage_multiplication);
 };
 
 }  // namespace dectnrp::phy

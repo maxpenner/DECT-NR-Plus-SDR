@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include "dectnrp/upper/tpoint_firmware/p2p/contact_list_p2p.hpp"
+#include "dectnrp/mac/contact_list.hpp"
+#include "dectnrp/upper/tpoint_firmware/p2p/contact_p2p.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
@@ -38,12 +39,12 @@ class tfw_p2p_ft_t final : public tfw_p2p_base_t {
 
         static const std::string firmware_name;
 
-        void work_start_imminent(const int64_t start_time_64) override;
-        phy::machigh_phy_t work_regular(const phy::phy_mac_reg_t& phy_mac_reg) override;
+        void work_start_imminent(const int64_t start_time_64) override final;
+        phy::machigh_phy_t work_regular(const phy::phy_mac_reg_t& phy_mac_reg) override final;
         // phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override;
         // phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
-        phy::machigh_phy_t work_upper(const upper::upper_report_t& upper_report) override;
-        phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override;
+        phy::machigh_phy_t work_upper(const upper::upper_report_t& upper_report) override final;
+        phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
 
     private:
         std::vector<std::string> start_threads() override final;
@@ -58,29 +59,21 @@ class tfw_p2p_ft_t final : public tfw_p2p_base_t {
         void init_radio() override final;
         void init_simulation_if_detected() override final;
 
-#ifdef TFW_P2P_EXPORT_1PPS
-        void worksub_callback_pps(const int64_t now_64,
-                                  const size_t idx,
-                                  int64_t& next_64) override final;
-#endif
-
         // ##################################################
         // MAC Layer
 
         /// fast lookup of all PTs and their properties the FT requires for uplink and downlink
-        contact_list_p2p_t contact_list_p2p;
+        mac::contact_list_t<contact_p2p_t> contact_list;
 
         // besides unicast for downlink, the FT also requires a beacon packet
         void init_packet_beacon();
 
         // clang-format off
         std::optional<phy::maclow_phy_t> worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) override final;
-        std::optional<phy::maclow_phy_t> worksub_pcc_11(const phy::phy_maclow_t& phy_maclow) override final;
         phy::maclow_phy_t worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) override final;
         phy::maclow_phy_t worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) override final;
         
         phy::machigh_phy_t worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) override final;
-        phy::machigh_phy_t worksub_pdc_11(const phy::phy_machigh_t& phy_machigh) override final;
         phy::machigh_phy_t worksub_pdc_20(const phy::phy_machigh_t& phy_machigh) override final;
         phy::machigh_phy_t worksub_pdc_21(const phy::phy_machigh_t& phy_machigh) override final;
         // clang-format on

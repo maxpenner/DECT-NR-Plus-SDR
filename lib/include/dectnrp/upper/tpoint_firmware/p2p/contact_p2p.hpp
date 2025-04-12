@@ -20,32 +20,27 @@
 
 #pragma once
 
-#include <cstdint>
+#include "dectnrp/mac/contact.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::upper::tfw::p2p {
 
-class packing_t {
+class contact_p2p_t final : public mac::contact_t {
     public:
-        virtual ~packing_t() = default;
+        // ##################################################
+        // Radio Layer + PHY
+        // -
 
-        /// set all values to zero
-        virtual void zero() = 0;
+        // ##################################################
+        // MAC Layer
+        // -
 
-        /// called before pack() or after unpack()
-        virtual bool is_valid() const = 0;
+        // ##################################################
+        // DLC and Convergence Layer
+        // -
 
-        /// called after is_valid(), typically called with pack()
-        virtual uint32_t get_packed_size() const = 0;
-
-        /// serialize
-        virtual void pack(uint8_t* a_ptr) const = 0;
-
-        /// deserialize
-        virtual bool unpack(const uint8_t* a_ptr) = 0;
-
-        void operator~() { zero(); }
-        void operator>>(uint8_t* a_ptr) const { pack(a_ptr); }
-        void operator<<(const uint8_t* a_ptr) { unpack(a_ptr); }
+        // ##################################################
+        // Application Layer
+        // -
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::upper::tfw::p2p

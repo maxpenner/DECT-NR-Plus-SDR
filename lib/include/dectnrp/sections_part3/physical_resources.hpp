@@ -44,7 +44,7 @@ static constexpr uint32_t N_TS_2_N_TS_idx_vec[9] = {0, 0, 1, 0, 2, 0, 0, 0, 3};
 static constexpr uint32_t N_TS_idx_2_N_TS_vec[4] = {1, 2, 4, 8};
 static constexpr uint32_t N_TS_2_nof_STF_templates_vec[9] = {0, 1, 2, 0, 3, 0, 0, 0, 4};
 
-using k_b_OCC_t = struct k_b_OCC_t {
+struct k_b_OCC_t {
         int32_t b_1[56];
         int32_t b_2[112];
         int32_t b_4[224];
@@ -53,7 +53,7 @@ using k_b_OCC_t = struct k_b_OCC_t {
         int32_t b_16[896];
 };
 
-using k_b_OCC_vec_t = struct k_b_OCC_vec_t {
+struct k_b_OCC_vec_t {
         /**
          * \brief vector b_x will have 6 rows
          *

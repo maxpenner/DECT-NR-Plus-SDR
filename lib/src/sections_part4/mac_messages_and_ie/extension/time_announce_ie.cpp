@@ -43,27 +43,38 @@ void time_announce_ie_t::set_time(const time_type_t time_type_,
     time_type = time_type_;
     N_frames_until_full_sec = N_frames_until_full_sec_;
     full_sec = full_sec_;
+
+    tai_minus_utc_seconds = 0;
 }
 
 void time_announce_ie_t::zero() {
     time_type = time_type_t::not_defined;
-    N_frames_until_full_sec = -1;
+    N_frames_until_full_sec = common::adt::UNDEFINED_NUMERIC_32;
     full_sec = -1;
+    tai_minus_utc_seconds = common::adt::UNDEFINED_NUMERIC_32;
 }
 
 bool time_announce_ie_t::is_valid() const {
+    if (!common::adt::is_valid<time_type_t>(time_type)) {
+        return false;
+    }
+
+    if (255 < N_frames_until_full_sec) {
+        return false;
+    }
+
     if (full_sec < 0) {
         return false;
     }
 
-    if (full_sec < 0 || 255 < full_sec) {
+    if (255 < tai_minus_utc_seconds) {
         return false;
     }
 
-    return common::adt::is_valid<time_type_t>(time_type);
+    return true;
 }
 
-uint32_t time_announce_ie_t::get_packed_size() const { return 10; }
+uint32_t time_announce_ie_t::get_packed_size() const { return 11; }
 
 void time_announce_ie_t::pack(uint8_t* mac_pdu_offset) const {
     dectnrp_assert(is_valid(), "time_announce_ie_t not valid");
@@ -71,6 +82,7 @@ void time_announce_ie_t::pack(uint8_t* mac_pdu_offset) const {
     mac_pdu_offset[0] = static_cast<uint8_t>(std::underlying_type_t<time_type_t>(time_type));
     mac_pdu_offset[1] = static_cast<uint8_t>(N_frames_until_full_sec);
     common::adt::l2b_lower<uint64_t>(&mac_pdu_offset[2], static_cast<uint64_t>(full_sec), 8);
+    mac_pdu_offset[10] = static_cast<uint8_t>(tai_minus_utc_seconds);
 }
 
 bool time_announce_ie_t::unpack(const uint8_t* mac_pdu_offset) {
@@ -79,6 +91,7 @@ bool time_announce_ie_t::unpack(const uint8_t* mac_pdu_offset) {
     time_type = common::adt::from_coded_value<time_type_t>(mac_pdu_offset[0]);
     N_frames_until_full_sec = mac_pdu_offset[1];
     full_sec = common::adt::b2l_lower<uint64_t>(&mac_pdu_offset[2], 8);
+    tai_minus_utc_seconds = mac_pdu_offset[10];
 
     return is_valid();
 }

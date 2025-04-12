@@ -38,19 +38,38 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     hpp =
         std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 4, 4);
 
-    // set frequency, TX and RX power
+    // set TX power, RX power, and frequency which should be free of any interference
     hw.set_command_time();
     hw.set_tx_power_ant_0dBFS_tc(10.0f);
     hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
-
-    // frequency should be free of any interference
     hw.set_freq_tc(3830.0e6);
 
-    // set identities
+    psdef = {.u = worker_pool_config.radio_device_class.u_min,
+             .b = worker_pool_config.radio_device_class.b_min,
+             .PacketLengthType = 0,
+             .PacketLength = 2,
+             .tm_mode_index = 0,
+             .mcs_index = 2,
+             .Z = worker_pool_config.radio_device_class.Z_min};
+
     identity_ft = section4::mac_architecture::identity_t(100, 444, 555);
     identity_pt = identity_ft;
     ++identity_pt.LongRadioDeviceID;
     ++identity_pt.ShortRadioDeviceID;
+
+    plcf_10.HeaderFormat = 0;
+    plcf_10.PacketLengthType = psdef.PacketLengthType;
+    plcf_10.set_PacketLength_m1(psdef.PacketLength);
+    if (tpoint_config.firmware_id == 0) {
+        plcf_10.ShortNetworkID = identity_ft.ShortNetworkID;
+        plcf_10.TransmitterIdentity = identity_ft.ShortRadioDeviceID;
+    } else {
+        plcf_10.ShortNetworkID = identity_pt.ShortNetworkID;
+        plcf_10.TransmitterIdentity = identity_pt.ShortRadioDeviceID;
+    }
+    plcf_10.set_TransmitPower(0);
+    plcf_10.Reserved = 0;
+    plcf_10.DFMCS = psdef.mcs_index;
 
     app_server = std::make_unique<application::sockets::socket_server_t>(
         id,
@@ -68,7 +87,7 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
         4UL,
         1500UL);
 
-    a_raw_with_rtt.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
+    stage_a.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
 }
 
 void tfw_rtt_t::work_start_imminent(const int64_t start_time_64) {}
@@ -79,7 +98,7 @@ phy::machigh_phy_t tfw_rtt_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg
 
 phy::maclow_phy_t tfw_rtt_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     // base pointer to extract PLCF_type=1
-    const auto* plcf_base = phy_maclow.pcc_report.plcf_decoder.get_plcf_base(plcf_type);
+    const auto* plcf_base = phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1);
 
     // is this the correct PLCF type?
     if (plcf_base == nullptr) {
@@ -92,31 +111,31 @@ phy::maclow_phy_t tfw_rtt_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     }
 
     // cast guaranteed to work
-    const auto* plcf_10 = static_cast<const section4::plcf_10_t*>(
+    const auto* plcf_10_rx = static_cast<const section4::plcf_10_t*>(
         phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
 
-    dectnrp_assert(plcf_10 != nullptr, "cast ill-formed");
+    dectnrp_assert(plcf_10_rx != nullptr, "cast ill-formed");
 
     // is this the correct short network ID?
-    if (plcf_10->ShortNetworkID != identity_ft.ShortNetworkID) {
+    if (plcf_10_rx->ShortNetworkID != identity_ft.ShortNetworkID) {
         return phy::maclow_phy_t();
     }
 
     // expected TransmitterIdentity depends on FT or PT
     if (tpoint_config.firmware_id == 0) {
         // FT receives from PT
-        if (plcf_10->TransmitterIdentity != identity_pt.ShortRadioDeviceID) {
+        if (plcf_10_rx->TransmitterIdentity != identity_pt.ShortRadioDeviceID) {
             return phy::maclow_phy_t();
         }
     } else {
         // PT receives from FT
-        if (plcf_10->TransmitterIdentity != identity_ft.ShortRadioDeviceID) {
+        if (plcf_10_rx->TransmitterIdentity != identity_ft.ShortRadioDeviceID) {
             return phy::maclow_phy_t();
         }
     }
 
     return worksub_pcc2pdc(phy_maclow,
-                           plcf_type,
+                           1,
                            identity_pt.NetworkID,
                            0,
                            phy::harq::finalize_rx_t::reset_and_terminate,
@@ -129,10 +148,8 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
         return phy::machigh_phy_t();
     }
 
-    // PDC was decoded with correct CRC, now define return value
     phy::machigh_phy_t machigh_phy;
 
-    // FT receives from PT
     if (tpoint_config.firmware_id == 0) {
         // measure round-trip time
         const int64_t rtt = watch.get_elapsed();
@@ -145,37 +162,30 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
         // get pointer to payload of received packet
         const auto a_raw = phy_machigh.pdc_report.mac_pdu_decoder.get_a_raw();
 
-        // copy first few bytes so rtt_external.cpp can verify the content of the packet
-        memcpy(&a_raw_with_rtt[0], a_raw.first, TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE);
+        // copy first few bytes so rtt can verify the content of the packet
+        memcpy(&stage_a[0], a_raw.first, TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE);
 
         // insert measured RTT into payload so rtt_external.cpp can log it
-        memcpy(&a_raw_with_rtt[TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE], &rtt, sizeof(rtt));
+        memcpy(&stage_a[TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE], &rtt, sizeof(rtt));
 
-        // forward to rtt_external.cpp directly
-        app_client->write_immediate(0, &a_raw_with_rtt[0], a_raw.second);
+        // forward to rtt
+        app_client->write_immediate(0, &stage_a[0], a_raw.second);
 
         ++N_measurement_rx_cnt;
-    }
-    // PT receives from FT
-    else {
-        // set pointer to MAC PDU decoder so that we can copy its data
-        mac_pdu_decoder = &phy_machigh.pdc_report.mac_pdu_decoder;
+    } else {
+        // copy received payload onto stage
+        phy_machigh.pdc_report.mac_pdu_decoder.copy_a(&stage_a[0]);
 
-        // declare response packet
-        generate_packet_asap(identity_pt, machigh_phy);
-
-        // reset to nullptr so we don't accidentally use it
-        mac_pdu_decoder = nullptr;
+        generate_packet_asap(machigh_phy);
 
         // base pointer to extract PLCF_type=1
-        const auto* plcf_base =
-            phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(plcf_type);
+        const auto* plcf_base = phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1);
 
         // make AGC gain changes right after sending the response packet
         const int64_t t_agc_change_64 =
             machigh_phy.tx_descriptor_vec.at(0).buffer_tx_meta.tx_time_64 +
             duration_lut.get_N_samples_from_subslots(worker_pool_config.radio_device_class.u_min,
-                                                     N_subslots);
+                                                     psdef.PacketLength);
 
         worksub_agc(phy_machigh.phy_maclow.sync_report, *plcf_base, t_agc_change_64);
     }
@@ -184,12 +194,15 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
 }
 
 phy::machigh_phy_t tfw_rtt_t::work_upper(const upper::upper_report_t& upper_report) {
-    // only FT with firmware_id=0 triggers measurements
-    if (tpoint_config.firmware_id > 0) {
+    // return immediately if PT
+    if (0 < tpoint_config.firmware_id) {
         return phy::machigh_phy_t();
     }
 
-    // connection index 1 to indicate that a measurement was completed and we want a printout
+    /* The program rtt uses payload at connection index 1 to indicate that a measurement is
+     * completed and the result should be logged. All variables must be reset for a new measurement
+     * run.
+     */
     if (upper_report.conn_idx == 1) {
         // convert rtt to us (unused if logging is turned off)
         [[maybe_unused]] const int64_t rtt_min_us = rtt_min / int64_t{1000};
@@ -198,40 +211,38 @@ phy::machigh_phy_t tfw_rtt_t::work_upper(const upper::upper_report_t& upper_repo
         // number of microseconds in our packet (unused if logging is turned off)
         [[maybe_unused]] const int64_t packet_length_us_64 =
             duration_lut.get_N_us_from_samples(duration_lut.get_N_samples_from_subslots(
-                worker_pool_config.radio_device_class.u_min, N_subslots));
+                worker_pool_config.radio_device_class.u_min, psdef.PacketLength));
 
-        // print result
-        dectnrp_log_inf("TX = {} RX = {} | PER = {} | packet_length = {} us  N_TB_byte = {}",
+        dectnrp_log_inf("TX = {} RX = {} | PER = {} | packet_length = {} us",
                         N_measurement_tx_cnt,
                         N_measurement_rx_cnt,
                         1.0f - static_cast<float>(N_measurement_rx_cnt) /
                                    static_cast<float>(N_measurement_tx_cnt),
-                        packet_length_us_64,
-                        N_TB_byte);
+                        packet_length_us_64);
         dectnrp_log_inf("rtt_min = {} us rtt_max: = {} us", rtt_min_us, rtt_max_us);
         dectnrp_log_inf("rtt_min = {} us rtt_max: = {} us <-- RTT adjusted for packet length",
                         rtt_min_us - 2 * packet_length_us_64,
                         rtt_max_us - 2 * packet_length_us_64);
         dectnrp_log_inf("rms_max: = {}", rms_max);
 
+        // reset measurement variables
         N_measurement_tx_cnt = 0;
         N_measurement_rx_cnt = 0;
         rtt_min = -common::adt::UNDEFINED_EARLY_64;
         rtt_max = common::adt::UNDEFINED_EARLY_64;
         rms_max = -1000.0f;
 
-        // invalidate dummy packet
+        // invalidate payload
         app_server->read_nto(1, nullptr);
 
         return phy::machigh_phy_t();
     }
 
-    // save current operating system time
     watch.reset();
 
     phy::machigh_phy_t machigh_phy;
 
-    generate_packet_asap(identity_ft, machigh_phy);
+    generate_packet_asap(machigh_phy);
 
     ++N_measurement_tx_cnt;
 
@@ -262,20 +273,10 @@ std::vector<std::string> tfw_rtt_t::stop_threads() {
     return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
 }
 
-void tfw_rtt_t::generate_packet_asap(const section4::mac_architecture::identity_t identity,
-                                     phy::machigh_phy_t& machigh_phy) {
-    // define required input to calculate packet dimensions
-    const section3::packet_sizes_def_t psdef = {.u = worker_pool_config.radio_device_class.u_min,
-                                                .b = worker_pool_config.radio_device_class.b_min,
-                                                .PacketLengthType = 0,
-                                                .PacketLength = N_subslots,
-                                                .tm_mode_index = 0,
-                                                .mcs_index = 2,
-                                                .Z = worker_pool_config.radio_device_class.Z_min};
-
+void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // request harq process
     auto* hp_tx = hpp->get_process_tx(
-        1, identity.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
+        1, identity_ft.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process
     if (hp_tx == nullptr) {
@@ -286,39 +287,22 @@ void tfw_rtt_t::generate_packet_asap(const section4::mac_architecture::identity_
     // this is now a well-defined packet size
     const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    // save number of bytes in transport block
-    N_TB_byte = packet_sizes.N_TB_byte;
-
-    // define and pack one of the PLCF types and formats
-    section4::plcf_10_t plcf_10;
-    plcf_10.HeaderFormat = 0;
-    plcf_10.PacketLengthType = psdef.PacketLengthType;
-    plcf_10.set_PacketLength_m1(psdef.PacketLength);
-    plcf_10.ShortNetworkID = identity.ShortNetworkID;
-    plcf_10.TransmitterIdentity = identity.ShortRadioDeviceID;
-    plcf_10.set_TransmitPower(0);
-    plcf_10.Reserved = 0;
-    plcf_10.DFMCS = psdef.mcs_index;
+    // pack headers
     plcf_10.pack(hp_tx->get_a_plcf());
 
-    // FT copies from application server to HARQ buffer
+    // define MAC PDU
     if (tpoint_config.firmware_id == 0) {
         // get item size for first connection
         const auto items_level_report = app_server->get_items_level_report_nto(0, 1);
 
         dectnrp_assert(items_level_report.N_filled > 0, "no items to transmit");
-        dectnrp_assert(
-            items_level_report.levels[0] <= N_TB_byte, "N_TB_byte is only {}", N_TB_byte);
+        dectnrp_assert(items_level_report.levels[0] <= packet_sizes.N_TB_byte,
+                       "N_TB_byte is only {}",
+                       packet_sizes.N_TB_byte);
 
-        // make app_server copy to HARQ buffer
         app_server->read_nto(0, hp_tx->get_a_tb());
-    }
-    // PT copies from received DECT NR+ packet to HARQ buffer
-    else {
-        dectnrp_assert(mac_pdu_decoder != nullptr, "MAC PDU decoder not defined");
-
-        // make MAC PDU decoder copy to HARQ buffer
-        mac_pdu_decoder->copy_a(hp_tx->get_a_tb());
+    } else {
+        memcpy(hp_tx->get_a_tb(), &stage_a[0], packet_sizes.N_TB_byte);
     }
 
     // pick beamforming codebook index
@@ -336,8 +320,7 @@ void tfw_rtt_t::generate_packet_asap(const section4::mac_architecture::identity_
         .tx_order_id = tx_order_id,
         .tx_time_64 = std::max(
             tx_earliest_64,
-            buffer_rx.get_rx_time_passed() + duration_lut.get_N_samples_from_duration(
-                                                 section3::duration_ec_t::turn_around_time_us))};
+            buffer_rx.get_rx_time_passed() + hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround))};
 
     ++tx_order_id;
     tx_earliest_64 = buffer_tx_meta.tx_time_64 + section3::get_N_samples_in_packet_length(

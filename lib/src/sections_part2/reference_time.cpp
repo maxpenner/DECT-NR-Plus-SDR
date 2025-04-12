@@ -1,5 +1,6 @@
 /*
- * Copyright 2023-2025 Maxim Penner
+ * Copyright 2023-2024 Maxim Penner, Alexander Poets
+ * Copyright 2025-2025 Maxim Penner
  *
  * This file is part of DECTNRP.
  *
@@ -18,16 +19,22 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#pragma once
+#include "dectnrp/sections_part2/reference_time.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::section2 {
 
-class testing_t {
-    public:
-        testing_t() = default;
-        virtual ~testing_t() = default;
+reference_time_accuracy_t get_reference_time_accuracy(const bool extreme_condition) {
+    reference_time_accuracy_t ret;
 
-        virtual void set_valid_random_configuration() = 0;
-};
+    ret.extreme_condition = extreme_condition;
 
-}  // namespace dectnrp::section4
+    if (extreme_condition) {
+        ret.accuracy_ppm = 15;
+    } else {
+        ret.accuracy_ppm = 10;
+    }
+
+    return ret;
+}
+
+}  // namespace dectnrp::section2

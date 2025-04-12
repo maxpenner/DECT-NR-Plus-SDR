@@ -53,6 +53,18 @@ worker_sync_t::worker_sync_t(worker_config_t& worker_config, baton_t& baton_)
 void worker_sync_t::work() {
     warmup();
 
+    dectnrp_assert(1 <= RX_SYNC_PARAM_MAX_NOF_BUFFERABLE_SYNC_BEFORE_ACQUIRING_BATON,
+                   "at least one packet must be bufferable");
+
+    // preallocate the maximum number of instances of sync_report_t that can be buffer
+    std::array<sync_report_t, RX_SYNC_PARAM_MAX_NOF_BUFFERABLE_SYNC_BEFORE_ACQUIRING_BATON>
+        sync_report_arr;
+
+    // current number of buffered instances of sync_report_t
+    uint32_t sync_report_arr_cnt = 0;
+
+    decltype(sync_chunk->search()) sync_report_opt;
+
     int64_t now_64 = buffer_rx.get_rx_time_passed();
 
     // we don't want synchronization to start right away, but some time in the near future
@@ -84,23 +96,12 @@ void worker_sync_t::work() {
 
     dectnrp_assert(now_64 <= start_time_64, "invalid synchronization start time");
 
-    // set starting point for synchronization and wait for it
     sync_chunk->wait_for_first_chunk_nto(start_time_64);
 
-    dectnrp_assert(1 <= RX_SYNC_PARAM_MAX_NOF_BUFFERABLE_SYNC_BEFORE_ACQUIRING_BATON,
-                   "at least one packet must be bufferable");
+    if (id == 0) {
+        job_queue.set_permeable();
+    }
 
-    // preallocate the maximum number of instances of sync_report_t that we can buffer
-    std::array<sync_report_t, RX_SYNC_PARAM_MAX_NOF_BUFFERABLE_SYNC_BEFORE_ACQUIRING_BATON>
-        sync_report_arr;
-
-    // we also need a counter for the number of sync_report_t we are currently buffering
-    uint32_t sync_report_arr_cnt = 0;
-
-    // working instance for the search result
-    decltype(sync_chunk->search()) sync_report_opt;
-
-    // work loop
     while (keep_running.load(std::memory_order_acquire)) {
         /* At this point, we know that keep_running is true and we are expected to continue our
          * search for packets. Furthermore, we know that we are the start of a new chunk. So, first

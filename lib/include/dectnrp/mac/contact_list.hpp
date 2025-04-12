@@ -21,44 +21,84 @@
 #pragma once
 
 #include <cstdint>
-#include <unordered_map>
+#include <vector>
 
 #include "dectnrp/common/adt/bimap.hpp"
-#include "dectnrp/phy/rx/rx_synced/mimo/mimo_report.hpp"
+#include "dectnrp/mac/contact.hpp"
+#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 #include "dectnrp/phy/rx/sync/sync_report.hpp"
 
 namespace dectnrp::mac {
 
+template <std::derived_from<contact_t> T>
 class contact_list_t {
     public:
-        /// LRDID = long radio device ID
-        using key_lrdid_t = uint32_t;
+        void reserve(const std::size_t N_entries) {
+            srdid_bimap.reserve(N_entries);
+            conn_idx_server_bimap.reserve(N_entries);
+            conn_idx_client_bimap.reserve(N_entries);
 
-        // ##################################################
-        // Radio Layer + PHY
+            contact_idx_um.reserve(N_entries);
+            contacts_vec.reserve(N_entries);
+        }
 
-        std::unordered_map<key_lrdid_t, phy::sync_report_t> sync_report_last_known;
+        void add_new_contact(const uint32_t lrdid,
+                             const uint32_t srdid,
+                             const uint32_t conn_idx_server,
+                             const uint32_t conn_idx_client) noexcept {
+            srdid_bimap.insert(lrdid, srdid);
+            conn_idx_server_bimap.insert(lrdid, conn_idx_server);
+            conn_idx_client_bimap.insert(lrdid, conn_idx_client);
 
-        bool have_heard_from_at_or_after(const key_lrdid_t key_lrdid, const int64_t time_64) const;
+            contact_idx_um.insert(std::make_pair(lrdid, contacts_vec.size()));
+            contacts_vec.push_back(T{});
+        }
 
-        std::unordered_map<key_lrdid_t, phy::mimo_report_t> mimo_report_last_known;
+        bool is_lrdid_known(const uint32_t lrdid) const noexcept {
+            return srdid_bimap.is_k_known(lrdid);
+        }
 
-        // ##################################################
-        // MAC Layer
+        bool is_srdid_known(const uint32_t srdid) const noexcept {
+            return srdid_bimap.is_v_known(srdid);
+        }
 
-        /// long to short radio device mapping
-        common::adt::bimap_t<key_lrdid_t, uint32_t, true> lrdid2srdid;
+        uint32_t get_lrdid_from_srdid(const uint32_t srdid) const noexcept {
+            return srdid_bimap.get_k(srdid);
+        };
 
-        bool is_lrdid_known(const key_lrdid_t key_lrdid) const;
-        bool is_srdid_known(const uint32_t srdid) const;
+        uint32_t get_srdid_from_lrdid(const uint32_t lrdid) const noexcept {
+            return srdid_bimap.get_v(lrdid);
+        };
 
-        // ##################################################
-        // DLC and Convergence Layer
-        // -
+        uint32_t get_lrdid_from_conn_idx_server(const uint32_t conn_idx_server) const noexcept {
+            return conn_idx_server_bimap.get_k(conn_idx_server);
+        };
 
-        // ##################################################
-        // Application Layer
-        // -
+        uint32_t get_conn_idx_client_from_lrdid(const uint32_t lrdid) const noexcept {
+            return conn_idx_client_bimap.get_v(lrdid);
+        };
+
+        constexpr const T& get_contact(const uint32_t lrdid) const& noexcept {
+            return contacts_vec.at(contact_idx_um.at(lrdid));
+        };
+
+        constexpr T& get_contact(const uint32_t lrdid) & noexcept {
+            return contacts_vec.at(contact_idx_um.at(lrdid));
+        };
+
+        const std::vector<T>& get_contacts_vec() const noexcept { return contacts_vec; };
+
+    private:
+        /// map various identifiers to long radio device ID
+        common::adt::bimap_t<uint32_t, uint32_t, true> srdid_bimap;
+        common::adt::bimap_t<uint32_t, uint32_t, true> conn_idx_server_bimap;
+        common::adt::bimap_t<uint32_t, uint32_t, true> conn_idx_client_bimap;
+
+        /// map long radio device ID to local contact index
+        std::unordered_map<uint32_t, uint32_t> contact_idx_um;
+
+        /// list of all contacts_vec accessible via the local index
+        std::vector<T> contacts_vec;
 };
 
 }  // namespace dectnrp::mac

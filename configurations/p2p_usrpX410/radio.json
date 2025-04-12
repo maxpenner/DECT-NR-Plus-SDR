@@ -3,7 +3,7 @@
   {
     "hw_name": "usrp",
     "nof_buffer_tx": 16,
-    "turn_around_time_us": 1200,
+    "turnaround_time_us": 1200,
     "tx_burst_leading_zero_us": 5,
     "tx_time_advance_smpl": 0,
     "rx_prestream_ms": 1000,

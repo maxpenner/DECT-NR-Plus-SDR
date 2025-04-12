@@ -64,10 +64,11 @@ hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
         nof_antennas_max = 4;
         ADC_bits = 16;
         DAC_bits = 14;
-        settling_time_us.at(std::to_underlying(settling_time_property_t::freq)) = 250;
-        settling_time_us.at(std::to_underlying(settling_time_property_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::freq)) = 250;
+        tmin_us.at(std::to_underlying(tmin_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::turnaround)) = hw_config.turnaround_time_us;
         ppm = 1.0f;
-        time_advance_fpga2ant_ns = 0;
+        time_advance_fpga2ant_samples = 0;
 
         // https://www.ettus.com/wp-content/uploads/2019/01/USRP_N310_Datasheet_v3.pdf
 
@@ -88,10 +89,11 @@ hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
         nof_antennas_max = 2;
         ADC_bits = 14;
         DAC_bits = 16;
-        settling_time_us.at(std::to_underlying(settling_time_property_t::freq)) = 250;
-        settling_time_us.at(std::to_underlying(settling_time_property_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::freq)) = 250;
+        tmin_us.at(std::to_underlying(tmin_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::turnaround)) = hw_config.turnaround_time_us;
         ppm = 1.0f;
-        time_advance_fpga2ant_ns = 0;
+        time_advance_fpga2ant_samples = 0;
 
         // https://www.ettus.com/wp-content/uploads/2019/04/USRP-N320-Datasheet-2.pdf
 
@@ -113,10 +115,11 @@ hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
         nof_antennas_max = 2;
         ADC_bits = 12;
         DAC_bits = 12;
-        settling_time_us.at(std::to_underlying(settling_time_property_t::freq)) = 250;
-        settling_time_us.at(std::to_underlying(settling_time_property_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::freq)) = 250;
+        tmin_us.at(std::to_underlying(tmin_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::turnaround)) = hw_config.turnaround_time_us;
         ppm = 2.0f;
-        time_advance_fpga2ant_ns = 0;
+        time_advance_fpga2ant_samples = 0;
 
         // https://kb.ettus.com/images/c/cb/B200_RF_Performance.pdf
 
@@ -137,10 +140,11 @@ hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
         nof_antennas_max = 4;
         ADC_bits = 12;
         DAC_bits = 14;
-        settling_time_us.at(std::to_underlying(settling_time_property_t::freq)) = 250;
-        settling_time_us.at(std::to_underlying(settling_time_property_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::freq)) = 250;
+        tmin_us.at(std::to_underlying(tmin_t::gain)) = 200;
+        tmin_us.at(std::to_underlying(tmin_t::turnaround)) = hw_config.turnaround_time_us;
         ppm = 2.0f;
-        time_advance_fpga2ant_ns = 0;
+        time_advance_fpga2ant_samples = 0;
 
         // https://www.ni.com/docs/de-DE/bundle/ettus-usrp-x410-specs/page/specs.html
 
@@ -191,6 +195,11 @@ void hw_usrp_t::set_samp_rate(const uint32_t samp_rate_in) {
     dectnrp_assert(
         (samp_rate / 2 + USRP_DIGITAL_LO_TUNING_OFFSET_FREQUENCY_HZ) <= master_clock_rate / 2,
         "sample rate + digital tuning offset too large");
+
+    // convert from us to samples
+    for (std::size_t i = 0; i < std::to_underlying(tmin_t::CARDINALITY); ++i) {
+        tmin_samples.at(i) = get_samples_in_us(tmin_us.at(i));
+    }
 }
 
 void hw_usrp_t::initialize_device() {

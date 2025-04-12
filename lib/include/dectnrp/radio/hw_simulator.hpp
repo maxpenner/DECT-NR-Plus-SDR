@@ -139,15 +139,15 @@ class hw_simulator_t final : public hw_t {
 
         /// is reset with every call of work_tx()
         struct tx_stats_t {
-                uint64_t samples_sent{0};
-                double samp_rate_is{0.0};
-                int64_t buffer_tx_sent{0};
+                uint64_t samples_sent{};
+                double samp_rate_is{};
+                int64_t buffer_tx_sent{};
         } tx_stats;
 
         /// is reset with every call of work_rx()
         struct rx_stats_t {
-                uint64_t samples_sent{0};
-                double samp_rate_is{0.0};
+                uint64_t samples_sent{};
+                double samp_rate_is{};
         } rx_stats;
 };
 

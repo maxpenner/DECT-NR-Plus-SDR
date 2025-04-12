@@ -21,13 +21,43 @@
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 //
 
+#include <cmath>
+
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/limits.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
+#ifdef TFW_P2P_EXPORT_PPX
+void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
+                                          const size_t idx,
+                                          int64_t& next_64) {
+    const auto pulse_config = ppx.get_ppx_imminent();
+
+    hw.schedule_pulse_tc(pulse_config);
+
+    dectnrp_assert(now_64 < pulse_config.rising_edge_64, "time out-of-order");
+    dectnrp_assert(pulse_config.rising_edge_64 < now_64 + ppx.get_ppx_period_warped(),
+                   "time out-of-order");
+
+    ppx.extrapolate_next_rising_edge();
+
+    dectnrp_assert(now_64 + ppx.get_ppx_period_warped() < ppx.get_ppx_imminent().rising_edge_64,
+                   "time out-of-order");
+
+    dectnrp_assert(
+        std::abs(pulse_config.rising_edge_64 - ppx.get_ppx_time_advance_samples() - next_64) <
+            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 5),
+        "callback adjustment time too large");
+
+    // set time of next callback
+    next_64 = pulse_config.rising_edge_64 - ppx.get_ppx_time_advance_samples();
+}
+#endif
+
 bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                                         const mac::allocation::tx_opportunity_t& tx_opportunity,
+                                        const phy::mimo_csi_t& mimo_csi,
                                         const uint32_t conn_idx) {
     // first check if there even is any data to transmit
     const auto items_level_report = app_server->get_items_level_report_try(
@@ -94,7 +124,6 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
             break;
         }
 
-        // increment counter only if we actually wrote data to the MMIE
         a_cnt_w += a_cnt_w_inc;
     }
 

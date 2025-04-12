@@ -19,7 +19,7 @@ Calling this method also must take care of adding a [mac_multiplexing_header_t](
 
 ## Reception
 
-The decoder at the receiver side is [mac_pdu_decoder_t](../mac_pdu/mac_pdu_decoder.hpp). If the CRC on PHY layer is correct, it is given a pointer to the PHY PDU and its length and attempts to extract all MMIEs. The class [mac_pdu_decoder_t](../mac_pdu/mac_pdu_decoder.hpp) derives from [mmie_pool_tx_t](mmie_pool_tx.hpp) and thus contains the same MMIEs. However, the decoder may contain each MMIE as often as it can occur in a MAC PDU. For example, it is possible that there are multiple instances of [user_plane_data_t](user_plane_data.hpp) or [higher_layer_signalling_t](higher_layer_signalling.hpp) in a single MAC PDU.
+The decoder at the receiver side is [mac_pdu_decoder_t](../mac_pdu/mac_pdu_decoder.hpp). It decodes speculatively, i.e. it also tries to decode MMIEs from available data before the CRC of the MAC PDU has been confirmed. The class [mac_pdu_decoder_t](../mac_pdu/mac_pdu_decoder.hpp) derives from [mmie_pool_tx_t](mmie_pool_tx.hpp) and thus contains the same MMIEs. However, the decoder may contain each MMIE as often as it can occur in a MAC PDU. For example, it is possible that there are multiple instances of [user_plane_data_t](user_plane_data.hpp) or [higher_layer_signalling_t](higher_layer_signalling.hpp) in a single MAC PDU.
 
 ## MMIE Types
 

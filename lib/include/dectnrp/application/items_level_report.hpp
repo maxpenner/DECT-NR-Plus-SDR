@@ -27,7 +27,7 @@
 
 namespace dectnrp::application {
 
-using items_level_report_t = struct items_level_report_t {
+struct items_level_report_t {
         uint32_t N_filled{};
         std::array<uint32_t, limits::max_items_level_reported> levels{};
 };

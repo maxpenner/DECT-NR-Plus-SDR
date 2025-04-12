@@ -35,14 +35,14 @@ resource_t::resource_t(const section3::duration_t offset_, const section3::durat
     dectnrp_assert(is_well_defined(), "not well defined");
 }
 
-uint32_t resource_t::get_first_sample_index() const { return offset.N_samples; }
+uint32_t resource_t::get_first_sample_index() const { return offset.get_N_samples(); }
 
 uint32_t resource_t::get_last_sample_index() const {
-    return offset.N_samples + length.N_samples - 1;
+    return offset.get_N_samples() + length.get_N_samples() - 1;
 }
 
 bool resource_t::is_positive_length(const uint32_t length_) const {
-    return length_ <= length.N_samples;
+    return length_ <= length.get_N_samples();
 }
 
 bool resource_t::is_causal() const { return get_first_sample_index() <= get_last_sample_index(); }
@@ -76,12 +76,12 @@ bool resource_t::is_orthogonal(const resource_t& other) const {
 
 bool resource_t::is_leq(const resource_t& other) const {
     dectnrp_assert(other.is_well_defined(), "not well defined");
-    return other.length.N_samples <= length.N_samples;
+    return other.length.get_N_samples() <= length.get_N_samples();
 }
 
 bool resource_t::is_seq(const resource_t& other) const {
     dectnrp_assert(other.is_well_defined(), "not well defined");
-    return length.N_samples <= other.length.N_samples;
+    return length.get_N_samples() <= other.length.get_N_samples();
 }
 
 }  // namespace dectnrp::mac::allocation

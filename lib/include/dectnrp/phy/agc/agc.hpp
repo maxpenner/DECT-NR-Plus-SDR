@@ -41,7 +41,9 @@ class agc_t {
         static constexpr float OFDM_AMPLITUDE_FACTOR_MINUS_20dB = 0.1f;
 
         bool check_protect_duration_passed(const int64_t t_64) const {
-            return protect_duration_start_64 + agc_config.protect_duration.N_samples_64 <= t_64;
+            return protect_duration_start_64 +
+                       agc_config.protect_duration.get_N_samples<int64_t>() <=
+                   t_64;
         };
 
     protected:

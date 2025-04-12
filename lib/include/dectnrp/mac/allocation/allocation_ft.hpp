@@ -36,7 +36,8 @@ class allocation_ft_t final : public allocation_t {
 
         /// check if beacon has to be prepared for transmission
         bool check_beacon_prepare_duration(const int64_t now_64) const {
-            return (beacon_time_scheduled_64 - beacon_prepare_duration.N_samples_64) <= now_64;
+            return (beacon_time_scheduled_64 - beacon_prepare_duration.get_N_samples<int64_t>()) <=
+                   now_64;
         }
 
         int64_t get_beacon_time_transmitted() const { return beacon_time_transmitted_64; };
@@ -53,17 +54,22 @@ class allocation_ft_t final : public allocation_t {
             beacon_time_transmitted_64 = beacon_time_scheduled_64;
 
             // update time of next beacon
-            beacon_time_scheduled_64 += beacon_period.N_samples_64;
+            beacon_time_scheduled_64 += beacon_period.get_N_samples<int64_t>();
         }
 
+        uint32_t get_N_beacons_per_second() const { return N_beacons_per_second; };
+
     private:
-        section3::duration_t beacon_prepare_duration;
+        section3::duration_t beacon_prepare_duration{};
 
         /// start time of last beacon transmitted
-        int64_t beacon_time_transmitted_64;
+        int64_t beacon_time_transmitted_64{};
 
         /// start time of next scheduled beacon
-        int64_t beacon_time_scheduled_64;
+        int64_t beacon_time_scheduled_64{};
+
+        /// number of beacons transmitted per second
+        uint32_t N_beacons_per_second{};
 };
 
 }  // namespace dectnrp::mac::allocation

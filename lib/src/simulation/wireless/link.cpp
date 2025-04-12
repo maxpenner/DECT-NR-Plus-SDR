@@ -23,6 +23,7 @@
 #include <volk/volk.h>
 
 #include <numbers>
+#include <numeric>
 
 extern "C" {
 #include "srsran/phy/utils/vector.h"

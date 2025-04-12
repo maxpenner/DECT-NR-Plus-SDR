@@ -32,7 +32,12 @@ void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
     // what is the next full second after PHY becomes operational?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
 
-    // some headroom is required to set the PPS aligned with the first beacon
+#ifdef TFW_P2P_EXPORT_PPX
+    // set virtual time of first rising edge
+    ppx.set_ppx_rising_edge(A);
+#endif
+
+    // some headroom is required to set the PPX aligned with the first beacon
     const int64_t B = A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
 
     // set first beacon transmission time, beacon is aligned with full second
@@ -45,16 +50,14 @@ void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
         duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001,
                                                  worksub_callback_log_period_sec));
 
-#ifdef TFW_P2P_EXPORT_1PPS
-    // callback is triggered shortly before a PPS is due, and before first beacon
-    callbacks.add_callback(
-        std::bind(&tfw_p2p_ft_t::worksub_callback_pps,
-                  this,
-                  std::placeholders::_1,
-                  std::placeholders::_2,
-                  std::placeholders::_3),
-        B - duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 100),
-        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001));
+#ifdef TFW_P2P_EXPORT_PPX
+    callbacks.add_callback(std::bind(&tfw_p2p_ft_t::worksub_callback_ppx,
+                                     this,
+                                     std::placeholders::_1,
+                                     std::placeholders::_2,
+                                     std::placeholders::_3),
+                           B - ppx.get_ppx_time_advance_samples(),
+                           ppx.get_ppx_period_warped());
 #endif
 }
 

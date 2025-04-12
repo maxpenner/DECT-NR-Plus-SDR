@@ -51,10 +51,12 @@ hw_simulator_t::hw_simulator_t(const hw_config_t& hw_config_, simulation::vspace
     nof_antennas_max = 8;
     ADC_bits = 12;
     DAC_bits = 12;
-    settling_time_us.at(std::to_underlying(settling_time_property_t::freq)) = 250;
-    settling_time_us.at(std::to_underlying(settling_time_property_t::gain)) = 50;
+    tmin_us.at(std::to_underlying(tmin_t::freq)) = 250;
+    tmin_us.at(std::to_underlying(tmin_t::gain)) = 50;
+    tmin_us.at(std::to_underlying(tmin_t::turnaround)) = hw_config.turnaround_time_us;
+
     ppm = 0.0f;
-    time_advance_fpga2ant_ns = 0;
+    time_advance_fpga2ant_samples = 0;
 
     gain_lut.freqs_Hz = calibration::simulator::freqs_Hz;
 
@@ -93,6 +95,11 @@ void hw_simulator_t::set_samp_rate(const uint32_t samp_rate_in) {
     }
 
     dectnrp_assert(samp_rate_in <= samp_rate, "Sample rate smaller than input sample rate");
+
+    // convert from us to samples
+    for (std::size_t i = 0; i < std::to_underlying(tmin_t::CARDINALITY); ++i) {
+        tmin_samples.at(i) = get_samples_in_us(tmin_us.at(i));
+    }
 }
 
 void hw_simulator_t::initialize_device() {

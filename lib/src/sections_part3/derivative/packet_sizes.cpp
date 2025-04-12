@@ -27,7 +27,7 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
-#include "dectnrp/sections_part3/derivative/duration_lut.hpp"
+#include "dectnrp/sections_part3/derivative/duration.hpp"
 #include "dectnrp/sections_part3/fix/cbsegm.hpp"
 #include "dectnrp/sections_part3/pdc.hpp"
 #include "dectnrp/sections_part3/radio_device_class.hpp"
@@ -135,7 +135,7 @@ packet_sizes_opt_t get_packet_sizes(const packet_sizes_def_t& qq) {
     /* When u==8, we have three zero symbols for GI at the end of the packet. When N_PACKET_symb is
      * 15, this would imply that OFDM symbols with indices 12, 13 and 14 (+ N_step) are zero.
      * However, with 8 transmit streams, we also have DRS cells in OFDM symbol indices 11 and 12.
-     * Thus, there is a collison at symbol 12 and this combination is not possible.
+     * Thus, there is a collision at symbol 12 and this combination is not possible.
      *
      * As a solution, N_PACKET_symb must be at least 20 and a multiple of 10.
      */
@@ -143,10 +143,10 @@ packet_sizes_opt_t get_packet_sizes(const packet_sizes_def_t& qq) {
         return std::nullopt;
     }
 
-    /* When we reached this point, we know that our packet can accomodate all DRS symbols. However,
-     * depending on the combination of N_PACKET_symb, u, N_eff_TX and numerology.N_b_OCC, the packet
-     * configuration can still fail because we can't accomodate all 98 PCC cells, or we can but
-     * there is no space left for a single PDC cell.
+    /* When we have reached this point, we know that our packet can accommodate all DRS symbols.
+     * However, depending on the combination of N_PACKET_symb, u, N_eff_TX and numerology.N_b_OCC,
+     * the packet configuration can still fail because we can't accommodate all 98 PCC cells, or we
+     * can but there is no space left for a single PDC cell.
      */
     const uint32_t N_PDC_subc =
         pdc_t::get_N_PDC_subc(N_PACKET_symb, u, N_eff_TX, numerology.N_b_OCC);
@@ -159,8 +159,8 @@ packet_sizes_opt_t get_packet_sizes(const packet_sizes_def_t& qq) {
 
     const uint32_t N_SS = tm_mode.N_SS;
 
-    /* When we reached this point, we know that our packet can accomodate all DRS symbols, all PCC
-     * symbols and at least one PDC cell. How many bits can we then accomodate?
+    /* When we have reached this point, we know that our packet can accommodate all DRS symbols, all
+     * PCC symbols and at least one PDC cell. How many bits can we then accommodate?
      */
     const uint32_t N_TB_bits = transport_block_size::get_N_TB_bits(
         N_SS, N_PDC_subc, mcs.N_bps, mcs.R_numerator, mcs.R_denominator, Z);
@@ -183,13 +183,13 @@ packet_sizes_opt_t get_packet_sizes(const packet_sizes_def_t& qq) {
     q.N_TB_bits = N_TB_bits;
     q.N_TB_byte = common::adt::ceil_divide_integer(N_TB_bits, 8U);
 
-    /* When we reached this point, we know that our packet can accomodate all DRS symbols, all PCC
+    /* When we reached this point, we know that our packet can accommodate all DRS symbols, all PCC
      * symbols and at least one PDC cell. We also know the exact amount of bits in the transport
      * block.
      *
      * However, there is an error in the standard: 5.3: "With this definition of tbs the number of
      * filler bits in clause 6.1.3 is always 0." That is not correct as there are combinations where
-     * N_TB_bits = 8. Then B is 8+L=8+24=32 and thereore smaller 40. Filler bits become necessary.
+     * N_TB_bits = 8. Then B is 8+L=8+24=32 and therefore smaller 40. Filler bits become necessary.
      * Though, no one is gonna use N_TB_bits = 8.
      */
     srsran_cbsegm_t cb_segm;
@@ -254,8 +254,7 @@ uint32_t get_N_samples_in_packet_length_max(const packet_sizes_t& packet_sizes,
     // Slots are longer than subslots, so when looking for the maximum duration of a packet in
     // seconds, we need the maximum number of slots.
     return packet_sizes.psdef.PacketLength *
-           static_cast<uint32_t>(
-               duration_lut_t::get_N_samples_from_duration(samp_rate, duration_ec_t::slot001));
+           static_cast<uint32_t>(duration_t(samp_rate, duration_ec_t::slot001).get_N_samples());
 }
 
 packet_sizes_t get_random_packet_sizes_within_rdc(const std::string& radio_device_class_string,
@@ -266,9 +265,9 @@ packet_sizes_t get_random_packet_sizes_within_rdc(const std::string& radio_devic
     // this structure will describe a packet within the boundaries of the radio device class
     packet_sizes_def_t psdef;
 
-    //                               1  2     4           8          12          16
-    const uint32_t val2idx[17] = {0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5};
-    const uint32_t idx2val[6] = {1, 2, 4, 8, 12, 16};
+    //                                      1  2     4           8          12          16
+    static const uint32_t val2idx[17] = {0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5};
+    static const uint32_t idx2val[6] = {1, 2, 4, 8, 12, 16};
 
     packet_sizes_opt_t q;
 

@@ -28,11 +28,11 @@
 #include <unordered_map>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
-#include "dectnrp/sections_part4/packing.hpp"
+#include "dectnrp/common/serdes/packing.hpp"
 
 namespace dectnrp::section4 {
 
-class feedback_info_t : public packing_t {
+class feedback_info_t : public common::serdes::packing_t {
     public:
         virtual ~feedback_info_t() = default;
 

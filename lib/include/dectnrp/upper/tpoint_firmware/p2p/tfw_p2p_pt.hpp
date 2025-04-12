@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 
 #define TFW_P2P_PT_AGC_ENABLED
@@ -40,12 +41,12 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
 
         static const std::string firmware_name;
 
-        void work_start_imminent(const int64_t start_time_64) override;
-        phy::machigh_phy_t work_regular(const phy::phy_mac_reg_t& phy_mac_reg) override;
+        void work_start_imminent(const int64_t start_time_64) override final;
+        phy::machigh_phy_t work_regular(const phy::phy_mac_reg_t& phy_mac_reg) override final;
         // phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override;
         // phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
-        phy::machigh_phy_t work_upper(const upper::upper_report_t& upper_report) override;
-        phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override;
+        phy::machigh_phy_t work_upper(const upper::upper_report_t& upper_report) override final;
+        phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
 
     private:
         std::vector<std::string> start_threads() override final;
@@ -57,19 +58,6 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
         void init_radio() override final;
         void init_simulation_if_detected() override final;
 
-#ifdef TFW_P2P_EXPORT_1PPS
-        void worksub_callback_pps(const int64_t now_64,
-                                  const size_t idx,
-                                  int64_t& next_64) override final;
-
-        /**
-         * \brief For the PPS signal to be aligned with a full second, the FT has to indicate
-         * whenever a transmitted beacon is aligned to a full second. This beacon will be called
-         * time alignment beacon fow now.
-         */
-        void worksub_pps_first_beacon(const int64_t fine_peak_time_64);
-#endif
-
         // ##################################################
         // MAC Layer
 
@@ -79,14 +67,15 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
         /// uplink and downlink, FT has the same information in its contact list
         mac::allocation::allocation_pt_t allocation_pt;
 
+        /// measured for received beacons
+        phy::mimo_csi_t mimo_csi;
+
         // clang-format off
         std::optional<phy::maclow_phy_t> worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) override final;
-        std::optional<phy::maclow_phy_t> worksub_pcc_11(const phy::phy_maclow_t& phy_maclow) override final;
         phy::maclow_phy_t worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) override final;
         phy::maclow_phy_t worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) override final;
         
         phy::machigh_phy_t worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) override final;
-        phy::machigh_phy_t worksub_pdc_11(const phy::phy_machigh_t& phy_machigh) override final;
         phy::machigh_phy_t worksub_pdc_20(const phy::phy_machigh_t& phy_machigh) override final;
         phy::machigh_phy_t worksub_pdc_21(const phy::phy_machigh_t& phy_machigh) override final;
         // clang-format on

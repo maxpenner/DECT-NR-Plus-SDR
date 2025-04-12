@@ -24,11 +24,11 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "dectnrp/sections_part4/packing.hpp"
+#include "dectnrp/common/serdes/packing.hpp"
 
 namespace dectnrp::section4 {
 
-class plcf_base_t : public packing_t {
+class plcf_base_t : public common::serdes::packing_t {
     public:
         virtual void zero() override;
         virtual bool is_valid() const override;

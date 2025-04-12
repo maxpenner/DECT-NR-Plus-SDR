@@ -74,14 +74,57 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     // MAC Layer
 
     identity = section4::mac_architecture::identity_t(100, 10000000, 1000);
-    ShortRadioDeviceID_rx = identity.ShortRadioDeviceID + 1;
+
+    psdef = {.u = worker_pool_config.radio_device_class.u_min,
+             .b = worker_pool_config.radio_device_class.b_min,
+             .PacketLengthType = 1,
+             .PacketLength = 1,
+             .tm_mode_index = 0,
+             .mcs_index = common::adt::UNDEFINED_NUMERIC_32,
+             .Z = worker_pool_config.radio_device_class.Z_min};
+
+    plcf_10.HeaderFormat = 0;
+    plcf_10.PacketLengthType = psdef.PacketLengthType;
+    plcf_10.set_PacketLength_m1(psdef.PacketLength);
+    plcf_10.ShortNetworkID = identity.ShortNetworkID;
+    plcf_10.TransmitterIdentity = identity.ShortRadioDeviceID;
+    plcf_10.set_TransmitPower(10);
+    plcf_10.Reserved = 0;
+    plcf_10.DFMCS = psdef.mcs_index;
+
+    plcf_20.HeaderFormat = 0;
+    plcf_20.PacketLengthType = plcf_10.PacketLengthType;
+    plcf_20.PacketLength_m1 = plcf_10.PacketLength_m1;
+    plcf_20.ShortNetworkID = plcf_10.ShortNetworkID;
+    plcf_20.TransmitterIdentity = plcf_10.TransmitterIdentity;
+    plcf_20.TransmitPower = plcf_10.TransmitPower;
+    plcf_20.DFMCS = plcf_10.DFMCS;
+    plcf_20.ReceiverIdentity = identity.ShortRadioDeviceID + 1;
+    plcf_20.set_NumberOfSpatialStreams(section3::tmmode::get_tm_mode(psdef.tm_mode_index).N_SS);
+    plcf_20.DFRedundancyVersion = 0;
+    plcf_20.DFNewDataIndication = 0;
+    plcf_20.DFHARQProcessNumber = 0;
+    plcf_20.FeedbackFormat = section4::feedback_info_t::No_feedback;
+
+    plcf_21.HeaderFormat = 1;
+    plcf_21.PacketLengthType = plcf_10.PacketLengthType;
+    plcf_21.PacketLength_m1 = plcf_10.PacketLength_m1;
+    plcf_21.ShortNetworkID = plcf_10.ShortNetworkID;
+    plcf_21.TransmitterIdentity = plcf_10.TransmitterIdentity;
+    plcf_21.TransmitPower = plcf_10.TransmitPower;
+    plcf_21.DFMCS = plcf_10.DFMCS;
+    plcf_21.ReceiverIdentity = identity.ShortRadioDeviceID + 1;
+    plcf_21.set_NumberOfSpatialStreams(section3::tmmode::get_tm_mode(psdef.tm_mode_index).N_SS);
+    plcf_21.Reserved = 0;
+    plcf_21.FeedbackFormat = section4::feedback_info_t::No_feedback;
+
     PLCF_type = 2;
     PLCF_type_header_format = 0;
 
     // ##################################################
     // measurement logic
 
-    state = STATE_t::SET_SNR;
+    state = STATE_t::SET_MCS;
     state_time_reference_64 = 0;
 
     // ##################################################
@@ -123,7 +166,7 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
 void tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
     // start some time in the near future
     state_time_reference_64 = start_time_64 + duration_lut.get_N_samples_from_duration(
-                                                  section3::duration_ec_t::ms001, 127);
+                                                  section3::duration_ec_t::ms001, 123);
 }
 
 phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
@@ -139,6 +182,19 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
 
     switch (state) {
         using enum STATE_t;
+        case SET_MCS:
+            {
+                psdef.mcs_index = mcs_index;
+
+                plcf_10.DFMCS = psdef.mcs_index;
+                plcf_20.DFMCS = psdef.mcs_index;
+                plcf_21.DFMCS = psdef.mcs_index;
+
+                state = SET_SNR;
+
+                break;
+            }
+
         case SET_SNR:
             {
                 hw_simulator->set_rx_snr_in_net_bandwidth_norm_dB(snr);
@@ -155,7 +211,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
 
         case SET_SMALL_SCALE_FADING:
             {
-                // re-randomize channel
+                // randomize channel
                 hw_simulator->wchannel_randomize_small_scale();
 
                 state = GENERATE_PACKET;
@@ -168,7 +224,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
 
         case GENERATE_PACKET:
             {
-                generate_one_new_packet(now_64, machigh_phy);
+                generate_packet(now_64, machigh_phy);
 
                 ++nof_packets_cnt;
 
@@ -189,14 +245,11 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
             {
                 dectnrp_assert(nof_packets_cnt == nof_packets, "incorrect number of packets");
 
-                // clang-format off
                 const float per_pcc_crc = 1.0f - float(n_pcc_crc) / float(nof_packets);
-                const float per_pcc_crc_and_plcf =1.0f - float(n_pcc_crc_and_plcf) / float(nof_packets);
+                const float per_pcc_crc_and_plcf =
+                    1.0f - float(n_pcc_crc_and_plcf) / float(nof_packets);
                 const float per_pdc_crc = 1.0f - float(n_pdc_crc) / float(nof_packets);
-                // clang-format on
 
-                // put result in global container
-                // TB_bits[mcs_cnt] is directly written in function generate_one_new_packet()
                 PER_pcc_crc[mcs_cnt].push_back(per_pcc_crc);
                 PER_pcc_crc_and_plcf[mcs_cnt].push_back(per_pcc_crc_and_plcf);
                 PER_pdc_crc[mcs_cnt].push_back(per_pdc_crc);
@@ -221,7 +274,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
             {
                 snr += snr_step;
 
-                state = SET_SNR;
+                state = SET_MCS;
 
                 // abort condition for SNR
                 if (snr > snr_stop) {
@@ -319,17 +372,7 @@ void tfw_loopback_t::reset_for_new_run() {
     snr_min = -snr_max;
 }
 
-void tfw_loopback_t::generate_one_new_packet(const int64_t now_64,
-                                             phy::machigh_phy_t& machigh_phy) {
-    // define required input to calculate packet dimensions
-    const section3::packet_sizes_def_t psdef = {.u = worker_pool_config.radio_device_class.u_min,
-                                                .b = worker_pool_config.radio_device_class.b_min,
-                                                .PacketLengthType = 1,
-                                                .PacketLength = 1,
-                                                .tm_mode_index = 0,
-                                                .mcs_index = mcs_index,
-                                                .Z = worker_pool_config.radio_device_class.Z_min};
-
+void tfw_loopback_t::generate_packet(const int64_t now_64, phy::machigh_phy_t& machigh_phy) {
     // request harq process
     auto* hp_tx = hpp->get_process_tx(
         PLCF_type, identity.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
@@ -343,52 +386,16 @@ void tfw_loopback_t::generate_one_new_packet(const int64_t now_64,
     // this is now a well-defined packet size
     const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    // define and pack one of the PLCF types and formats
-    section4::plcf_10_t plcf_10;
-    plcf_10.HeaderFormat = 0;
-    plcf_10.PacketLengthType = psdef.PacketLengthType;
-    plcf_10.set_PacketLength_m1(psdef.PacketLength);
-    plcf_10.ShortNetworkID = identity.ShortNetworkID;
-    plcf_10.TransmitterIdentity = identity.ShortRadioDeviceID;
-    plcf_10.set_TransmitPower(10);
-    plcf_10.Reserved = 0;
-    plcf_10.DFMCS = psdef.mcs_index;
-
+    // pack headers
     if (PLCF_type == 1) {
+        dectnrp_assert(hp_tx->get_rv() == plcf_10.get_DFRedundancyVersion(), "incorrect rv");
         plcf_10.pack(hp_tx->get_a_plcf());
     } else {
         if (PLCF_type_header_format == 0) {
-            section4::plcf_20_t plcf_20;
-            plcf_20.HeaderFormat = 0;
-            plcf_20.PacketLengthType = plcf_10.PacketLengthType;
-            plcf_20.PacketLength_m1 = plcf_10.PacketLength_m1;
-            plcf_20.ShortNetworkID = plcf_10.ShortNetworkID;
-            plcf_20.TransmitterIdentity = plcf_10.TransmitterIdentity;
-            plcf_20.TransmitPower = plcf_10.TransmitPower;
-            plcf_20.DFMCS = plcf_10.DFMCS;
-            plcf_20.ReceiverIdentity = ShortRadioDeviceID_rx;
-            plcf_20.set_NumberOfSpatialStreams(packet_sizes.tm_mode.N_SS);
-            plcf_20.DFRedundancyVersion = hp_tx->get_rv();
-            plcf_20.DFNewDataIndication = 0;
-            plcf_20.DFHARQProcessNumber = 0;
-            plcf_20.FeedbackFormat = 0;
-
+            dectnrp_assert(hp_tx->get_rv() == plcf_20.get_DFRedundancyVersion(), "incorrect rv");
             plcf_20.pack(hp_tx->get_a_plcf());
-
         } else {
-            section4::plcf_21_t plcf_21;
-            plcf_21.HeaderFormat = 1;
-            plcf_21.PacketLengthType = plcf_10.PacketLengthType;
-            plcf_21.PacketLength_m1 = plcf_10.PacketLength_m1;
-            plcf_21.ShortNetworkID = plcf_10.ShortNetworkID;
-            plcf_21.TransmitterIdentity = plcf_10.TransmitterIdentity;
-            plcf_21.TransmitPower = plcf_10.TransmitPower;
-            plcf_21.DFMCS = plcf_10.DFMCS;
-            plcf_21.ReceiverIdentity = ShortRadioDeviceID_rx;
-            plcf_21.set_NumberOfSpatialStreams(packet_sizes.tm_mode.N_SS);
-            plcf_21.Reserved = 0;
-            plcf_21.FeedbackFormat = 0;
-
+            dectnrp_assert(hp_tx->get_rv() == plcf_21.get_DFRedundancyVersion(), "incorrect rv");
             plcf_21.pack(hp_tx->get_a_plcf());
         }
     }
@@ -421,14 +428,13 @@ void tfw_loopback_t::generate_one_new_packet(const int64_t now_64,
     // radio meta
     radio::buffer_tx_meta_t buffer_tx_meta = {
         .tx_order_id = tx_order_id,
-        .tx_time_64 = now_64 + duration_lut.get_N_samples_from_duration(
-                                   section3::duration_ec_t::turn_around_time_us)};
+        .tx_time_64 = now_64 + hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround)};
 
     // add a random jitter to the transmission time
     buffer_tx_meta.tx_time_64 += static_cast<int64_t>(randomgen.randi(
         0,
         static_cast<uint32_t>(
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::us100))));
+            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::subslot_u1_001))));
 
     // force transmission time to multiple of packet_tx_time_multiple
     const int64_t res = buffer_tx_meta.tx_time_64 % packet_tx_time_multiple;

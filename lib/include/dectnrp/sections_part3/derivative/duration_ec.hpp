@@ -24,13 +24,7 @@
 
 namespace dectnrp::section3 {
 
-/**
- * \brief These are the most basic durations that any DECT NR+ system requires. Some of the values
- * likely do not divide samp_rate with remainder 0. For instance, at 1.728MHz, 100us correspond to
- * 172 samples with 1.728e6/10000=172.8. 1.728e6 is not a multiple of 172.
- */
 enum class duration_ec_t : uint32_t {
-    us100 = 0,  // likely does not divide samp_rate with remainder zero
     ms001,
     s001,
     slot001,
@@ -38,10 +32,9 @@ enum class duration_ec_t : uint32_t {
     subslot_u2_001,
     subslot_u4_001,
     subslot_u8_001,
-    turn_around_time_us,    // likely does not divide samp_rate with remainder zero
-    settling_time_freq_us,  // likely does not divide samp_rate with remainder zero
-    settling_time_gain_us,  // likely does not divide samp_rate with remainder zero
     CARDINALITY
 };
+
+duration_ec_t get_duration_ec_depending_on_mu(const uint32_t u);
 
 }  // namespace dectnrp::section3

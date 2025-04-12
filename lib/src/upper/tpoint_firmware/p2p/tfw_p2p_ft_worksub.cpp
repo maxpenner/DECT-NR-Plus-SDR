@@ -30,23 +30,7 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-#ifdef TFW_P2P_EXPORT_1PPS
-void tfw_p2p_ft_t::worksub_callback_pps(const int64_t now_64, const size_t idx, int64_t& next_64) {
-    // called shortly before the next full second, what is the time of next full second?
-    const int64_t A = duration_lut.get_N_samples_at_next_full_second(now_64);
-
-    const radio::pulse_config_t pulse_config{
-        .rising_edge_64 = A, .falling_edge_64 = A + ppx_pll.get_ppx_length_samples()};
-
-    hw.schedule_pulse_tc(pulse_config);
-}
-#endif
-
 std::optional<phy::maclow_phy_t> tfw_p2p_ft_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
-    return std::nullopt;
-}
-
-std::optional<phy::maclow_phy_t> tfw_p2p_ft_t::worksub_pcc_11(const phy::phy_maclow_t& phy_maclow) {
     return std::nullopt;
 }
 
@@ -61,16 +45,25 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
 
     dectnrp_assert(plcf_21 != nullptr, "cast ill-formed");
 
-    // must have the correct ReceiverIdentity, and a known TransmitterIdentity
-    if (plcf_21->ReceiverIdentity != identity_ft.ShortRadioDeviceID ||
-        !contact_list_p2p.is_srdid_known(plcf_21->TransmitterIdentity)) {
+    // is this a packet from the correct network, from a known PT, and for this FT?
+    if (plcf_21->ShortNetworkID != identity_ft.ShortNetworkID ||
+        !contact_list.is_srdid_known(plcf_21->TransmitterIdentity) ||
+        plcf_21->ReceiverIdentity != identity_ft.ShortRadioDeviceID) {
         return phy::maclow_phy_t();
     }
 
     // load long radio device ID of sending PT
-    const auto lrdid = contact_list_p2p.lrdid2srdid.get_k(plcf_21->TransmitterIdentity);
+    const auto lrdid = contact_list.get_lrdid_from_srdid(plcf_21->TransmitterIdentity);
 
-    contact_list_p2p.sync_report_last_known.at(lrdid) = phy_maclow.sync_report;
+    // load contact information of PT
+    auto& contact = contact_list.get_contact(lrdid);
+
+    // save sync_report
+    contact.sync_report = phy_maclow.sync_report;
+
+    // udpate CSI
+    contact.mimo_csi.update(
+        plcf_21->FeedbackFormat, plcf_21->feedback_info_pool, phy_maclow.sync_report);
 
     return worksub_pcc2pdc(phy_maclow,
                            2,
@@ -81,10 +74,6 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) {
-    return phy::machigh_phy_t();
-}
-
-phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_11(const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
@@ -99,9 +88,7 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
     // long radio device ID used as key
     const auto lrdid = phy_machigh.maclow_phy.get_handle_lrdid();
 
-    contact_list_p2p.mimo_report_last_known.at(lrdid) = phy_machigh.pdc_report.mimo_report;
-
-    const uint32_t conn_idx = contact_list_p2p.app_client_idx.get_v(lrdid);
+    const uint32_t conn_idx = contact_list.get_conn_idx_client_from_lrdid(lrdid);
 
     // request vector with base pointers to MMIEs
     const auto& mmie_decoded_vec = phy_machigh.pdc_report.mac_pdu_decoder.get_mmie_decoded_vec();
@@ -130,9 +117,7 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
 }
 
 bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
-    ++stats.beacon_cnt;
-
-    // OPTIONAL: change dimensions of PLCF and MAC PDU (psdef)
+    // OPTIONAL: change MIMO mode and dimensions of PLCF and MAC PDU (psdef)
     // -
 
     // request harq process
@@ -161,11 +146,14 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     cbm.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
     a_cnt_w += cbm.get_packed_size_of_mmh_sdu();
 
-    // set values in time_announce_ie_t
-    auto& tan = mmie_pool_tx.get<section4::extensions::time_announce_ie_t>();
-    tan.set_time(section4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
-    tan.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
-    a_cnt_w += tan.get_packed_size_of_mmh_sdu();
+    // one time_announce_ie_t per second
+    if (stats.beacon_cnt % allocation_ft.get_N_beacons_per_second() == 0) {
+        // set values in time_announce_ie_t
+        auto& taie = mmie_pool_tx.get<section4::extensions::time_announce_ie_t>();
+        taie.set_time(section4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
+        taie.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
+        a_cnt_w += taie.get_packed_size_of_mmh_sdu();
+    }
 
     // fill up with padding IEs
     mmie_pool_tx.fill_with_padding_ies(hp_tx->get_a_tb() + a_cnt_w,
@@ -195,6 +183,8 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     // set tranmission time of next beacon
     allocation_ft.set_beacon_time_next();
 
+    ++stats.beacon_cnt;
+
     return true;
 }
 
@@ -204,19 +194,18 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
         // go over the connection indexes which represent different devices
         for (uint32_t conn_idx = 0; conn_idx < N_pt; ++conn_idx) {
             // first map connection index to PT
-            const auto lrdid = contact_list_p2p.app_server_idx.get_k(conn_idx);
-            const uint32_t ShortRadioDeviceID = contact_list_p2p.lrdid2srdid.get_v(lrdid);
+            const auto lrdid = contact_list.get_lrdid_from_conn_idx_server(conn_idx);
 
-            // load the corresponding allocation
-            auto& allocation_pt = contact_list_p2p.allocation_pt_um.at(lrdid);
+            // load contact information of PT
+            auto& contact = contact_list.get_contact(lrdid);
 
-            allocation_pt.set_beacon_time_last_known(allocation_ft.get_beacon_time_transmitted());
+            contact.allocation_pt.set_beacon_time_last_known(
+                allocation_ft.get_beacon_time_transmitted());
 
-            // find next transmission opportunity
             const auto tx_opportunity =
-                allocation_pt.get_tx_opportunity(mac::allocation::direction_t::downlink,
-                                                 buffer_rx.get_rx_time_passed(),
-                                                 tx_earliest_64);
+                contact.allocation_pt.get_tx_opportunity(mac::allocation::direction_t::downlink,
+                                                         buffer_rx.get_rx_time_passed(),
+                                                         tx_earliest_64);
 
             // if no opportunity found, leave machigh_phy as is
             if (tx_opportunity.tx_time_64 < 0) {
@@ -224,15 +213,14 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
             }
 
             // change content of headers
-            section4::plcf_21_t& plcf_21 = ppmp_unicast.plcf_21;
-            plcf_21.ReceiverIdentity = ShortRadioDeviceID;
+            ppmp_unicast.plcf_21.ReceiverIdentity = contact.identity.ShortRadioDeviceID;
             ppmp_unicast.unicast_header.Receiver_Address = lrdid;
 
             // change feedback info in PLCF
-            // -
+            ppmp_unicast.plcf_21.FeedbackFormat = section4::feedback_info_t::No_feedback;
 
-            // we have an opportunity, but no more HARQ processes or data
-            if (!worksub_tx_unicast(machigh_phy, tx_opportunity, conn_idx)) {
+            // try to send a packet, may return false if no data of HARQ processes are available
+            if (!worksub_tx_unicast(machigh_phy, tx_opportunity, contact.mimo_csi, conn_idx)) {
                 // break;
             }
         }
@@ -247,10 +235,10 @@ void tfw_p2p_ft_t::worksub_callback_log(const int64_t now_64) const {
     str += "tx_power_ant_0dBFS=" + std::to_string(agc_tx.get_power_ant_0dBFS(now_64)) + " ";
     str += "rx_power_ant_0dBFS=" + agc_rx.get_power_ant_0dBFS(now_64).get_readable_list() + " ";
 
-    for (const auto& sync_report : contact_list_p2p.sync_report_last_known) {
+    for (const auto& contact : contact_list.get_contacts_vec()) {
         str += "rx_rms=[";
-        str += std::to_string(sync_report.first) + "]" +
-               agc_rx.get_rms_measured_last_known().get_readable_list() + " ";
+        str += std::to_string(contact.identity.LongRadioDeviceID) + "]" +
+               contact.sync_report.rms_array.get_readable_list() + " ";
     }
 
     dectnrp_log_inf("{}", str);

@@ -1,4 +1,6 @@
-# DECT NR+ Software Defined Radio
+<p align="center">
+  <img src="docs/logo.png" style="width: 100%; background-color: transparent;" alt="logo.png"/>
+</p>
 
 This repository contains a work-in-progress SDR implementation of DECT NR+ ([ETSI TS 103 636, Part 1 to 5](https://www.etsi.org/committee/1394-dect)). DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](https://www.etsi.org/newsroom/press-releases/1988-2021-10-world-s-first-non-cellular-5g-technology-etsi-dect-2020-gets-itu-r-approval-setting-example-of-new-era-connectivity). Introductions are available at [ETSI](https://www.etsi.org/technologies/dect), [DECT Forum](https://www.dect.org/nrplus) and [Wikipedia](https://en.wikipedia.org/wiki/DECT-2020).
 
@@ -13,6 +15,7 @@ While commonly referred to as DECT NR+, the standard's official designation is D
 5. [Contributing](#contributing)
 6. [Citation](#citation)
 7. [Known Issues](#known-issues)
+8. [To Do](#to-do)
 
 Advanced Topics
 
@@ -23,7 +26,7 @@ Advanced Topics
 5. [Compatibility](#compatibility)
 6. [JSON Export](#json-export)
 7. [PPS Export and PTP](#pps-export-and-ptp)
-8. [Host Tuning](#host-tuning)
+8. [Host and SDR Tuning](#host-and-sdr-tuning)
 9. [Firmware P2P](#firmware-p2p)
 
 ## Core Idea
@@ -37,29 +40,29 @@ The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware
 
 Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for termination point which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
-|   | **Virtual Function**  | **Properties**                                                           |
-|---|-----------------------|--------------------------------------------------------------------------|
-| 1 | work_start_imminent() | called once immediately before IQ sample processing begins               |
-| 2 | work_regular()        | called regularly (polling)                                               |
-| 3 | work_pcc()            | called upon PCC reception (event-driven)                                 |
-| 4 | work_pdc_async()      | called upon PDC reception (event-driven)                                 |
-| 5 | work_upper()          | called upon availability of new data on application layer (event-driven) |
-| 6 | work_chscan_async()   | called upon finished channel measurement (event-driven)                  |
-| 7 | start_threads()       | called once to start application layer threads                           |
-| 8 | stop_threads()        | called once to stop application layer threads                            |
+|   | **Virtual Function**  | **Properties**                                                            |
+|---|-----------------------|---------------------------------------------------------------------------|
+| 1 | work_start_imminent() | called once immediately before IQ sample processing begins                |
+| 2 | work_regular()        | called regularly (polling)                                                |
+| 3 | work_pcc()            | called upon PCC reception (event-driven)                                  |
+| 4 | work_pdc_async()      | called upon PDC reception (event-driven)                                  |
+| 5 | work_upper()          | called upon availability of new data on application layer (event-driven)  |
+| 6 | work_chscan_async()   | called upon finished channel measurement (event-driven)                   |
+| 7 | start_threads()       | called once during SDR startup to start application layer threads         |
+| 8 | stop_threads()        | called once during SDR shutdown to stop application layer threads         |
 
 ## Directories
 
     ├─ .vscode/                 VS Code settings
     ├─ apps/                    apps sources
-    ├─ bin/                     apps post-compilation binary executables
+    ├─ bin/                     apps post-compilation binaries
     ├─ cmake/                   CMake modules
     ├─ configurations/          configuration files required to start the SDR
     ├─ docs/                    documentation (doxygen, graphics etc.)
     ├─ gnuradio/                flow graphs (SDR oscilloscope, USRP calibration etc.)
     ├─ json/                    submodule to analyze exported JSON files in Matlab
     ├─ lib/                     library code used by applications
-    │  ├─ include/              include folder
+    │  ├─ include/
     │  |  ├─ application/       application layer interfaces
     │  |  ├─ apps/              utilities for apps in directory apps/
     │  |  ├─ common/            common functionality across all layers/directories
@@ -72,8 +75,8 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
     │  |  ├─ sections_part3/    sections of ETSI TS 103 636-3
     │  |  ├─ sections_part4/    sections of ETSI TS 103 636-4
     │  |  ├─ sections_part5/    sections of ETSI TS 103 636-5
-    │  |  ├─ simulation/        wireless environment simulation
-    │  |  ├─ upper/             upper layers, i.e. between PHY and application layer
+    │  |  ├─ simulation/        wireless simulation
+    │  |  ├─ upper/             upper layers, i.e. layers between PHY and application layer
     │  ├─ src/                  source code (same directories as in include/)
     └─ scripts/                 shell scripts
 
@@ -134,11 +137,29 @@ If you use this repository for any publication, please cite the repository accor
 ## Known Issues
 
 1. The channel coding requires verification. It is based on [srsRAN 4G](https://github.com/srsran/srsRAN_4G) with multiple changes, for instance, an additional maximum code block size Z=2048. Furthermore, channel coding with a limited number of soft bits is not implemented yet.
-2. [MAC messages and information elements (MMIEs)](lib/include/dectnrp/sections_part4/mac_messages_and_ie) in the standard are subject to frequent changes. Previously completed MMIEs are currently being revised and will be added soon.
+2. [MAC messages and information elements (MMIEs)](lib/include/dectnrp/sections_part4/mac_messages_and_ie) in the standard are subject to frequent changes. Previously completed MMIEs are currently being revised and will be updated soon.
 3. If asserts are enabled, the program may stop abruptly if IQ samples are not processed fast enough. This is triggered by a backlog of unprocessed IQ samples within synchronization.
 4. For some combinations of operating system, CPU and DPDK, pressing control+C does not stop the SDR. The SDR process must then be stopped manually.
 5. With gcc 12 and above, a [warning is issued in relation to fmt](https://github.com/fmtlib/fmt/issues/3354) which becomes an error due to the compiler flag *Werror* being used by default. It can be disabled in [CMakeLists.txt](CMakeLists.txt) by turning off the option *ENABLE_WERROR*.
-6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclical rotation of the STF in frequency domain. This function will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
+6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclical rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
+
+## To Do
+
+### Physical Layer
+
+- [ ] **$\mu$** detection
+- [ ] integer CFO
+- [ ] residual STO based on DRS
+- [ ] residual CFO based on STF
+- [ ] residual CFO based on DRS
+- [ ] MIMO modes with two or more spatial streams
+- [ ] 1024-QAM
+
+### Upper layers
+
+- [ ] reusable firmware procedures (retransmission, association etc.)
+- [ ] DLC and Convergence layers
+- [ ] enhance application layer interface to DECT NR+ stack (multiplexing addresses, streams, control information etc.)
 
 ## Architecture
 
@@ -162,9 +183,7 @@ The key takeaways are:
 
 An ideal AGC receives a packet and adjusts its sensitivity within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts the sensitivity 50 times per second.
 
-It is typically best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels.
-
-One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated by a guard interval (GI). Since synchronization is based on several correlations of the length of the STF, and the STF for $\mu$ < 8 is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
+One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu$ < 8 is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
 
 | **$\mu$** | **GI length ($\mu s$)** | **STF length ($\mu s$)**  |
 |:---------:|:-----------------------:|:-------------------------:|
@@ -172,6 +191,8 @@ One drawback of a software AGC is that packets can be masked. This happens when 
 |     2     |          20.83          |           41.67           |
 |     4     |          10.42          |           20.83           |
 |     8     |          10.42          |           10.42           |
+
+It is typically best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels.
 
 ## Resampling
 
@@ -219,18 +240,22 @@ A PPS signal itself is a frequently used clock for other systems. For example, a
 - The PPS is stable enough to allow deriving higher clock speeds, for instance 48kHz for distributed wireless audio applications.
 - The SDR can also be synchronized to an existing PTP network by converting [PTP to a 10MHz and 1PPS signal](https://www.meinberg.de/german/products/ntp-ptp-signalkonverter.htm), and feeding these to the USRP.
 
+<p align="center">
+  <img src="docs/synchronization.drawio.png" style="width: 75%; background-color: transparent;" alt="docs/synchronization.drawio.png"/>
+</p>
+
 ## Host and SDR Tuning
 
 The following tuning tips have been tested with Ubuntu and help achieving low-latency real-time performance:
 
-1. Increase thread priority
-2. [Disable CPU sleep states and CPU frequency scaling](https://gitlab.eurecom.fr/oai/openairinterface5g/-/wikis/OpenAirKernelMainSetup#power-management)
-3. [Isolate CPU cores and disable interrupts](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD#Isolate_Cores.2FCPUs)
+1. Elevated thread priority through [threads_core_prio_config_t](lib/include/dectnrp/common/thread/threads.hpp)
+2. SDR threads on [isolated CPU cores with disabled interrupts](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD#Isolate_Cores.2FCPUs) through [threads_core_prio_config_t](lib/include/dectnrp/common/thread/threads.hpp)
+2. [Disabled CPU sleep states and CPU frequency scaling](https://gitlab.eurecom.fr/oai/openairinterface5g/-/wikis/OpenAirKernelMainSetup#power-management)
 5. Interface to SDR
-    1. [Use DPDK with UHD](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD)
-    2. [Adjust send_frame_size and recv_frame_size](https://files.ettus.com/manual/page_transport.html#transport_param_overrides) in `radio.json`
-    3. [Increase buffer sizes](https://kb.ettus.com/USRP_Host_Performance_Tuning_Tips_and_Tricks#Adjust_Network_Buffers)
-    4. In each `radio.json`, the value `“turn_around_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR time. That means the smaller the number, the lower the latency. Under optimal conditions, between 80 and 150us are possible.
+    1. [DPDK with UHD](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD)
+    2. [Adjusted send_frame_size and recv_frame_size](https://files.ettus.com/manual/page_transport.html#transport_param_overrides) in `radio.json`
+    3. [Increased buffer sizes](https://kb.ettus.com/USRP_Host_Performance_Tuning_Tips_and_Tricks#Adjust_Network_Buffers)
+    4. In each `radio.json`, the value `“turnaround_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR timestamp. For UHD, the SDR time is a [64-bit counter in the FPGA](https://kb.ettus.com/Synchronizing_USRP_Events_Using_Timed_Commands_in_UHD#Radio_Core_Block_Timing). The smaller the turn around time, the lower the latency. Under optimal conditions, between 80 and 150 microseconds are possible.
 6. Low-latency kernel
 
 ## Firmware P2P

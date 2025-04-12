@@ -145,13 +145,10 @@ uint32_t get_max_tm_mode_index_depending_on_N_TX(const uint32_t N_TX) {
     return 11;
 }
 
-// TX diversity mode for a given number of antennas
-uint32_t get_tx_div(const uint32_t N_TX) {
-    dectnrp_assert(N_TX == 1 || N_TX == 2 || N_TX == 4 || N_TX == 8, "N_TX undefined");
+uint32_t get_tx_div_mode(const uint32_t N_TX) {
+    dectnrp_assert(N_TX == 2 || N_TX == 4 || N_TX == 8, "N_TX without tx diversity mode");
 
     switch (N_TX) {
-        case 1:
-            return 0;
         case 2:
             return 1;
         case 4:
@@ -159,6 +156,19 @@ uint32_t get_tx_div(const uint32_t N_TX) {
     }
 
     return 10;
+}
+
+uint32_t get_single_antenna_mode(const uint32_t N_TX) {
+    dectnrp_assert(N_TX == 1 || N_TX == 2 || N_TX == 4, "N_TX without single antenna mode");
+
+    switch (N_TX) {
+        case 1:
+            return 0;
+        case 2:
+            return 3;
+    }
+
+    return 7;
 }
 
 uint32_t get_equivalent_tm_mode(const uint32_t N_eff_TX, const uint32_t N_SS) {

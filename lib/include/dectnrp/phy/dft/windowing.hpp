@@ -24,7 +24,7 @@
 
 namespace dectnrp::phy::dft {
 
-using windowing_t = struct windowing_t {
+struct windowing_t {
         float* raised_cosine;
         float* raised_cosine_inv;
         uint32_t length;

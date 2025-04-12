@@ -25,26 +25,26 @@
 
 namespace dectnrp::section3 {
 
-using numerologies_t = struct numerologies_t {
-        uint32_t u{};
-        uint32_t b{};
+struct numerologies_t {
+        uint32_t u;
+        uint32_t b;
 
-        uint32_t delta_u_f{};
-        double T_u_symb{};
-        uint32_t N_SLOT_u_symb{};
-        uint32_t N_SLOT_u_subslot{};
+        uint32_t delta_u_f;
+        double T_u_symb;
+        uint32_t N_SLOT_u_symb;
+        uint32_t N_SLOT_u_subslot;
         // double GI_u;
 
-        uint32_t B_u_b_DFT{};
+        uint32_t B_u_b_DFT;
         // double T_u_b_s;
-        uint32_t N_b_DFT{};
-        uint32_t N_b_CP{};
-        uint32_t N_b_OCC{};
+        uint32_t N_b_DFT;
+        uint32_t N_b_CP;
+        uint32_t N_b_OCC;
         // uint32_t B_u_b_TX;
 
         // also calculate the guards
-        uint32_t N_guards_top{};
-        uint32_t N_guards_bottom{};
+        uint32_t N_guards_top;
+        uint32_t N_guards_bottom;
 };
 
 numerologies_t get_numerologies(const uint32_t u, const uint32_t b);

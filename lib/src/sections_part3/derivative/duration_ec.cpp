@@ -18,27 +18,25 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/mac/contact_list.hpp"
+#include "dectnrp/sections_part3/derivative/duration_ec.hpp"
 
 #include "dectnrp/common/prog/assert.hpp"
 
-#define ASSERT_LRDID_IS_KNOWN dectnrp_assert(is_lrdid_known(key_lrdid), "unknown key")
+namespace dectnrp::section3 {
 
-namespace dectnrp::mac {
+duration_ec_t get_duration_ec_depending_on_mu(const uint32_t u) {
+    dectnrp_assert(std::has_single_bit(u) && u <= 8, "u undefined");
 
-bool contact_list_t::have_heard_from_at_or_after(const key_lrdid_t key_lrdid,
-                                                 const int64_t time_64) const {
-    ASSERT_LRDID_IS_KNOWN;
+    switch (u) {
+        case 1:
+            return duration_ec_t::subslot_u1_001;
+        case 2:
+            return duration_ec_t::subslot_u2_001;
+        case 4:
+            return duration_ec_t::subslot_u4_001;
+    }
 
-    return time_64 <= sync_report_last_known.at(key_lrdid).fine_peak_time_64;
+    return duration_ec_t::subslot_u8_001;
 }
 
-bool contact_list_t::is_lrdid_known(const key_lrdid_t key_lrdid) const {
-    return lrdid2srdid.is_k_known(key_lrdid);
-}
-
-bool contact_list_t::is_srdid_known(const uint32_t srdid) const {
-    return lrdid2srdid.is_v_known(srdid);
-}
-
-}  // namespace dectnrp::mac
+}  // namespace dectnrp::section3

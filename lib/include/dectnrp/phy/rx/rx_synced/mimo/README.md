@@ -23,7 +23,7 @@ According to Table 7.2-1 in ETSI TS 103 636-3, there are twelve (index 0 to 11) 
     - equivalent to LTE TM2
     - use cases:
         - RX has only one antenna (must support transmit diversity)
-        - fallback if other MIMO modes are undesirable (rank-one transmission)
+        - fallback if other MIMO modes are undesirable (rank-one transmission, high speed and thus short coherence time)
         - increase reliability
         - beacon with PMI 0, allows RX to conduct a channel measurement across all transmit streams (in that case equivalent to antennas streams)
         - broadcast with PMI 0 to multiple users

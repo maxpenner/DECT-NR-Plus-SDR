@@ -24,7 +24,7 @@
 #include "dectnrp/limits.hpp"
 #include "dectnrp/phy/resample/resampler_param.hpp"
 #include "dectnrp/radio/hw.hpp"
-#include "dectnrp/sections_part3/derivative/duration_lut.hpp"
+#include "dectnrp/sections_part3/derivative/duration.hpp"
 
 namespace dectnrp::phy {
 
@@ -81,8 +81,9 @@ phy_t::phy_t(const phy_config_t& phy_config_, const radio::radio_t& radio_)
 
         hw.initialize_buffer_rx(
             worker_pool_config.rx_ant_streams_length_slots *
-            static_cast<uint32_t>(section3::duration_lut_t::get_N_samples_from_duration(
-                hw.get_samp_rate(), section3::duration_ec_t::slot001)));
+            static_cast<uint32_t>(
+                section3::duration_t(hw.get_samp_rate(), section3::duration_ec_t::slot001)
+                    .get_N_samples()));
 
         // init worker pool
         layer_unit_vec.push_back(

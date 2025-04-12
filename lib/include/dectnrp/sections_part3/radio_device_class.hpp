@@ -25,8 +25,8 @@
 
 namespace dectnrp::section3 {
 
-using radio_device_class_t = struct radio_device_class_t {
-        std::string radio_device_class_string;
+struct radio_device_class_t {
+        std::string radio_device_class_string{};
 
         /// min refers to minimum that is supported
         uint32_t u_min;

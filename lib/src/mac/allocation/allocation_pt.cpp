@@ -31,14 +31,14 @@ namespace dectnrp::mac::allocation {
 
 allocation_pt_t::allocation_pt_t(const section3::duration_lut_t* duration_lut_,
                                  const section3::duration_t beacon_period_,
-                                 const section3::duration_t turn_around_time_,
                                  const section3::duration_t allocation_validity_after_beacon_,
-                                 const section3::duration_t allocation_validity_after_now_)
+                                 const section3::duration_t allocation_validity_after_now_,
+                                 const int64_t turnaround_time_)
     : allocation_t(duration_lut_, beacon_period_),
-      turn_around_time(turn_around_time_),
-      beacon_time_last_known_64(common::adt::UNDEFINED_EARLY_64),
       allocation_validity_after_beacon(allocation_validity_after_beacon_),
-      allocation_validity_after_now(allocation_validity_after_now_) {
+      allocation_validity_after_now(allocation_validity_after_now_),
+      turnaround_time(turnaround_time_),
+      beacon_time_last_known_64(common::adt::UNDEFINED_EARLY_64) {
     resource_ul_vec.reserve(limits::max_nof_ul_resources_per_pt);
     resource_dl_vec.reserve(limits::max_nof_dl_resources_per_pt);
 }
@@ -83,7 +83,7 @@ void allocation_pt_t::add_resource_regular(const direction_t direction,
 }
 
 bool allocation_pt_t::is_within_beacon_period(const resource_t& other) const {
-    return other.get_last_sample_index() < beacon_period.N_samples;
+    return other.get_last_sample_index() < beacon_period.get_N_samples();
 }
 
 bool allocation_pt_t::is_orthogonal(const resource_vec_t& ref, const resource_t& other) {
@@ -129,8 +129,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity(const direction_t direction
                                                      const int64_t now_64,
                                                      const int64_t tx_earliest_64) const {
     // minimum transmission time
-    const int64_t tx_earliest_local_64 =
-        std::max(now_64 + turn_around_time.N_samples_64, tx_earliest_64);
+    const int64_t tx_earliest_local_64 = std::max(now_64 + turnaround_time, tx_earliest_64);
 
     switch (direction) {
         using enum direction_t;
@@ -139,9 +138,10 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity(const direction_t direction
                 dectnrp_assert(beacon_time_last_known_64 <= now_64, "uplink times out-of-order");
 
                 // maximum transmission time
-                const int64_t tx_latest_local_64 = std::min(
-                    beacon_time_last_known_64 + allocation_validity_after_beacon.N_samples_64,
-                    now_64 + allocation_validity_after_now.N_samples_64);
+                const int64_t tx_latest_local_64 =
+                    std::min(beacon_time_last_known_64 +
+                                 allocation_validity_after_beacon.get_N_samples<int64_t>(),
+                             now_64 + allocation_validity_after_now.get_N_samples<int64_t>());
 
                 return get_tx_opportunity_generic(
                     tx_earliest_local_64, tx_latest_local_64, resource_ul_vec);
@@ -151,7 +151,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity(const direction_t direction
             {
                 // maximum transmission time
                 const int64_t tx_latest_local_64 =
-                    beacon_time_last_known_64 + beacon_period.N_samples_64;
+                    beacon_time_last_known_64 + beacon_period.get_N_samples<int64_t>();
 
                 return get_tx_opportunity_generic(
                     tx_earliest_local_64, tx_latest_local_64, resource_dl_vec);
@@ -169,15 +169,16 @@ int64_t allocation_pt_t::get_tx_opportunity_ul_time_closest(const int64_t refere
         return common::adt::UNDEFINED_EARLY_64;
     }
 
-    dectnrp_assert(beacon_time_last_known_64 < reference_time_64 &&
-                       reference_time_64 < beacon_time_last_known_64 + beacon_period.N_samples_64,
-                   "must lie between two beacons");
+    dectnrp_assert(
+        beacon_time_last_known_64 < reference_time_64 &&
+            reference_time_64 < beacon_time_last_known_64 + beacon_period.get_N_samples<int64_t>(),
+        "must lie between two beacons");
 
     int64_t ret = common::adt::UNDEFINED_EARLY_64;
 
     for (const auto& elem : resource_ul_vec) {
         const int64_t A =
-            reference_time_64 - (beacon_time_last_known_64 + elem.offset.N_samples_64);
+            reference_time_64 - (beacon_time_last_known_64 + elem.offset.get_N_samples<int64_t>());
         if (std::abs(A) < std::abs(ret)) {
             ret = A;
         }
@@ -230,7 +231,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity_generic(const int64_t tx_ea
     // lower drawing
     if (tx_earliest_local_64 > beacon_time_last_known_64) {
         const int64_t B = tx_earliest_local_64 - beacon_time_last_known_64;
-        const int64_t C = common::adt::multiple_leq(B, beacon_period.N_samples_64);
+        const int64_t C = common::adt::multiple_leq(B, beacon_period.get_N_samples<int64_t>());
 
         A = beacon_time_last_known_64 + C;
 
@@ -247,12 +248,12 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity_generic(const int64_t tx_ea
     // keep searching until ...
     while (1) {
         // potential transmission time
-        const int64_t D = A + rvec.at(idx).offset.N_samples_64;
+        const int64_t D = A + rvec.at(idx).offset.get_N_samples<int64_t>();
 
         // ... we either found the first possible transmission time within the limits or ...
         if (tx_earliest_local_64 <= D && D < tx_latest_local_64) {
             tx_time_64 = D;
-            N_samples_64 = rvec.at(idx).length.N_samples_64;
+            N_samples_64 = rvec.at(idx).length.get_N_samples<int64_t>();
             break;
         }
 
@@ -267,7 +268,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity_generic(const int64_t tx_ea
             idx = 0;
 
             // increase base time by one beacon period
-            A += beacon_period.N_samples_64;
+            A += beacon_period.get_N_samples<int64_t>();
         }
     }
 

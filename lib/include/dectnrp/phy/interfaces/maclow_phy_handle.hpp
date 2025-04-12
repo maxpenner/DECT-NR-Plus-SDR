@@ -27,7 +27,6 @@ namespace dectnrp::phy {
 /// handles connecting the decoding of PCC and a PDC
 enum class handle_pcc2pdc_t : uint32_t {
     th10 = 0,  // type 1, format 0
-    th11,      // type 1, format 1
     th20,      // type 2, format 0
     th21,      // type 2, format 1
     CARDINALITY
@@ -38,7 +37,7 @@ enum class handle_pcc2pdc_t : uint32_t {
  * handle. Once the PDC is processed and the higher MAC is called, we can use the handle to
  * avoid mapping the short radio device ID to a long radio device ID.
  */
-using maclow_phy_handle_t = struct maclow_phy_handle_t {
+struct maclow_phy_handle_t {
         maclow_phy_handle_t() = default;
         maclow_phy_handle_t(const handle_pcc2pdc_t handle_pcc2pdc_, const uint32_t lrdid_)
             : handle_pcc2pdc(handle_pcc2pdc_),

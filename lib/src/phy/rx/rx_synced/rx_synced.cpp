@@ -250,9 +250,6 @@ pcc_report_t rx_synced_t::demoddecod_rx_pcc(sync_report_t& sync_report_) {
     estimator_mimo->reset(sync_report->b, sync_report->N_eff_TX);
     estimator_aoa->reset(sync_report->b, sync_report->N_eff_TX);
 
-    // process STF
-    run_stf(sync_report_);
-
     /* At this point, we know the OFDM symbol sizes but we don't know yet how many OFDM symbols
      * there are in the current packet. To retrieve that information, we have to collect the PCC and
      * decode it. Every PCC cell has to be channel corrected, and chestim_mode_lr=false is mandatory
@@ -271,6 +268,9 @@ pcc_report_t rx_synced_t::demoddecod_rx_pcc(sync_report_t& sync_report_) {
      * of 1. The first relative symbol index within the processing stage is 0.
      */
     ofdm_symb_ps_idx = 0;
+
+    // process STF
+    run_stf(sync_report_);
 
     /* With the given packet configuration so far, we can also determine the maximum OFDM symbol
      * index to contain PCC cells.
@@ -420,7 +420,8 @@ pdc_report_t rx_synced_t::demoddecod_rx_pdc(const maclow_phy_t& maclow_phy_) {
     /* At this point, the latest transmit stream indices are not relevant, as at the end of a packet
      * it is always guaranteed that all transmit streams are present in the channel estimate.
      */
-    const process_drs_meta_t process_drs_meta(TS_idx_first, TS_idx_last, ofdm_symb_idx);
+    const process_drs_meta_t process_drs_meta(
+        sync_report->N_eff_TX, TS_idx_first, TS_idx_last, ofdm_symb_idx);
 
     dectnrp_assert(TS_idx_last == sync_report->N_eff_TX - 1,
                    "last transmit stream incorrect {} {}",
@@ -582,6 +583,17 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
 
     // immediately correct phase rotation of the current OFDM symbol for upcoming CFO estimation
     estimator_sto->apply_full_phase_rotation(ofdm_symbol_now);
+
+    // overwrite fractional STO in sync_report
+    sync_report_.sto_fractional = estimator_sto->get_fractional_sto_in_samples(N_b_DFT_os);
+
+    dectnrp_assert(std::abs(sync_report_.sto_fractional) < static_cast<float>(N_b_DFT / 4),
+                   "fractional STO very large");
+
+    // overwrite exact fine peak time in sync_report
+    sync_report_.fine_peak_time_correct_by_sto_fractional_64 =
+        sync_report_.fine_peak_time_64 +
+        static_cast<int64_t>(std::round(sync_report_.sto_fractional));
 
 #if defined(RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_STF) || defined(RX_SYNCED_PARAM_SNR_BASED_ON_STF)
     /* At this point, we have correct the phase rotation of ofdm_symbol_now. If the STF is required
@@ -832,7 +844,8 @@ void rx_synced_t::run_drs_chestim_zf() {
 #if defined(RX_SYNCED_PARAM_STO_RESIDUAL_BASED_ON_DRS) || \
     defined(RX_SYNCED_PARAM_CFO_RESIDUAL_BASED_ON_DRS) || \
     defined(RX_SYNCED_PARAM_SNR_BASED_ON_DRS)
-    const process_drs_meta_t process_drs_meta(TS_idx_first, TS_idx_last, ofdm_symb_idx);
+    const process_drs_meta_t process_drs_meta(
+        sync_report->N_eff_TX, TS_idx_first, TS_idx_last, ofdm_symb_idx);
 #endif
 
 #ifdef RX_SYNCED_PARAM_STO_RESIDUAL_BASED_ON_DRS

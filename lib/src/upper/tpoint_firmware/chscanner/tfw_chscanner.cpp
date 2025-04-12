@@ -25,6 +25,7 @@
 
 #include "dectnrp/common/adt/decibels.hpp"
 #include "dectnrp/common/prog/log.hpp"
+#include "dectnrp/sections_part2/channel_arrangement.hpp"
 
 namespace dectnrp::upper::tfw::chscanner {
 
@@ -34,15 +35,23 @@ tfw_chscanner_t::tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
                                  phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_),
       next_measurement_time_64(std::numeric_limits<int64_t>::max()) {
+    // init frequencies
+    for (const auto band : bands) {
+        const auto acfn = section2::get_absolute_channel_frequency_numbering(band);
+
+        for (uint32_t n = acfn.n_min; n <= acfn.n_max; n += acfn.n_spacing) {
+            freqs.push_back(section2::get_center_frequency(acfn, n).FC);
+        }
+    }
+
     // set frequency, TX and RX power
     hw.set_command_time();
     hw.set_tx_power_ant_0dBFS_tc(-1000.0f);
     rx_power_ant_0dBFS = hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
-    hw.set_freq_tc(freq[freq_idx]);
+    hw.set_freq_tc(freqs[freqs_idx]);
 }
 
 void tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
-    // start some time in the future
     next_measurement_time_64 =
         start_time_64 + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
 }
@@ -56,7 +65,6 @@ phy::machigh_phy_t tfw_chscanner_t::work_regular(const phy::phy_mac_reg_t& phy_m
         return phy::machigh_phy_t();
     }
 
-    // return value
     phy::machigh_phy_t machigh_phy;
 
     /**
@@ -106,15 +114,15 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& ch
     else {
         // show result
         dectnrp_log_inf(
-            "frequency: {}MHz | rms_min={} rms_max={}", freq[freq_idx] / 1.0e6, rms_min, rms_max);
+            "frequency: {}MHz | rms_min={} rms_max={}", freqs[freqs_idx] / 1.0e6, rms_min, rms_max);
 
         if (0.5 <= rms_max) {
             dectnrp_log_wrn("ADC range is limited to +/-1. ADC may be clipping.");
         }
 
-        ++freq_idx;
-        if (freq_idx == freq.size()) {
-            freq_idx = 0;
+        ++freqs_idx;
+        if (freqs_idx == freqs.size()) {
+            freqs_idx = 0;
             dectnrp_log_inf(" ");
         }
 
@@ -127,7 +135,7 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& ch
         hw.set_command_time(
             buffer_rx.get_rx_time_passed() +
             duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 100));
-        hw.set_freq_tc(freq[freq_idx]);
+        hw.set_freq_tc(freqs[freqs_idx]);
 
         // trigger new run some distant time in the future
         next_measurement_time_64 =

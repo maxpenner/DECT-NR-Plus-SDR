@@ -52,7 +52,7 @@ class estimator_sto_t final : public estimator_t {
 
         void apply_full_phase_rotation(std::vector<cf_t*>& ofdm_symbol_now);
 
-        float get_fractional_sto_in_samples(const uint32_t N_b_DFT_os) const;
+        [[nodiscard]] float get_fractional_sto_in_samples(const uint32_t N_b_DFT_os) const;
 
     private:
         virtual void reset_internal() override final;

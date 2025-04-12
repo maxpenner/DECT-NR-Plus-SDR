@@ -27,11 +27,14 @@ namespace dectnrp::upper::tfw::p2p {
 
 tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {
+    dectnrp_assert(mac_lower.lower_ctrl_vec.size() == 1,
+                   "firmware written for a single pair of physical and radio layer");
+
     // ##################################################
     // Radio Layer + PHY
 
     cqi_lut =
-        phy::indicators::cqi_lut_t(3, worker_pool_config.radio_device_class.mcs_index_min, 5.0f);
+        phy::indicators::cqi_lut_t(4, worker_pool_config.radio_device_class.mcs_index_min, 8.0f);
 
     hw_simulator = dynamic_cast<radio::hw_simulator_t*>(&hw);
 
@@ -46,16 +49,17 @@ tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     // how often does the FT send beacons, how often does the PT expect beacons?
     const auto beacon_period = duration_lut.get_duration(section3::duration_ec_t::ms001, 10);
 
-    // set allocation
     allocation_ft = mac::allocation::allocation_ft_t(
         &duration_lut, beacon_period, duration_lut.get_duration(section3::duration_ec_t::ms001, 2));
 
-#ifdef TFW_P2P_EXPORT_1PPS
-    ppx_pll = mac::ppx::ppx_pll_t(duration_lut.get_duration(section3::duration_ec_t::s001),
-                                  duration_lut.get_duration(section3::duration_ec_t::ms001, 250),
-                                  duration_lut.get_duration(section3::duration_ec_t::ms001, 100),
-                                  beacon_period,
-                                  duration_lut.get_duration(section3::duration_ec_t::ms001, 10));
+    pll = mac::pll_t(beacon_period);
+
+#ifdef TFW_P2P_EXPORT_PPX
+    ppx = mac::ppx_t(duration_lut.get_duration(section3::duration_ec_t::s001),
+                     duration_lut.get_duration(section3::duration_ec_t::ms001, 250),
+                     duration_lut.get_duration(section3::duration_ec_t::ms001, 20),
+                     beacon_period,
+                     duration_lut.get_duration(section3::duration_ec_t::ms001, 5));
 #endif
 
     // ##################################################
@@ -80,13 +84,12 @@ section4::mac_architecture::identity_t tfw_p2p_base_t::init_identity_pt(
 }
 
 mac::allocation::allocation_pt_t tfw_p2p_base_t::init_allocation_pt(const uint32_t firmware_id_) {
-    // empty allocation for one specific pt
     mac::allocation::allocation_pt_t allocation_pt = mac::allocation::allocation_pt_t(
         &duration_lut,
         allocation_ft.get_beacon_period_as_duration(),
-        duration_lut.get_duration(section3::duration_ec_t::turn_around_time_us),
         duration_lut.get_duration(section3::duration_ec_t::ms001, 16),
-        duration_lut.get_duration(section3::duration_ec_t::ms001, 11));
+        duration_lut.get_duration(section3::duration_ec_t::ms001, 11),
+        hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround));
 
     /* If firmware ID is larger than the number of PTs we want to support, we simply leave the
      * allocation empty. This way we can use the same code for different number of PTs, which is
@@ -111,10 +114,8 @@ mac::allocation::allocation_pt_t tfw_p2p_base_t::init_allocation_pt(const uint32
     const uint32_t stride = ul_gap_dl_gap * N_pt;
 
 #ifdef APPLICATION_INTERFACE_VNIC_OR_SOCKET
-    // number of allocations per PT we can fit in a single frame
     const uint32_t N_resources = 4;
 #else
-    // number of allocations per PT we can fit in a single frame
     const uint32_t N_resources = 2;
 #endif
 
@@ -148,8 +149,12 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
     psdef.b = worker_pool_config.radio_device_class.b_min;
     psdef.PacketLengthType = 1;
     psdef.PacketLength = 2;
+#ifdef TFW_P2P_MIMO
+    psdef.tm_mode_index = section3::tmmode::get_single_antenna_mode(buffer_rx.nof_antennas);
+#else
     psdef.tm_mode_index = 0;
-    psdef.mcs_index = 4;
+#endif
+    psdef.mcs_index = cqi_lut.get_highest_mcs_possible(-1000.0f);
     psdef.Z = worker_pool_config.radio_device_class.Z_min;
 
     // define PLCFs
@@ -164,7 +169,19 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
     plcf_21.ReceiverIdentity = ShortRadioDeviceID_rx;
     plcf_21.set_NumberOfSpatialStreams(1);
     plcf_21.Reserved = 0;
-    plcf_21.FeedbackFormat = section4::feedback_info_f1_t::No_feedback;
+
+    // pick a feedback format
+    plcf_21.FeedbackFormat = 5;
+    // prepare feedback format 4
+    plcf_21.feedback_info_pool.feedback_info_f4.HARQ_feedback_bitmap = 0;
+    plcf_21.feedback_info_pool.feedback_info_f4.MCS = psdef.mcs_index;
+    // prepare feedback format 5
+    plcf_21.feedback_info_pool.feedback_info_f5.HARQ_Process_number = 0;
+    plcf_21.feedback_info_pool.feedback_info_f5.Transmission_feedback =
+        section4::feedback_info_f1_t::transmission_feedback_t::ACK;
+    plcf_21.feedback_info_pool.feedback_info_f5.MIMO_feedback =
+        section4::feedback_info_f1_t::mimo_feedback_t::single_layer;
+    plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index = 0;
 
     // pick one PLCF
     ppmp_unicast.plcf_base_effective = &ppmp_unicast.plcf_21;
