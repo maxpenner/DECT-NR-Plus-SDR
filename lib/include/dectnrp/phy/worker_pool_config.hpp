@@ -23,6 +23,7 @@
 #include <array>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/constants.hpp"

@@ -23,6 +23,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include <random>
 
 namespace dectnrp::common {
 

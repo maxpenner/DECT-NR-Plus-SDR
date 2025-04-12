@@ -20,10 +20,9 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstdint>
 #include <limits>
-#include <random>
-#include <type_traits>
 
 namespace dectnrp::common {
 
