@@ -192,13 +192,7 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
     // number of definable packets is limited
     for (uint32_t i = 0; i < max_simultaneous_tx_unicast; ++i) {
         // go over the connection indexes which represent different devices
-        for (uint32_t conn_idx = 0; conn_idx < N_pt; ++conn_idx) {
-            // first map connection index to PT
-            const auto lrdid = contact_list.get_lrdid_from_conn_idx_server(conn_idx);
-
-            // load contact information of PT
-            auto& contact = contact_list.get_contact(lrdid);
-
+        for (auto& contact : contact_list.get_contacts_vec()) {
             contact.allocation_pt.set_beacon_time_last_known(
                 allocation_ft.get_beacon_time_transmitted());
 
@@ -214,13 +208,14 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
 
             // change content of headers
             ppmp_unicast.plcf_21.ReceiverIdentity = contact.identity.ShortRadioDeviceID;
-            ppmp_unicast.unicast_header.Receiver_Address = lrdid;
+            ppmp_unicast.unicast_header.Receiver_Address = contact.identity.LongRadioDeviceID;
 
             // change feedback info in PLCF
             ppmp_unicast.plcf_21.FeedbackFormat = section4::feedback_info_t::No_feedback;
 
             // try to send a packet, may return false if no data of HARQ processes are available
-            if (!worksub_tx_unicast(machigh_phy, tx_opportunity, contact.mimo_csi, conn_idx)) {
+            if (!worksub_tx_unicast(
+                    machigh_phy, tx_opportunity, contact.mimo_csi, contact.conn_idx_server)) {
                 // break;
             }
         }

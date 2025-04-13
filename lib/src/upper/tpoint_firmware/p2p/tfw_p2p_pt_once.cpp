@@ -50,13 +50,13 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     // ##################################################
     // MAC Layer
 
-    identity_pt = init_identity_pt(tpoint_config.firmware_id);
+    contact_pt.identity = init_identity_pt(tpoint_config.firmware_id);
 
-    allocation_pt = init_allocation_pt(tpoint_config.firmware_id);
+    contact_pt.allocation_pt = init_allocation_pt(tpoint_config.firmware_id);
 
-    init_packet_unicast(identity_pt.ShortRadioDeviceID,
+    init_packet_unicast(contact_pt.identity.ShortRadioDeviceID,
                         identity_ft.ShortRadioDeviceID,
-                        identity_pt.LongRadioDeviceID,
+                        contact_pt.identity.LongRadioDeviceID,
                         identity_ft.LongRadioDeviceID);
 
     // ##################################################

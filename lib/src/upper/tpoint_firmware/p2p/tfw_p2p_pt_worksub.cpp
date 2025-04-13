@@ -38,7 +38,7 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
     dectnrp_assert(plcf_10 != nullptr, "cast ill-formed");
 
     // is this a packet from the correct network, and from the FT?
-    if (plcf_10->ShortNetworkID != identity_pt.ShortNetworkID ||
+    if (plcf_10->ShortNetworkID != contact_pt.identity.ShortNetworkID ||
         plcf_10->TransmitterIdentity != identity_ft.ShortRadioDeviceID) {
         return std::nullopt;
     }
@@ -49,7 +49,7 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
     ++stats.beacon_cnt;
 
     // it's the beacon, so update beacon time
-    allocation_pt.set_beacon_time_last_known(phy_maclow.sync_report.fine_peak_time_64);
+    contact_pt.allocation_pt.set_beacon_time_last_known(phy_maclow.sync_report.fine_peak_time_64);
 
     pll.provide_beacon_time(phy_maclow.sync_report.fine_peak_time_correct_by_sto_fractional_64);
 
@@ -63,8 +63,8 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
 #ifdef TFW_P2P_PT_AGC_ENABLED
 #ifdef TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
     // apply AGC change for RX and TX immediately before the next beacon
-    const int64_t t_agc_change_64 = allocation_pt.get_beacon_time_last_known() +
-                                    allocation_pt.get_beacon_period() -
+    const int64_t t_agc_change_64 = contact_pt.allocation_pt.get_beacon_time_last_known() +
+                                    contact_pt.allocation_pt.get_beacon_period() -
                                     hw.get_tmin_samples(radio::hw_t::tmin_t::gain);
 #else
     // immediate AGC gain change
@@ -96,9 +96,9 @@ phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
     dectnrp_assert(plcf_21 != nullptr, "cast ill-formed");
 
     // is this a packet from the correct network, from the FT and for this PT?
-    if (plcf_21->ShortNetworkID != identity_pt.ShortNetworkID ||
+    if (plcf_21->ShortNetworkID != contact_pt.identity.ShortNetworkID ||
         plcf_21->TransmitterIdentity != identity_ft.ShortRadioDeviceID ||
-        plcf_21->ReceiverIdentity != identity_pt.ShortRadioDeviceID) {
+        plcf_21->ReceiverIdentity != contact_pt.identity.ShortRadioDeviceID) {
         return phy::maclow_phy_t();
     }
 
@@ -145,7 +145,8 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
         phy_machigh.pdc_report.mimo_report.tm_3_7_beamforming_idx;
 
     // convert MIMO report to CSI
-    mimo_csi.update(phy_machigh.pdc_report.mimo_report, phy_machigh.phy_maclow.sync_report);
+    contact_pt.mimo_csi.update(phy_machigh.pdc_report.mimo_report,
+                               phy_machigh.phy_maclow.sync_report);
 
     // check if we can generate any uplink
     phy::machigh_phy_t machigh_phy;
@@ -193,7 +194,7 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
     // number of definable packets is limited
     for (uint32_t i = 0; i < max_simultaneous_tx_unicast; ++i) {
         // find next transmission opportunity
-        const auto tx_opportunity = allocation_pt.get_tx_opportunity(
+        const auto tx_opportunity = contact_pt.allocation_pt.get_tx_opportunity(
             mac::allocation::direction_t::uplink, buffer_rx.get_rx_time_passed(), tx_earliest_64);
 
         // if no opportunity found, leave machigh_phy as is
@@ -205,7 +206,7 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
         ppmp_unicast.plcf_21.FeedbackFormat = ppmp_unicast.plcf_21.FeedbackFormat == 4 ? 5 : 4;
 
         // try to send a packet, may return false if no data of HARQ processes are available
-        if (!worksub_tx_unicast(machigh_phy, tx_opportunity, mimo_csi, 0)) {
+        if (!worksub_tx_unicast(machigh_phy, tx_opportunity, contact_pt.mimo_csi, 0)) {
             break;
         }
     }

@@ -51,8 +51,8 @@ class tpoint_t : public common::layer_unit_t {
          * that every firmware must implement. Additional functions, members etc. should not be
          * included here, but rather in deriving classes/firmwares.
          *
-         * To be able to load the firmware, it has to be added to the function upper_t::add_tpoint()
-         * in upper.cpp.
+         * To be able to load a new firmware, it must have a unique member "firmware_name" of type
+         * std::string, and must be added to the function upper_t::add_tpoint() in upper.cpp.
          *
          * \param tpoint_config_ configuration of this termination point
          * \param mac_lower_ access to phy + radio layer

@@ -42,17 +42,19 @@ class contact_list_t {
             contacts_vec.reserve(N_entries);
         }
 
-        void add_new_contact(const uint32_t lrdid,
-                             const uint32_t srdid,
-                             const uint32_t conn_idx_server,
-                             const uint32_t conn_idx_client) noexcept {
-            srdid_bimap.insert(lrdid, srdid);
-            conn_idx_server_bimap.insert(lrdid, conn_idx_server);
-            conn_idx_client_bimap.insert(lrdid, conn_idx_client);
+        void add_new_contact_and_setup_indexing(
+            const section4::mac_architecture::identity_t& identity,
+            const uint32_t conn_idx_server,
+            const uint32_t conn_idx_client) noexcept {
+            srdid_bimap.insert(identity.LongRadioDeviceID, identity.ShortRadioDeviceID);
+            conn_idx_server_bimap.insert(identity.LongRadioDeviceID, conn_idx_server);
+            conn_idx_client_bimap.insert(identity.LongRadioDeviceID, conn_idx_client);
 
-            contact_idx_um.insert(std::make_pair(lrdid, contacts_vec.size()));
+            contact_idx_um.insert(std::make_pair(identity.LongRadioDeviceID, contacts_vec.size()));
             contacts_vec.push_back(T{});
         }
+
+        std::vector<T>& get_contacts_vec() { return contacts_vec; }
 
         bool is_lrdid_known(const uint32_t lrdid) const noexcept {
             return srdid_bimap.is_k_known(lrdid);
