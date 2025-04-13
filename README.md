@@ -146,6 +146,10 @@ If you use this repository for any publication, please cite the repository accor
 
 ## To Do
 
+### Radio Layer
+
+- [ ] GPIO support for B210
+
 ### Physical Layer
 
 - [ ] **$\mu$** detection
