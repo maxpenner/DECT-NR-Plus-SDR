@@ -174,7 +174,7 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
         if (const auto* mmie_child = dynamic_cast<const section4::user_plane_data_t*>(mmie);
             mmie_child != nullptr) {
             // submit to app_client
-            if (app_client->write_try(0, mmie_child->get_data_ptr(), mmie_child->get_data_size()) >
+            if (app_client->write_nto(0, mmie_child->get_data_ptr(), mmie_child->get_data_size()) >
                 0) {
                 ++datagram_cnt;
             }
