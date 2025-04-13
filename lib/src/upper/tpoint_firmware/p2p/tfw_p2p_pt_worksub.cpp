@@ -101,7 +101,6 @@ phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
         return phy::maclow_phy_t();
     }
 
-    // udpate CSI
     contact_pt.mimo_csi.update_from_feedback(
         plcf_21->FeedbackFormat, plcf_21->feedback_info_pool, phy_maclow.sync_report);
 
@@ -121,7 +120,6 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     // request vector with base pointer to all decoded MMIEs
     const auto& mmie_decoded_vec = mac_pdu_decoder.get_mmie_decoded_vec();
 
-    // go over each MMIE
     for (auto mmie : mmie_decoded_vec) {
         if (const auto* mmie_child = dynamic_cast<const section4::cluster_beacon_message_t*>(mmie);
             mmie_child != nullptr) {
@@ -139,7 +137,6 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
         }
     }
 
-    // convert MIMO report to CSI
     contact_pt.mimo_csi.update_from_phy(phy_machigh.pdc_report.mimo_report,
                                         phy_machigh.phy_maclow.sync_report);
 
@@ -169,8 +166,9 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
         if (const auto* mmie_child = dynamic_cast<const section4::user_plane_data_t*>(mmie);
             mmie_child != nullptr) {
             // submit to app_client
-            if (app_client->write_nto(0, mmie_child->get_data_ptr(), mmie_child->get_data_size()) >
-                0) {
+            if (app_client->write_nto(contact_pt.conn_idx_client,
+                                      mmie_child->get_data_ptr(),
+                                      mmie_child->get_data_size()) > 0) {
                 ++datagram_cnt;
             }
 
@@ -181,6 +179,10 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
     }
 
     app_client->trigger_forward_nto(datagram_cnt);
+
+    contact_pt.mimo_csi.update_from_phy(
+        cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),
+        phy_machigh.phy_maclow.sync_report);
 
     return phy::machigh_phy_t();
 }
@@ -197,11 +199,8 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
             break;
         }
 
-        // change feedback info in PLCF
-        ppmp_unicast.plcf_21.FeedbackFormat = ppmp_unicast.plcf_21.FeedbackFormat == 4 ? 5 : 4;
-
         // try to send a packet, may return false if no data of HARQ processes are available
-        if (!worksub_tx_unicast(machigh_phy, tx_opportunity, contact_pt)) {
+        if (!worksub_tx_unicast(machigh_phy, contact_pt, tx_opportunity)) {
             break;
         }
     }

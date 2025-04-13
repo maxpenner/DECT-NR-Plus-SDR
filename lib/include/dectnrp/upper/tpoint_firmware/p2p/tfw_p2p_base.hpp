@@ -168,8 +168,11 @@ class tfw_p2p_base_t : public tpoint_t {
 
         /// common procedure for FT and PT generating a single packet with multiple MAC PDUs
         bool worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
-                                const mac::allocation::tx_opportunity_t& tx_opportunity,
-                                const contact_p2p_t& contact_p2p);
+                                contact_p2p_t& contact_p2p,
+                                const mac::allocation::tx_opportunity_t& tx_opportunity);
+
+        void worksub_tx_unicast_psdef(contact_p2p_t& contact_p2p, const int64_t expiration_64);
+        void worksub_tx_unicast_feedback(contact_p2p_t& contact_p2p, const int64_t expiration_64);
 
         // ##################################################
         // DLC and Convergence Layer

@@ -34,17 +34,6 @@ class mimo_csi_t {
         mimo_csi_t() = default;
 
         /**
-         * \brief The current channel state information (CSI) can be updated based on the reporting
-         * of the physical layer. This is a valid approach under the assumption that the channel is
-         * reciprocal, which depends on the radio hardware in use. Once updated, the CSI may be
-         * applied immediately.
-         *
-         * \param mimo_report
-         * \param sync_report contains time of reception
-         */
-        void update_from_phy(const mimo_report_t& mimo_report, const sync_report_t& sync_report);
-
-        /**
          * \brief The CSI can also be updated based on the receiver's feedback as part of the PLCF.
          * In that case, the channel does not have to be reciprocal as the receiver sees the radio
          * hardware as part of its own channel. Once updated, the CSI may be applied immediately.
@@ -57,13 +46,29 @@ class mimo_csi_t {
                                   const section4::feedback_info_pool_t& feedback_info_pool,
                                   const sync_report_t& sync_report);
 
-        common::adt::expiring_t<uint32_t> MCS{};
-        common::adt::expiring_t<uint32_t> codebook_index{};
-        common::adt::expiring_t<uint32_t> tm_mode{};
+        /**
+         * \brief The current channel state information (CSI) can be updated based on the reporting
+         * of the physical layer. This is a valid approach under the assumption that the channel is
+         * reciprocal, which depends on the radio hardware in use. Once updated, the CSI may be
+         * applied immediately.
+         *
+         * \param mimo_report
+         * \param sync_report contains time of reception
+         */
+        void update_from_phy(const mimo_report_t& mimo_report, const sync_report_t& sync_report);
+        void update_from_phy(const uint32_t MCS, const sync_report_t& sync_report);
 
-    private:
-        void update_mcs(const uint32_t MCS_, const int64_t time_64);
-        void update_ci(const uint32_t codebook_index_, const int64_t time_64);
+        common::adt::expiring_t<uint32_t> feedback_MCS{};
+        common::adt::expiring_t<uint32_t> feedback_codebook_index{};
+        common::adt::expiring_t<uint32_t> feedback_tm_mode{};
+
+        common::adt::expiring_t<uint32_t> phy_MCS{};
+        common::adt::expiring_t<uint32_t> phy_codebook_index{};
+        common::adt::expiring_t<uint32_t> phy_codebook_index_reciprocal{};
+        common::adt::expiring_t<uint32_t> phy_tm_mode_reciprocal{};
+
+        /// can be the same as feedback_codebook_index or phy_codebook_index_reciprocal
+        common::adt::expiring_t<uint32_t> codebook_index{};
 };
 
 }  // namespace dectnrp::phy

@@ -48,11 +48,13 @@ class tpoint_t : public common::layer_unit_t {
         /**
          * \brief This class tpoint_t (tpoint = termination point) is a base class every firmware
          * has to derive from. It declares the absolute minimum interface of functions and members
-         * that every firmware must implement. Additional functions, members etc. should not be
-         * included here, but rather in deriving classes/firmwares.
+         * that every firmware must implement. Additional methods and members should not be included
+         * here, but in deriving classes/firmwares.
          *
-         * To be able to load a new firmware, it must have a unique member "firmware_name" of type
-         * std::string, and must be added to the function upper_t::add_tpoint() in upper.cpp.
+         * To load a new firmware at SDR startup, its class deriving from tpoint_t must have a
+         * unique static member "firmware_name" of type std::string, and it must be added to the
+         * function upper_t::add_tpoint() in upper.cpp. The value of "firmware_name" can then be
+         * used in any configuration file "upper.json".
          *
          * \param tpoint_config_ configuration of this termination point
          * \param mac_lower_ access to phy + radio layer

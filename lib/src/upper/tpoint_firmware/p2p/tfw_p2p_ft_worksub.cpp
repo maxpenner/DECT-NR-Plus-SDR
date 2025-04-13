@@ -58,10 +58,8 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
     // load contact information of PT
     auto& contact = contact_list.get_contact(lrdid);
 
-    // save sync_report
     contact.sync_report = phy_maclow.sync_report;
 
-    // udpate CSI
     contact.mimo_csi.update_from_feedback(
         plcf_21->FeedbackFormat, plcf_21->feedback_info_pool, phy_maclow.sync_report);
 
@@ -88,8 +86,7 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
     // long radio device ID used as key
     const auto lrdid = phy_machigh.maclow_phy.get_handle_lrdid();
 
-    // load contact data of PT
-    const auto& contact = contact_list.get_contact(lrdid);
+    auto& contact = contact_list.get_contact(lrdid);
 
     // request vector of base pointers to MMIEs
     const auto& mmie_decoded_vec = phy_machigh.pdc_report.mac_pdu_decoder.get_mmie_decoded_vec();
@@ -97,9 +94,7 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
     // count datagrams to be forwarded
     uint32_t datagram_cnt = 0;
 
-    // go over each MMIE
     for (auto mmie : mmie_decoded_vec) {
-        // check if MMIE is actually user plane data
         if (dynamic_cast<section4::user_plane_data_t*>(mmie) == nullptr) {
             dectnrp_log_wrn("MMIE not user plane data");
             continue;
@@ -114,6 +109,10 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
     }
 
     app_client->trigger_forward_nto(datagram_cnt);
+
+    contact.mimo_csi.update_from_phy(
+        cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),
+        phy_machigh.phy_maclow.sync_report);
 
     return phy::machigh_phy_t();
 }
@@ -216,7 +215,7 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
             ppmp_unicast.plcf_21.FeedbackFormat = section4::feedback_info_t::No_feedback;
 
             // try to send a packet, may return false if no data of HARQ processes are available
-            if (!worksub_tx_unicast(machigh_phy, tx_opportunity, contact)) {
+            if (!worksub_tx_unicast(machigh_phy, contact, tx_opportunity)) {
                 // break;
             }
         }

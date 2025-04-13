@@ -50,9 +50,15 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     // ##################################################
     // MAC Layer
 
+    contact_pt.sync_report = phy::sync_report_t(buffer_rx.nof_antennas);
     contact_pt.identity = init_identity_pt(tpoint_config.firmware_id);
-
     contact_pt.allocation_pt = init_allocation_pt(tpoint_config.firmware_id);
+    contact_pt.mimo_csi = phy::mimo_csi_t();
+    contact_pt.conn_idx_server = 0;
+    contact_pt.conn_idx_client = 0;
+
+    // feedback format 4 for MCS, 5 for codebookindex
+    contact_pt.feedback_plan = mac::feedback_plan_t(std::vector<uint32_t>{4, 5});
 
     init_packet_unicast(contact_pt.identity.ShortRadioDeviceID,
                         identity_ft.ShortRadioDeviceID,

@@ -18,31 +18,25 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#pragma once
-
-#include "dectnrp/mac/contact.hpp"
 #include "dectnrp/mac/feedback_plan.hpp"
 
-namespace dectnrp::upper::tfw::p2p {
+#include <cmath>
 
-class contact_p2p_t final : public mac::contact_t {
-    public:
-        // ##################################################
-        // Radio Layer + PHY
-        // -
+#include "dectnrp/common/prog/assert.hpp"
 
-        // ##################################################
-        // MAC Layer
+namespace dectnrp::mac {
 
-        mac::feedback_plan_t feedback_plan;
+feedback_plan_t::feedback_plan_t(const std::vector<uint32_t>&& feedback_format_vec_)
+    : feedback_format_vec(feedback_format_vec_),
+      idx(0) {}
 
-        // ##################################################
-        // DLC and Convergence Layer
-        // -
+uint32_t feedback_plan_t::get_next_feedback_format() {
+    const uint32_t ret = feedback_format_vec.at(idx);
 
-        // ##################################################
-        // Application Layer
-        // -
-};
+    ++idx;
+    idx %= feedback_format_vec.size();
 
-}  // namespace dectnrp::upper::tfw::p2p
+    return ret;
+}
+
+}  // namespace dectnrp::mac

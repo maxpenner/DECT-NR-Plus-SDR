@@ -82,6 +82,9 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
         contact.conn_idx_server = conn_idx_server;
         contact.conn_idx_client = conn_idx_client;
 
+        // feedback format 4 to send the MCS in the downlink
+        contact.feedback_plan = mac::feedback_plan_t(std::vector<uint32_t>{4});
+
         dectnrp_assert(contact.identity.NetworkID == identity_pt.NetworkID, "id not equal");
         dectnrp_assert(contact.identity.ShortNetworkID == identity_pt.ShortNetworkID,
                        "id not equal");

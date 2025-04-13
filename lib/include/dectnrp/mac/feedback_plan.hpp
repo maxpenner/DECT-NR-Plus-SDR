@@ -20,29 +20,21 @@
 
 #pragma once
 
-#include "dectnrp/mac/contact.hpp"
-#include "dectnrp/mac/feedback_plan.hpp"
+#include <cstdint>
+#include <vector>
 
-namespace dectnrp::upper::tfw::p2p {
+namespace dectnrp::mac {
 
-class contact_p2p_t final : public mac::contact_t {
+class feedback_plan_t {
     public:
-        // ##################################################
-        // Radio Layer + PHY
-        // -
+        feedback_plan_t() = default;
+        feedback_plan_t(const std::vector<uint32_t>&& feedback_format_vec);
 
-        // ##################################################
-        // MAC Layer
+        uint32_t get_next_feedback_format();
 
-        mac::feedback_plan_t feedback_plan;
-
-        // ##################################################
-        // DLC and Convergence Layer
-        // -
-
-        // ##################################################
-        // Application Layer
-        // -
+    private:
+        std::vector<uint32_t> feedback_format_vec;
+        std::size_t idx{};
 };
 
-}  // namespace dectnrp::upper::tfw::p2p
+}  // namespace dectnrp::mac

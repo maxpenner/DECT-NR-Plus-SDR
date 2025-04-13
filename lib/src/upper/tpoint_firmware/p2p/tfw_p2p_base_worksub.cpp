@@ -25,6 +25,7 @@
 
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/limits.hpp"
+#include "dectnrp/sections_part3/beamforming_and_antenna_port_mapping.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
@@ -56,8 +57,8 @@ void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
 #endif
 
 bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
-                                        const mac::allocation::tx_opportunity_t& tx_opportunity,
-                                        const contact_p2p_t& contact_p2p) {
+                                        contact_p2p_t& contact_p2p,
+                                        const mac::allocation::tx_opportunity_t& tx_opportunity) {
     // first check if there even is any data to transmit
     const auto items_level_report = app_server->get_items_level_report_nto(
         contact_p2p.conn_idx_server, limits::max_nof_user_plane_data_per_mac_pdu);
@@ -67,8 +68,13 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
         return false;
     }
 
-    // OPTIONAL: change dimensions of PLCF and MAC PDU (psdef)
-    // -
+    // define an expiration time for all instances of expiring_t
+    const int64_t expiration_64 =
+        tx_opportunity.tx_time_64 -
+        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 50);
+
+    // change dimensions of PLCF and MAC PDU (psdef)
+    worksub_tx_unicast_psdef(contact_p2p, expiration_64);
 
     // request harq process
     auto* hp_tx = hpp->get_process_tx(ppmp_unicast.plcf_base_effective->get_Type(),
@@ -85,8 +91,8 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     // this is now a well-defined packet size
     const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    // OPTIONAL: change content of PLCF, MAC header type and MAC common header
-    // -
+    // update feedback info in PLCF
+    worksub_tx_unicast_feedback(contact_p2p, expiration_64);
 
     // pack headers
     uint32_t a_cnt_w = ppmp_unicast.pack_first_3_header(hp_tx->get_a_plcf(), hp_tx->get_a_tb());
@@ -136,8 +142,11 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     mmie_pool_tx.fill_with_padding_ies(hp_tx->get_a_tb() + a_cnt_w,
                                        packet_sizes.N_TB_byte - a_cnt_w);
 
-    // pick beamforming codebook index
-    const uint32_t codebook_index = 0;
+    // is the codebook index from the channel state information still valid at TX time?
+    const uint32_t codebook_index =
+        contact_p2p.mimo_csi.codebook_index.is_valid(expiration_64)
+            ? section3::W_t::clamp_W(packet_sizes.tm_mode, *contact_p2p.mimo_csi.codebook_index)
+            : 0;
 
     // PHY meta
     const phy::tx_meta_t& tx_meta = {.optimal_scaling_DAC = false,
@@ -158,6 +167,46 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
 
     return true;
+}
+
+void tfw_p2p_base_t::worksub_tx_unicast_psdef(contact_p2p_t& contact_p2p,
+                                              const int64_t expiration_64) {
+    if (contact_p2p.mimo_csi.feedback_MCS.is_valid(expiration_64)) {
+        ppmp_unicast.psdef.mcs_index = cqi_lut.clamp_mcs(*contact_p2p.mimo_csi.feedback_MCS);
+    } else {
+        ppmp_unicast.psdef.mcs_index = cqi_lut.get_mcs_min();
+    }
+
+    // update transmission mode
+    // ToDo
+}
+
+void tfw_p2p_base_t::worksub_tx_unicast_feedback(contact_p2p_t& contact_p2p,
+                                                 const int64_t expiration_64) {
+    // set next feedback format in PLCF
+    ppmp_unicast.plcf_21.FeedbackFormat = contact_p2p.feedback_plan.get_next_feedback_format();
+
+    // update respective feedback format
+    switch (ppmp_unicast.plcf_21.FeedbackFormat) {
+        case 4:
+            if (contact_p2p.mimo_csi.phy_MCS.is_valid(expiration_64)) {
+                ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f4.MCS =
+                    cqi_lut.clamp_mcs(*contact_p2p.mimo_csi.phy_MCS);
+            } else {
+                ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f4.MCS =
+                    cqi_lut.get_mcs_min();
+            }
+            break;
+
+        case 5:
+            if (contact_p2p.mimo_csi.phy_codebook_index.is_valid(expiration_64)) {
+                ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index =
+                    *contact_p2p.mimo_csi.phy_codebook_index;
+            } else {
+                ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index = 0;
+            }
+            break;
+    }
 }
 
 }  // namespace dectnrp::upper::tfw::p2p
