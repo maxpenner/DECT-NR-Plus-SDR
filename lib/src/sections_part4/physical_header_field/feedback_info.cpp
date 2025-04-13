@@ -107,7 +107,7 @@ bool feedback_info_f1_t::is_valid() const {
         return false;
     }
 
-    if (MCS <= 11) {
+    if (11 < MCS) {
         return false;
     }
 
@@ -155,7 +155,7 @@ bool feedback_info_f2_t::is_valid() const {
         return false;
     }
 
-    if (MCS <= 11) {
+    if (11 < MCS) {
         return false;
     }
 
@@ -207,7 +207,7 @@ bool feedback_info_f3_t::is_valid() const {
         return false;
     }
 
-    if (MCS <= 11) {
+    if (11 < MCS) {
         return false;
     }
 
@@ -246,7 +246,7 @@ bool feedback_info_f4_t::is_valid() const {
         return false;
     }
 
-    if (MCS <= 11) {
+    if (11 < MCS) {
         return false;
     }
 
@@ -339,7 +339,7 @@ bool feedback_info_f6_t::is_valid() const {
         return false;
     }
 
-    if (MCS <= 11) {
+    if (11 < MCS) {
         return false;
     }
 
