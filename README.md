@@ -40,16 +40,17 @@ The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware
 
 Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for termination point which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
-|   | **Virtual Function**  | **Properties**                                                            |
-|---|-----------------------|---------------------------------------------------------------------------|
-| 1 | work_start_imminent() | called once immediately before IQ sample processing begins                |
-| 2 | work_regular()        | called regularly (polling)                                                |
-| 3 | work_pcc()            | called upon PCC reception (event-driven)                                  |
-| 4 | work_pdc_async()      | called upon PDC reception (event-driven)                                  |
-| 5 | work_upper()          | called upon availability of new data on application layer (event-driven)  |
-| 6 | work_chscan_async()   | called upon finished channel measurement (event-driven)                   |
-| 7 | start_threads()       | called once during SDR startup to start application layer threads         |
-| 8 | stop_threads()        | called once during SDR shutdown to stop application layer threads         |
+|   | **Virtual Function**     | **Properties**                                                            |
+|---|--------------------------|---------------------------------------------------------------------------|
+| 1 | work_start_imminent()    | called once immediately before IQ sample processing begins                |
+| 2 | work_regular()           | called regularly (polling)                                                |
+| 3 | work_pcc()               | called upon PCC reception with correct CRC (event-driven)                 |
+| 4 | work_pcc_incorrect_crc() | called upon PCC reception with incorrect CRC (event-driven, optional)     |
+| 5 | work_pdc_async()         | called upon PDC reception (event-driven)                                  |
+| 6 | work_upper()             | called upon availability of new data on application layer (event-driven)  |
+| 7 | work_chscan_async()      | called upon finished channel measurement (event-driven)                   |
+| 8 | start_threads()          | called once during SDR startup to start application layer threads         |
+| 9 | stop_threads()           | called once during SDR shutdown to stop application layer threads         |
 
 ## Directories
 

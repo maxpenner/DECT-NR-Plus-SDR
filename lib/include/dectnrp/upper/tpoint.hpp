@@ -106,8 +106,24 @@ class tpoint_t : public common::layer_unit_t {
          * \param phy_maclow information provided by PHY about synchronization and PCC
          * \return
          */
-
         virtual phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) = 0;
+
+#ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
+        /**
+         * \brief Function called after decoding a PCC with incorrect CRC. This function is virtual
+         * while all other functions which are pure virtual. Furthermore, it must be explicitly
+         * enabled by defining the enclosing preprocessor directive. Notifying the MAC of a PCC with
+         * incorrect CRC can be useful is MAC was expecting a packet at that exact time. Downside is
+         * that the MAC layer is called for every false alarm produced by synchronization.
+         *
+         * 1. Called only after unsuccessful PCC decoding, i.e. incorrect CRC.
+         * 2. Called in the same FIFO order as put into the job_queue (sync_report_t).
+         *
+         * \param phy_maclow information provided by PHY about synchronization and PCC
+         * \return
+         */
+        virtual phy::machigh_phy_t work_pcc_incorrect_crc(const phy::phy_maclow_t& phy_maclow);
+#endif
 
         /**
          * \brief Function called after decoding a PDC.

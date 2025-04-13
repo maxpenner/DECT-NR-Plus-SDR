@@ -111,13 +111,23 @@ void worker_tx_rx_t::work() {
 
                 // any PLCF found?
                 if (pcc_report.plcf_decoder.has_any_plcf() == 0) {
-                    // reset for next reception
-                    rx_synced->reset_for_next_pcc();
+#ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
+                    // compile all reports
+                    const phy_maclow_t phy_maclow{std::get<sync_report_t>(job.content), pcc_report};
 
+                    TOKEN_LOCK_FIFO_OR_RETURN
+                    auto machigh_phy = tpoint->work_pcc_incorrect_crc(phy_maclow);
+                    token->unlock_fifo();
+
+                    run_tx_chscan(machigh_phy.tx_descriptor_vec, machigh_phy.chscan_opt);
+#else
                     TOKEN_LOCK_FIFO_OR_RETURN
                     // nothing to do here, but we have to increment the token's internal fifo_cnt
                     // when unlocking
                     token->unlock_fifo();
+#endif
+                    // reset for next reception
+                    rx_synced->reset_for_next_pcc();
 
                     ++stats.rx_pcc_fail;
 
@@ -135,7 +145,7 @@ void worker_tx_rx_t::work() {
                  */
 
                 // compile all reports
-                const phy_maclow_t phy_maclow(std::get<sync_report_t>(job.content), pcc_report);
+                const phy_maclow_t phy_maclow{std::get<sync_report_t>(job.content), pcc_report};
 
                 TOKEN_LOCK_FIFO_OR_RETURN
                 const maclow_phy_t maclow_phy = tpoint->work_pcc(phy_maclow);
@@ -163,7 +173,7 @@ void worker_tx_rx_t::work() {
                 }
 
                 // compile all reports
-                const phy_machigh_t phy_machigh(phy_maclow, maclow_phy, pdc_report);
+                const phy_machigh_t phy_machigh{phy_maclow, maclow_phy, pdc_report};
 
                 // call MAC regardless of correct or incorrect CRC
                 token->lock(token_call_id);
