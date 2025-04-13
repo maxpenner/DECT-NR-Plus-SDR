@@ -42,7 +42,7 @@ class mimo_csi_t {
          * \param mimo_report
          * \param sync_report contains time of reception
          */
-        void update(const mimo_report_t& mimo_report, const sync_report_t& sync_report);
+        void update_from_phy(const mimo_report_t& mimo_report, const sync_report_t& sync_report);
 
         /**
          * \brief The CSI can also be updated based on the receiver's feedback as part of the PLCF.
@@ -53,9 +53,9 @@ class mimo_csi_t {
          * \param feedback_info_pool feedback pool with all feedback formats
          * \param sync_report contains time of reception and number of RX antennas
          */
-        void update(const uint32_t feedback_format,
-                    const section4::feedback_info_pool_t& feedback_info_pool,
-                    const sync_report_t& sync_report);
+        void update_from_feedback(const uint32_t feedback_format,
+                                  const section4::feedback_info_pool_t& feedback_info_pool,
+                                  const sync_report_t& sync_report);
 
         common::adt::expiring_t<uint32_t> MCS{};
         common::adt::expiring_t<uint32_t> codebook_index{};

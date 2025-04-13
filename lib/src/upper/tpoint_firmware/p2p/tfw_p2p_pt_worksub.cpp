@@ -50,7 +50,6 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
 
     // it's the beacon, so update beacon time
     contact_pt.allocation_pt.set_beacon_time_last_known(phy_maclow.sync_report.fine_peak_time_64);
-
     pll.provide_beacon_time(phy_maclow.sync_report.fine_peak_time_correct_by_sto_fractional_64);
 
 #ifdef TFW_P2P_EXPORT_PPX
@@ -102,6 +101,10 @@ phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
         return phy::maclow_phy_t();
     }
 
+    // udpate CSI
+    contact_pt.mimo_csi.update_from_feedback(
+        plcf_21->FeedbackFormat, plcf_21->feedback_info_pool, phy_maclow.sync_report);
+
     return worksub_pcc2pdc(
         phy_maclow,
         2,
@@ -136,17 +139,9 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
         }
     }
 
-    // update MCS sent to FT as feedback
-    ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f4.MCS =
-        cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB);
-
-    // update codebook index sent to FT as feedback
-    ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index =
-        phy_machigh.pdc_report.mimo_report.tm_3_7_beamforming_idx;
-
     // convert MIMO report to CSI
-    contact_pt.mimo_csi.update(phy_machigh.pdc_report.mimo_report,
-                               phy_machigh.phy_maclow.sync_report);
+    contact_pt.mimo_csi.update_from_phy(phy_machigh.pdc_report.mimo_report,
+                                        phy_machigh.phy_maclow.sync_report);
 
     // check if we can generate any uplink
     phy::machigh_phy_t machigh_phy;
@@ -206,7 +201,7 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
         ppmp_unicast.plcf_21.FeedbackFormat = ppmp_unicast.plcf_21.FeedbackFormat == 4 ? 5 : 4;
 
         // try to send a packet, may return false if no data of HARQ processes are available
-        if (!worksub_tx_unicast(machigh_phy, tx_opportunity, contact_pt.mimo_csi, 0)) {
+        if (!worksub_tx_unicast(machigh_phy, tx_opportunity, contact_pt)) {
             break;
         }
     }

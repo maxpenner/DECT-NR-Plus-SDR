@@ -38,6 +38,7 @@
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie_pool_tx.hpp"
 #include "dectnrp/sections_part4/psdef_plcf_mac_pdu.hpp"
 #include "dectnrp/upper/tpoint.hpp"
+#include "dectnrp/upper/tpoint_firmware/p2p/contact_p2p.hpp"
 
 #define APPLICATION_INTERFACE_VNIC_OR_SOCKET
 
@@ -168,8 +169,7 @@ class tfw_p2p_base_t : public tpoint_t {
         /// common procedure for FT and PT generating a single packet with multiple MAC PDUs
         bool worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                                 const mac::allocation::tx_opportunity_t& tx_opportunity,
-                                const phy::mimo_csi_t& mimo_csi,
-                                const uint32_t conn_idx);
+                                const contact_p2p_t& contact_p2p);
 
         // ##################################################
         // DLC and Convergence Layer

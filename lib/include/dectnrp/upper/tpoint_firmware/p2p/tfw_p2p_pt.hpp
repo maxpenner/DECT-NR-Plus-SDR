@@ -21,7 +21,6 @@
 #pragma once
 
 #include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
-#include "dectnrp/upper/tpoint_firmware/p2p/contact_p2p.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 
 #define TFW_P2P_PT_AGC_ENABLED

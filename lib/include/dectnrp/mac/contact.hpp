@@ -21,7 +21,6 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/mac/allocation/allocation_pt.hpp"

@@ -22,9 +22,14 @@
 
 namespace dectnrp::phy {
 
-void mimo_csi_t::update(const uint32_t feedback_format,
-                        const section4::feedback_info_pool_t& feedback_info_pool,
-                        const sync_report_t& sync_report) {
+void mimo_csi_t::update_from_phy(const mimo_report_t& mimo_report,
+                                 const sync_report_t& sync_report) {
+    update_ci(mimo_report.tm_3_7_beamforming_reciprocal_idx, sync_report.fine_peak_time_64);
+}
+
+void mimo_csi_t::update_from_feedback(const uint32_t feedback_format,
+                                      const section4::feedback_info_pool_t& feedback_info_pool,
+                                      const sync_report_t& sync_report) {
     // extract at which time this update was received
     const int64_t time_64 = sync_report.fine_peak_time_64;
 
@@ -49,11 +54,6 @@ void mimo_csi_t::update(const uint32_t feedback_format,
             dectnrp_assert_failure("undefined feedback format");
             break;
     }
-}
-
-void mimo_csi_t::update(const mimo_report_t& mimo_report, const sync_report_t& sync_report) {
-    codebook_index = common::adt::expiring_t(mimo_report.tm_3_7_beamforming_reciprocal_idx,
-                                             sync_report.fine_peak_time_64);
 }
 
 void mimo_csi_t::update_mcs(const uint32_t MCS_, const int64_t time_64) {

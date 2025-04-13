@@ -57,11 +57,10 @@ void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
 
 bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                                         const mac::allocation::tx_opportunity_t& tx_opportunity,
-                                        const phy::mimo_csi_t& mimo_csi,
-                                        const uint32_t conn_idx) {
+                                        const contact_p2p_t& contact_p2p) {
     // first check if there even is any data to transmit
     const auto items_level_report = app_server->get_items_level_report_nto(
-        conn_idx, limits::max_nof_user_plane_data_per_mac_pdu);
+        contact_p2p.conn_idx_server, limits::max_nof_user_plane_data_per_mac_pdu);
 
     // if not, return immediately
     if (items_level_report.N_filled == 0) {
@@ -120,7 +119,7 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                        "MAC PDU too large");
 
         // ... try reading data from upper layer to MMIE
-        if (app_server->read_nto(conn_idx, dst_payload) == 0) {
+        if (app_server->read_nto(contact_p2p.conn_idx_server, dst_payload) == 0) {
             break;
         }
 

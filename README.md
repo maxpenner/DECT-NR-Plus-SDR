@@ -166,6 +166,10 @@ If you use this repository for any publication, please cite the repository accor
 - [ ] DLC and Convergence layers
 - [ ] enhance application layer interface to DECT NR+ stack (multiplexing addresses, streams, control information etc.)
 
+### Application Layer
+
+- [ ] lock around individual items instead of instances of items_t
+
 ## Architecture
 
 The figure below illustrates the architecture of the SDR with blocks representing C++ classes, objects and threads. All types (postfix *_t*) have identical names in the source code. The original image is [docs/sdr_architecture.drawio](docs/sdr_architecture.drawio).
