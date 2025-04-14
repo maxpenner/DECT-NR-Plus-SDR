@@ -25,25 +25,21 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-
-#include "dectnrp/application/items.hpp"
+#include <vector>
 
 namespace dectnrp::application::vnic {
 
 class vnic_t {
     public:
-        explicit vnic_t(const uint32_t N_item_, const uint32_t N_item_byte_);
+        vnic_t() = default;
         virtual ~vnic_t() = default;
 
-        vnic_t() = delete;
         vnic_t(const vnic_t&) = delete;
         vnic_t& operator=(const vnic_t&) = delete;
         vnic_t(vnic_t&&) = delete;
         vnic_t& operator=(vnic_t&&) = delete;
 
     protected:
-        std::unique_ptr<items_t> items;
-
         /// 4 or 6
         static uint32_t get_ip_version(const uint8_t* ip);
 

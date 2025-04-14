@@ -22,12 +22,9 @@
 
 namespace dectnrp::application::sockets {
 
-socketx_t::socketx_t(const std::vector<uint32_t> ports_,
-                     const uint32_t N_item_,
-                     const uint32_t N_item_byte_) {
+socketx_t::socketx_t(const std::vector<uint32_t> ports_) {
     for (uint32_t i = 0; i < ports_.size(); ++i) {
-        socket_items_pair_vec.push_back(
-            std::make_unique<socket_items_pair_t>(ports_[i], N_item_, N_item_byte_));
+        udp_vec.push_back(std::make_unique<udp_t>(ports_[i]));
     }
 }
 

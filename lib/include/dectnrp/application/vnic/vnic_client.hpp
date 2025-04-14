@@ -27,12 +27,11 @@ namespace dectnrp::application::vnic {
 
 class vnic_client_t final : public app_client_t, public vnic_t {
     public:
-        explicit vnic_client_t(const uint32_t id_,
-                               const common::threads_core_prio_config_t thread_config_,
-                               phy::job_queue_t& job_queue_,
+        explicit vnic_client_t(const uint32_t id,
+                               const common::threads_core_prio_config_t thread_config,
+                               phy::job_queue_t& job_queue,
                                const int tuntap_fd_,
-                               const uint32_t N_item_,
-                               const uint32_t N_item_byte_);
+                               const queue_size_t queue_size);
         ~vnic_client_t() = default;
 
         vnic_client_t() = delete;
@@ -54,7 +53,7 @@ class vnic_client_t final : public app_client_t, public vnic_t {
                                          const uint32_t n) override final;
 
     private:
-        [[nodiscard]] uint32_t copy_from_items_to_localbuffer(
+        [[nodiscard]] uint32_t copy_from_queue_to_localbuffer(
             const uint32_t conn_idx) override final;
 
         const int tuntap_fd;

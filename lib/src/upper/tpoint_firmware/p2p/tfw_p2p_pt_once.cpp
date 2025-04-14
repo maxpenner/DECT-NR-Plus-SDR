@@ -152,37 +152,43 @@ void tfw_p2p_pt_t::init_appiface() {
 
     vnic_config.netmask = "255.255.255.0";
 
+    const application::queue_size_t queue_size_server = {
+        .N_item = 20, .N_item_max_byte = limits::app_max_queue_item_size};
+
     app_server = std::make_unique<application::vnic::vnic_server_t>(
-        id, tpoint_config.app_server_thread_config, job_queue, vnic_config, 20UL, 1600UL);
+        id, tpoint_config.app_server_thread_config, job_queue, vnic_config, queue_size_server);
 
     application::vnic::vnic_server_t* vnics =
         dynamic_cast<application::vnic::vnic_server_t*>(app_server.get());
 
     dectnrp_assert(vnics != nullptr, "vnic server cast failed");
 
+    const application::queue_size_t queue_size_client = {
+        .N_item = 10, .N_item_max_byte = limits::app_max_queue_item_size};
+
     app_client =
         std::make_unique<application::vnic::vnic_client_t>(id,
                                                            tpoint_config.app_client_thread_config,
                                                            job_queue,
                                                            vnics->get_tuntap_fd(),
-                                                           10UL,
-                                                           1600UL);
+                                                           queue_size_client);
 #else
+    const application::queue_size_t queue_size = {
+        .N_item = 4, .N_item_max_byte = limits::app_max_queue_item_size};
+
     app_server = std::make_unique<application::sockets::socket_server_t>(
         id,
         tpoint_config.app_server_thread_config,
         job_queue,
         std::vector<uint32_t>{8100 + tpoint_config.firmware_id},
-        4UL,
-        1500UL);
+        queue_size);
 
     app_client = std::make_unique<application::sockets::socket_client_t>(
         id,
         tpoint_config.app_client_thread_config,
         job_queue,
         std::vector<uint32_t>{8150 + tpoint_config.firmware_id},
-        4UL,
-        1500UL);
+        queue_size);
 #endif
 
     // app_server->set_job_queue_access_protection_ns();

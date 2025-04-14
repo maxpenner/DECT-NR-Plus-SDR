@@ -25,9 +25,6 @@
 
 namespace dectnrp::application::vnic {
 
-vnic_t::vnic_t(const uint32_t N_item_, const uint32_t N_item_byte_)
-    : items(std::make_unique<items_t>(N_item_, N_item_byte_)) {}
-
 uint32_t vnic_t::get_ip_version(const uint8_t* ip) {
     const struct iphdr* ip_header = (struct iphdr*)ip;
     return ip_header->version;

@@ -26,14 +26,13 @@
 
 namespace dectnrp::application::vnic {
 
-vnic_client_t::vnic_client_t(const uint32_t id_,
-                             const common::threads_core_prio_config_t thread_config_,
-                             phy::job_queue_t& job_queue_,
+vnic_client_t::vnic_client_t(const uint32_t id,
+                             const common::threads_core_prio_config_t thread_config,
+                             phy::job_queue_t& job_queue,
                              const int tuntap_fd_,
-                             const uint32_t N_item_,
-                             const uint32_t N_item_byte_)
-    : app_client_t(id_, thread_config_, job_queue_, 1, N_item_byte_),
-      vnic_t(N_item_, N_item_byte_),
+                             const queue_size_t queue_size)
+    : app_client_t(id, thread_config, job_queue, 1, queue_size),
+      vnic_t(),
       tuntap_fd(tuntap_fd_) {}
 
 uint32_t vnic_client_t::write_immediate(const uint32_t conn_idx,
@@ -50,17 +49,17 @@ uint32_t vnic_client_t::write_immediate(const uint32_t conn_idx,
 
 uint32_t vnic_client_t::write_nto(const uint32_t conn_idx, const uint8_t* inp, const uint32_t n) {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->write_nto(inp, n);
+    return queue_vec.at(conn_idx)->write_nto(inp, n);
 }
 
 uint32_t vnic_client_t::write_try(const uint32_t conn_idx, const uint8_t* inp, const uint32_t n) {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->write_try(inp, n);
+    return queue_vec.at(conn_idx)->write_try(inp, n);
 }
 
-uint32_t vnic_client_t::copy_from_items_to_localbuffer(const uint32_t conn_idx) {
+uint32_t vnic_client_t::copy_from_queue_to_localbuffer(const uint32_t conn_idx) {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->read_nto(buffer_local);
+    return queue_vec.at(conn_idx)->read_nto(buffer_local);
 }
 
 }  // namespace dectnrp::application::vnic

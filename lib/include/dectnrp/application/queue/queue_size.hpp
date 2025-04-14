@@ -21,26 +21,26 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
-#include <vector>
 
-#include "dectnrp/application/socket/udp.hpp"
+#include "dectnrp/limits.hpp"
 
-namespace dectnrp::application::sockets {
+namespace dectnrp::application {
 
-class socketx_t {
-    public:
-        explicit socketx_t(const std::vector<uint32_t> ports_);
-        virtual ~socketx_t() = default;
+struct queue_size_t {
+        uint32_t N_item{};
+        uint32_t N_item_max_byte{};
 
-        socketx_t() = delete;
-        socketx_t(const socketx_t&) = delete;
-        socketx_t& operator=(const socketx_t&) = delete;
-        socketx_t(socketx_t&&) = delete;
-        socketx_t& operator=(socketx_t&&) = delete;
+        bool is_valid() const {
+            if (N_item == 0 || limits::app_max_queue_item < N_item) {
+                return false;
+            }
 
-    protected:
-        std::vector<std::unique_ptr<udp_t>> udp_vec;
+            if (N_item_max_byte == 0 || limits::app_max_queue_item_size < N_item_max_byte) {
+                return false;
+            }
+
+            return true;
+        }
 };
 
-}  // namespace dectnrp::application::sockets
+}  // namespace dectnrp::application

@@ -18,7 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/application/items.hpp"
+#include "dectnrp/application/queue/queue.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -27,45 +27,44 @@
 
 namespace dectnrp::application {
 
-items_t::items_t(const uint32_t N_item_, const uint32_t N_item_byte_)
-    : N_item(N_item_),
-      N_item_byte(N_item_byte_) {
-    for (uint32_t i = 0; i < N_item; ++i) {
-        items_vec.push_back(new uint8_t[N_item_byte]);
+queue_t::queue_t(const queue_size_t queue_size_)
+    : queue_size(queue_size_) {
+    for (uint32_t i = 0; i < queue_size.N_item; ++i) {
+        item_vec.push_back(new uint8_t[queue_size.N_item_max_byte]);
     }
 
-    items_level_vec.resize(N_item, 0);
+    item_level_vec.resize(queue_size.N_item, 0);
 }
 
-items_t::~items_t() {
-    for (uint32_t i = 0; i < N_item; ++i) {
-        delete items_vec[i];
+queue_t::~queue_t() {
+    for (uint32_t i = 0; i < queue_size.N_item; ++i) {
+        delete item_vec[i];
     }
 }
 
-items_level_report_t items_t::get_items_level_report_nto(const uint32_t n) const {
+queue_level_t queue_t::get_queue_level_nto(const uint32_t n) const {
     lockv.lock();
 
-    items_level_report_t ret = get_items_level_report_under_lock(n);
+    const queue_level_t ret = get_queue_level_under_lock(n);
 
     lockv.unlock();
 
     return ret;
 }
 
-items_level_report_t items_t::get_items_level_report_try(const uint32_t n) const {
+queue_level_t queue_t::get_queue_level_try(const uint32_t n) const {
     if (!lockv.try_lock()) {
-        return items_level_report_t();
+        return queue_level_t();
     }
 
-    items_level_report_t ret = get_items_level_report_under_lock(n);
+    const queue_level_t ret = get_queue_level_under_lock(n);
 
     lockv.unlock();
 
     return ret;
 }
 
-uint32_t items_t::write_nto(const uint8_t* inp, const uint32_t n) {
+uint32_t queue_t::write_nto(const uint8_t* inp, const uint32_t n) {
     lockv.lock();
 
     const uint32_t w_ret = write_under_lock(inp, n);
@@ -75,7 +74,7 @@ uint32_t items_t::write_nto(const uint8_t* inp, const uint32_t n) {
     return w_ret;
 }
 
-uint32_t items_t::write_try(const uint8_t* inp, const uint32_t n) {
+uint32_t queue_t::write_try(const uint8_t* inp, const uint32_t n) {
     if (!lockv.try_lock()) {
         return 0;
     }
@@ -87,7 +86,7 @@ uint32_t items_t::write_try(const uint8_t* inp, const uint32_t n) {
     return w_ret;
 }
 
-uint32_t items_t::read_nto(uint8_t* dst) {
+uint32_t queue_t::read_nto(uint8_t* dst) {
     lockv.lock();
 
     const uint32_t r_ret = read_under_lock(dst);
@@ -97,7 +96,7 @@ uint32_t items_t::read_nto(uint8_t* dst) {
     return r_ret;
 }
 
-uint32_t items_t::read_try(uint8_t* dst) {
+uint32_t queue_t::read_try(uint8_t* dst) {
     if (!lockv.try_lock()) {
         return 0;
     }
@@ -109,8 +108,8 @@ uint32_t items_t::read_try(uint8_t* dst) {
     return r_ret;
 }
 
-items_level_report_t items_t::get_items_level_report_under_lock(const uint32_t n) const {
-    dectnrp_assert(n <= limits::max_items_level_reported,
+queue_level_t queue_t::get_queue_level_under_lock(const uint32_t n) const {
+    dectnrp_assert(n <= limits::max_queue_level_reported,
                    "number of levels for reporting is limited");
 
     // make sure returned vector is readable
@@ -118,65 +117,65 @@ items_level_report_t items_t::get_items_level_report_under_lock(const uint32_t n
 
     uint32_t r_idx_cpy = r_idx;
 
-    items_level_report_t ret;
+    queue_level_t ret;
     ret.N_filled = n_;
 
     // fill
     for (uint32_t i = 0; i < n_; ++i) {
-        ret.levels[i] = items_level_vec[r_idx_cpy];
-        r_idx_cpy = (r_idx_cpy + 1) % N_item;
+        ret.levels[i] = item_level_vec[r_idx_cpy];
+        r_idx_cpy = (r_idx_cpy + 1) % queue_size.N_item;
     }
 
     return ret;
 }
 
-uint32_t items_t::write_under_lock(const uint8_t* inp, const uint32_t n) {
+uint32_t queue_t::write_under_lock(const uint8_t* inp, const uint32_t n) {
     if (get_free() == 0) {
         return 0;
     }
 
-    dectnrp_assert(n <= N_item_byte, "Write does not fit N_item per item.");
+    dectnrp_assert(n <= queue_size.N_item_max_byte, "write does not fit N_item per item");
 
-    std::memcpy(items_vec[w_idx], inp, n);
+    std::memcpy(item_vec[w_idx], inp, n);
 
-    items_level_vec[w_idx] = n;
+    item_level_vec[w_idx] = n;
 
-    w_idx = (w_idx + 1) % N_item;
+    w_idx = (w_idx + 1) % queue_size.N_item;
 
     return n;
 }
 
-uint32_t items_t::read_under_lock(uint8_t* dst) {
+uint32_t queue_t::read_under_lock(uint8_t* dst) {
     if (get_used() == 0) {
         return 0;
     }
 
-    const uint32_t n = items_level_vec[r_idx];
+    const uint32_t n = item_level_vec[r_idx];
 
     if (dst != nullptr) {
-        std::memcpy(dst, items_vec[r_idx], n);
+        std::memcpy(dst, item_vec[r_idx], n);
     }
 
-    r_idx = (r_idx + 1) % N_item;
+    r_idx = (r_idx + 1) % queue_size.N_item;
 
     return n;
 }
 
-uint32_t items_t::get_free() const {
+uint32_t queue_t::get_free() const {
     if (r_idx > w_idx) {
         // w_idx should never reach r_idx
         return r_idx - w_idx - 1;
     }
 
-    return r_idx + N_item - w_idx - 1;
+    return r_idx + queue_size.N_item - w_idx - 1;
 }
 
-uint32_t items_t::get_used() const {
+uint32_t queue_t::get_used() const {
     if (w_idx >= r_idx) {
         return w_idx - r_idx;
     }
 
-    return w_idx + N_item - r_idx;
+    return w_idx + queue_size.N_item - r_idx;
 }
 
 }  // namespace dectnrp::application

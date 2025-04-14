@@ -24,7 +24,11 @@
 
 #include <atomic>
 #include <cstdint>
+#include <memory>
+#include <vector>
 
+#include "dectnrp/application/queue/queue.hpp"
+#include "dectnrp/application/queue/queue_size.hpp"
 #include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/phy/pool/job_queue.hpp"
@@ -36,8 +40,8 @@ class app_t {
         explicit app_t(const uint32_t id_,
                        const common::threads_core_prio_config_t thread_config_,
                        phy::job_queue_t& job_queue_,
-                       const uint32_t n_connections_,
-                       const uint32_t n_item_byte_max_);
+                       const uint32_t N_queue,
+                       const queue_size_t queue_size);
         virtual ~app_t() = default;
 
         app_t() = delete;
@@ -46,9 +50,7 @@ class app_t {
         app_t(app_t&&) = delete;
         app_t& operator=(app_t&&) = delete;
 
-        static constexpr uint32_t APP_MAX_CONNECTIONS{32U};
         static constexpr uint32_t APP_POLL_WAIT_TIMEOUT_MS{100U};
-        static constexpr uint32_t APP_LOCALBUFFER_BYTE{1600U};
 
         /// spawns work_thread executing work_spawn(), sc = server client
         void start_sc();
@@ -76,7 +78,10 @@ class app_t {
         common::watch_t watch_since_start;
 
         /// local buffer which inheriting classes can use to temporarily buffer write
-        uint8_t buffer_local[APP_LOCALBUFFER_BYTE];
+        uint8_t buffer_local[limits::app_max_queue_item_size];
+
+        /// one queue per connection
+        std::vector<std::unique_ptr<queue_t>> queue_vec;
 
         /// start routine called from pthread_create()
         static void* work_spawn(void* app_server_or_client) {

@@ -27,12 +27,11 @@ namespace dectnrp::application::sockets {
 
 class socket_client_t final : public app_client_t, public socketx_t {
     public:
-        explicit socket_client_t(const uint32_t id_,
-                                 const common::threads_core_prio_config_t thread_config_,
-                                 phy::job_queue_t& job_queue_,
-                                 const std::vector<uint32_t> ports_,
-                                 const uint32_t N_item_,
-                                 const uint32_t N_item_byte_);
+        explicit socket_client_t(const uint32_t id,
+                                 const common::threads_core_prio_config_t thread_config,
+                                 phy::job_queue_t& job_queue,
+                                 const std::vector<uint32_t> ports,
+                                 const queue_size_t queue_size);
         ~socket_client_t();
 
         socket_client_t() = delete;
@@ -41,7 +40,7 @@ class socket_client_t final : public app_client_t, public socketx_t {
         socket_client_t(socket_client_t&&) = delete;
         socket_client_t& operator=(socket_client_t&&) = delete;
 
-        uint32_t get_n_connections() override final { return socket_items_pair_vec.size(); }
+        uint32_t get_n_connections() override final { return udp_vec.size(); }
 
         uint32_t write_immediate(const uint32_t conn_idx,
                                  const uint8_t* inp,
@@ -54,7 +53,7 @@ class socket_client_t final : public app_client_t, public socketx_t {
                                          const uint32_t n) override final;
 
     private:
-        [[nodiscard]] uint32_t copy_from_items_to_localbuffer(
+        [[nodiscard]] uint32_t copy_from_queue_to_localbuffer(
             const uint32_t conn_idx) override final;
 };
 

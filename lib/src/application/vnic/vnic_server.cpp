@@ -35,14 +35,13 @@
 
 namespace dectnrp::application::vnic {
 
-vnic_server_t::vnic_server_t(const uint32_t id_,
-                             const common::threads_core_prio_config_t thread_config_,
-                             phy::job_queue_t& job_queue_,
+vnic_server_t::vnic_server_t(const uint32_t id,
+                             const common::threads_core_prio_config_t thread_config,
+                             phy::job_queue_t& job_queue,
                              const vnic_config_t vnic_config_,
-                             const uint32_t N_item_,
-                             const uint32_t N_item_byte_)
-    : app_server_t(id_, thread_config_, job_queue_, 1, N_item_byte_),
-      vnic_t(N_item_, N_item_byte_),
+                             const queue_size_t queue_size)
+    : app_server_t(id, thread_config, job_queue, 1, queue_size),
+      vnic_t(),
       vnic_config(vnic_config_) {
     dectnrp_assert(!(vnic_config.tun_name.size() == 0 && vnic_config.tap_name.size() == 0),
                    "either TUN or TAP");
@@ -107,7 +106,7 @@ void vnic_server_t::work_sc() {
                 pollin_happened = pfds[i].revents & POLLIN;
 
                 if (pollin_happened) {
-                    n = read(pfds[i].fd, buffer_local, APP_LOCALBUFFER_BYTE);
+                    n = read(pfds[i].fd, buffer_local, sizeof(buffer_local));
 
                     // if a new datagram was received ...
                     if (n > 0) {
@@ -119,9 +118,9 @@ void vnic_server_t::work_sc() {
 #endif
 
                         // ... get a lock on the item and try to write the datagram
-                        n_written = items->write_nto((const uint8_t*)buffer_local, n);
+                        n_written = queue_vec[0]->write_nto((const uint8_t*)buffer_local, n);
 
-                        // if we successfully wrote the datagram to items ...
+                        // if we successfully wrote the datagram to the queue ...
                         if (n_written > 0) {
                             /// ... create a job in the job queue for quick processing
                             enqueue_job_nto(i, n_written);
@@ -136,26 +135,24 @@ void vnic_server_t::work_sc() {
     }
 };
 
-items_level_report_t vnic_server_t::get_items_level_report_nto(const uint32_t conn_idx,
-                                                               const uint32_t n) const {
+queue_level_t vnic_server_t::get_queue_level_nto(const uint32_t conn_idx, const uint32_t n) const {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->get_items_level_report_nto(n);
+    return queue_vec.at(conn_idx)->get_queue_level_nto(n);
 }
 
-items_level_report_t vnic_server_t::get_items_level_report_try(const uint32_t conn_idx,
-                                                               const uint32_t n) const {
+queue_level_t vnic_server_t::get_queue_level_try(const uint32_t conn_idx, const uint32_t n) const {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->get_items_level_report_try(n);
+    return queue_vec.at(conn_idx)->get_queue_level_try(n);
 }
 
 uint32_t vnic_server_t::read_nto(const uint32_t conn_idx, uint8_t* dst) {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->read_nto(dst);
+    return queue_vec.at(conn_idx)->read_nto(dst);
 }
 
 uint32_t vnic_server_t::read_try(const uint32_t conn_idx, uint8_t* dst) {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->read_try(dst);
+    return queue_vec.at(conn_idx)->read_try(dst);
 }
 
 int vnic_server_t::tun_start() {

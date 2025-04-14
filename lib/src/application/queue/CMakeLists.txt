@@ -18,12 +18,5 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-add_library(dectnrp_application STATIC)
-target_link_libraries(dectnrp_application dectnrp_common)
-
 file(GLOB DECTNRP_APPLICATION_SOURCES "*.cpp")
 target_sources(dectnrp_application PRIVATE ${DECTNRP_APPLICATION_SOURCES})
-
-add_subdirectory(queue)
-add_subdirectory(socket)
-add_subdirectory(vnic)

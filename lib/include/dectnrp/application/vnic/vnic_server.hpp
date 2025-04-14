@@ -49,12 +49,11 @@ class vnic_server_t final : public app_server_t, public vnic_t {
                 std::string phynic_name;  // TAP
         };
 
-        explicit vnic_server_t(const uint32_t id_,
-                               const common::threads_core_prio_config_t thread_config_,
-                               phy::job_queue_t& job_queue_,
+        explicit vnic_server_t(const uint32_t id,
+                               const common::threads_core_prio_config_t thread_config,
+                               phy::job_queue_t& job_queue,
                                const vnic_config_t vnic_config_,
-                               const uint32_t N_item_,
-                               const uint32_t N_item_byte_);
+                               const queue_size_t queue_size);
         ~vnic_server_t();
 
         vnic_server_t() = delete;
@@ -66,10 +65,10 @@ class vnic_server_t final : public app_server_t, public vnic_t {
         void work_sc() override final;
         uint32_t get_n_connections() override final { return 1; }
 
-        items_level_report_t get_items_level_report_nto(const uint32_t conn_idx,
-                                                        const uint32_t n) const override final;
-        items_level_report_t get_items_level_report_try(const uint32_t conn_idx,
-                                                        const uint32_t n) const override final;
+        queue_level_t get_queue_level_nto(const uint32_t conn_idx,
+                                          const uint32_t n) const override final;
+        queue_level_t get_queue_level_try(const uint32_t conn_idx,
+                                          const uint32_t n) const override final;
 
         uint32_t read_nto(const uint32_t conn_idx, uint8_t* dst) override final;
         uint32_t read_try(const uint32_t conn_idx, uint8_t* dst) override final;

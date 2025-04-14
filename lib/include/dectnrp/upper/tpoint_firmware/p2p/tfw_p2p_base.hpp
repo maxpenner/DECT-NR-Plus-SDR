@@ -179,7 +179,7 @@ class tfw_p2p_base_t : public tpoint_t {
 
         /// fill buffer of HARQ process with MAC SDU
         bool worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p,
-                                        const application::items_level_report_t& ilr,
+                                        const application::queue_level_t& queue_level,
                                         const section3::packet_sizes_t& packet_sizes,
                                         phy::harq::process_tx_t& hp_tx);
 
