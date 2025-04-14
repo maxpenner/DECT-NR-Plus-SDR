@@ -23,11 +23,17 @@
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
 
+#include "dectnrp/common/prog/assert.hpp"
+
 namespace dectnrp::application::vnic {
 
-uint32_t vnic_t::get_ip_version(const uint8_t* ip) {
-    const struct iphdr* ip_header = (struct iphdr*)ip;
-    return ip_header->version;
+uint32_t vnic_t::get_ip4_header_length_byte(const uint8_t* ip4) {
+    const struct iphdr* ip_header = (struct iphdr*)ip4;
+
+    dectnrp_assert(20 <= ip_header->ihl * 4, "ipv4 header too small");
+    dectnrp_assert(ip_header->ihl * 4 <= 60, "ipv4 header too large");
+
+    return ip_header->ihl * 4;
 }
 
 uint32_t vnic_t::get_ip4_daddr(const uint8_t* ip4) {
@@ -35,7 +41,7 @@ uint32_t vnic_t::get_ip4_daddr(const uint8_t* ip4) {
     return ip_header->daddr;
 }
 
-std::string vnic_t::get_ip4_addr(const uint8_t* ip4) {
+std::string vnic_t::get_ip4_daddr_str(const uint8_t* ip4) {
     const uint32_t addr = get_ip4_daddr(ip4);
 
     std::string ret;
@@ -52,7 +58,7 @@ struct in6_addr vnic_t::get_ip6_daddr(const uint8_t* ip6) {
     return ip_header->ip6_dst;
 }
 
-std::string vnic_t::get_ip6_addr(const uint8_t* ip6) {
+std::string vnic_t::get_ip6_daddr_str(const uint8_t* ip6) {
     const struct in6_addr addr = get_ip6_daddr(ip6);
 
     std::string ret;
@@ -62,6 +68,16 @@ std::string vnic_t::get_ip6_addr(const uint8_t* ip6) {
     }
 
     return ret;
+}
+
+uint32_t vnic_t::get_ip_version(const uint8_t* ipx) {
+    const struct iphdr* ip_header = (struct iphdr*)ipx;
+    return ip_header->version;
+}
+
+uint32_t vnic_t::get_ip_header_length(const uint8_t* ipx) {
+    return get_ip_version(ipx) == 4 ? get_ip4_header_length_byte(ipx)
+                                    : get_ip6_header_length_byte();
 }
 
 }  // namespace dectnrp::application::vnic

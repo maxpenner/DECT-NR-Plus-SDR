@@ -40,20 +40,33 @@ class vnic_t {
         vnic_t& operator=(vnic_t&&) = delete;
 
     protected:
-        /// 4 or 6
-        static uint32_t get_ip_version(const uint8_t* ip);
-
         // ##################################################
         // IP V4
 
+        static uint32_t get_ip4_header_length_byte(const uint8_t* ip4);
         static uint32_t get_ip4_daddr(const uint8_t* ip4);
-        static std::string get_ip4_addr(const uint8_t* ip4);
+        static std::string get_ip4_daddr_str(const uint8_t* ip4);
 
         // ##################################################
         // IP V6
 
+        static constexpr uint32_t get_ip6_header_length_byte() { return 40; };
         static struct in6_addr get_ip6_daddr(const uint8_t* ip6);
-        static std::string get_ip6_addr(const uint8_t* ip6);
+        static std::string get_ip6_daddr_str(const uint8_t* ip6);
+
+        // ##################################################
+        /// IP V4 or V6
+
+        static uint32_t get_ip_version(const uint8_t* ipx);
+        static uint32_t get_ip_header_length(const uint8_t* ipx);
+
+        // ##################################################
+        // UDP
+        // -
+
+        // ##################################################
+        // PTP
+        // -
 };
 
 }  // namespace dectnrp::application::vnic
