@@ -50,11 +50,12 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
 
     // it's the beacon, so update beacon time
     contact_pt.allocation_pt.set_beacon_time_last_known(phy_maclow.sync_report.fine_peak_time_64);
-    pll.provide_beacon_time(phy_maclow.sync_report.fine_peak_time_correct_by_sto_fractional_64);
+    pll.provide_beacon_time(phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64);
 
 #ifdef TFW_P2P_EXPORT_PPX
     if (ppx.has_ppx_rising_edge()) {
-        ppx.provide_beacon_time(phy_maclow.sync_report.fine_peak_time_correct_by_sto_fractional_64);
+        ppx.provide_beacon_time(
+            phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64);
         ppx.set_ppx_period_warped(pll.get_warped(ppx.get_ppx_period_samples()));
     }
 #endif

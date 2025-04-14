@@ -69,6 +69,9 @@ class mimo_csi_t {
 
         /// can be the same as feedback_codebook_index or phy_codebook_index_reciprocal
         common::adt::expiring_t<uint32_t> codebook_index{};
+
+        /// can be the same as feedback_tm_mode or phy_tm_mode_reciprocal
+        common::adt::expiring_t<uint32_t> tm_mode{};
 };
 
 }  // namespace dectnrp::phy

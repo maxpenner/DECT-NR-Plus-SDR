@@ -28,7 +28,6 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/common/prog/print.hpp"
-#include "dectnrp/common/prog/simd.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/phy/phy.hpp"
 #include "dectnrp/phy/phy_config.hpp"
@@ -36,6 +35,10 @@
 #include "dectnrp/radio/radio_config.hpp"
 #include "dectnrp/upper/upper.hpp"
 #include "dectnrp/upper/upper_config.hpp"
+
+#ifdef ASSERT_ENABLED
+#include "dectnrp/common/prog/simd.hpp"
+#endif
 
 static std::atomic<bool> ctrl_c_pressed{false};
 
@@ -54,7 +57,7 @@ int main(int argc, char** argv) {
     }
 
     // log and print start time
-    const auto start_time_str = dectnrp::common::watch_t::get_date_and_time();
+    const auto start_time_str{dectnrp::common::watch_t::get_date_and_time()};
     dectnrp_log_inf("dectnrp started at: {}", start_time_str);
     dectnrp_print_inf("dectnrp started at: {}", start_time_str);
 
@@ -64,7 +67,7 @@ int main(int argc, char** argv) {
     dectnrp_log_inf("DECTNRP_GIT_INFO {}", dectnrp::version::DECTNRP_GIT_INFO);
 
     // parse arguments
-    dectnrp_assert(argc == 2, "Argument must contain one path to folder with configuration files.");
+    dectnrp_assert(argc == 2, "argument must contain one path to folder with configuration files");
     const std::string configuration_directory = argv[1];
     dectnrp_log_inf("configuration_directory {}", configuration_directory);
 

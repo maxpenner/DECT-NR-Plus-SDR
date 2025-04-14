@@ -148,7 +148,7 @@ If you use this repository for any publication, please cite the repository accor
 
 ### Radio Layer
 
-- [ ] GPIO support for B210
+- [ ] GPIO support for B210, currently only X410 supported
 
 ### Physical Layer
 
@@ -162,9 +162,10 @@ If you use this repository for any publication, please cite the repository accor
 
 ### Upper layers
 
-- [ ] reusable firmware procedures (retransmission, association etc.)
+- [ ] integration of retransmissions with HARQ into [Firmware P2P](#firmware-p2p) to finalize interfaces
+- [ ] reusable firmware procedures (association etc.)
 - [ ] DLC and Convergence layers
-- [ ] enhance application layer interface to DECT NR+ stack (multiplexing addresses, streams, control information etc.)
+- [ ] enhanced application layer interfaces to DECT NR+ stack (blocking and multiplexing of addresses, streams, control information etc.)
 
 ### Application Layer
 

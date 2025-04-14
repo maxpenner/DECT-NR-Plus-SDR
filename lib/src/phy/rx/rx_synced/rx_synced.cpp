@@ -591,7 +591,7 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
                    "fractional STO very large");
 
     // overwrite exact fine peak time in sync_report
-    sync_report_.fine_peak_time_correct_by_sto_fractional_64 =
+    sync_report_.fine_peak_time_corrected_by_sto_fractional_64 =
         sync_report_.fine_peak_time_64 +
         static_cast<int64_t>(std::round(sync_report_.sto_fractional));
 

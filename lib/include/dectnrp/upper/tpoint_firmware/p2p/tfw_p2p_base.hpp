@@ -112,7 +112,7 @@ class tfw_p2p_base_t : public tpoint_t {
         /// all PT allocations have to be known at FT, individual PTs only need their own allocation
         mac::allocation::allocation_pt_t init_allocation_pt(const uint32_t firmware_id_);
 
-        /// for estimation of ppx_period_warped_64
+        /// estimation of deviation between time bases
         mac::pll_t pll;
 
 #ifdef TFW_P2P_EXPORT_PPX
@@ -171,8 +171,17 @@ class tfw_p2p_base_t : public tpoint_t {
                                 contact_p2p_t& contact_p2p,
                                 const mac::allocation::tx_opportunity_t& tx_opportunity);
 
+        /// update packet size depending on channel state information
         void worksub_tx_unicast_psdef(contact_p2p_t& contact_p2p, const int64_t expiration_64);
+
+        /// insert latest values into the PLCF feedback info
         void worksub_tx_unicast_feedback(contact_p2p_t& contact_p2p, const int64_t expiration_64);
+
+        /// fill buffer of HARQ process with MAC SDU
+        bool worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p,
+                                        const application::items_level_report_t& ilr,
+                                        const section3::packet_sizes_t& packet_sizes,
+                                        phy::harq::process_tx_t& hp_tx);
 
         // ##################################################
         // DLC and Convergence Layer

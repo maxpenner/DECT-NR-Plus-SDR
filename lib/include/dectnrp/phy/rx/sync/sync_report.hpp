@@ -95,7 +95,7 @@ class sync_report_t {
         float sto_fractional{};
 
         /// may deviate a few samples from fine_peak_time_64
-        int64_t fine_peak_time_correct_by_sto_fractional_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t fine_peak_time_corrected_by_sto_fractional_64{common::adt::UNDEFINED_EARLY_64};
 };
 
 }  // namespace dectnrp::phy
