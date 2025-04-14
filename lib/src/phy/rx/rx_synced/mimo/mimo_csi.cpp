@@ -22,9 +22,9 @@
 
 namespace dectnrp::phy {
 
-void mimo_csi_t::update(const uint32_t feedback_format,
-                        const section4::feedback_info_pool_t& feedback_info_pool,
-                        const sync_report_t& sync_report) {
+void mimo_csi_t::update_from_feedback(const uint32_t feedback_format,
+                                      const section4::feedback_info_pool_t& feedback_info_pool,
+                                      const sync_report_t& sync_report) {
     // extract at which time this update was received
     const int64_t time_64 = sync_report.fine_peak_time_64;
 
@@ -38,10 +38,23 @@ void mimo_csi_t::update(const uint32_t feedback_format,
         case 3:
             break;
         case 4:
-            update_mcs(feedback_info_pool.feedback_info_f4.MCS, time_64);
+            feedback_MCS =
+                common::adt::expiring_t(feedback_info_pool.feedback_info_f4.MCS, time_64);
+
+            // update feedback_tm_mode
+            // ToDo
+
             break;
         case 5:
-            update_ci(feedback_info_pool.feedback_info_f5.Codebook_index, time_64);
+            feedback_codebook_index = common::adt::expiring_t(
+                feedback_info_pool.feedback_info_f5.Codebook_index, time_64);
+
+            // update feedback_tm_mode
+            // ToDo
+
+            // use the codebook index suggested by the feedback in the PLCF
+            codebook_index = feedback_codebook_index;
+
             break;
         case 6:
             break;
@@ -51,17 +64,23 @@ void mimo_csi_t::update(const uint32_t feedback_format,
     }
 }
 
-void mimo_csi_t::update(const mimo_report_t& mimo_report, const sync_report_t& sync_report) {
-    codebook_index = common::adt::expiring_t(mimo_report.tm_3_7_beamforming_reciprocal_idx,
-                                             sync_report.fine_peak_time_64);
+void mimo_csi_t::update_from_phy(const mimo_report_t& mimo_report,
+                                 const sync_report_t& sync_report) {
+    phy_codebook_index =
+        common::adt::expiring_t(mimo_report.tm_3_7_beamforming_idx, sync_report.fine_peak_time_64);
+
+    phy_codebook_index_reciprocal = common::adt::expiring_t(
+        mimo_report.tm_3_7_beamforming_reciprocal_idx, sync_report.fine_peak_time_64);
+
+    // update phy_tm_mode_reciprocal
+    // ToDo
+
+    // use the codebook index suggested by PHY
+    codebook_index = phy_codebook_index_reciprocal;
 }
 
-void mimo_csi_t::update_mcs(const uint32_t MCS_, const int64_t time_64) {
-    MCS = common::adt::expiring_t(MCS_, time_64);
-}
-
-void mimo_csi_t::update_ci(const uint32_t codebook_index_, const int64_t time_64) {
-    codebook_index = common::adt::expiring_t(codebook_index_, time_64);
+void mimo_csi_t::update_from_phy(const uint32_t MCS, const sync_report_t& sync_report) {
+    phy_MCS = common::adt::expiring_t(MCS, sync_report.fine_peak_time_64);
 }
 
 }  // namespace dectnrp::phy

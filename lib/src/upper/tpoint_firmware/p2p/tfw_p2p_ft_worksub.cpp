@@ -58,11 +58,9 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
     // load contact information of PT
     auto& contact = contact_list.get_contact(lrdid);
 
-    // save sync_report
     contact.sync_report = phy_maclow.sync_report;
 
-    // udpate CSI
-    contact.mimo_csi.update(
+    contact.mimo_csi.update_from_feedback(
         plcf_21->FeedbackFormat, plcf_21->feedback_info_pool, phy_maclow.sync_report);
 
     return worksub_pcc2pdc(phy_maclow,
@@ -88,17 +86,15 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
     // long radio device ID used as key
     const auto lrdid = phy_machigh.maclow_phy.get_handle_lrdid();
 
-    const uint32_t conn_idx = contact_list.get_conn_idx_client_from_lrdid(lrdid);
+    auto& contact = contact_list.get_contact(lrdid);
 
-    // request vector with base pointers to MMIEs
+    // request vector of base pointers to MMIEs
     const auto& mmie_decoded_vec = phy_machigh.pdc_report.mac_pdu_decoder.get_mmie_decoded_vec();
 
     // count datagrams to be forwarded
     uint32_t datagram_cnt = 0;
 
-    // go over each MMIE
     for (auto mmie : mmie_decoded_vec) {
-        // check if MMIE is actually user plane data
         if (dynamic_cast<section4::user_plane_data_t*>(mmie) == nullptr) {
             dectnrp_log_wrn("MMIE not user plane data");
             continue;
@@ -106,12 +102,17 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
 
         const section4::user_plane_data_t* upd = static_cast<section4::user_plane_data_t*>(mmie);
 
-        if (app_client->write_try(conn_idx, upd->get_data_ptr(), upd->get_data_size()) > 0) {
+        if (app_client->write_nto(
+                contact.conn_idx_client, upd->get_data_ptr(), upd->get_data_size()) > 0) {
             ++datagram_cnt;
         }
     }
 
     app_client->trigger_forward_nto(datagram_cnt);
+
+    contact.mimo_csi.update_from_phy(
+        cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),
+        phy_machigh.phy_maclow.sync_report);
 
     return phy::machigh_phy_t();
 }
@@ -192,13 +193,7 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
     // number of definable packets is limited
     for (uint32_t i = 0; i < max_simultaneous_tx_unicast; ++i) {
         // go over the connection indexes which represent different devices
-        for (uint32_t conn_idx = 0; conn_idx < N_pt; ++conn_idx) {
-            // first map connection index to PT
-            const auto lrdid = contact_list.get_lrdid_from_conn_idx_server(conn_idx);
-
-            // load contact information of PT
-            auto& contact = contact_list.get_contact(lrdid);
-
+        for (auto& contact : contact_list.get_contacts_vec()) {
             contact.allocation_pt.set_beacon_time_last_known(
                 allocation_ft.get_beacon_time_transmitted());
 
@@ -214,13 +209,13 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
 
             // change content of headers
             ppmp_unicast.plcf_21.ReceiverIdentity = contact.identity.ShortRadioDeviceID;
-            ppmp_unicast.unicast_header.Receiver_Address = lrdid;
+            ppmp_unicast.unicast_header.Receiver_Address = contact.identity.LongRadioDeviceID;
 
             // change feedback info in PLCF
             ppmp_unicast.plcf_21.FeedbackFormat = section4::feedback_info_t::No_feedback;
 
             // try to send a packet, may return false if no data of HARQ processes are available
-            if (!worksub_tx_unicast(machigh_phy, tx_opportunity, contact.mimo_csi, conn_idx)) {
+            if (!worksub_tx_unicast(machigh_phy, contact, tx_opportunity)) {
                 // break;
             }
         }

@@ -21,6 +21,7 @@
 #pragma once
 
 #include "dectnrp/mac/contact.hpp"
+#include "dectnrp/mac/feedback_plan.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
@@ -32,7 +33,8 @@ class contact_p2p_t final : public mac::contact_t {
 
         // ##################################################
         // MAC Layer
-        // -
+
+        mac::feedback_plan_t feedback_plan;
 
         // ##################################################
         // DLC and Convergence Layer

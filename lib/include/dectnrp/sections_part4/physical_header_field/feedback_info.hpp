@@ -52,7 +52,7 @@ class feedback_info_t : public common::serdes::packing_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32
         };
 
-        static constexpr int32_t MCS_out_of_range{-1};
+        static constexpr uint32_t MCS_out_of_range{common::adt::UNDEFINED_NUMERIC_32};
 
         static uint32_t buffer_size_2_buffer_status(const uint32_t buffer_size);
 
@@ -85,7 +85,7 @@ class feedback_info_t : public common::serdes::packing_t {
         virtual bool unpack(const uint8_t* a_ptr) override = 0;
 
         static uint32_t mcs_2_cqi(const int32_t mcs);
-        static int32_t cqi_2_mcs(const uint32_t cqi);
+        static uint32_t cqi_2_mcs(const uint32_t cqi);
 };
 
 class feedback_info_f1_t final : public feedback_info_t {
@@ -93,7 +93,7 @@ class feedback_info_f1_t final : public feedback_info_t {
         uint32_t HARQ_Process_number;
         transmission_feedback_t Transmission_feedback;
         uint32_t Buffer_Size;  // Buffer_Status;
-        int32_t MCS;           // CQI;
+        uint32_t MCS;          // CQI;
 
         friend class feedback_info_pool_t;
 
@@ -109,7 +109,7 @@ class feedback_info_f2_t final : public feedback_info_t {
         uint32_t Codebook_index;
         mimo_feedback_t MIMO_feedback;
         uint32_t Buffer_Size;  // Buffer_Status;
-        int32_t MCS;           // CQI;
+        uint32_t MCS;          // CQI;
 
         friend class feedback_info_pool_t;
 
@@ -126,7 +126,7 @@ class feedback_info_f3_t final : public feedback_info_t {
         transmission_feedback_t Transmission_feedback_0;
         uint32_t HARQ_Process_number_1;
         transmission_feedback_t Transmission_feedback_1;
-        int32_t MCS;  // CQI;
+        uint32_t MCS;  // CQI;
 
         friend class feedback_info_pool_t;
 
@@ -140,7 +140,7 @@ class feedback_info_f3_t final : public feedback_info_t {
 class feedback_info_f4_t final : public feedback_info_t {
     public:
         uint32_t HARQ_feedback_bitmap;
-        int32_t MCS;  // CQI;
+        uint32_t MCS;  // CQI;
 
         friend class feedback_info_pool_t;
 
@@ -172,7 +172,7 @@ class feedback_info_f6_t final : public feedback_info_t {
         uint32_t HARQ_Process_number;
         uint32_t Reserved;
         uint32_t Buffer_Size;  // Buffer_Status;
-        int32_t MCS;           // CQI;
+        uint32_t MCS;          // CQI;
 
         friend class feedback_info_pool_t;
 

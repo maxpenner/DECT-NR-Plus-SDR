@@ -61,14 +61,11 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
         // ##################################################
         // MAC Layer
 
-        /// FT has the same information in its contact list
-        section4::mac_architecture::identity_t identity_pt;
-
-        /// uplink and downlink, FT has the same information in its contact list
-        mac::allocation::allocation_pt_t allocation_pt;
-
-        /// measured for received beacons
-        phy::mimo_csi_t mimo_csi;
+        /**
+         * \brief The FT saves a full contact_list_t with one entry per PT. A PT saves a single
+         * contact with information about itself.
+         */
+        contact_p2p_t contact_pt;
 
         // clang-format off
         std::optional<phy::maclow_phy_t> worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) override final;

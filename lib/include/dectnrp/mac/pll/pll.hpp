@@ -36,7 +36,10 @@ class pll_t {
 
         void provide_beacon_time(const int64_t beacon_time_64);
 
+        /// negative if invalid
         int64_t get_beacon_time_last_known() const { return beacon_time_vec.at(prev_idx()); };
+
+        /// negative if invalid
         int64_t get_beacon_time_oldest_known() const { return beacon_time_vec.at(next_idx()); };
 
         void reset();
@@ -44,11 +47,11 @@ class pll_t {
         template <typename T>
             requires(std::is_arithmetic_v<T>)
         T get_warped(const T length) const {
-            const float A = std::round(static_cast<float>(length) * warp_factor_ema.get_val());
+            const double A = std::round(static_cast<double>(length) * warp_factor_ema.get_val());
             return static_cast<T>(A);
         }
 
-        float convert_warp_factor_to_ppm() const;
+        double convert_warp_factor_to_ppm() const;
 
     private:
         section3::duration_t beacon_period;
@@ -56,16 +59,17 @@ class pll_t {
         /// minimum time distance between two beacons to accept the latter one
         int64_t dist_min_accept_64;
 
-        /// minimum time dist distance two beacons to measure the warping
+        /// minimum time distance between two beacons to measure the warping
         int64_t dist_min_64;
 
-        /// maximum time dist distance two beacons to measure the warping
+        /// maximum time distance between two beacons to measure the warping
         int64_t dist_max_64;
 
+        /// collection of past beacons used to measure the warping between the time bases
         std::vector<int64_t> beacon_time_vec;
         std::size_t idx{};
 
-        common::adt::ema_t<float, float> warp_factor_ema;
+        common::adt::ema_t<double, double> warp_factor_ema;
 
         std::size_t prev_idx() const { return idx == 0 ? beacon_time_vec.size() - 1 : idx - 1; };
         std::size_t next_idx() const { return idx == beacon_time_vec.size() - 1 ? 0 : idx + 1; };

@@ -35,12 +35,12 @@ uint32_t feedback_info_t::mcs_2_cqi(const int32_t mcs) {
     return static_cast<uint32_t>(mcs + 1);
 }
 
-int32_t feedback_info_t::cqi_2_mcs(const uint32_t cqi) {
+uint32_t feedback_info_t::cqi_2_mcs(const uint32_t cqi) {
     if (cqi == 0 || 12 < cqi) {
         return MCS_out_of_range;
     }
 
-    return static_cast<int32_t>(cqi) - 1;
+    return cqi - 1;
 }
 
 uint32_t feedback_info_t::buffer_size_2_buffer_status(const uint32_t buffer_size) {
@@ -107,7 +107,7 @@ bool feedback_info_f1_t::is_valid() const {
         return false;
     }
 
-    if (common::adt::bitmask_lsb<4>() < mcs_2_cqi(MCS)) {
+    if (11 < MCS) {
         return false;
     }
 
@@ -155,7 +155,7 @@ bool feedback_info_f2_t::is_valid() const {
         return false;
     }
 
-    if (common::adt::bitmask_lsb<4>() < mcs_2_cqi(MCS)) {
+    if (11 < MCS) {
         return false;
     }
 
@@ -207,7 +207,7 @@ bool feedback_info_f3_t::is_valid() const {
         return false;
     }
 
-    if (common::adt::bitmask_lsb<4>() < mcs_2_cqi(MCS)) {
+    if (11 < MCS) {
         return false;
     }
 
@@ -246,7 +246,7 @@ bool feedback_info_f4_t::is_valid() const {
         return false;
     }
 
-    if (common::adt::bitmask_lsb<4>() < mcs_2_cqi(MCS)) {
+    if (11 < MCS) {
         return false;
     }
 
@@ -339,7 +339,7 @@ bool feedback_info_f6_t::is_valid() const {
         return false;
     }
 
-    if (common::adt::bitmask_lsb<4>() < mcs_2_cqi(MCS)) {
+    if (11 < MCS) {
         return false;
     }
 

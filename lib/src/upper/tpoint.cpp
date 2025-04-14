@@ -48,6 +48,12 @@ tpoint_t::tpoint_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_
                    "must be negative so first transmission is guaranteed to occur later");
 };
 
+#ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
+phy::machigh_phy_t tpoint_t::work_pcc_incorrect_crc(const phy::phy_maclow_t& phy_maclow) {
+    return phy::machigh_phy_t();
+};
+#endif
+
 void tpoint_t::worksub_agc(const phy::sync_report_t& sync_report,
                            const section4::plcf_base_t& plcf_base,
                            const int64_t t_agc_change_64,

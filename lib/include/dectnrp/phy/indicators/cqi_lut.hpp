@@ -32,6 +32,9 @@ class cqi_lut_t {
         cqi_lut_t(const uint32_t mcs_min_, const uint32_t mcs_max_, const float snr_offset_);
         ~cqi_lut_t() = default;
 
+        uint32_t get_mcs_min() const { return mcs_min; };
+        uint32_t get_mcs_max() const { return mcs_max; };
+
         uint32_t get_highest_mcs_possible(const float snr_dB_measured) const;
 
         uint32_t clamp_mcs(const uint32_t mcs_candidate) const;

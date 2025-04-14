@@ -21,8 +21,8 @@
 #pragma once
 
 #include <cstdint>
-#include <vector>
 
+#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/mac/allocation/allocation_pt.hpp"
 #include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 #include "dectnrp/phy/rx/sync/sync_report.hpp"
@@ -50,7 +50,9 @@ class contact_t {
 
         // ##################################################
         // Application Layer
-        // -
+
+        uint32_t conn_idx_server{common::adt::UNDEFINED_NUMERIC_32};
+        uint32_t conn_idx_client{common::adt::UNDEFINED_NUMERIC_32};
 };
 
 }  // namespace dectnrp::mac

@@ -20,15 +20,21 @@
 
 #pragma once
 
-#define PLL_PARAM_DIST_MIN_ACCEPT_MS 1000
+#include <cstdint>
+#include <vector>
 
-#define PLL_PARAM_DIST_MIN_MS 5000
-#define PLL_PARAM_DIST_MIN_TO_MAX_IN_BEACON_PERIODS 8
+namespace dectnrp::mac {
 
-#define PLL_PARAM_DIST_MAX_DEVIATION_SAFETY_FACTOR 8
+class feedback_plan_t {
+    public:
+        feedback_plan_t() = default;
+        feedback_plan_t(const std::vector<uint32_t>&& feedback_format_vec);
 
-#define PLL_PARAM_EMA_ALPHA 0.9
+        uint32_t get_next_feedback_format();
 
-// #define PLL_PARAM_UNLUCKY_WARP_FACTOR_FILTER
+    private:
+        std::vector<uint32_t> feedback_format_vec;
+        std::size_t idx{};
+};
 
-#define PLL_PARAM_PPM_OUT_OF_SYNC 150.0
+}  // namespace dectnrp::mac

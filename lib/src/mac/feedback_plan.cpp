@@ -18,17 +18,25 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#pragma once
+#include "dectnrp/mac/feedback_plan.hpp"
 
-#define PLL_PARAM_DIST_MIN_ACCEPT_MS 1000
+#include <cmath>
 
-#define PLL_PARAM_DIST_MIN_MS 5000
-#define PLL_PARAM_DIST_MIN_TO_MAX_IN_BEACON_PERIODS 8
+#include "dectnrp/common/prog/assert.hpp"
 
-#define PLL_PARAM_DIST_MAX_DEVIATION_SAFETY_FACTOR 8
+namespace dectnrp::mac {
 
-#define PLL_PARAM_EMA_ALPHA 0.9
+feedback_plan_t::feedback_plan_t(const std::vector<uint32_t>&& feedback_format_vec_)
+    : feedback_format_vec(feedback_format_vec_),
+      idx(0) {}
 
-// #define PLL_PARAM_UNLUCKY_WARP_FACTOR_FILTER
+uint32_t feedback_plan_t::get_next_feedback_format() {
+    const uint32_t ret = feedback_format_vec.at(idx);
 
-#define PLL_PARAM_PPM_OUT_OF_SYNC 150.0
+    ++idx;
+    idx %= feedback_format_vec.size();
+
+    return ret;
+}
+
+}  // namespace dectnrp::mac

@@ -65,18 +65,25 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
         // load identity of one PT
         const auto identity_pt = init_identity_pt(firmware_id_pt);
 
+        // connection index is the firmware ID
+        const uint32_t conn_idx_server{firmware_id_pt};
+        const uint32_t conn_idx_client{firmware_id_pt};
+
         // add PT as new contact
-        contact_list.add_new_contact(identity_pt.LongRadioDeviceID,
-                                     identity_pt.ShortRadioDeviceID,
-                                     firmware_id_pt,
-                                     firmware_id_pt);
+        contact_list.add_new_contact_and_setup_indexing(
+            identity_pt, conn_idx_server, conn_idx_client);
 
         auto& contact = contact_list.get_contact(identity_pt.LongRadioDeviceID);
 
+        contact.sync_report = phy::sync_report_t(buffer_rx.nof_antennas);
         contact.identity = identity_pt;
         contact.allocation_pt = init_allocation_pt(firmware_id_pt);
-        contact.sync_report = phy::sync_report_t(buffer_rx.nof_antennas);
         contact.mimo_csi = phy::mimo_csi_t();
+        contact.conn_idx_server = conn_idx_server;
+        contact.conn_idx_client = conn_idx_client;
+
+        // feedback format 4 to send the MCS in the downlink
+        contact.feedback_plan = mac::feedback_plan_t(std::vector<uint32_t>{4});
 
         dectnrp_assert(contact.identity.NetworkID == identity_pt.NetworkID, "id not equal");
         dectnrp_assert(contact.identity.ShortNetworkID == identity_pt.ShortNetworkID,

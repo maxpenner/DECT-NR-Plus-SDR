@@ -23,7 +23,6 @@
 #include <cstdint>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
-#include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::common::adt {
 
@@ -38,11 +37,17 @@ class expiring_t {
         bool is_valid(const int64_t latest_64) const noexcept { return latest_64 <= time_64; };
         bool is_expired(const int64_t latest_64) const noexcept { return time_64 < latest_64; };
 
-        constexpr const T* operator->() const noexcept { return &val; }
-        constexpr T* operator->() noexcept { return &val; }
-
-        constexpr const T& operator*() const& noexcept { return val; }
-        constexpr T& operator*() & noexcept { return val; }
+        /**
+         * \brief The only way to get access to val is by using this function and providing a
+         * fallback in case the value has expired.
+         *
+         * \param latest_64
+         * \param fallback
+         * \return
+         */
+        T get_val_or_fallback(const int64_t latest_64, const T&& fallback) const {
+            return is_valid(latest_64) ? val : fallback;
+        };
 
     private:
         T val{};

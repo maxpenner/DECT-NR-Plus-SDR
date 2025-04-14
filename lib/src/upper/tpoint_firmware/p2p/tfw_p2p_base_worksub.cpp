@@ -25,6 +25,7 @@
 
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/limits.hpp"
+#include "dectnrp/sections_part3/beamforming_and_antenna_port_mapping.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
@@ -56,22 +57,24 @@ void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
 #endif
 
 bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
-                                        const mac::allocation::tx_opportunity_t& tx_opportunity,
-                                        const phy::mimo_csi_t& mimo_csi,
-                                        const uint32_t conn_idx) {
+                                        contact_p2p_t& contact_p2p,
+                                        const mac::allocation::tx_opportunity_t& tx_opportunity) {
     // first check if there even is any data to transmit
-    const auto items_level_report = app_server->get_items_level_report_try(
-        conn_idx, limits::max_nof_user_plane_data_per_mac_pdu);
+    const auto items_level_report = app_server->get_items_level_report_nto(
+        contact_p2p.conn_idx_server, limits::max_nof_user_plane_data_per_mac_pdu);
 
     // if not, return immediately
     if (items_level_report.N_filled == 0) {
         return false;
     }
 
-    // OPTIONAL: change dimensions of PLCF and MAC PDU (psdef)
-    // -
+    // define an expiration time for all instances of expiring_t
+    const int64_t expiration_64 =
+        tx_opportunity.tx_time_64 -
+        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 50);
 
-    // request harq process
+    worksub_tx_unicast_psdef(contact_p2p, expiration_64);
+
     auto* hp_tx = hpp->get_process_tx(ppmp_unicast.plcf_base_effective->get_Type(),
                                       identity_ft.NetworkID,
                                       ppmp_unicast.psdef,
@@ -84,61 +87,19 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     }
 
     // this is now a well-defined packet size
-    const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
+    const auto& packet_sizes = hp_tx->get_packet_sizes();
 
-    // OPTIONAL: change content of PLCF, MAC header type and MAC common header
-    // -
+    worksub_tx_unicast_feedback(contact_p2p, expiration_64);
 
-    // pack headers
-    uint32_t a_cnt_w = ppmp_unicast.pack_first_3_header(hp_tx->get_a_plcf(), hp_tx->get_a_tb());
-
-    // then attach as many user plane data MMIEs as possible
-    for (uint32_t i = 0; i < items_level_report.N_filled; ++i) {
-        // request ...
-        auto& upd = mmie_pool_tx.get<section4::user_plane_data_t>();
-
-        // ... and configure user plane data MMIE
-        upd.set_flow_id(1);
-        upd.set_data_size(items_level_report.levels[i]);
-
-        // make sure user plane data still fits into the transport block
-        if (packet_sizes.N_TB_byte <= a_cnt_w + upd.get_packed_size_of_mmh_sdu()) {
-            break;
-        }
-
-        // pack header and ...
-        upd.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
-
-        // ... advance pointer by size of packed MAC PDU and ...
-        const uint32_t a_cnt_w_inc = upd.get_packed_size_of_mmh_sdu();
-
-        // ... request payload pointer and ...
-        uint8_t* const dst_payload = upd.get_data_ptr();
-
-        dectnrp_assert(dst_payload - hp_tx->get_a_tb() + items_level_report.levels[i] <=
-                           packet_sizes.N_TB_byte,
-                       "MAC PDU too large");
-
-        // ... try reading data from upper layer to MMIE
-        if (app_server->read_try(conn_idx, dst_payload) == 0) {
-            break;
-        }
-
-        a_cnt_w += a_cnt_w_inc;
-    }
-
-    // in case no user plane data was written
-    if (ppmp_unicast.get_packed_size_mht_mch() == a_cnt_w) {
+    if (!worksub_tx_unicast_mac_sdu(contact_p2p, items_level_report, packet_sizes, *hp_tx)) {
+        // no data written to the HARQ buffer, terminate the process and return without sending
         hp_tx->finalize();
+
         return false;
     }
 
-    // fill up with padding IEs
-    mmie_pool_tx.fill_with_padding_ies(hp_tx->get_a_tb() + a_cnt_w,
-                                       packet_sizes.N_TB_byte - a_cnt_w);
-
-    // pick beamforming codebook index
-    const uint32_t codebook_index = 0;
+    const uint32_t codebook_index =
+        contact_p2p.mimo_csi.codebook_index.get_val_or_fallback(expiration_64, 0);
 
     // PHY meta
     const phy::tx_meta_t& tx_meta = {.optimal_scaling_DAC = false,
@@ -157,6 +118,87 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
+
+    return true;
+}
+
+void tfw_p2p_base_t::worksub_tx_unicast_psdef(contact_p2p_t& contact_p2p,
+                                              const int64_t expiration_64) {
+    ppmp_unicast.psdef.mcs_index =
+        cqi_lut.clamp_mcs(contact_p2p.mimo_csi.feedback_MCS.get_val_or_fallback(
+            expiration_64, cqi_lut.get_mcs_min()));
+
+    // update transmission mode
+    // ToDo
+}
+
+void tfw_p2p_base_t::worksub_tx_unicast_feedback(contact_p2p_t& contact_p2p,
+                                                 const int64_t expiration_64) {
+    // set next feedback format in PLCF
+    ppmp_unicast.plcf_21.FeedbackFormat = contact_p2p.feedback_plan.get_next_feedback_format();
+
+    // update respective feedback format
+    switch (ppmp_unicast.plcf_21.FeedbackFormat) {
+        case 4:
+            ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f4.MCS =
+                contact_p2p.mimo_csi.phy_MCS.get_val_or_fallback(expiration_64,
+                                                                 cqi_lut.get_mcs_min());
+
+            break;
+
+        case 5:
+            ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index =
+                contact_p2p.mimo_csi.phy_codebook_index.get_val_or_fallback(expiration_64, 0);
+
+            break;
+    }
+}
+
+bool tfw_p2p_base_t::worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p,
+                                                const application::items_level_report_t& ilr,
+                                                const section3::packet_sizes_t& packet_sizes,
+                                                phy::harq::process_tx_t& hp_tx) {
+    uint32_t a_cnt_w = ppmp_unicast.pack_first_3_header(hp_tx.get_a_plcf(), hp_tx.get_a_tb());
+
+    // then attach as many user plane data MMIEs as possible
+    for (uint32_t i = 0; i < ilr.N_filled; ++i) {
+        // request ...
+        auto& upd = mmie_pool_tx.get<section4::user_plane_data_t>();
+
+        // ... and configure user plane data MMIE
+        upd.set_flow_id(1);
+        upd.set_data_size(ilr.levels[i]);
+
+        // make sure user plane data still fits into the transport block
+        if (packet_sizes.N_TB_byte <= a_cnt_w + upd.get_packed_size_of_mmh_sdu()) {
+            break;
+        }
+
+        upd.pack_mmh_sdu(hp_tx.get_a_tb() + a_cnt_w);
+
+        const uint32_t a_cnt_w_inc = upd.get_packed_size_of_mmh_sdu();
+
+        // request payload pointer and ...
+        uint8_t* const dst_payload = upd.get_data_ptr();
+
+        dectnrp_assert(dst_payload - hp_tx.get_a_tb() + ilr.levels[i] <= packet_sizes.N_TB_byte,
+                       "MAC PDU too large");
+
+        // ... try reading data from upper layer to MMIE
+        if (app_server->read_nto(contact_p2p.conn_idx_server, dst_payload) == 0) {
+            break;
+        }
+
+        a_cnt_w += a_cnt_w_inc;
+    }
+
+    // in case no user plane data was written
+    if (ppmp_unicast.get_packed_size_mht_mch() == a_cnt_w) {
+        return false;
+    }
+
+    mmie_pool_tx.fill_with_padding_ies(hp_tx.get_a_tb() + a_cnt_w,
+                                       packet_sizes.N_TB_byte - a_cnt_w);
 
     return true;
 }
