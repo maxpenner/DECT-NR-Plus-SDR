@@ -29,45 +29,44 @@
 
 namespace dectnrp::application::sockets {
 
-socket_client_t::socket_client_t(const uint32_t id_,
-                                 const common::threads_core_prio_config_t thread_config_,
-                                 phy::job_queue_t& job_queue_,
-                                 const std::vector<uint32_t> ports_,
-                                 const uint32_t N_item_,
-                                 const uint32_t N_item_byte_)
-    : app_client_t(id_, thread_config_, job_queue_, ports_.size(), N_item_byte_),
-      socketx_t(ports_, N_item_, N_item_byte_) {
-    // setup one socket for every socket_items_pair defined
-    for (uint32_t i = 0; i < socket_items_pair_vec.size(); ++i) {
+socket_client_t::socket_client_t(const uint32_t id,
+                                 const common::threads_core_prio_config_t thread_config,
+                                 phy::job_queue_t& job_queue,
+                                 const std::vector<uint32_t> ports,
+                                 const queue_size_t queue_size)
+    : app_client_t(id, thread_config, job_queue, ports.size(), queue_size),
+      socketx_t(ports) {
+    // setup one socket for every udp defined
+    for (uint32_t i = 0; i < udp_vec.size(); ++i) {
         // setup socket
-        if ((socket_items_pair_vec[i]->socketfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        if ((udp_vec[i]->socketfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
             dectnrp_assert_failure("Server failed to init socket.");
         }
 
-        memset(&socket_items_pair_vec[i]->servaddr, 0, sizeof(socket_items_pair_vec[i]->servaddr));
+        memset(&udp_vec[i]->servaddr, 0, sizeof(udp_vec[i]->servaddr));
 
         // filling server information
-        socket_items_pair_vec[i]->servaddr.sin_family = AF_INET;
-        socket_items_pair_vec[i]->servaddr.sin_addr.s_addr = INADDR_ANY;
-        socket_items_pair_vec[i]->servaddr.sin_port = htons(socket_items_pair_vec[i]->port);
+        udp_vec[i]->servaddr.sin_family = AF_INET;
+        udp_vec[i]->servaddr.sin_addr.s_addr = INADDR_ANY;
+        udp_vec[i]->servaddr.sin_port = htons(udp_vec[i]->port);
     }
 }
 
 socket_client_t::~socket_client_t() {
-    for (uint32_t i = 0; i < socket_items_pair_vec.size(); ++i) {
-        close(socket_items_pair_vec[i]->socketfd);
+    for (uint32_t i = 0; i < udp_vec.size(); ++i) {
+        close(udp_vec[i]->socketfd);
     }
 };
 
 uint32_t socket_client_t::write_immediate(const uint32_t conn_idx,
                                           const uint8_t* inp,
                                           const uint32_t n) {
-    const auto w_n = sendto(socket_items_pair_vec[conn_idx]->socketfd,
+    const auto w_n = sendto(udp_vec[conn_idx]->socketfd,
                             (const char*)inp,
                             n,
                             MSG_CONFIRM,
-                            (const struct sockaddr*)&socket_items_pair_vec[conn_idx]->servaddr,
-                            sizeof(socket_items_pair_vec[conn_idx]->servaddr));
+                            (const struct sockaddr*)&udp_vec[conn_idx]->servaddr,
+                            sizeof(udp_vec[conn_idx]->servaddr));
 
     dectnrp_assert(n == w_n, "nof bytes not the same");
 
@@ -75,15 +74,15 @@ uint32_t socket_client_t::write_immediate(const uint32_t conn_idx,
 }
 
 uint32_t socket_client_t::write_nto(const uint32_t conn_idx, const uint8_t* inp, const uint32_t n) {
-    return socket_items_pair_vec[conn_idx]->items->write_nto(inp, n);
+    return queue_vec.at(conn_idx)->write_nto(inp, n);
 }
 
 uint32_t socket_client_t::write_try(const uint32_t conn_idx, const uint8_t* inp, const uint32_t n) {
-    return socket_items_pair_vec[conn_idx]->items->write_try(inp, n);
+    return queue_vec.at(conn_idx)->write_try(inp, n);
 }
 
-uint32_t socket_client_t::copy_from_items_to_localbuffer(const uint32_t conn_idx) {
-    return socket_items_pair_vec[conn_idx]->items->read_nto(buffer_local);
+uint32_t socket_client_t::copy_from_queue_to_localbuffer(const uint32_t conn_idx) {
+    return queue_vec.at(conn_idx)->read_nto(buffer_local);
 }
 
 }  // namespace dectnrp::application::sockets

@@ -20,27 +20,4 @@
 
 #pragma once
 
-#include <cstdint>
-#include <memory>
-#include <vector>
-
-#include "dectnrp/application/socket/udp.hpp"
-
-namespace dectnrp::application::sockets {
-
-class socketx_t {
-    public:
-        explicit socketx_t(const std::vector<uint32_t> ports_);
-        virtual ~socketx_t() = default;
-
-        socketx_t() = delete;
-        socketx_t(const socketx_t&) = delete;
-        socketx_t& operator=(const socketx_t&) = delete;
-        socketx_t(socketx_t&&) = delete;
-        socketx_t& operator=(socketx_t&&) = delete;
-
-    protected:
-        std::vector<std::unique_ptr<udp_t>> udp_vec;
-};
-
-}  // namespace dectnrp::application::sockets
+#define APPLICATION_VNIC_VNIC_SERVER_ONLY_FORWARD_IPV4

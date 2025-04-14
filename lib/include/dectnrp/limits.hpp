@@ -28,51 +28,55 @@ namespace dectnrp::limits {
 // RADIO and SIMULATION
 
 /// simulation speed change
-static constexpr int32_t simulation_samp_rate_speedup_minimum = -1000;
-static constexpr int32_t simulation_samp_rate_speedup_maximum = 100;
+static constexpr int32_t simulation_samp_rate_speedup_minimum{-1000};
+static constexpr int32_t simulation_samp_rate_speedup_maximum{100};
 
 // ##################################################
 // PHY
 
 /// physical number of antennas
-static constexpr uint32_t dectnrp_max_nof_antennas = 8;
+static constexpr uint32_t dectnrp_max_nof_antennas{8};
 
 /// spatial streams
-static constexpr uint32_t dectnrp_max_nof_n_ss = 8;
+static constexpr uint32_t dectnrp_max_nof_n_ss{8};
 
 /// QAM-256
-static constexpr uint32_t dectnrp_max_mcs_index = 9;
+static constexpr uint32_t dectnrp_max_mcs_index{9};
 
 /// network IDs for scrambling
-static constexpr uint32_t max_nof_network_id_for_scrambling = 20;
+static constexpr uint32_t max_nof_network_id_for_scrambling{20};
 
 /**
  * \brief We can control multiple pairs of a hw on the radio layer and a worker_pool on the PHY from
  * a single tpoint_t firmware. We limit the number of pairs supported.
  */
-static constexpr uint32_t max_nof_radio_phy_pairs_one_tpoint = 4;
+static constexpr uint32_t max_nof_radio_phy_pairs_one_tpoint{4};
 
 // ##################################################
 // MAC
 
 /// single MAC PDU
-static constexpr uint32_t max_nof_higher_layer_signalling = 8;
-static constexpr uint32_t max_nof_user_plane_data_per_mac_pdu = 8;
+static constexpr uint32_t max_nof_higher_layer_signalling{8};
+static constexpr uint32_t max_nof_user_plane_data_per_mac_pdu{8};
 
 /// uplink or downlink resources per PT
-static constexpr uint32_t max_nof_ul_resources_per_pt = 8;
-static constexpr uint32_t max_nof_dl_resources_per_pt = 8;
+static constexpr uint32_t max_nof_ul_resources_per_pt{8};
+static constexpr uint32_t max_nof_dl_resources_per_pt{8};
 
 /// maximum number of TX packets from MAC to PHY
-static constexpr uint32_t max_nof_tx_packet_mac_to_phy = 4;
+static constexpr uint32_t max_nof_tx_packet_mac_to_phy{4};
 
 /// regular callbacks are limited
-static constexpr uint32_t max_callbacks = 4;
+static constexpr uint32_t max_callbacks{4};
 
 // ##################################################
 // Application
 
+static constexpr uint32_t app_max_connections{32U};
+static constexpr uint32_t app_max_queue_item{256U};
+static constexpr uint32_t app_max_queue_item_size{1600};
+
 /// maximum number of item level that are reportable
-static constexpr uint32_t max_items_level_reported = 8;
+static constexpr uint32_t max_queue_level_reported{8};
 
 }  // namespace dectnrp::limits

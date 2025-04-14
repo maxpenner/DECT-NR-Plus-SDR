@@ -33,11 +33,11 @@ namespace dectnrp::application {
 
 class app_client_t : public app_t {
     public:
-        explicit app_client_t(const uint32_t id_,
-                              const common::threads_core_prio_config_t thread_config_,
-                              phy::job_queue_t& job_queue_,
-                              const uint32_t n_connections_,
-                              const uint32_t n_item_byte_max_);
+        explicit app_client_t(const uint32_t id,
+                              const common::threads_core_prio_config_t thread_config,
+                              phy::job_queue_t& job_queue,
+                              const uint32_t N_queue,
+                              const queue_size_t queue_size);
         virtual ~app_client_t() = default;
 
         app_client_t() = delete;
@@ -76,7 +76,7 @@ class app_client_t : public app_t {
 
         void forward_under_lock();
 
-        [[nodiscard]] virtual uint32_t copy_from_items_to_localbuffer(const uint32_t conn_idx) = 0;
+        [[nodiscard]] virtual uint32_t copy_from_queue_to_localbuffer(const uint32_t conn_idx) = 0;
 };
 
 }  // namespace dectnrp::application

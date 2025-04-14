@@ -20,23 +20,25 @@
 
 #pragma once
 
+#include <poll.h>
+
 #include <cstdint>
 #include <limits>
 #include <vector>
 
 #include "dectnrp/application/app.hpp"
-#include "dectnrp/application/items_level_report.hpp"
+#include "dectnrp/application/queue/queue_level.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 
 namespace dectnrp::application {
 
 class app_server_t : public app_t {
     public:
-        explicit app_server_t(const uint32_t id_,
-                              const common::threads_core_prio_config_t thread_config_,
-                              phy::job_queue_t& job_queue_,
-                              const uint32_t n_connections_,
-                              const uint32_t n_item_byte_max_);
+        explicit app_server_t(const uint32_t id,
+                              const common::threads_core_prio_config_t thread_config,
+                              phy::job_queue_t& job_queue,
+                              const uint32_t N_queue,
+                              const queue_size_t queue_size);
         virtual ~app_server_t() = default;
 
         app_server_t() = delete;
@@ -45,21 +47,21 @@ class app_server_t : public app_t {
         app_server_t(app_server_t&&) = delete;
         app_server_t& operator=(app_server_t&&) = delete;
 
-        virtual void work_sc() override = 0;
+        void work_sc() override final;
         virtual uint32_t get_n_connections() override = 0;
 
         /**
-         * \brief Get vector with current levels in the individual items. The first element refers
-         * to the oldest item, which would be returned with the next read.
+         * \brief Get vector with current levels in a specific queue. The first element refers to
+         * the oldest item, which would be returned with the next read.
          *
          * \param conn_idx
          * \param n number of levels requested, can be set to very large number to get full overview
          * \return
          */
-        virtual items_level_report_t get_items_level_report_nto(const uint32_t conn_idx,
-                                                                const uint32_t n) const = 0;
-        virtual items_level_report_t get_items_level_report_try(const uint32_t conn_idx,
-                                                                const uint32_t n) const = 0;
+        virtual queue_level_t get_queue_level_nto(const uint32_t conn_idx,
+                                                  const uint32_t n) const = 0;
+        virtual queue_level_t get_queue_level_try(const uint32_t conn_idx,
+                                                  const uint32_t n) const = 0;
 
         virtual uint32_t read_nto(const uint32_t conn_idx, uint8_t* dst) = 0;
         virtual uint32_t read_try(const uint32_t conn_idx, uint8_t* dst) = 0;
@@ -71,6 +73,21 @@ class app_server_t : public app_t {
         }
 
     protected:
+        /// poll multiple file descriptors each representing connections
+        std::vector<struct pollfd> pfds;
+
+        /// every deriving class has its own way of reading datagrams
+        virtual ssize_t read_datagram(const std::size_t conn_idx) = 0;
+
+        /**
+         * \brief Every deriving class must filter ingress datagrams.
+         *
+         * \param conn_idx
+         * \return true to keep datagram
+         * \return false to discard datagram
+         */
+        virtual bool filter_datagram(const std::size_t conn_idx) = 0;
+
         /**
          * \brief The app_server_t accepts data from outside. For each individual datagram, it can
          * enqueue one job to notify the other layers of the SDR. To reduce the number of jobs and

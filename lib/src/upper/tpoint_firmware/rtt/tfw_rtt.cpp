@@ -71,21 +71,22 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     plcf_10.Reserved = 0;
     plcf_10.DFMCS = psdef.mcs_index;
 
+    const application::queue_size_t queue_size = {
+        .N_item = 4, .N_item_max_byte = limits::app_max_queue_item_size};
+
     app_server = std::make_unique<application::sockets::socket_server_t>(
         id,
         tpoint_config.app_server_thread_config,
         job_queue,
         std::vector<uint32_t>{TFW_RTT_UDP_PORT_DATA, TFW_RTT_UDP_PORT_PRINT},
-        4UL,
-        1500UL);
+        queue_size);
 
     app_client = std::make_unique<application::sockets::socket_client_t>(
         id,
         tpoint_config.app_client_thread_config,
         job_queue,
         std::vector<uint32_t>{8050},
-        4UL,
-        1500UL);
+        queue_size);
 
     stage_a.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
 }
@@ -293,10 +294,10 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // define MAC PDU
     if (tpoint_config.firmware_id == 0) {
         // get item size for first connection
-        const auto items_level_report = app_server->get_items_level_report_nto(0, 1);
+        const auto queue_level = app_server->get_queue_level_nto(0, 1);
 
-        dectnrp_assert(items_level_report.N_filled > 0, "no items to transmit");
-        dectnrp_assert(items_level_report.levels[0] <= packet_sizes.N_TB_byte,
+        dectnrp_assert(queue_level.N_filled > 0, "queue empty");
+        dectnrp_assert(queue_level.levels[0] <= packet_sizes.N_TB_byte,
                        "N_TB_byte is only {}",
                        packet_sizes.N_TB_byte);
 

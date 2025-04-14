@@ -28,15 +28,20 @@ namespace dectnrp::application {
 app_t::app_t(const uint32_t id_,
              const common::threads_core_prio_config_t thread_config_,
              phy::job_queue_t& job_queue_,
-             const uint32_t n_connections_,
-             const uint32_t n_item_byte_max_)
+             const uint32_t N_queue,
+             const queue_size_t queue_size)
     : id(id_),
       thread_config(thread_config_),
       job_queue(job_queue_) {
     keep_running.store(false, std::memory_order_release);
 
-    dectnrp_assert(n_connections_ <= APP_MAX_CONNECTIONS, "number of connections too large");
-    dectnrp_assert(n_item_byte_max_ <= APP_LOCALBUFFER_BYTE, "max nof of byte per item too large");
+    dectnrp_assert(0 < N_queue, "ill-defined");
+    dectnrp_assert(N_queue <= limits::app_max_connections, "ill-defined");
+    dectnrp_assert(queue_size.is_valid(), "ill-defined");
+
+    for (uint32_t i = 0; i < N_queue; ++i) {
+        queue_vec.push_back(std::make_unique<queue_t>(queue_size));
+    }
 }
 
 void app_t::start_sc() {

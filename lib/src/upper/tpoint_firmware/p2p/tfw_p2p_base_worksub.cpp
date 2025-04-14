@@ -60,11 +60,11 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                                         contact_p2p_t& contact_p2p,
                                         const mac::allocation::tx_opportunity_t& tx_opportunity) {
     // first check if there even is any data to transmit
-    const auto items_level_report = app_server->get_items_level_report_nto(
+    const auto queue_level = app_server->get_queue_level_nto(
         contact_p2p.conn_idx_server, limits::max_nof_user_plane_data_per_mac_pdu);
 
     // if not, return immediately
-    if (items_level_report.N_filled == 0) {
+    if (queue_level.N_filled == 0) {
         return false;
     }
 
@@ -91,7 +91,7 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
 
     worksub_tx_unicast_feedback(contact_p2p, expiration_64);
 
-    if (!worksub_tx_unicast_mac_sdu(contact_p2p, items_level_report, packet_sizes, *hp_tx)) {
+    if (!worksub_tx_unicast_mac_sdu(contact_p2p, queue_level, packet_sizes, *hp_tx)) {
         // no data written to the HARQ buffer, terminate the process and return without sending
         hp_tx->finalize();
 
@@ -155,19 +155,19 @@ void tfw_p2p_base_t::worksub_tx_unicast_feedback(contact_p2p_t& contact_p2p,
 }
 
 bool tfw_p2p_base_t::worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p,
-                                                const application::items_level_report_t& ilr,
+                                                const application::queue_level_t& queue_level,
                                                 const section3::packet_sizes_t& packet_sizes,
                                                 phy::harq::process_tx_t& hp_tx) {
     uint32_t a_cnt_w = ppmp_unicast.pack_first_3_header(hp_tx.get_a_plcf(), hp_tx.get_a_tb());
 
     // then attach as many user plane data MMIEs as possible
-    for (uint32_t i = 0; i < ilr.N_filled; ++i) {
+    for (uint32_t i = 0; i < queue_level.N_filled; ++i) {
         // request ...
         auto& upd = mmie_pool_tx.get<section4::user_plane_data_t>();
 
         // ... and configure user plane data MMIE
         upd.set_flow_id(1);
-        upd.set_data_size(ilr.levels[i]);
+        upd.set_data_size(queue_level.levels[i]);
 
         // make sure user plane data still fits into the transport block
         if (packet_sizes.N_TB_byte <= a_cnt_w + upd.get_packed_size_of_mmh_sdu()) {
@@ -181,8 +181,9 @@ bool tfw_p2p_base_t::worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p
         // request payload pointer and ...
         uint8_t* const dst_payload = upd.get_data_ptr();
 
-        dectnrp_assert(dst_payload - hp_tx.get_a_tb() + ilr.levels[i] <= packet_sizes.N_TB_byte,
-                       "MAC PDU too large");
+        dectnrp_assert(
+            dst_payload - hp_tx.get_a_tb() + queue_level.levels[i] <= packet_sizes.N_TB_byte,
+            "MAC PDU too large");
 
         // ... try reading data from upper layer to MMIE
         if (app_server->read_nto(contact_p2p.conn_idx_server, dst_payload) == 0) {

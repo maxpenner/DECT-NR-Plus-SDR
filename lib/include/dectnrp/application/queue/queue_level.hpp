@@ -27,9 +27,9 @@
 
 namespace dectnrp::application {
 
-struct items_level_report_t {
+struct queue_level_t {
         uint32_t N_filled{};
-        std::array<uint32_t, limits::max_items_level_reported> levels{};
+        std::array<uint32_t, limits::max_queue_level_reported> levels{};
 };
 
 }  // namespace dectnrp::application

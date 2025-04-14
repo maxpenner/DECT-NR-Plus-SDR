@@ -169,7 +169,7 @@ If you use this repository for any publication, please cite the repository accor
 
 ### Application Layer
 
-- [ ] lock around individual items instead of instances of items_t
+- [ ] lock around individual items instead of entire queues
 
 ## Architecture
 

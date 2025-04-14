@@ -25,12 +25,12 @@
 
 namespace dectnrp::application {
 
-app_client_t::app_client_t(const uint32_t id_,
-                           const common::threads_core_prio_config_t thread_config_,
-                           phy::job_queue_t& job_queue_,
-                           const uint32_t n_connections_,
-                           const uint32_t n_item_byte_max_)
-    : app_t(id_, thread_config_, job_queue_, n_connections_, n_item_byte_max_),
+app_client_t::app_client_t(const uint32_t id,
+                           const common::threads_core_prio_config_t thread_config,
+                           phy::job_queue_t& job_queue,
+                           const uint32_t N_queue,
+                           const queue_size_t queue_size)
+    : app_t(id, thread_config, job_queue, N_queue, queue_size),
       indicator_cnt{0} {}
 
 void app_client_t::work_sc() {
@@ -115,13 +115,13 @@ void app_client_t::forward_under_lock() {
     // process until all indicated datagrams have been processed
     while (get_indicator_cnt_under_lock() > 0) {
 #ifdef ASSERT_ENABLED
-        bool all_items_empty = true;
+        bool all_queues_empty = true;
 #endif
 
         // check for every existing interface
         for (uint32_t i = 0; i < get_n_connections(); ++i) {
             // check if there is any data
-            const uint32_t n = copy_from_items_to_localbuffer(i);
+            const uint32_t n = copy_from_queue_to_localbuffer(i);
 
             // if so ...
             if (n > 0) {
@@ -130,13 +130,13 @@ void app_client_t::forward_under_lock() {
                 dec_indicator_cnt_under_lock();
 
 #ifdef ASSERT_ENABLED
-                all_items_empty = false;
+                all_queues_empty = false;
 #endif
             }
         }
 
 #ifdef ASSERT_ENABLED
-        dectnrp_assert(!all_items_empty, "went over all items and non has data");
+        dectnrp_assert(!all_queues_empty, "went over all queues and non has data");
 #endif
     }
 }

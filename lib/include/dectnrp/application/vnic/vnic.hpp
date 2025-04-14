@@ -25,39 +25,48 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-
-#include "dectnrp/application/items.hpp"
+#include <vector>
 
 namespace dectnrp::application::vnic {
 
 class vnic_t {
     public:
-        explicit vnic_t(const uint32_t N_item_, const uint32_t N_item_byte_);
+        vnic_t() = default;
         virtual ~vnic_t() = default;
 
-        vnic_t() = delete;
         vnic_t(const vnic_t&) = delete;
         vnic_t& operator=(const vnic_t&) = delete;
         vnic_t(vnic_t&&) = delete;
         vnic_t& operator=(vnic_t&&) = delete;
 
     protected:
-        std::unique_ptr<items_t> items;
-
-        /// 4 or 6
-        static uint32_t get_ip_version(const uint8_t* ip);
-
         // ##################################################
         // IP V4
 
+        static uint32_t get_ip4_header_length_byte(const uint8_t* ip4);
         static uint32_t get_ip4_daddr(const uint8_t* ip4);
-        static std::string get_ip4_addr(const uint8_t* ip4);
+        static std::string get_ip4_daddr_str(const uint8_t* ip4);
 
         // ##################################################
         // IP V6
 
+        static constexpr uint32_t get_ip6_header_length_byte() { return 40; };
         static struct in6_addr get_ip6_daddr(const uint8_t* ip6);
-        static std::string get_ip6_addr(const uint8_t* ip6);
+        static std::string get_ip6_daddr_str(const uint8_t* ip6);
+
+        // ##################################################
+        /// IP V4 or V6
+
+        static uint32_t get_ip_version(const uint8_t* ipx);
+        static uint32_t get_ip_header_length(const uint8_t* ipx);
+
+        // ##################################################
+        // UDP
+        // -
+
+        // ##################################################
+        // PTP
+        // -
 };
 
 }  // namespace dectnrp::application::vnic

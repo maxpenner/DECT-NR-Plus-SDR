@@ -24,25 +24,24 @@
 #include <fcntl.h>
 #include <linux/if_tun.h>
 #include <linux/sockios.h>
-#include <poll.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "dectnrp/application/vnic/vnic_server_param.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::application::vnic {
 
-vnic_server_t::vnic_server_t(const uint32_t id_,
-                             const common::threads_core_prio_config_t thread_config_,
-                             phy::job_queue_t& job_queue_,
+vnic_server_t::vnic_server_t(const uint32_t id,
+                             const common::threads_core_prio_config_t thread_config,
+                             phy::job_queue_t& job_queue,
                              const vnic_config_t vnic_config_,
-                             const uint32_t N_item_,
-                             const uint32_t N_item_byte_)
-    : app_server_t(id_, thread_config_, job_queue_, 1, N_item_byte_),
-      vnic_t(N_item_, N_item_byte_),
+                             const queue_size_t queue_size)
+    : app_server_t(id, thread_config, job_queue, 1, queue_size),
+      vnic_t(),
       vnic_config(vnic_config_) {
     dectnrp_assert(!(vnic_config.tun_name.size() == 0 && vnic_config.tap_name.size() == 0),
                    "either TUN or TAP");
@@ -54,6 +53,10 @@ vnic_server_t::vnic_server_t(const uint32_t id_,
     } else if (vnic_config.tap_name.size() > 0) {
         tap_start();
     }
+
+    // add polling structure
+    pfds[0].fd = tuntap_fd;
+    pfds[0].events = POLLIN;
 }
 
 vnic_server_t::~vnic_server_t() {
@@ -79,83 +82,38 @@ vnic_server_t::~vnic_server_t() {
     close(tuntap_fd);
 }
 
-void vnic_server_t::work_sc() {
-    const int __nfds = 1;
-
-    // create the poll structure required
-    struct pollfd pfds[__nfds];
-    for (uint32_t i = 0; i < __nfds; ++i) {
-        pfds[i].fd = tuntap_fd;
-        pfds[i].events = POLLIN;
-    }
-
-    // struct sockaddr_in cliaddr;
-    // socklen_t len = sizeof(cliaddr);
-    int pollin_happened, n;
-    uint32_t n_written;
-
-    // allow immediate creation of jobs
-    watch_job_queue_access_protection.reset();
-
-    while (keep_running.load(std::memory_order_acquire)) {
-        // poll TUN
-        int num_events = poll(pfds, __nfds, APP_POLL_WAIT_TIMEOUT_MS);
-
-        // any TUN events? if not, poll timed out
-        if (num_events > 0) {
-            for (int i = 0; i < __nfds; ++i) {
-                pollin_happened = pfds[i].revents & POLLIN;
-
-                if (pollin_happened) {
-                    n = read(pfds[i].fd, buffer_local, APP_LOCALBUFFER_BYTE);
-
-                    // if a new datagram was received ...
-                    if (n > 0) {
-#ifdef APPLICATION_VNIC_VNIC_SERVER_ONLY_FORWARD_IPV4
-                        // ... make sure it is IPv4 and only then ...
-                        if (get_ip_version(buffer_local) != 4) {
-                            continue;
-                        }
-#endif
-
-                        // ... get a lock on the item and try to write the datagram
-                        n_written = items->write_nto((const uint8_t*)buffer_local, n);
-
-                        // if we successfully wrote the datagram to items ...
-                        if (n_written > 0) {
-                            /// ... create a job in the job queue for quick processing
-                            enqueue_job_nto(i, n_written);
-                        }
-                    }
-
-                    // ... otherwise discard datagram
-                    // nothing to do here
-                }
-            }
-        }
-    }
-};
-
-items_level_report_t vnic_server_t::get_items_level_report_nto(const uint32_t conn_idx,
-                                                               const uint32_t n) const {
+queue_level_t vnic_server_t::get_queue_level_nto(const uint32_t conn_idx, const uint32_t n) const {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->get_items_level_report_nto(n);
+    return queue_vec.at(conn_idx)->get_queue_level_nto(n);
 }
 
-items_level_report_t vnic_server_t::get_items_level_report_try(const uint32_t conn_idx,
-                                                               const uint32_t n) const {
+queue_level_t vnic_server_t::get_queue_level_try(const uint32_t conn_idx, const uint32_t n) const {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->get_items_level_report_try(n);
+    return queue_vec.at(conn_idx)->get_queue_level_try(n);
 }
 
 uint32_t vnic_server_t::read_nto(const uint32_t conn_idx, uint8_t* dst) {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->read_nto(dst);
+    return queue_vec.at(conn_idx)->read_nto(dst);
 }
 
 uint32_t vnic_server_t::read_try(const uint32_t conn_idx, uint8_t* dst) {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
-    return items->read_try(dst);
+    return queue_vec.at(conn_idx)->read_try(dst);
+}
+
+ssize_t vnic_server_t::read_datagram(const std::size_t conn_idx) {
+    return read(pfds[conn_idx].fd, buffer_local, sizeof(buffer_local));
+}
+
+bool vnic_server_t::filter_datagram(const std::size_t conn_idx) {
+#ifdef APPLICATION_VNIC_VNIC_SERVER_ONLY_FORWARD_IPV4
+    if (get_ip_version(buffer_local) != 4) {
+        return false;
+    }
+#endif
+
+    return true;
 }
 
 int vnic_server_t::tun_start() {

@@ -24,41 +24,41 @@
 
 namespace dectnrp::constants {
 
-static constexpr uint32_t N_b_DFT_min_u_b = 64;
-static constexpr uint32_t N_b_CP_min_u_b = 8;
-static constexpr uint32_t N_b_DFT_CP_min_u_b = N_b_DFT_min_u_b + N_b_CP_min_u_b;
+static constexpr uint32_t N_b_DFT_min_u_b{64};
+static constexpr uint32_t N_b_CP_min_u_b{8};
+static constexpr uint32_t N_b_DFT_CP_min_u_b{N_b_DFT_min_u_b + N_b_CP_min_u_b};
 
 // see Table 4.3-1, ratio between FFT size and cyclic prefix length 1/8=12.5%
-static constexpr uint32_t N_b_DFT_to_N_b_CP = N_b_DFT_min_u_b / N_b_CP_min_u_b;
+static constexpr uint32_t N_b_DFT_to_N_b_CP{N_b_DFT_min_u_b / N_b_CP_min_u_b};
 
-static constexpr uint32_t samp_rate_min_u_b = 1728000;
-static constexpr uint32_t subcarrier_spacing_min_u_b = 27000;
+static constexpr uint32_t samp_rate_min_u_b{1728000};
+static constexpr uint32_t subcarrier_spacing_min_u_b{27000};
 
-static constexpr uint32_t slots_per_10ms = 24;
-static constexpr uint32_t slots_per_100ms = 240;
-static constexpr uint32_t slots_per_sec = 2400;
+static constexpr uint32_t slots_per_10ms{24};
+static constexpr uint32_t slots_per_100ms{240};
+static constexpr uint32_t slots_per_sec{2400};
 
-static constexpr uint32_t u1_subslots_per_slot = 2;
-static constexpr uint32_t u8_subslots_per_slot = 16;
+static constexpr uint32_t u1_subslots_per_slot{2};
+static constexpr uint32_t u8_subslots_per_slot{16};
 
-static constexpr uint32_t u1_subslots_per_sec = 4800;
-static constexpr uint32_t u2_subslots_per_sec = 9600;
-static constexpr uint32_t u4_subslots_per_sec = 19200;
-static constexpr uint32_t u8_subslots_per_sec = 38400;
+static constexpr uint32_t u1_subslots_per_sec{4800};
+static constexpr uint32_t u2_subslots_per_sec{9600};
+static constexpr uint32_t u4_subslots_per_sec{19200};
+static constexpr uint32_t u8_subslots_per_sec{38400};
 
-static constexpr uint32_t N_stf_pattern_u1 = 7;
-static constexpr uint32_t N_stf_pattern_u248 = 9;
-static constexpr uint32_t N_samples_stf_pattern = 16;
-static constexpr uint32_t N_samples_stf_u1 = N_stf_pattern_u1 * N_samples_stf_pattern;
-static constexpr uint32_t N_samples_stf_u248 = N_stf_pattern_u248 * N_samples_stf_pattern;
+static constexpr uint32_t N_stf_pattern_u1{7};
+static constexpr uint32_t N_stf_pattern_u248{9};
+static constexpr uint32_t N_samples_stf_pattern{16};
+static constexpr uint32_t N_samples_stf_u1{N_stf_pattern_u1 * N_samples_stf_pattern};
+static constexpr uint32_t N_samples_stf_u248{N_stf_pattern_u248 * N_samples_stf_pattern};
 
 // for beta=1, there are 14 occupied STF cells across the full spectrum
-static constexpr uint32_t N_STF_cells_b_1 = 14;
-static constexpr uint32_t N_STF_cells_separation = 4;
-static constexpr uint32_t N_STF_cells_separation_center = 8;
+static constexpr uint32_t N_STF_cells_b_1{14};
+static constexpr uint32_t N_STF_cells_separation{4};
+static constexpr uint32_t N_STF_cells_separation_center{8};
 
 // antenna and MIMO configurations
-static constexpr uint32_t N_TS_max = 8;
+static constexpr uint32_t N_TS_max{8};
 
 /**
  * \brief PCC consists of 98 complex subcarriers, each QPSK coded. Thus, the number of bits after
@@ -72,15 +72,15 @@ static constexpr uint32_t N_TS_max = 8;
  * (Table 6.1.4.2.3-1 in part 3). Also, we could define more types (3, 4 etc.), but at the receiver
  * we would have to test against each type blindly.
  */
-static constexpr uint32_t plcf_type_1_byte = 5;
-static constexpr uint32_t plcf_type_1_bit = plcf_type_1_byte * 8;
-static constexpr uint32_t plcf_type_2_byte = 10;
-static constexpr uint32_t plcf_type_2_bit = plcf_type_2_byte * 8;
+static constexpr uint32_t plcf_type_1_byte{5};
+static constexpr uint32_t plcf_type_1_bit{plcf_type_1_byte * 8};
+static constexpr uint32_t plcf_type_2_byte{10};
+static constexpr uint32_t plcf_type_2_bit{plcf_type_2_byte * 8};
 
-static constexpr uint32_t pcc_bits = 196;
-static constexpr uint32_t pcc_cells = 98;  // cells = complex subcarriers
+static constexpr uint32_t pcc_bits{196};
+static constexpr uint32_t pcc_cells{98};  // cells{complex subcarriers
 
-static constexpr uint32_t rv_max = 3;
-static constexpr uint32_t rv_unwrapped_max = 7;
+static constexpr uint32_t rv_max{3};
+static constexpr uint32_t rv_unwrapped_max{7};
 
 }  // namespace dectnrp::constants

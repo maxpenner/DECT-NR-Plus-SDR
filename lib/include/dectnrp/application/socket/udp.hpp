@@ -24,24 +24,19 @@
 
 #include <memory>
 
-#include "dectnrp/application/items.hpp"
-
 namespace dectnrp::application::sockets {
 
-class socket_items_pair_t {
+class udp_t {
     public:
-        explicit socket_items_pair_t(const uint32_t port_,
-                                     const uint32_t N_item_,
-                                     const uint32_t N_item_byte_)
-            : port(port_),
-              items(std::make_unique<items_t>(N_item_, N_item_byte_)) {};
-        ~socket_items_pair_t() = default;
+        explicit udp_t(const uint32_t port_)
+            : port(port_) {};
+        ~udp_t() = default;
 
-        socket_items_pair_t() = delete;
-        socket_items_pair_t(const socket_items_pair_t&) = delete;
-        socket_items_pair_t& operator=(const socket_items_pair_t&) = delete;
-        socket_items_pair_t(socket_items_pair_t&&) = delete;
-        socket_items_pair_t& operator=(socket_items_pair_t&&) = delete;
+        udp_t() = delete;
+        udp_t(const udp_t&) = delete;
+        udp_t& operator=(const udp_t&) = delete;
+        udp_t(udp_t&&) = delete;
+        udp_t& operator=(udp_t&&) = delete;
 
         friend class socket_server_t;
         friend class socket_client_t;
@@ -50,7 +45,6 @@ class socket_items_pair_t {
         const uint32_t port;
         int socketfd;
         struct sockaddr_in servaddr;
-        std::unique_ptr<items_t> items;
 };
 
 }  // namespace dectnrp::application::sockets

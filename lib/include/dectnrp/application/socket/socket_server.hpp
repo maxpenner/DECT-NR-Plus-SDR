@@ -27,12 +27,11 @@ namespace dectnrp::application::sockets {
 
 class socket_server_t final : public app_server_t, public socketx_t {
     public:
-        explicit socket_server_t(const uint32_t id_,
-                                 const common::threads_core_prio_config_t thread_config_,
-                                 phy::job_queue_t& job_queue_,
-                                 const std::vector<uint32_t> ports_,
-                                 const uint32_t N_item_,
-                                 const uint32_t N_item_byte_);
+        explicit socket_server_t(const uint32_t id,
+                                 const common::threads_core_prio_config_t thread_config,
+                                 phy::job_queue_t& job_queue,
+                                 const std::vector<uint32_t> ports,
+                                 const queue_size_t queue_size);
         ~socket_server_t();
 
         socket_server_t() = delete;
@@ -41,17 +40,21 @@ class socket_server_t final : public app_server_t, public socketx_t {
         socket_server_t(socket_server_t&&) = delete;
         socket_server_t& operator=(socket_server_t&&) = delete;
 
-        void work_sc() override final;
-        uint32_t get_n_connections() override final { return socket_items_pair_vec.size(); }
+        uint32_t get_n_connections() override final { return udp_vec.size(); }
 
-        items_level_report_t get_items_level_report_nto(const uint32_t conn_idx,
-                                                        const uint32_t n) const override final;
-        items_level_report_t get_items_level_report_try(const uint32_t conn_idx,
-                                                        const uint32_t n) const override final;
+        queue_level_t get_queue_level_nto(const uint32_t conn_idx,
+                                          const uint32_t n) const override final;
+        queue_level_t get_queue_level_try(const uint32_t conn_idx,
+                                          const uint32_t n) const override final;
 
         uint32_t read_nto(const uint32_t conn_idx, uint8_t* dst) override final;
 
         uint32_t read_try(const uint32_t conn_idx, uint8_t* dst) override final;
+
+    private:
+        ssize_t read_datagram(const std::size_t conn_idx) override final;
+
+        bool filter_datagram(const std::size_t conn_idx) override final;
 };
 
 }  // namespace dectnrp::application::sockets
