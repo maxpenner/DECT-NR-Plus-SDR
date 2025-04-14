@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <poll.h>
+
 #include <cstdint>
 #include <limits>
 #include <vector>
@@ -45,7 +47,7 @@ class app_server_t : public app_t {
         app_server_t(app_server_t&&) = delete;
         app_server_t& operator=(app_server_t&&) = delete;
 
-        virtual void work_sc() override = 0;
+        void work_sc() override final;
         virtual uint32_t get_n_connections() override = 0;
 
         /**
@@ -71,6 +73,21 @@ class app_server_t : public app_t {
         }
 
     protected:
+        /// poll multiple file descriptors each representing connections
+        std::vector<struct pollfd> pfds;
+
+        /// every deriving class has its own way of reading datagrams
+        virtual ssize_t read_datagram(const std::size_t conn_idx) = 0;
+
+        /**
+         * \brief Every deriving class must filter ingress datagrams.
+         *
+         * \param conn_idx
+         * \return true to keep datagram
+         * \return false to discard datagram
+         */
+        virtual bool filter_datagram(const std::size_t conn_idx) = 0;
+
         /**
          * \brief The app_server_t accepts data from outside. For each individual datagram, it can
          * enqueue one job to notify the other layers of the SDR. To reduce the number of jobs and

@@ -40,7 +40,6 @@ class socket_server_t final : public app_server_t, public socketx_t {
         socket_server_t(socket_server_t&&) = delete;
         socket_server_t& operator=(socket_server_t&&) = delete;
 
-        void work_sc() override final;
         uint32_t get_n_connections() override final { return udp_vec.size(); }
 
         queue_level_t get_queue_level_nto(const uint32_t conn_idx,
@@ -51,6 +50,11 @@ class socket_server_t final : public app_server_t, public socketx_t {
         uint32_t read_nto(const uint32_t conn_idx, uint8_t* dst) override final;
 
         uint32_t read_try(const uint32_t conn_idx, uint8_t* dst) override final;
+
+    private:
+        ssize_t read_datagram(const std::size_t conn_idx) override final;
+
+        bool filter_datagram(const std::size_t conn_idx) override final;
 };
 
 }  // namespace dectnrp::application::sockets
