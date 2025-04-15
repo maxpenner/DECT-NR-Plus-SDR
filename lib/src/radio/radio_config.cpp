@@ -94,6 +94,7 @@ radio_config_t::radio_config_t(const std::string directory)
         // does the key describe global simulation parameters?
         else if (it.key().starts_with(hw_config_t::json_log_key_simulation)) {
             hw_config_t::sim_samp_rate_lte = common::jsonparse::read_bool(it, "sim_samp_rate_lte");
+            hw_config_t::sim_spp_us = common::jsonparse::read_int(it, "sim_spp_us", 50, 500);
             hw_config_t::sim_samp_rate_speedup =
                 common::jsonparse::read_int(it, "sim_samp_rate_speedup", INT32_MIN, INT32_MAX);
             hw_config_t::sim_channel_name_inter =

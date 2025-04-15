@@ -25,6 +25,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/thread/watch.hpp"
+#include "dectnrp/radio/pps_sync_param.hpp"
 #include "dectnrp/simulation/topology/graph.hpp"
 #include "dectnrp/simulation/wireless/channel_awgn.hpp"
 #include "dectnrp/simulation/wireless/channel_doubly.hpp"
@@ -72,8 +73,8 @@ vspace_t::vspace_t(const uint32_t nof_hw_simulator_,
 void vspace_t::hw_register_tx(const vspptx_t& vspptx) {
     std::unique_lock<std::mutex> lk(mtx);
 
-    dectnrp_assert(vspptx.id < nof_hw_simulator, "HW out of range.");
-    dectnrp_assert(vspptx_vec[vspptx.id].get() == nullptr, "HW already registered.");
+    dectnrp_assert(vspptx.id < nof_hw_simulator, "hw out of range");
+    dectnrp_assert(vspptx_vec[vspptx.id].get() == nullptr, "hw already registered");
 
     // init tx vspp counterpart, to which TX threads will deepcopy
     vspptx_vec[vspptx.id] = std::make_unique<vspptx_t>(
@@ -87,13 +88,15 @@ void vspace_t::hw_register_tx(const vspptx_t& vspptx) {
 
         // make sure all simulators use the same values
         for (uint32_t i = 1; i < nof_hw_simulator; ++i) {
-            dectnrp_assert(samp_rate_common == vspptx_vec[i]->samp_rate,
-                           "HW hw_samp_rate incorrect.");
-            dectnrp_assert(spp_size_common == vspptx_vec[i]->spp_size, "HW spp_size incorrect.");
+            dectnrp_assert(samp_rate_common == vspptx_vec[i]->samp_rate, "hw_samp_rate incorrect");
+            dectnrp_assert(spp_size_common == vspptx_vec[i]->spp_size, "hw spp_size incorrect");
         }
 
         // create edges of complete graph
         wchannel_generate_graph();
+
+        // set to 0, will be overwritten in RX
+        now_64 = 0;
 
         // allow all TX and RX threads to work and wake them up
         all_tx_registered_and_inits_done = true;
@@ -105,14 +108,20 @@ void vspace_t::hw_register_rx(const vspprx_t& vspprx) {
     std::unique_lock<std::mutex> lk(mtx);
 
     dectnrp_assert(!vspptx_vec[vspprx.id]->meta.vspprx_counterpart_registered,
-                   "HW counterpart already registered.");
+                   "hw counterpart already registered");
+
+    // if first device overwrite time
+    if (check_if_first_to_register_rx()) {
+        dectnrp_assert(now_64 == 0, "now_64 not zero");
+        now_64 = vspprx.meta.now_64;
+    }
 
     // set as registered
     vspptx_vec[vspprx.id]->meta.vspprx_counterpart_registered = true;
 
-    dectnrp_assert(vspprx.samp_rate == vspptx_vec[vspprx.id]->samp_rate,
-                   "HW hw_samp_rate incorrect.");
-    dectnrp_assert(vspprx.spp_size == vspptx_vec[vspprx.id]->spp_size, "HW spp_size incorrect.");
+    dectnrp_assert(vspprx.samp_rate == vspptx_vec[vspprx.id]->samp_rate, "hw_samp_rate incorrect");
+    dectnrp_assert(vspprx.spp_size == vspptx_vec[vspprx.id]->spp_size, "spp_size incorrect");
+    dectnrp_assert(vspprx.meta.now_64 == now_64, "now the same time");
 
     // all devices registered?
     if (check_if_last_to_register_rx()) {
@@ -120,9 +129,7 @@ void vspace_t::hw_register_rx(const vspprx_t& vspprx) {
         set_status_tx_written(false);
         set_status_rx_read(true);
 
-        // realign real time and virtual time at zero
         watch.reset();
-        now_64 = 0;
 
         // allow all TX and RX threads to work and wake them up
         all_rx_registered_and_inits_done = true;
@@ -233,7 +240,7 @@ void vspace_t::read(vspprx_t& vspprx) {
         now_64 += static_cast<int64_t>(spp_size_common);
 
         // last RX thread tries to realign time axles
-        realign_realtime_with_simulationtime(
+        realign_realtime_with_simulation_time(
             watch, samp_rate_speedup, static_cast<int64_t>(samp_rate_common), now_64);
 
         // set all TX buffers as not written ...
@@ -256,16 +263,26 @@ void vspace_t::wchannel_randomize_small_scale() {
     }
 }
 
-void vspace_t::realign_realtime_with_simulationtime(const common::watch_t& watch,
-                                                    const int32_t samp_rate_speedup,
-                                                    const int64_t samp_rate_64,
-                                                    const int64_t now_simulation_64) {
+void vspace_t::realign_realtime_with_simulation_time(const common::watch_t& watch,
+                                                     const int32_t samp_rate_speedup,
+                                                     const int64_t samp_rate_64,
+                                                     const int64_t now_simulation_64) {
+#ifdef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
+    // determine how many samples we should have created by now in real time
+    const int64_t now_realtime_target_64 =
+        (samp_rate_speedup >= 0)
+            ? watch.get_elapsed_since_epoch<int64_t, common::milli, common::tai_clock>() *
+                  samp_rate_64 * int64_t{10 + samp_rate_speedup} / int64_t{10} / int64_t{1000}
+            : watch.get_elapsed_since_epoch<int64_t, common::milli, common::tai_clock>() *
+                  samp_rate_64 / int64_t{-samp_rate_speedup} / int64_t{1000};
+#else
     // determine how many samples we should have created by now in real time
     const int64_t now_realtime_target_64 =
         (samp_rate_speedup >= 0) ? watch.get_elapsed<int64_t, common::milli>() * samp_rate_64 *
                                        int64_t{10 + samp_rate_speedup} / int64_t{10} / int64_t{1000}
                                  : watch.get_elapsed<int64_t, common::milli>() * samp_rate_64 /
                                        int64_t{-samp_rate_speedup} / int64_t{1000};
+#endif
 
     /* Sleep until realtime has caught up with simulation time. This only makes sense if the CPU
      * processes the simulation faster than realtime. Otherwise this section is skipped and the
@@ -279,6 +296,16 @@ void vspace_t::realign_realtime_with_simulationtime(const common::watch_t& watch
     }
 }
 
+bool vspace_t::check_if_first_to_register_tx() const {
+    for (auto& elem : vspptx_vec) {
+        if (elem.get() != nullptr) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool vspace_t::check_if_last_to_register_tx() const {
     for (auto& elem : vspptx_vec) {
         if (elem.get() == nullptr) {
@@ -289,10 +316,20 @@ bool vspace_t::check_if_last_to_register_tx() const {
     return true;
 }
 
-bool vspace_t::check_if_last_to_register_rx() const {
-    if (!all_tx_registered_and_inits_done) {
-        return false;
+bool vspace_t::check_if_first_to_register_rx() const {
+    dectnrp_assert(all_tx_registered_and_inits_done, "TX not registered yet");
+
+    for (auto& elem : vspptx_vec) {
+        if (elem->meta.vspprx_counterpart_registered) {
+            return false;
+        }
     }
+
+    return true;
+}
+
+bool vspace_t::check_if_last_to_register_rx() const {
+    dectnrp_assert(all_tx_registered_and_inits_done, "TX not registered yet");
 
     for (auto& elem : vspptx_vec) {
         if (!elem->meta.vspprx_counterpart_registered) {

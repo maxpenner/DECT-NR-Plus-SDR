@@ -23,8 +23,8 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/hw.hpp"
-
-#define PPS_SYNC_TO_TAI_OR_TO_ZERO
+#include "dectnrp/radio/hw_simulator.hpp"
+#include "dectnrp/radio/pps_sync_param.hpp"
 
 namespace dectnrp::radio {
 
@@ -60,7 +60,7 @@ void pps_sync_t::sync_procedure(hw_t& hw) {
     // wait for another PPS in case instances of hw do not share a common PPS signal
     hw.pps_wait_for_next();
 
-#ifdef PPS_SYNC_TO_TAI_OR_TO_ZERO
+#ifdef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
     // sleep for a short time so that the full second of the operating system has certainly passed
     common::watch_t::sleep<common::milli>(50);
 
@@ -72,8 +72,11 @@ void pps_sync_t::sync_procedure(hw_t& hw) {
     hw.pps_full_sec_at_next(0);
 #endif
 
-    // sleep until every hw has definitely heard a PPS and set its internal time to zero
-    common::watch_t::sleep<common::milli>(1500);
+    // applies only for real hardware
+    if (dynamic_cast<radio::hw_simulator_t*>(&hw) == nullptr) {
+        // sleep until every hw has definitely heard a PPS and set its internal time to zero
+        common::watch_t::sleep<common::milli>(1500);
+    }
 }
 
 }  // namespace dectnrp::radio

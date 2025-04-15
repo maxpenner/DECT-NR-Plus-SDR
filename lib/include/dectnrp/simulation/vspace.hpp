@@ -115,12 +115,14 @@ class vspace_t {
         int64_t now_64;         // simulation time
 
         /// called by last RX thread
-        static void realign_realtime_with_simulationtime(const common::watch_t& watch,
-                                                         const int32_t samp_rate_speedup,
-                                                         const int64_t samp_rate_64,
-                                                         const int64_t now_simulation_64);
+        static void realign_realtime_with_simulation_time(const common::watch_t& watch,
+                                                          const int32_t samp_rate_speedup,
+                                                          const int64_t samp_rate_64,
+                                                          const int64_t now_simulation_64);
 
+        bool check_if_first_to_register_tx() const;
         bool check_if_last_to_register_tx() const;
+        bool check_if_first_to_register_rx() const;
         bool check_if_last_to_register_rx() const;
         bool check_if_last_to_write() const;
         bool check_if_last_to_read() const;

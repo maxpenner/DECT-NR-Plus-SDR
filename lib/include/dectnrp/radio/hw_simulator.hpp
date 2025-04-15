@@ -54,8 +54,6 @@ class hw_simulator_t final : public hw_t {
         hw_simulator_t(hw_simulator_t&&) = delete;
         hw_simulator_t& operator=(hw_simulator_t&&) = delete;
 
-        static constexpr uint32_t HW_SIMULATOR_SPP_US = 50;
-
         /// what is the name of this hardware?
         static const std::string name;
 
@@ -146,7 +144,7 @@ class hw_simulator_t final : public hw_t {
 
         /// is reset with every call of work_rx()
         struct rx_stats_t {
-                uint64_t samples_sent{};
+                uint64_t samples_received{};
                 double samp_rate_is{};
         } rx_stats;
 };

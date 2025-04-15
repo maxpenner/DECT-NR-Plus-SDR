@@ -31,6 +31,7 @@ namespace dectnrp::phy {
 /**
  * \brief Every instance of worker_sync_t makes a suggestion where synchronization should start, and
  * the latest time wins. This directive defines how far into the future the suggestion should lie.
+ * This time advance has become unnecessary with the warmup function, but the functionality is kept.
  */
 #define RX_SYNC_PARAM_SYNCHRONIZATION_START_TIME_ADVANCE_MS 0
 

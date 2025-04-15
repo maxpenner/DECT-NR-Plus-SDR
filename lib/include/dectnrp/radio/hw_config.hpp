@@ -88,6 +88,9 @@ struct hw_config_t {
         /// simulation variables are the same for every tpoint
         static bool sim_samp_rate_lte;
 
+        /// number of samples hw_simulator exchanges with the virtual space
+        static uint32_t sim_spp_us;
+
         /// >1 for speedup, <-1 for slowdown
         static int32_t sim_samp_rate_speedup;
 

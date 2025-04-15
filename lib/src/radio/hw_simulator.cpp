@@ -27,6 +27,7 @@
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/calibration/cal_simulator.hpp"
 #include "dectnrp/radio/complex.hpp"
+#include "dectnrp/radio/pps_sync_param.hpp"
 #include "dectnrp/simulation/hardware/clip.hpp"
 #include "dectnrp/simulation/hardware/quantize.hpp"
 
@@ -103,8 +104,11 @@ void hw_simulator_t::set_samp_rate(const uint32_t samp_rate_in) {
 }
 
 void hw_simulator_t::initialize_device() {
+    dectnrp_assert(50 < hw_config.sim_spp_us, "spp too small");
+    dectnrp_assert(hw_config.sim_spp_us <= 500, "spp too large");
+
     // maximum number of samples per spp
-    const double spp_size_d = double(samp_rate) * double(HW_SIMULATOR_SPP_US) / double(1e6);
+    const double spp_size_d = double(samp_rate) * double(hw_config.sim_spp_us) / double(1e6);
     const uint32_t spp_size = static_cast<uint32_t>(spp_size_d);
 
     dectnrp_assert(spp_size >= 15, "minimum spp size");
@@ -195,7 +199,14 @@ void hw_simulator_t::pps_wait_for_next() const {
 }
 
 void hw_simulator_t::pps_full_sec_at_next(const int64_t full_sec) const {
-    // simulator are synchronized in the virtual space
+    dectnrp_assert(buffer_rx.get() != nullptr, "buffer not initialized");
+
+    buffer_rx->time_as_sample_cnt_64 = full_sec * static_cast<int64_t>(samp_rate);
+    buffer_rx->rx_time_passed_64.store(buffer_rx->time_as_sample_cnt_64, std::memory_order_release);
+    vspptx->meta.now_64 = buffer_rx->time_as_sample_cnt_64;
+    vspprx->meta.now_64 = buffer_rx->time_as_sample_cnt_64;
+
+    pps_wait_for_next();
 }
 
 void hw_simulator_t::set_trajectory(const simulation::topology::trajectory_t trajectory) {
@@ -302,10 +313,10 @@ std::vector<std::string> hw_simulator_t::stop_threads() {
     std::vector<std::string> lines;
 
     std::string str("Simulator");
-    str.append(" Sample Rate Target " + std::to_string(static_cast<double>(samp_rate) / 1e6));
-    str.append(" TX Samples generated " + std::to_string(tx_stats.samples_sent));
+    str.append(" Sample Rate Target " + std::to_string(static_cast<double>(samp_rate)));
+    str.append(" TX Samples sent " + std::to_string(tx_stats.samples_sent));
     str.append(" TX Sample Rate Is " + std::to_string(tx_stats.samp_rate_is));
-    str.append(" RX Samples generated " + std::to_string(rx_stats.samples_sent));
+    str.append(" RX Samples received " + std::to_string(rx_stats.samples_received));
     str.append(" RX Sample Rate Is " + std::to_string(rx_stats.samp_rate_is));
     lines.push_back(str);
 
@@ -341,9 +352,12 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
     std::vector<void*> ant_streams(calling_instance->nof_antennas);
 
     // get latest time
-    int64_t now_64 = calling_instance->buffer_rx->get_rx_time_passed();
+    const int64_t now_start_64 = calling_instance->buffer_rx->get_rx_time_passed();
+    int64_t now_64 = now_start_64;
 
-    dectnrp_assert(now_64 == 0, "Buffer RX time not at zero.");
+#ifndef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
+    dectnrp_assert(now_64 == 0, "buffer RX time not at zero");
+#endif
 
     // measure wall clock execution time
     common::watch_t watch;
@@ -508,18 +522,16 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
     }
 
     // set stats
-    calling_instance->tx_stats.samples_sent = now_64;
+    calling_instance->tx_stats.samples_sent = now_64 - now_start_64;
     calling_instance->tx_stats.samp_rate_is =
-        static_cast<double>(now_64) * 1000.0 / static_cast<double>(watch.get_elapsed<uint64_t>());
+        static_cast<double>(calling_instance->tx_stats.samples_sent) /
+        (static_cast<double>(watch.get_elapsed<uint64_t, common::milli>()) / 1000.0);
 
     return nullptr;
 }
 
 void* hw_simulator_t::work_rx(void* hw_simulator) {
     hw_simulator_t* calling_instance = reinterpret_cast<hw_simulator_t*>(hw_simulator);
-
-    // synchronize PPS across all devices
-    calling_instance->pps_sync.sync_procedure(*calling_instance);
 
     // for readability
     auto& vspace = calling_instance->vspace;
@@ -531,6 +543,10 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
 
     // device registration
     vspace.wait_for_all_tx_registered_and_inits_done_nto();
+
+    // TX are all registered and waiting for RX, so now we can adjust the time
+    calling_instance->pps_sync.sync_procedure(*calling_instance);
+
     vspace.hw_register_rx(vspprx);
 
     std::vector<void*> ant_streams(calling_instance->nof_antennas);
@@ -544,9 +560,12 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
     buffer_rx.set_zero();
 
     // get latest time
-    int64_t now_64 = buffer_rx.get_rx_time_passed();
+    const int64_t now_start_64 = calling_instance->buffer_rx->get_rx_time_passed();
+    int64_t now_64 = now_start_64;
 
-    dectnrp_assert(now_64 == 0, "Buffer RX time not at zero.");
+#ifndef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
+    dectnrp_assert(now_64 == 0, "buffer RX time not at zero");
+#endif
 
     // wait until all simulators are registered
     vspace.wait_for_all_rx_registered_and_inits_done_nto();
@@ -585,9 +604,10 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
     }
 
     // set stats
-    calling_instance->rx_stats.samples_sent = now_64;
+    calling_instance->rx_stats.samples_received = now_64 - now_start_64;
     calling_instance->rx_stats.samp_rate_is =
-        static_cast<double>(now_64) * 1000.0 / static_cast<double>(watch.get_elapsed<uint64_t>());
+        static_cast<double>(calling_instance->rx_stats.samples_received) /
+        (static_cast<double>(watch.get_elapsed<uint64_t, common::milli>()) / 1000.0);
 
     return nullptr;
 }

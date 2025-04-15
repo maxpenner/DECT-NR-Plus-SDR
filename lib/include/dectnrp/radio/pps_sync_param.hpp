@@ -18,18 +18,6 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/radio/hw_config.hpp"
+#pragma once
 
-namespace dectnrp::radio {
-
-const std::string hw_config_t::json_log_key = "HW";
-const std::string hw_config_t::json_log_key_simulation = "SIMULATION";
-
-bool hw_config_t::sim_samp_rate_lte;
-uint32_t hw_config_t::sim_spp_us;
-int32_t hw_config_t::sim_samp_rate_speedup;
-std::string hw_config_t::sim_channel_name_inter;
-std::string hw_config_t::sim_channel_name_intra;
-std::string hw_config_t::sim_noise_type;
-
-}  // namespace dectnrp::radio
+#define RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
