@@ -40,19 +40,24 @@ class vnic_t {
         vnic_t& operator=(vnic_t&&) = delete;
 
     protected:
+        enum class dir_t {
+            dest,
+            src
+        };
+
         // ##################################################
         // IP V4
 
         static uint32_t get_ip4_header_length_byte(const uint8_t* ip4);
-        static uint32_t get_ip4_daddr(const uint8_t* ip4);
-        static std::string get_ip4_daddr_str(const uint8_t* ip4);
+        static uint32_t get_ip4_addr(const uint8_t* ip4, const dir_t dir);
+        static std::string get_ip4_addr_str(const uint8_t* ip4, const dir_t dir);
 
         // ##################################################
         // IP V6
 
         static constexpr uint32_t get_ip6_header_length_byte() { return 40; };
-        static struct in6_addr get_ip6_daddr(const uint8_t* ip6);
-        static std::string get_ip6_daddr_str(const uint8_t* ip6);
+        static struct in6_addr get_ip6_addr(const uint8_t* ip6, const dir_t dir);
+        static std::string get_ip6_addr_str(const uint8_t* ip6, const dir_t dir);
 
         // ##################################################
         /// IP V4 or V6
@@ -62,11 +67,9 @@ class vnic_t {
 
         // ##################################################
         // UDP
-        // -
 
-        // ##################################################
-        // PTP
-        // -
+        static uint32_t get_udp_port(const uint8_t* ipx, const dir_t dir);
+        static bool has_ptp_payload(const uint8_t* ipx);
 };
 
 }  // namespace dectnrp::application::vnic

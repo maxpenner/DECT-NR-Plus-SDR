@@ -57,6 +57,12 @@ uint32_t vnic_client_t::write_try(const uint32_t conn_idx, const uint8_t* inp, c
     return queue_vec.at(conn_idx)->write_try(inp, n);
 }
 
+bool vnic_client_t::filter_egress_datagram(const uint32_t conn_idx) {
+    // nothing to here so far
+
+    return true;
+}
+
 uint32_t vnic_client_t::copy_from_queue_to_localbuffer(const uint32_t conn_idx) {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
     return queue_vec.at(conn_idx)->read_nto(buffer_local);

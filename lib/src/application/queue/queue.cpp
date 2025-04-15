@@ -29,16 +29,16 @@ namespace dectnrp::application {
 
 queue_t::queue_t(const queue_size_t queue_size_)
     : queue_size(queue_size_) {
-    for (uint32_t i = 0; i < queue_size.N_item; ++i) {
-        item_vec.push_back(new uint8_t[queue_size.N_item_max_byte]);
+    for (uint32_t i = 0; i < queue_size.N_datagram; ++i) {
+        datagram_vec.push_back(new uint8_t[queue_size.N_datagram_max_byte]);
     }
 
-    item_level_vec.resize(queue_size.N_item, 0);
+    datagram_level_vec.resize(queue_size.N_datagram, 0);
 }
 
 queue_t::~queue_t() {
-    for (uint32_t i = 0; i < queue_size.N_item; ++i) {
-        delete item_vec[i];
+    for (uint32_t i = 0; i < queue_size.N_datagram; ++i) {
+        delete datagram_vec[i];
     }
 }
 
@@ -122,8 +122,8 @@ queue_level_t queue_t::get_queue_level_under_lock(const uint32_t n) const {
 
     // fill
     for (uint32_t i = 0; i < n_; ++i) {
-        ret.levels[i] = item_level_vec[r_idx_cpy];
-        r_idx_cpy = (r_idx_cpy + 1) % queue_size.N_item;
+        ret.levels[i] = datagram_level_vec[r_idx_cpy];
+        r_idx_cpy = (r_idx_cpy + 1) % queue_size.N_datagram;
     }
 
     return ret;
@@ -134,13 +134,13 @@ uint32_t queue_t::write_under_lock(const uint8_t* inp, const uint32_t n) {
         return 0;
     }
 
-    dectnrp_assert(n <= queue_size.N_item_max_byte, "write does not fit N_item per item");
+    dectnrp_assert(n <= queue_size.N_datagram_max_byte, "too large");
 
-    std::memcpy(item_vec[w_idx], inp, n);
+    std::memcpy(datagram_vec[w_idx], inp, n);
 
-    item_level_vec[w_idx] = n;
+    datagram_level_vec[w_idx] = n;
 
-    w_idx = (w_idx + 1) % queue_size.N_item;
+    w_idx = (w_idx + 1) % queue_size.N_datagram;
 
     return n;
 }
@@ -150,13 +150,13 @@ uint32_t queue_t::read_under_lock(uint8_t* dst) {
         return 0;
     }
 
-    const uint32_t n = item_level_vec[r_idx];
+    const uint32_t n = datagram_level_vec[r_idx];
 
     if (dst != nullptr) {
-        std::memcpy(dst, item_vec[r_idx], n);
+        std::memcpy(dst, datagram_vec[r_idx], n);
     }
 
-    r_idx = (r_idx + 1) % queue_size.N_item;
+    r_idx = (r_idx + 1) % queue_size.N_datagram;
 
     return n;
 }
@@ -167,7 +167,7 @@ uint32_t queue_t::get_free() const {
         return r_idx - w_idx - 1;
     }
 
-    return r_idx + queue_size.N_item - w_idx - 1;
+    return r_idx + queue_size.N_datagram - w_idx - 1;
 }
 
 uint32_t queue_t::get_used() const {
@@ -175,7 +175,7 @@ uint32_t queue_t::get_used() const {
         return w_idx - r_idx;
     }
 
-    return w_idx + queue_size.N_item - r_idx;
+    return w_idx + queue_size.N_datagram - r_idx;
 }
 
 }  // namespace dectnrp::application

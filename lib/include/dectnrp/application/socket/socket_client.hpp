@@ -40,7 +40,7 @@ class socket_client_t final : public app_client_t, public socketx_t {
         socket_client_t(socket_client_t&&) = delete;
         socket_client_t& operator=(socket_client_t&&) = delete;
 
-        uint32_t get_n_connections() override final { return udp_vec.size(); }
+        uint32_t get_n_connections() const override final { return udp_vec.size(); }
 
         uint32_t write_immediate(const uint32_t conn_idx,
                                  const uint8_t* inp,
@@ -53,6 +53,8 @@ class socket_client_t final : public app_client_t, public socketx_t {
                                          const uint32_t n) override final;
 
     private:
+        bool filter_egress_datagram(const uint32_t conn_idx) override final;
+
         [[nodiscard]] uint32_t copy_from_queue_to_localbuffer(
             const uint32_t conn_idx) override final;
 };

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <netinet/in.h>
+
 #include "dectnrp/application/app_server.hpp"
 #include "dectnrp/application/socket/socketx.hpp"
 
@@ -40,7 +42,7 @@ class socket_server_t final : public app_server_t, public socketx_t {
         socket_server_t(socket_server_t&&) = delete;
         socket_server_t& operator=(socket_server_t&&) = delete;
 
-        uint32_t get_n_connections() override final { return udp_vec.size(); }
+        uint32_t get_n_connections() const override final { return udp_vec.size(); }
 
         queue_level_t get_queue_level_nto(const uint32_t conn_idx,
                                           const uint32_t n) const override final;
@@ -52,9 +54,12 @@ class socket_server_t final : public app_server_t, public socketx_t {
         uint32_t read_try(const uint32_t conn_idx, uint8_t* dst) override final;
 
     private:
-        ssize_t read_datagram(const std::size_t conn_idx) override final;
+        ssize_t read_datagram(const uint32_t conn_idx) override final;
 
-        bool filter_datagram(const std::size_t conn_idx) override final;
+        bool filter_ingress_datagram(const uint32_t conn_idx) override final;
+
+        struct sockaddr_in cliaddr;
+        socklen_t len = sizeof(cliaddr);
 };
 
 }  // namespace dectnrp::application::sockets

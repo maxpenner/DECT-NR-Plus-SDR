@@ -60,7 +60,7 @@ class vnic_server_t final : public app_server_t, public vnic_t {
         vnic_server_t(vnic_server_t&&) = delete;
         vnic_server_t& operator=(vnic_server_t&&) = delete;
 
-        uint32_t get_n_connections() override final { return 1; }
+        uint32_t get_n_connections() const override final { return 1; }
 
         queue_level_t get_queue_level_nto(const uint32_t conn_idx,
                                           const uint32_t n) const override final;
@@ -73,9 +73,9 @@ class vnic_server_t final : public app_server_t, public vnic_t {
         int get_tuntap_fd() const { return tuntap_fd; }
 
     private:
-        ssize_t read_datagram(const std::size_t conn_idx) override final;
+        ssize_t read_datagram(const uint32_t conn_idx) override final;
 
-        bool filter_datagram(const std::size_t conn_idx) override final;
+        bool filter_ingress_datagram(const uint32_t conn_idx) override final;
 
         /// TUN and TAP
         const vnic_config_t vnic_config;

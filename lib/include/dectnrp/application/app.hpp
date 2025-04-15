@@ -37,6 +37,16 @@ namespace dectnrp::application {
 
 class app_t {
     public:
+        /**
+         * \brief Root class for all servers (accept ingress packets from external applications to
+         * the SDR) and clients (forward egress packets to external applications from the SDR).
+         *
+         * \param id_
+         * \param thread_config_
+         * \param job_queue_
+         * \param N_queue same as the number of connections
+         * \param queue_size every queue has the same size
+         */
         explicit app_t(const uint32_t id_,
                        const common::threads_core_prio_config_t thread_config_,
                        phy::job_queue_t& job_queue_,
@@ -58,11 +68,8 @@ class app_t {
         /// stops work_thread, sc = server client
         void stop_sc();
 
-        /// actual work done in work_thread + work_spawn(), sc = server client
-        virtual void work_sc() = 0;
-
         /// number of connections
-        virtual uint32_t get_n_connections() = 0;
+        virtual uint32_t get_n_connections() const = 0;
 
     protected:
         const uint32_t id;
@@ -78,10 +85,13 @@ class app_t {
         common::watch_t watch_since_start;
 
         /// local buffer which inheriting classes can use to temporarily buffer write
-        uint8_t buffer_local[limits::app_max_queue_item_size];
+        uint8_t buffer_local[limits::app_max_queue_datagram_byte];
 
         /// one queue per connection
         std::vector<std::unique_ptr<queue_t>> queue_vec;
+
+        /// actual work done in work_thread + work_spawn(), sc = server client
+        virtual void work_sc() = 0;
 
         /// start routine called from pthread_create()
         static void* work_spawn(void* app_server_or_client) {

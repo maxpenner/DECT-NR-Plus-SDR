@@ -519,7 +519,7 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
     hw_simulator_t* calling_instance = reinterpret_cast<hw_simulator_t*>(hw_simulator);
 
     // synchronize PPS across all devices
-    calling_instance->pps_sync.sync_procedure(calling_instance);
+    calling_instance->pps_sync.sync_procedure(*calling_instance);
 
     // for readability
     auto& vspace = calling_instance->vspace;

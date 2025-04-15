@@ -24,25 +24,25 @@
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/hw.hpp"
 
-#define PPS_SYNC_TO_ZERO_OR_TO_GLOBAL_TIME
+#define PPS_SYNC_TO_TAI_OR_TO_ZERO
 
 namespace dectnrp::radio {
 
-void pps_sync_t::sync_procedure(hw_t* hw) {
+void pps_sync_t::sync_procedure(hw_t& hw) {
     common::watch_t watch_dog;
 
     {
         std::unique_lock<std::mutex> lk(mtx);
 
         dectnrp_assert(nof_hw > 0, "number of hw must be larger zero");
-        dectnrp_assert(hw->id < nof_hw, "id too large");
+        dectnrp_assert(hw.id < nof_hw, "id too large");
 
         ++nof_hw_cnt;
 
         // last one?
         if (nof_hw_cnt == nof_hw) {
             // last device to register blocks until a PPS occurred
-            hw->pps_wait_for_next();
+            hw.pps_wait_for_next();
 
             // unblock all other hw
             cv.notify_all();
@@ -57,21 +57,19 @@ void pps_sync_t::sync_procedure(hw_t* hw) {
         }
     }
 
-    // wait for another PPS in case instances of hw do not share a common PPS signal ...
-    hw->pps_wait_for_next();
+    // wait for another PPS in case instances of hw do not share a common PPS signal
+    hw.pps_wait_for_next();
 
-#ifdef PPS_SYNC_TO_ZERO_OR_TO_GLOBAL_TIME
-    // ... so that this function is called well before the next PPS
-    hw->pps_full_sec_at_next(0);
-#else
+#ifdef PPS_SYNC_TO_TAI_OR_TO_ZERO
+    // sleep for a short time so that the full second of the operating system has certainly passed
+    common::watch_t::sleep<common::milli>(50);
 
-    // sleep for a short time so that the full second has certainly passed
-    common::watch_t::sleep<common::milli>(20);
-
-    // get current second, but set to value + 1 at next PPS
-    hw->pps_full_sec_at_next(
+    // get full second, but set to value + 1 at next PPS
+    hw.pps_full_sec_at_next(
         common::watch_t::get_elapsed_since_epoch<int64_t, common::seconds, common::tai_clock>() +
         int64_t{1});
+#else
+    hw.pps_full_sec_at_next(0);
 #endif
 
     // sleep until every hw has definitely heard a PPS and set its internal time to zero

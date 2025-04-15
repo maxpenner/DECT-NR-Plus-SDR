@@ -32,7 +32,13 @@ class pps_sync_t {
     public:
         void expect_one_more_hw() { ++nof_hw; };
 
-        void sync_procedure(hw_t* hw);
+        /**
+         * \brief This function synchronizes the PPS and time base of all radios. For that, each
+         * radio hardware must call this blocking function from its own thread.
+         *
+         * \param hw
+         */
+        void sync_procedure(hw_t& hw);
 
     private:
         static constexpr uint32_t CV_WAIT_TIMEOUT_MS{100};

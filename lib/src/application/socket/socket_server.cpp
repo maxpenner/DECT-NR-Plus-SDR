@@ -20,10 +20,9 @@
 
 #include "dectnrp/application/socket/socket_server.hpp"
 
-#include <arpa/inet.h>   // sockaddr_in
-#include <sys/socket.h>  // socket
+#include <sys/socket.h>
 
-#include <cstring>  // memset
+#include <cstring>
 
 #include "dectnrp/common/prog/assert.hpp"
 
@@ -87,16 +86,16 @@ uint32_t socket_server_t::read_try(const uint32_t conn_idx, uint8_t* dst) {
     return queue_vec.at(conn_idx)->read_try(dst);
 }
 
-ssize_t socket_server_t::read_datagram(const std::size_t conn_idx) {
+ssize_t socket_server_t::read_datagram(const uint32_t conn_idx) {
     return recvfrom(udp_vec[conn_idx]->socketfd,
                     buffer_local,
                     sizeof(buffer_local),
                     MSG_WAITALL,
-                    nullptr,
-                    nullptr);
+                    (struct sockaddr*)&cliaddr,
+                    &len);
 }
 
-bool socket_server_t::filter_datagram(const std::size_t conn_idx) {
+bool socket_server_t::filter_ingress_datagram(const uint32_t conn_idx) {
     // nothing to here so far
 
     return true;

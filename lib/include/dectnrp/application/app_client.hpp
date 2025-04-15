@@ -46,8 +46,7 @@ class app_client_t : public app_t {
         app_client_t(app_client_t&&) = delete;
         app_client_t& operator=(app_client_t&&) = delete;
 
-        void work_sc() override final;
-        virtual uint32_t get_n_connections() override = 0;
+        virtual uint32_t get_n_connections() const override = 0;
 
         virtual uint32_t write_immediate(const uint32_t conn_idx,
                                          const uint8_t* inp,
@@ -62,6 +61,8 @@ class app_client_t : public app_t {
         void trigger_forward_nto(const uint32_t datagram_cnt);
 
     protected:
+        void work_sc() override final;
+
 #ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
         std::mutex lockv;
         std::condition_variable cv;
@@ -69,6 +70,15 @@ class app_client_t : public app_t {
 #else
         std::atomic<int32_t> indicator_cnt;
 #endif
+
+        /**
+         * \brief Every deriving class must filter egress datagrams.
+         *
+         * \param conn_idx
+         * \return true to forward datagram
+         * \return false to discard datagram
+         */
+        virtual bool filter_egress_datagram(const uint32_t conn_idx) = 0;
 
         void inc_indicator_cnt_under_lock(const uint32_t datagram_cnt);
         void dec_indicator_cnt_under_lock();

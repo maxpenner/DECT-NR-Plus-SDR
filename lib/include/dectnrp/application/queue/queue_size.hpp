@@ -27,15 +27,16 @@
 namespace dectnrp::application {
 
 struct queue_size_t {
-        uint32_t N_item{};
-        uint32_t N_item_max_byte{};
+        uint32_t N_datagram{};
+        uint32_t N_datagram_max_byte{};
 
         bool is_valid() const {
-            if (N_item == 0 || limits::app_max_queue_item < N_item) {
+            if (N_datagram == 0 || limits::app_max_queue_datagram < N_datagram) {
                 return false;
             }
 
-            if (N_item_max_byte == 0 || limits::app_max_queue_item_size < N_item_max_byte) {
+            if (N_datagram_max_byte == 0 ||
+                limits::app_max_queue_datagram_byte < N_datagram_max_byte) {
                 return false;
             }
 

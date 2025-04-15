@@ -72,7 +72,7 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     plcf_10.DFMCS = psdef.mcs_index;
 
     const application::queue_size_t queue_size = {
-        .N_item = 4, .N_item_max_byte = limits::app_max_queue_item_size};
+        .N_datagram = 4, .N_datagram_max_byte = limits::app_max_queue_datagram_byte};
 
     app_server = std::make_unique<application::sockets::socket_server_t>(
         id,
@@ -293,7 +293,7 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
 
     // define MAC PDU
     if (tpoint_config.firmware_id == 0) {
-        // get item size for first connection
+        // datagram sizes for first connection
         const auto queue_level = app_server->get_queue_level_nto(0, 1);
 
         dectnrp_assert(queue_level.N_filled > 0, "queue empty");

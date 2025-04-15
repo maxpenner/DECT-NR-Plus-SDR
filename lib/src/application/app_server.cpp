@@ -52,13 +52,13 @@ void app_server_t::work_sc() {
                 if (pollin_happened) {
                     n = read_datagram(i);
 
-                    if (!filter_datagram(i)) {
+                    if (!filter_ingress_datagram(i)) {
                         continue;
                     }
 
                     // if a new datagram was received ...
                     if (n > 0) {
-                        // ... get a lock on the item and try to write the datagram
+                        // ... get a lock on the queue and try to write the datagram
                         n_written = queue_vec[i]->write_nto((const uint8_t*)buffer_local, n);
 
                         // if we successfully wrote the datagram to the queue ...

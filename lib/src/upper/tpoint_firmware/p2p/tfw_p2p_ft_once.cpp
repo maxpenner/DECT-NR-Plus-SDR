@@ -251,7 +251,7 @@ void tfw_p2p_ft_t::init_appiface() {
     vnic_config.netmask = "255.255.255.0";
 
     const application::queue_size_t queue_size_server = {
-        .N_item = 20, .N_item_max_byte = limits::app_max_queue_item_size};
+        .N_datagram = 20, .N_datagram_max_byte = limits::app_max_queue_datagram_byte};
 
     app_server = std::make_unique<application::vnic::vnic_server_t>(
         id, tpoint_config.app_server_thread_config, job_queue, vnic_config, queue_size_server);
@@ -261,7 +261,7 @@ void tfw_p2p_ft_t::init_appiface() {
         static_cast<application::vnic::vnic_server_t*>(app_server.get());
 
     const application::queue_size_t queue_size_client = {
-        .N_item = 10, .N_item_max_byte = limits::app_max_queue_item_size};
+        .N_datagram = 10, .N_datagram_max_byte = limits::app_max_queue_datagram_byte};
 
     app_client =
         std::make_unique<application::vnic::vnic_client_t>(id,
@@ -279,7 +279,7 @@ void tfw_p2p_ft_t::init_appiface() {
     }
 
     const application::queue_size_t queue_size = {
-        .N_item = 4, .N_item_max_byte = limits::app_max_queue_item_size};
+        .N_datagram = 4, .N_datagram_max_byte = limits::app_max_queue_datagram_byte};
 
     app_server = std::make_unique<application::sockets::socket_server_t>(
         id, tpoint_config.app_server_thread_config, job_queue, ports_in, queue_size);

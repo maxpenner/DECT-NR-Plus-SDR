@@ -33,6 +33,20 @@ app_client_t::app_client_t(const uint32_t id,
     : app_t(id, thread_config, job_queue, N_queue, queue_size),
       indicator_cnt{0} {}
 
+void app_client_t::trigger_forward_nto(const uint32_t datagram_cnt) {
+#ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+    lockv.lock();
+#else
+#endif
+
+    inc_indicator_cnt_under_lock(datagram_cnt);
+
+#ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+    lockv.unlock();
+    cv.notify_all();
+#endif
+}
+
 void app_client_t::work_sc() {
     // external exit condition
     while (keep_running.load(std::memory_order_acquire)) {
@@ -79,20 +93,6 @@ void app_client_t::work_sc() {
     }
 };
 
-void app_client_t::trigger_forward_nto(const uint32_t datagram_cnt) {
-#ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
-    lockv.lock();
-#else
-#endif
-
-    inc_indicator_cnt_under_lock(datagram_cnt);
-
-#ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
-    lockv.unlock();
-    cv.notify_all();
-#endif
-}
-
 void app_client_t::inc_indicator_cnt_under_lock(const uint32_t datagram_cnt) {
     // ToDo: use conn_idx for better efficiency
 
@@ -125,6 +125,10 @@ void app_client_t::forward_under_lock() {
 
             // if so ...
             if (n > 0) {
+                if (!filter_egress_datagram(i)) {
+                    continue;
+                }
+
                 // ... forward
                 write_immediate(i, buffer_local, n);
                 dec_indicator_cnt_under_lock();

@@ -102,11 +102,11 @@ uint32_t vnic_server_t::read_try(const uint32_t conn_idx, uint8_t* dst) {
     return queue_vec.at(conn_idx)->read_try(dst);
 }
 
-ssize_t vnic_server_t::read_datagram(const std::size_t conn_idx) {
+ssize_t vnic_server_t::read_datagram(const uint32_t conn_idx) {
     return read(pfds[conn_idx].fd, buffer_local, sizeof(buffer_local));
 }
 
-bool vnic_server_t::filter_datagram(const std::size_t conn_idx) {
+bool vnic_server_t::filter_ingress_datagram(const uint32_t conn_idx) {
 #ifdef APPLICATION_VNIC_VNIC_SERVER_ONLY_FORWARD_IPV4
     if (get_ip_version(buffer_local) != 4) {
         return false;

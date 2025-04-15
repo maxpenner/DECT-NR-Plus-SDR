@@ -265,7 +265,7 @@ void worker_sync_t::warmup() {
     dectnrp_assert(constants::slots_per_sec % worker_pool_config.rx_ant_streams_length_slots == 0,
                    "not a multiple");
 
-    // determine the number of dummy search to conduct
+    // determine the number of dummy searches to conduct
     const std::size_t n_dummy_searches =
         warmup_sec * constants::slots_per_sec / worker_pool_config.rx_ant_streams_length_slots;
 

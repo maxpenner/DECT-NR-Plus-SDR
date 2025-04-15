@@ -47,12 +47,11 @@ class app_server_t : public app_t {
         app_server_t(app_server_t&&) = delete;
         app_server_t& operator=(app_server_t&&) = delete;
 
-        void work_sc() override final;
-        virtual uint32_t get_n_connections() override = 0;
+        virtual uint32_t get_n_connections() const override = 0;
 
         /**
          * \brief Get vector with current levels in a specific queue. The first element refers to
-         * the oldest item, which would be returned with the next read.
+         * the oldest datagram, which would be returned with the next read.
          *
          * \param conn_idx
          * \param n number of levels requested, can be set to very large number to get full overview
@@ -73,11 +72,13 @@ class app_server_t : public app_t {
         }
 
     protected:
+        void work_sc() override final;
+
         /// poll multiple file descriptors each representing connections
         std::vector<struct pollfd> pfds;
 
         /// every deriving class has its own way of reading datagrams
-        virtual ssize_t read_datagram(const std::size_t conn_idx) = 0;
+        virtual ssize_t read_datagram(const uint32_t conn_idx) = 0;
 
         /**
          * \brief Every deriving class must filter ingress datagrams.
@@ -86,7 +87,7 @@ class app_server_t : public app_t {
          * \return true to keep datagram
          * \return false to discard datagram
          */
-        virtual bool filter_datagram(const std::size_t conn_idx) = 0;
+        virtual bool filter_ingress_datagram(const uint32_t conn_idx) = 0;
 
         /**
          * \brief The app_server_t accepts data from outside. For each individual datagram, it can

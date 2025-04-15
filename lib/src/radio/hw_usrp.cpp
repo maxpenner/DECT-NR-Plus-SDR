@@ -1008,7 +1008,7 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
     hw_usrp_t* calling_instance = reinterpret_cast<hw_usrp_t*>(hw_usrp);
 
     // synchronize PPS across all devices
-    calling_instance->pps_sync.sync_procedure(calling_instance);
+    calling_instance->pps_sync.sync_procedure(*calling_instance);
 
     // hw parameters for readability
     auto& buffer_rx = *calling_instance->buffer_rx;

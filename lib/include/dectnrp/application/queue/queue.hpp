@@ -38,13 +38,12 @@ namespace dectnrp::application {
 class queue_t {
     public:
         /**
-         * \brief The SDR accepts chunks of data as input, for instance UDP packet payloads or
-         * entire IP packets when using a VNIC. Each of these chunks is called an item and this
-         * class contains multiple of these items. An item can be written to this class or read from
-         * it. Furthermore, classes can request the current status of each instance of queue_t.
+         * \brief The SDR accepts datagrams as input, for instance UDP packet payloads or entire IP
+         * packets when using a VNIC. This class can hold multiple of these datagrams. A datagram
+         * can be written to this class or read from it. Furthermore, classes can request the
+         * current status of each instance of queue_t.
          *
-         * \param N_item_ number of items than can be queued
-         * \param N_item_byte_ maximum number of bytes in each item, less can be written and read
+         * \param queue_size_
          */
         explicit queue_t(const queue_size_t queue_size_);
         ~queue_t();
@@ -56,34 +55,34 @@ class queue_t {
         queue_t& operator=(queue_t&&) = delete;
 
         /**
-         * \brief Get current level of the last n items. The level is the number of bytes written to
-         * an item. If less than n item slots are filled, return less than n. Function is
-         * thread-safe and waits for the lock indefinitely, i.e. with no timeout (nto).
+         * \brief Get current level of the last n datagrams. The level is the number of bytes
+         * written in a datagram. If less than n datagrams are held, return less than n. Function
+         * is thread-safe and waits for the lock indefinitely, i.e. with no timeout (nto).
          *
-         * \param n number of oldest items to consider
+         * \param n number of oldest datagrams to consider
          * \return
          */
         queue_level_t get_queue_level_nto(const uint32_t n) const;
         queue_level_t get_queue_level_try(const uint32_t n) const;
 
         /**
-         * \brief Write a new item to the queue. If all internal item slots are used, data is not
-         * written. Function is thread-safe and waits for the lock indefinitely, i.e. with no
+         * \brief Write a new datagram to the queue. If all internal datagrams slots are used, data
+         * is not written. Function is thread-safe and waits for the lock indefinitely, i.e. with no
          * timeout (nto).
          *
          * \param inp source
          * \param n number of bytes, i.e. level
-         * \return either 0 is all internal item slots are used, or n
+         * \return either 0 is all internal datagram slots are used, or n
          */
         [[nodiscard]] uint32_t write_nto(const uint8_t* inp, const uint32_t n);
         [[nodiscard]] uint32_t write_try(const uint8_t* inp, const uint32_t n);
 
         /**
-         * \brief Copy binary data of oldest item to dst. With no timeout means that we wait for the
-         * lock indefinitely. Function is thread-safe and waits for the lock indefinitely, i.e. with
-         * no timeout (nto).
+         * \brief Copy binary data of oldest datagram to dst. With no timeout means that we wait for
+         * the lock indefinitely. Function is thread-safe and waits for the lock indefinitely, i.e.
+         * with no timeout (nto).
          *
-         * \param dst if set to nullptr oldest item is invalidated, i.e. read without copying
+         * \param dst if set to nullptr oldest datagram is invalidated, i.e. read without copying
          * \return number of bytes read
          */
         [[nodiscard]] uint32_t read_nto(uint8_t* dst);
@@ -101,8 +100,8 @@ class queue_t {
         mutable common::spinlock_t lockv;
 #endif
 
-        std::vector<uint8_t*> item_vec;
-        std::vector<uint32_t> item_level_vec;
+        std::vector<uint8_t*> datagram_vec;
+        std::vector<uint32_t> datagram_level_vec;
 
         queue_level_t get_queue_level_under_lock(const uint32_t n) const;
         uint32_t write_under_lock(const uint8_t* inp, const uint32_t n);

@@ -73,10 +73,10 @@ static constexpr uint32_t max_callbacks{4};
 // Application
 
 static constexpr uint32_t app_max_connections{32U};
-static constexpr uint32_t app_max_queue_item{256U};
-static constexpr uint32_t app_max_queue_item_size{1600};
+static constexpr uint32_t app_max_queue_datagram{256U};
+static constexpr uint32_t app_max_queue_datagram_byte{1600};
 
-/// maximum number of item level that are reportable
+/// maximum number of datagrams reportable at once
 static constexpr uint32_t max_queue_level_reported{8};
 
 }  // namespace dectnrp::limits
