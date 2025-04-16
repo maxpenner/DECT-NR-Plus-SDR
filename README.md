@@ -172,6 +172,7 @@ If you use this repository for any publication, please cite the repository accor
 - [ ] residual STO based on DRS
 - [ ] residual CFO based on STF
 - [ ] residual CFO based on DRS
+- [ ] AoA estimation
 - [ ] MIMO modes with two or more spatial streams
 - [ ] 1024-QAM
 

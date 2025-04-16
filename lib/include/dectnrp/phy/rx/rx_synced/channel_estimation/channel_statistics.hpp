@@ -46,14 +46,19 @@ class channel_statistics_t {
 
         /// subcarrier spacing in Hz
         const double delta_u_f;
+
         /// OFDM symbol length in seconds, with CP
         const double T_u_symb;
+
         /// maximum Doppler spread in Hz
         const double nu_max_hz;
+
         /// RMS of delay spread in sec
         const double tau_rms_sec;
+
         /// expected value of SNR in dB
         const double snr_db;
+
         /// noise power in S/sigma when expected value of S is S=1
         const double sigma;
 

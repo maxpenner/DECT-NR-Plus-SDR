@@ -1105,7 +1105,7 @@ void tx_t::run_pdc() {
         }
     }
 
-    // How many unsued symbols are left now?
+    // How many unused symbols are left now?
     PDC_nof_cmplx_subc_residual =
         PDC_nof_cmplx_subc_residual + nof_new_complex_subc - nof_cmplx_subc;
 

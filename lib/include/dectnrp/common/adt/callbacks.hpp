@@ -177,7 +177,7 @@ class callbacks_t {
 
         /**
          * \brief Removing and updating callbacks from callbacks is not possible as this would
-         * change the value of it_next. This guards avoid this mistake.
+         * change the value of it_next. This guard variable prevents this mistake.
          */
         bool is_in_callback{false};
 };

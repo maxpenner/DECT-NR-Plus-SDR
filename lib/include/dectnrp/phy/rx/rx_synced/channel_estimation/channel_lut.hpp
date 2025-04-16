@@ -152,7 +152,7 @@ class channel_lut_t {
          * 3. lut_10_vec: Estimate channel between two OFDM symbols with DRS cells, N_step=10.
          *
          * Each vector lut_x_vec contains one lut_t per value of b, i.e. the maximum vector length
-         * is six since b=1,2,4,8,12,16.
+         * is six since b={1,2,4,8,12,16}.
          *
          * Each vector lut_x_vec also has a corresponding pointer lut_x_weight_vecs which contains
          * weight vectors for interpolation, extrapolation and smoothing. Weight vectors are always
