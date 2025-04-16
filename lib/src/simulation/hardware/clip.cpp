@@ -24,8 +24,8 @@
 
 namespace dectnrp::simulation {
 
-void clip_re_im(const std::vector<cf_t*> inp,
-                std::vector<cf_t*> out,
+void clip_re_im(const std::vector<cf_t*>& inp,
+                std::vector<cf_t*>& out,
                 const uint32_t nof_samples,
                 const float clip_limit) {
     for (uint32_t ant_idx = 0; ant_idx < inp.size(); ++ant_idx) {

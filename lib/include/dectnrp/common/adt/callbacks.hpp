@@ -49,7 +49,7 @@ class callbacks_t {
         std::optional<size_t> add_callback(cb_t callback,
                                            const int64_t next_64,
                                            const int64_t period_64) {
-            dectnrp_assert(!is_in_callback, "changing callbacks from callbacks");
+            dectnrp_assert(!is_in_callback, "changing callback from callback");
 
             auto it = std::find_if(callbacks.begin(), callbacks.end(), [](const auto& elem) {
                 return elem.cb == nullptr;
@@ -70,30 +70,30 @@ class callbacks_t {
 
         /// https://stackoverflow.com/questions/20833453/comparing-stdfunctions-for-equality
         void rm_callback(const size_t idx) {
-            dectnrp_assert(!is_in_callback, "changing callbacks from callbacks");
+            dectnrp_assert(!is_in_callback, "changing callback from callback");
             callbacks.at(idx).cb = callback_entry_t();
             set_it_next();
         }
 
         void update_next(const size_t idx, const size_t next_64) {
-            dectnrp_assert(!is_in_callback, "changing callbacks from callbacks");
+            dectnrp_assert(!is_in_callback, "changing callback from callback");
             callbacks.at(idx).next_64 = next_64;
             set_it_next();
         }
 
         void adjust_next(const size_t idx, const size_t next_adjustment_64) {
-            dectnrp_assert(!is_in_callback, "changing callbacks from callbacks");
+            dectnrp_assert(!is_in_callback, "changing callback from callback");
             callbacks.at(idx).next_64 += next_adjustment_64;
             set_it_next();
         }
 
         void update_period(const size_t idx, const size_t period_64) {
-            dectnrp_assert(!is_in_callback, "changing callbacks from callbacks");
+            dectnrp_assert(!is_in_callback, "changing callback from callback");
             callbacks.at(idx).period_64 = period_64;
         }
 
         void adjust_period(const size_t idx, const size_t period_adjustment_64) {
-            dectnrp_assert(!is_in_callback, "changing callbacks from callbacks");
+            dectnrp_assert(!is_in_callback, "changing callback from callback");
             callbacks.at(idx).period_64 += period_adjustment_64;
         }
 

@@ -28,8 +28,8 @@ namespace dectnrp::limits {
 // RADIO and SIMULATION
 
 /// simulation speed change
-static constexpr int32_t simulation_samp_rate_speedup_minimum{-1000};
-static constexpr int32_t simulation_samp_rate_speedup_maximum{100};
+static constexpr int32_t simulation_samp_rate_speed_minimum{-1000};
+static constexpr int32_t simulation_samp_rate_speed_maximum{100};
 
 // ##################################################
 // PHY

@@ -27,7 +27,7 @@ const std::string hw_config_t::json_log_key_simulation = "SIMULATION";
 
 bool hw_config_t::sim_samp_rate_lte;
 uint32_t hw_config_t::sim_spp_us;
-int32_t hw_config_t::sim_samp_rate_speedup;
+int32_t hw_config_t::sim_samp_rate_speed;
 std::string hw_config_t::sim_channel_name_inter;
 std::string hw_config_t::sim_channel_name_intra;
 std::string hw_config_t::sim_noise_type;

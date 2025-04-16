@@ -115,8 +115,8 @@ class tpoint_t : public common::layer_unit_t {
          * \brief Function called after decoding a PCC with incorrect CRC. This function is virtual
          * while all other functions which are pure virtual. Furthermore, it must be explicitly
          * enabled by defining the enclosing preprocessor directive. Notifying the MAC of a PCC with
-         * incorrect CRC can be useful is MAC was expecting a packet at that exact time. Downside is
-         * that the MAC layer is called for every false alarm produced by synchronization.
+         * incorrect CRC can be useful if MAC was expecting a packet at that time. Downside is that
+         * the MAC layer is called and blocked for every false alarm produced by synchronization.
          *
          * 1. Called only after unsuccessful PCC decoding, i.e. incorrect CRC.
          * 2. Called in the same FIFO order as put into the job_queue (sync_report_t).
@@ -177,7 +177,7 @@ class tpoint_t : public common::layer_unit_t {
 
         /**
          * \brief Function will be called by the main thread when the SDR is supposed to shut down
-         * because the used pressed ctrl+c. A firmware may block this function until all DECT NR+
+         * because the user pressed ctrl+c. A firmware may block this function until all DECT NR+
          * connections have been shut down gracefully. After that, all job queues should be made
          * impermeable so that the work-function will no longer be called. Lastly, all threads must
          * be shut down.
@@ -221,8 +221,8 @@ class tpoint_t : public common::layer_unit_t {
          * encoded in the PLCF (read from plcf_base).
          *
          * In most cases, AGC gain changes for TX and RX should be applied only at the PT, while the
-         * FT holds a constant transmit power and a constant receiver sensitivity. Target power for
-         * TX and RX are defined in agc_tx and agc_rx.
+         * FT holds a constant transmit power and a constant receiver sensitivity. Target power
+         * levels for TX and RX are defined in agc_tx and agc_rx.
          *
          * AGC gain changes can be applied ASAP (t_agc_change_64 < 0), or at a fixed point in time
          * in the future (t_agc_change_64 >= 0). Typically, the AGC settings should be applied when

@@ -612,8 +612,8 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
     return nullptr;
 }
 
-void hw_simulator_t::clip_and_quantize(const std::vector<cf32_t*> inp,
-                                       std::vector<cf32_t*> out,
+void hw_simulator_t::clip_and_quantize(const std::vector<cf32_t*>& inp,
+                                       std::vector<cf32_t*>& out,
                                        const uint32_t nof_samples,
                                        const float clip_limit,
                                        const uint32_t n_bits) {

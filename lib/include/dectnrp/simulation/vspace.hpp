@@ -39,7 +39,7 @@ namespace dectnrp::simulation {
 class vspace_t {
     public:
         explicit vspace_t(const uint32_t nof_hw_simulator_,
-                          const uint32_t samp_rate_speedup_,
+                          const uint32_t samp_rate_speed_,
                           const std::string sim_channel_name_inter_,
                           const std::string sim_channel_name_intra_,
                           const std::string sim_noise_type_);
@@ -84,7 +84,7 @@ class vspace_t {
         void wchannel_randomize_small_scale();
 
         const uint32_t nof_hw_simulator;
-        const uint32_t samp_rate_speedup;
+        const uint32_t samp_rate_speed;
         const std::string sim_channel_name_inter;
         const std::string sim_channel_name_intra;
         const std::string sim_noise_type;
@@ -112,13 +112,15 @@ class vspace_t {
         uint32_t spp_size_common;
 
         common::watch_t watch;  // real time
+        int64_t now_start_64;   // simulation start time
         int64_t now_64;         // simulation time
 
         /// called by last RX thread
         static void realign_realtime_with_simulation_time(const common::watch_t& watch,
-                                                          const int32_t samp_rate_speedup,
+                                                          const int32_t samp_rate_speed,
                                                           const int64_t samp_rate_64,
-                                                          const int64_t now_simulation_64);
+                                                          const int64_t simulation_now_start_64,
+                                                          const int64_t simulation_now_64);
 
         bool check_if_first_to_register_tx() const;
         bool check_if_last_to_register_tx() const;

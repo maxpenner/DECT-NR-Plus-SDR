@@ -30,15 +30,12 @@ namespace dectnrp::radio {
 radio_t::radio_t(const radio_config_t& radio_config_)
     : layer_t("RADIO"),
       radio_config(radio_config_) {
-    // number of devices (multi-devices hidden behind driver count as one device)
     const uint32_t nof_radio_hardware = radio_config.get_nof_layer_unit_config();
 
     dectnrp_assert(nof_radio_hardware > 0, "HW config vector of radio layer is empty");
 
-    // hardware must be of the same type, i.e. real or virtual
     vspace_check_validity_and_init();
 
-    // try to detect each hardware device
     for (uint32_t hw_id = 0; hw_id < nof_radio_hardware; ++hw_id) {
         const auto& hw_config = radio_config.get_layer_unit_config(hw_id);
 
@@ -86,13 +83,13 @@ void radio_t::vspace_check_validity_and_init() {
      */
     if (nof_simulator == nof_radio_hardware) {
         dectnrp_assert(
-            limits::simulation_samp_rate_speedup_minimum <= hw_config_t::sim_samp_rate_speedup &&
-                hw_config_t::sim_samp_rate_speedup != -1 &&
-                hw_config_t::sim_samp_rate_speedup <= limits::simulation_samp_rate_speedup_maximum,
-            "HW samp_rate_speedup_min out of bound.");
+            limits::simulation_samp_rate_speed_minimum <= hw_config_t::sim_samp_rate_speed &&
+                hw_config_t::sim_samp_rate_speed != -1 &&
+                hw_config_t::sim_samp_rate_speed <= limits::simulation_samp_rate_speed_maximum,
+            "samp_rate_speed out of bound.");
 
         vspace = std::make_unique<simulation::vspace_t>(nof_radio_hardware,
-                                                        hw_config_t::sim_samp_rate_speedup,
+                                                        hw_config_t::sim_samp_rate_speed,
                                                         hw_config_t::sim_channel_name_inter,
                                                         hw_config_t::sim_channel_name_intra,
                                                         hw_config_t::sim_noise_type);

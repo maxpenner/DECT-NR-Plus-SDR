@@ -34,12 +34,12 @@
 namespace dectnrp::simulation {
 
 vspace_t::vspace_t(const uint32_t nof_hw_simulator_,
-                   const uint32_t samp_rate_speedup_,
+                   const uint32_t samp_rate_speed_,
                    const std::string sim_channel_name_inter_,
                    const std::string sim_channel_name_intra_,
                    const std::string sim_noise_type_)
     : nof_hw_simulator(nof_hw_simulator_),
-      samp_rate_speedup(samp_rate_speedup_),
+      samp_rate_speed(samp_rate_speed_),
       sim_channel_name_inter(sim_channel_name_inter_),
       sim_channel_name_intra(sim_channel_name_intra_),
       sim_noise_type(sim_noise_type_) {
@@ -96,6 +96,7 @@ void vspace_t::hw_register_tx(const vspptx_t& vspptx) {
         wchannel_generate_graph();
 
         // set to 0, will be overwritten in RX
+        now_start_64 = 0;
         now_64 = 0;
 
         // allow all TX and RX threads to work and wake them up
@@ -113,7 +114,8 @@ void vspace_t::hw_register_rx(const vspprx_t& vspprx) {
     // if first device overwrite time
     if (check_if_first_to_register_rx()) {
         dectnrp_assert(now_64 == 0, "now_64 not zero");
-        now_64 = vspprx.meta.now_64;
+        now_start_64 = vspprx.meta.now_64;
+        now_64 = now_start_64;
     }
 
     // set as registered
@@ -241,7 +243,7 @@ void vspace_t::read(vspprx_t& vspprx) {
 
         // last RX thread tries to realign time axles
         realign_realtime_with_simulation_time(
-            watch, samp_rate_speedup, static_cast<int64_t>(samp_rate_common), now_64);
+            watch, samp_rate_speed, static_cast<int64_t>(samp_rate_common), now_start_64, now_64);
 
         // set all TX buffers as not written ...
         set_status_tx_written(false);
@@ -264,33 +266,36 @@ void vspace_t::wchannel_randomize_small_scale() {
 }
 
 void vspace_t::realign_realtime_with_simulation_time(const common::watch_t& watch,
-                                                     const int32_t samp_rate_speedup,
+                                                     const int32_t samp_rate_speed,
                                                      const int64_t samp_rate_64,
-                                                     const int64_t now_simulation_64) {
-#ifdef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
-    // determine how many samples we should have created by now in real time
-    const int64_t now_realtime_target_64 =
-        (samp_rate_speedup >= 0)
-            ? watch.get_elapsed_since_epoch<int64_t, common::milli, common::tai_clock>() *
-                  samp_rate_64 * int64_t{10 + samp_rate_speedup} / int64_t{10} / int64_t{1000}
-            : watch.get_elapsed_since_epoch<int64_t, common::milli, common::tai_clock>() *
-                  samp_rate_64 / int64_t{-samp_rate_speedup} / int64_t{1000};
-#else
-    // determine how many samples we should have created by now in real time
-    const int64_t now_realtime_target_64 =
-        (samp_rate_speedup >= 0) ? watch.get_elapsed<int64_t, common::milli>() * samp_rate_64 *
-                                       int64_t{10 + samp_rate_speedup} / int64_t{10} / int64_t{1000}
-                                 : watch.get_elapsed<int64_t, common::milli>() * samp_rate_64 /
-                                       int64_t{-samp_rate_speedup} / int64_t{1000};
-#endif
+                                                     const int64_t simulation_now_start_64,
+                                                     const int64_t simulation_now_64) {
+    // how much wall time in milliseconds has elapsed since the simulation started?
+    const auto realtime_elapsed_ms_64 = watch.get_elapsed<int64_t, common::milli>();
+
+    /* How many samples should the simulation have created in the given elapsed realtime?
+     *
+     *      speedup in 10 percent steps
+     *      speeddown by an integer factor
+     *
+     * Multiplication order must not be changed to avoid numerical overflow.
+     */
+    const int64_t realtime_now_target_64 =
+        (samp_rate_speed >= 0)
+            ? samp_rate_64 / int64_t{1000} * realtime_elapsed_ms_64 *
+                  int64_t{10 + samp_rate_speed} / int64_t{10}
+            : samp_rate_64 / int64_t{1000} * realtime_elapsed_ms_64 / int64_t{-samp_rate_speed};
+
+    // how many samples has the simulation generated since the simulation started?
+    const int64_t simulation_elapsed_64 = simulation_now_64 - simulation_now_start_64;
 
     /* Sleep until realtime has caught up with simulation time. This only makes sense if the CPU
      * processes the simulation faster than realtime. Otherwise this section is skipped and the
-     * ratio between the time axles is NOT samp_rate_speedup.
+     * ratio between the time axles is NOT samp_rate_speed.
      */
-    if (now_realtime_target_64 < now_simulation_64) {
+    if (realtime_now_target_64 < simulation_elapsed_64) {
         const int64_t delta_us_64 =
-            (now_simulation_64 - now_realtime_target_64) * int64_t{1000000} / samp_rate_64;
+            (simulation_elapsed_64 - realtime_now_target_64) * int64_t{1000000} / samp_rate_64;
 
         common::watch_t::sleep<common::micro>(delta_us_64);
     }

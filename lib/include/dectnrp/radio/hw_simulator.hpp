@@ -115,8 +115,8 @@ class hw_simulator_t final : public hw_t {
         std::unique_ptr<simulation::vspprx_t> vspprx;
 
         /// simulated hardware effects
-        static void clip_and_quantize(const std::vector<cf32_t*> inp,
-                                      std::vector<cf32_t*> out,
+        static void clip_and_quantize(const std::vector<cf32_t*>& inp,
+                                      std::vector<cf32_t*>& out,
                                       const uint32_t nof_samples,
                                       const float clip_limit,
                                       const uint32_t n_bits);

@@ -92,7 +92,7 @@ struct hw_config_t {
         static uint32_t sim_spp_us;
 
         /// >1 for speedup, <-1 for slowdown
-        static int32_t sim_samp_rate_speedup;
+        static int32_t sim_samp_rate_speed;
 
         /// channel between tpoints
         static std::string sim_channel_name_inter;

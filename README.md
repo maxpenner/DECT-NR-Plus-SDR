@@ -14,8 +14,9 @@ While commonly referred to as DECT NR+, the standard's official designation is D
 4. [Starting](#starting)
 5. [Contributing](#contributing)
 6. [Citation](#citation)
-7. [Known Issues](#known-issues)
-8. [To Do](#to-do)
+7. [Limitations of an SDR with Host Processing](#limitations-of-an-sdr-with-host-processing)
+8. [Known Issues](#known-issues)
+9. [To Do](#to-do)
 
 Advanced Topics
 
@@ -27,7 +28,13 @@ Advanced Topics
 6. [JSON Export](#json-export)
 7. [PPS Export and PTP](#pps-export-and-ptp)
 8. [Host and SDR Tuning](#host-and-sdr-tuning)
-9. [Firmware P2P](#firmware-p2p)
+9. [Firmware](#firmware)
+    1. [basic](#basic)
+    2. [chscanner](#chscanner)
+    3. [loopback](#loopback)
+    4. [p2p](#p2p)
+    5. [rtt](#rtt)
+    6. [timesync](#timesync)
 
 ## Core Idea
 
@@ -38,7 +45,7 @@ The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware
 - PHY to MAC layer interface
 - Application layer interface (e.g. UDP sockets, virtual NIC).
 
-Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for termination point which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
+Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for termination point which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/) with a brief description of each available under [Firmware](#firmware). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
 |   | **Virtual Function**     | **Properties**                                                            |
 |---|--------------------------|---------------------------------------------------------------------------|
@@ -51,6 +58,8 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
 | 7 | work_chscan_async()      | called upon finished channel measurement (event-driven)                   |
 | 8 | start_threads()          | called once during SDR startup to start application layer threads         |
 | 9 | stop_threads()           | called once during SDR shutdown to stop application layer threads         |
+
+For any firmware, start_threads() is always called first, followed by work_start_imminent(). Only then are all other work-functions called. For event-driven functions, calls are only made if and when the associated event occurs. As soon as the SDR is to be terminated, stop_threads() is called, and any firmware must stop.
 
 ## Directories
 
@@ -111,7 +120,7 @@ cd bin/
 sudo ./dectnrp "../configurations/basic_simulator/"
 ```
 
-The SDR is stopped by pressing control+C. The executable `dectnrp` requires exactly one argument, which is a path to a directory containing three configuration files `radio.json`, `phy.json` and `upper.json`. Each configuration file configures its respective layer(s). In the case of `upper.json`, this also implies the name of the firmware to load.
+The SDR is stopped by pressing control+c. The executable `dectnrp` requires exactly one argument, which is a path to a directory containing three configuration files `radio.json`, `phy.json` and `upper.json`. Each configuration file configures its respective layer(s). In the case of `upper.json`, this also implies the name of the firmware to load.
 
 The configuration files may also contain multiple instances of the SDR. In fact, each configuration file configures its layer(s) by listing one or multiple layer units:
 
@@ -134,13 +143,19 @@ Submit a pull request and keep the same licence.
 ## Citation
 
 If you use this repository for any publication, please cite the repository according to [CITATION.cff](CITATION.cff).
+
+## Limitations of an SDR with Host Processing
+
+- Quasi-instantaneous channel access with prior Listen-Before-Talk (LBT) is not possible since all channel measurements are carried out on the host. By the time the host has measured the channel as free and the TX packet arrives at the radio hardware, the channel measurements may already be stale.
+- The [AGC](#agc) is slow. By the time the host has made the decision to change a gain setting, the channel conditions may have already changed significantly.
+- SDR devices are general-purpose devices with limitations regarding typical hardware parameters such as output power, linearity, receiver sensitivity, noise figure, selectivity etc.
     
 ## Known Issues
 
 1. The channel coding requires verification. It is based on [srsRAN 4G](https://github.com/srsran/srsRAN_4G) with multiple changes, for instance, an additional maximum code block size Z=2048. Furthermore, channel coding with a limited number of soft bits is not implemented yet.
 2. [MAC messages and information elements (MMIEs)](lib/include/dectnrp/sections_part4/mac_messages_and_ie) in the standard are subject to frequent changes. Previously completed MMIEs are currently being revised and will be updated soon.
 3. If asserts are enabled, the program may stop abruptly if IQ samples are not processed fast enough. This is triggered by a backlog of unprocessed IQ samples within synchronization.
-4. For some combinations of operating system, CPU and DPDK, pressing control+C does not stop the SDR. The SDR process must then be stopped manually.
+4. For some combinations of operating system, CPU and DPDK, pressing control+c does not stop the SDR. The SDR process must then be stopped manually.
 5. With gcc 12 and above, a [warning is issued in relation to fmt](https://github.com/fmtlib/fmt/issues/3354) which becomes an error due to the compiler flag *Werror* being used by default. It can be disabled in [CMakeLists.txt](CMakeLists.txt) by turning off the option *ENABLE_WERROR*.
 6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclical rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
 
@@ -162,10 +177,11 @@ If you use this repository for any publication, please cite the repository accor
 
 ### Upper layers
 
-- [ ] integration of retransmissions with HARQ into [Firmware P2P](#firmware-p2p) to finalize interfaces
+- [ ] integration of retransmissions with HARQ into [firmware p2p](#p2p) to finalize interfaces
 - [ ] reusable firmware procedures (association etc.)
 - [ ] DLC and Convergence layers
 - [ ] enhanced application layer interfaces to DECT NR+ stack (blocking and multiplexing of addresses, streams, control information etc.)
+- [ ] plugin system for out-of-tree firmware
 
 ### Application Layer
 
@@ -191,9 +207,9 @@ The key takeaways are:
 
 ## AGC
 
-An ideal AGC receives a packet and adjusts its sensitivity within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts the sensitivity 50 times per second.
+An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second.
 
-One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu$ < 8 is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
+One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu$ < 8 is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
 
 | **$\mu$** | **GI length ($\mu s$)** | **STF length ($\mu s$)**  |
 |:---------:|:-----------------------:|:-------------------------:|
@@ -202,11 +218,11 @@ One drawback of a software AGC is that packets can be masked. This happens when 
 |     4     |          10.42          |           20.83           |
 |     8     |          10.42          |           10.42           |
 
-It is typically best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels.
+In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels.
 
 ## Resampling
 
-Most SDRs support a limited set of sample rates, which typically do not match the DECT NR+ base rate of 1.728MS/s or multiples thereof. A sample rate supported by most SDRs is 30.72MS/s. Therefore, the SDR uses fractional resampling with a polyphase filter to output IQ samples at the new base rate of 30.72MS/s / 16 = 1.92MS/s or multiples thereof.
+Most SDR devices support a limited set of sample rates, which typically do not match the DECT NR+ base rate of 1.728MS/s or multiples thereof. A sample rate supported by most SDRs is 30.72MS/s. Therefore, the SDR uses fractional resampling with a polyphase filter to output IQ samples at the new base rate of 30.72MS/s / 16 = 1.92MS/s or multiples thereof.
 
 ### Examples
 
@@ -218,7 +234,7 @@ Most SDRs support a limited set of sample rates, which typically do not match th
 
 Fractional resampling is computationally expensive. To reduce the computational load and enable larger bandwidths, the implicit FIR low-pass filter of the resampler can be made shorter. However, this also leads to more aliasing and thus to a larger EVM at the receiver. The resampler parameters are defined in [lib/include/dectnrp/phy/resample/resampler_param.hpp](lib/include/dectnrp/phy/resample/resampler_param.hpp).
 
-Another option is to disable resampling entirely and generate DECT NR+ packets directly at 1.92MS/s or multiples thereof. The internal time of the SDR then runs at the same rate and it is still possible, for example, to send out packets exactly every 10ms. However, the packets have a wider bandwidth and are shorter in time domain. Fractional resampling to a DECT NR+ sample rate is disabled by setting `"enforce_dectnrp_samp_rate_by_resampling": false` in `phy.json`.
+Another option is to disable resampling entirely and generate DECT NR+ packets directly at 1.92MS/s or multiples thereof. The internal time of the SDR then runs at 1.92MS/s and it is still possible, for example, to send out packets exactly every 10ms. However, the packets have a wider bandwidth and are shorter in time domain. Fractional resampling to a DECT NR+ sample rate is disabled by setting `"enforce_dectnrp_samp_rate_by_resampling": false` in `phy.json`.
 
 ## Synchronization
 
@@ -242,7 +258,7 @@ Exported files can be analyzed with [DECT-NR-Plus-SDR-json](https://github.com/m
 
 ## PPS Export and PTP
 
-With the [GPIOs of an USRP](https://files.ettus.com/manual/page_gpio_api.html), the SDR can create pulses that are synchronized to DECT NR+ events, for instance the beginning of a wirelessly received beacon. The generation of pulses is controlled by each firmware individually. The example [Firmware P2P](#firmware-p2p) contains logic to export one pulse per second (PPS).
+With the [GPIOs of an USRP](https://files.ettus.com/manual/page_gpio_api.html), the SDR can create pulses that are synchronized to DECT NR+ events, for instance the beginning of a wirelessly received beacon. The generation of pulses is controlled by each firmware individually. The example [firmware p2p](#p2p) contains logic to export one pulse per second (PPS).
 
 A PPS signal itself is a frequently used clock for other systems. For example, a Raspberry PI can be disciplined with a PPS and at the same time act as a PTP source which itself operates synchronously with the PPS ([pi5-pps-ptp](https://github.com/maxpenner/pi5-pps-ptp)). Such a PTP source can then be used to discipline further systems:
 
@@ -265,14 +281,30 @@ The following tuning tips have been tested with Ubuntu and help achieving low-la
     1. [DPDK with UHD](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD)
     2. [Adjusted send_frame_size and recv_frame_size](https://files.ettus.com/manual/page_transport.html#transport_param_overrides) in `radio.json`
     3. [Increased buffer sizes](https://kb.ettus.com/USRP_Host_Performance_Tuning_Tips_and_Tricks#Adjust_Network_Buffers)
-    4. In each `radio.json`, the value `“turnaround_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR timestamp. For UHD, the SDR time is a [64-bit counter in the FPGA](https://kb.ettus.com/Synchronizing_USRP_Events_Using_Timed_Commands_in_UHD#Radio_Core_Block_Timing). The smaller the turn around time, the lower the latency. Under optimal conditions, between 80 and 150 microseconds are possible.
+    4. In each `radio.json`, the value `“turnaround_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR timestamp. For UHD, the SDR time is a [64-bit counter in the FPGA](https://kb.ettus.com/Synchronizing_USRP_Events_Using_Timed_Commands_in_UHD#Radio_Core_Block_Timing). The smaller the turn around time, the lower the latency. Under optimal conditions, between 80 to 150 microseconds are possible.
 6. Low-latency kernel
 
-## Firmware P2P
+## Firmware
+
+The following firmware examples each demonstrate different capabilities of the SDR. Most examples have a small code base, only the firmware [p2p](#p2p) is more complex demonstrating a full duplex packet IP pipe with PLCF feedback reporting and beamforming.
+
+### basic
+
+This is the smallest and simplest firmware possible. All virtual functions are empty except for a few asserts. This firmware uses a simulator on the radio layer, i.e. it does not require real radio hardware to be started. If a new firmware is written from scratch, a renamed copy of this firmware is the recommended starting point. 
+
+### chscanner
+
+This firmware starts channel measurements in regular intervals and writes the result to the log file.
+
+### loopback
+
+This firmware is a simulation with a single device which loops its TX signal back into its own RX path. It is used to test the SDR functionality such as synchronization and packet error rate (PER) over SNR. The wireless channel model can be switched in `radio.json` from AWGN channel to a doubly selective Rayleigh fading channel.
+
+### p2p
 
 The P2P (point-to-point) firmware is started on two separate host computers, each connected to an USRP (in this example an X410). One combination of host and USRP acts as a fixed termination point (FT), while the other is the portable termination point (PT). The FT is connected to the internet and once both FT and PT are started, the PT can access the internet through the wireless DECT NR+ connection acting as pipe for IP packets.
 
-### Common settings on FT and PT
+#### Common settings on FT and PT
 
 If a different USRP type is used, the value of `“uspr_args”` in `radio.json` must be modified accordingly. Furthermore, FT and PT must be tuned to a common center frequency. This is done by opening the following two files
 
@@ -285,15 +317,15 @@ and changing the following line in both files to the desired center frequency in
 hw.set_freq_tc(3890.0e6);
 ```
 
-The CPU cores used may also require modification as both FT and PT use specific cores for their threads. For instance, in `radio.json` the thread handling TX is specified as:
+The CPU cores used may also require modification as both FT and PT use specific cores for their threads. For instance, in `radio.json` the thread handling received IQ samples is specified as:
 
 ```JSON
 "rx_thread_config": [0, 1]
 ```
 
-The first number 0 is the priority offset (or niceness), so here the thread is started with the highest priority 99 - 0 = 99. The second number 1 specifies the CPU core. Both numbers can also be negative, in which case the scheduler selects the priority and the CPU core. Further thread specifications can be found in all `.json` configuration files. 
+The first number 0 is the priority offset (or niceness), so here the thread is started with the highest priority 99 - 0 = 99. The second number 1 specifies the CPU core. Both numbers can also be negative, in which case the scheduler selects the priority and/or the CPU core. Further thread specifications can be found in all `.json` configuration files. 
 
-### On the FT:
+#### On the FT:
 
 ```console
 cd bin/
@@ -305,7 +337,7 @@ Once the SDR is running, a TUN interface is instantiated which can be verified w
 cd scripts/
 sudo ./masquerade.sh <Interface Name>
 ```
-### On the PT
+#### On the PT
 
 In the file [configurations/p2p_usrpX410/upper.json](configurations/p2p_usrpX410/upper.json), the firmware is changed to:
 
@@ -326,3 +358,24 @@ sudo ./defaultgateway_dns.sh -a 172.23.180.101 -i tuntap_pt
 ```
 
 On the PT, internet access should now happen through the DECT NR+ connection. This can be verified by running a speed test and observing the spectrum with a spectrum analyzer, or by checking the packet count in the log file in [bin/](bin/).
+
+### rtt
+
+This firmware tests the achievable round-trip time (RTT) between two instances of the SDR.
+
+- UDP packets are generated by the program rtt in [bin/](bin/) and send to the first SDR.
+- The first SDR transmits these packets wirelessly to the second SDR.
+- The second SDR receives these packets and sends response packets ASAP.
+- The first SDR receives the response packets and forwards them to the program rtt which finally measures the RTT.
+
+In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310/upper.json) of the seconds SDR, the firmware ID must be changed to:
+
+```JSON
+"firmware_id": 1
+```
+
+The program rtt is default configures to send packets to localhost, so the binary must be started on the host computer of the first SDR. 
+
+### timesync
+
+This firmware measures the synchronization between the host system and the radio hardware if they are synchronized as described in [PPS Export and PTP](#pps-export-and-ptp). Synchronization must be established with a Raspberry Pi.
