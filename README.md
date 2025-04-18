@@ -164,15 +164,19 @@ If you use this repository for any publication, please cite the repository accor
 ### Radio Layer
 
 - [ ] GPIO support for B210, currently only X410 supported
+- [ ] B210 USB transfer stability and latency
 
 ### Physical Layer
 
 - [ ] **$\mu$** detection
 - [ ] integer CFO
+- [ ] increase look-ahead of sync_chunk_t
+- [ ] add parallel queues in job_queue_t for asynchronous jobs
+- [ ] batch enqueuing into job queue
 - [ ] residual STO based on DRS
 - [ ] residual CFO based on STF
 - [ ] residual CFO based on DRS
-- [ ] AoA estimation
+- [ ] AoA estimation based on DRS
 - [ ] MIMO modes with two or more spatial streams
 - [ ] 1024-QAM
 
@@ -181,12 +185,12 @@ If you use this repository for any publication, please cite the repository accor
 - [ ] integration of retransmissions with HARQ into [firmware p2p](#p2p) to finalize interfaces
 - [ ] reusable firmware procedures (association etc.)
 - [ ] DLC and Convergence layers
-- [ ] enhanced application layer interfaces to DECT NR+ stack (blocking and multiplexing of addresses, streams, control information etc.)
+- [ ] enhanced application layer interfaces to DECT NR+ stack (ingress/egress filtering, blocking etc.)
 - [ ] plugin system for out-of-tree firmware
 
 ### Application Layer
 
-- [ ] lock around individual items instead of entire queues
+- [ ] mutex/spinlock around individual datagrams instead of entire queue
 
 ## Architecture
 
@@ -198,9 +202,9 @@ The figure below illustrates the architecture of the SDR with blocks representin
 
 The key takeaways are:
 
-1. The radio layer uses a single RX ring buffer of type [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) to distribute IQ samples to all workers. For TX, it uses multiple independent [buffer_tx_t](lib/include/dectnrp/radio/buffer_tx.hpp) instances from a [buffer_tx_pool_t](lib/include/dectnrp/radio/buffer_tx_pool.hpp). The size and number of buffers is defined in `radio.json`.
+1. The radio layer uses a single RX ring buffer of type [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) to distribute IQ samples to all workers. For TX, it uses multiple independent [buffer_tx_t](lib/include/dectnrp/radio/buffer_tx.hpp) instances from a [buffer_tx_pool_t](lib/include/dectnrp/radio/buffer_tx_pool.hpp). The number of buffers is defined in `radio.json`, and their size by the radio device class and the oversampling in `phy.json`.
 2. The PHY has workers for synchronization ([worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp)) and workers for packet encoding/decoding and modulation/demodulation ([worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp)). The number of workers, their CPU affinity and priority are set in `phy.json`. Both worker types communicate through a MPMC [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp).
-3. When synchronization detects a DECT NR+ packet, it creates a job with a [sync_report_t](lib/include/dectnrp/phy/rx/sync/sync_report.hpp), which is then processed by instances of [worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp). During packet processing, these workers call the firmware through the virtual work_*() functions mentioned in [Core Idea](#core-idea). Access to the firmware is thread-safe as each worker has to acquire a [token_t](lib/include/dectnrp/phy/pool/token.hpp).
+3. When synchronization detects a DECT NR+ packet, it creates a job with a [sync_report_t](lib/include/dectnrp/phy/rx/sync/sync_report.hpp), which is then processed by instances of [worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp). During packet processing, these workers call the firmware through the virtual work_*() functions mentioned in [Core Idea](#core-idea). Access to the firmware is thread-safe as each worker has to acquire a [token_t](lib/include/dectnrp/phy/pool/token.hpp). All jobs are processed in the same order as they are inserted into the queue.
 4. Synchronization also creates regular jobs with a [time_report_t](lib/include/dectnrp/phy/rx/sync/time_report.hpp). Each of these jobs contains a time update for the firmware, and the starting time of the last known packet. The rate of regular jobs depends on how processing of [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) is split up between instances of [worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp) in `phy.json`. A typical rate is one job for each 2 slots, equivalent to 1200 jobs per second. 
 5. The firmware of the SDR is not executed in an independent thread. Instead, the firmware is equivalent to a thread-safe state machine whose state changes are triggered by calls of the work_*() functions. The type of firmware executed is defined in `upper.json`.
 6. Each firmware starts and controls its own application layer interface ([app_t](lib/include/dectnrp/application/app.hpp)). To allow immediate action for new application layer data, [app_t](lib/include/dectnrp/application/app.hpp) is given access to [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp). The job type created by [app_t](lib/include/dectnrp/application/app.hpp) contains an [upper_report_t](lib/include/dectnrp/upper/upper_report.hpp) with the number and size of data items available on the application layer.
@@ -208,7 +212,7 @@ The key takeaways are:
 
 ## AGC
 
-An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second.
+An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second in regular intervals.
 
 One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu$ < 8 is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
 
@@ -299,7 +303,7 @@ This firmware starts channel measurements in regular intervals and writes the re
 
 ### loopback
 
-This firmware is a simulation with a single device which loops its TX signal back into its own RX path. It is used to test the SDR functionality such as synchronization and packet error rate (PER) over SNR. The wireless channel model can be switched in `radio.json` from AWGN channel to a doubly selective Rayleigh fading channel.
+This firmware is a simulation with a single device which loops its TX signal back into its own RX path. It is used to test the SDR functionality such as synchronization and packet error rate (PER) over SNR. The wireless channel model can be switched in `radio.json` from an AWGN channel to a doubly selective Rayleigh fading channel.
 
 ### p2p
 
@@ -364,19 +368,18 @@ On the PT, internet access should now happen through the DECT NR+ connection. Th
 
 This firmware tests the achievable round-trip time (RTT) between two instances of the SDR.
 
-- UDP packets are generated by the program rtt in [bin/](bin/) and send to the first SDR.
+- UDP packets are generated by the program rtt in [bin/](bin/) and send to the first SDR. By default, rtt is configured to send packets to localhost, so the binary must be started on the host computer of the first SDR. 
 - The first SDR transmits these packets wirelessly to the second SDR.
 - The second SDR receives these packets and sends response packets ASAP.
 - The first SDR receives the response packets and forwards them to the program rtt which finally measures the RTT.
+- In case any packet is not received correctly, rtt has an integrated timeout before sending the next packet.
 
-In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310/upper.json) of the seconds SDR, the firmware ID must be changed to:
+In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310/upper.json) of the second SDR, the firmware ID must be changed to:
 
 ```JSON
 "firmware_id": 1
 ```
 
-The program rtt is default configures to send packets to localhost, so the binary must be started on the host computer of the first SDR. 
-
 ### timesync
 
-This firmware measures the synchronization between the host system and the radio hardware if they are synchronized as described in [PPS Export and PTP](#pps-export-and-ptp). Synchronization must be established with a Raspberry Pi.
+This firmware measures the synchronization between the host system and the radio hardware if they are synchronized as described in [PPS Export and PTP](#pps-export-and-ptp). Synchronization must be established with an external device such as a Raspberry Pi.

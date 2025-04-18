@@ -121,10 +121,10 @@ int pdc_enc_free(pdc_enc_t* q) {
  *  2) Each codeblock is scrambled after rate mathing. The sequence is an input parameter
  * srsran_sequence_t* and the offset depends on rp and wp.
  *
- *  3) ToDo: The size of the soft buffer (n_soft_bits) influcences the redundancy, see part
+ *  3) ToDo: The size of the soft buffer (n_soft_bits) influences the redundancy, see part
  * 3, 6.1.5.3 Bit collection, selection and transmission.
  *
- *  4) Pushed all asserts to the beginning of the function.
+ *  4) Moved all asserts to the beginning of the function.
  */
 void pdc_encode_codeblocks(pdc_enc_t* q,
                            srsran_softbuffer_tx_t* softbuffer,
