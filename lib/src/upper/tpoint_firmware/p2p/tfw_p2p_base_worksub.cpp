@@ -89,6 +89,10 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     // this is now a well-defined packet size
     const auto& packet_sizes = hp_tx->get_packet_sizes();
 
+    // update values in PLCF header
+    ppmp_unicast.plcf_21.DFMCS = ppmp_unicast.psdef.mcs_index;
+    ppmp_unicast.plcf_21.set_NumberOfSpatialStreams(packet_sizes.tm_mode.N_SS);
+
     worksub_tx_unicast_feedback(contact_p2p, expiration_64);
 
     if (!worksub_tx_unicast_mac_sdu(contact_p2p, queue_level, packet_sizes, *hp_tx)) {
@@ -98,8 +102,14 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
         return false;
     }
 
+    contact_p2p.feedback_plan.set_next_feedback_format();
+
+#ifdef TFW_P2P_MIMO
     const uint32_t codebook_index =
         contact_p2p.mimo_csi.codebook_index.get_val_or_fallback(expiration_64, 0);
+#else
+    const uint32_t codebook_index = 0;
+#endif
 
     // PHY meta
     const phy::tx_meta_t& tx_meta = {.optimal_scaling_DAC = false,
@@ -135,7 +145,7 @@ void tfw_p2p_base_t::worksub_tx_unicast_psdef(contact_p2p_t& contact_p2p,
 void tfw_p2p_base_t::worksub_tx_unicast_feedback(contact_p2p_t& contact_p2p,
                                                  const int64_t expiration_64) {
     // set next feedback format in PLCF
-    ppmp_unicast.plcf_21.FeedbackFormat = contact_p2p.feedback_plan.get_next_feedback_format();
+    ppmp_unicast.plcf_21.FeedbackFormat = contact_p2p.feedback_plan.get_current_feedback_format();
 
     // update respective feedback format
     switch (ppmp_unicast.plcf_21.FeedbackFormat) {

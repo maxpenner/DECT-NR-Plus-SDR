@@ -30,7 +30,8 @@ class feedback_plan_t {
         feedback_plan_t() = default;
         feedback_plan_t(const std::vector<uint32_t>&& feedback_format_vec);
 
-        uint32_t get_next_feedback_format();
+        [[nodiscard]] uint32_t get_current_feedback_format();
+        void set_next_feedback_format();
 
     private:
         std::vector<uint32_t> feedback_format_vec;

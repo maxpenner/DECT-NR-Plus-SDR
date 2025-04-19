@@ -181,7 +181,7 @@ uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W
     dectnrp_assert(A < W_mat.size(), "no matrices to use");
 
     // every beamforming matrix is tested, the one with the highest receive power is picked
-    float power_max = -1000.0f;
+    float power_outer = -1000.0f;
     int32_t ret = -1;
 
     for (std::size_t wm = A; wm < W_mat.size(); ++wm) {
@@ -189,7 +189,7 @@ uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W
         const auto& W_mat_single = W_mat[wm];
 
         // sum of power across all RX antennas
-        float power = 0.0f;
+        float power_inner = 0.0f;
 
         // RX antennas of opposite size
         for (std::size_t rx = 0; rx < N_RX_virt; ++rx) {
@@ -212,13 +212,21 @@ uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W
                 sum += sum_partial;
             }
 
-            power += std::abs(sum);
+#if RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_HIGHEST_MIN_RX_POWER
+            if (std::abs(sum) < power_inner) {
+                power_inner = std::abs(sum);
+            }
+#elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MAX_RX_POWER
+            power_inner += std::abs(sum);
+#else
+#error "undefined mode 3 and 7 metric"
+#endif
         }
 
-        power *= scaling_factor[wm];
+        power_inner *= scaling_factor[wm];
 
-        if (power_max < power) {
-            power_max = power;
+        if (power_outer < power_inner) {
+            power_outer = power_inner;
             ret = wm;
         }
     }

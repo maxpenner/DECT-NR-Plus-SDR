@@ -112,7 +112,7 @@ class job_queue_t final : public common::reporting_t {
         const uint32_t capacity;
 
         friend class worker_pool_t;   // access to private report functions
-        friend class worker_tx_rx_t;  // access to private job_slot_vec
+        friend class worker_tx_rx_t;  // access to wait_for_new_job_to()
 
     private:
         std::vector<std::string> report_start() const override final;
@@ -132,7 +132,7 @@ class job_queue_t final : public common::reporting_t {
         std::atomic<int32_t> job_slot_vec_cnt;
 
         /// internal function called from enqueue_nto()
-        bool enqueue_under_lock(job_t& job);
+        bool enqueue_under_lock(job_t&& job);
 
         /// consumers (for instance worker_tx_rx_t), function has a timeout (to)
         bool wait_for_new_job_to(job_t& job);
@@ -209,7 +209,7 @@ class job_queue_t final : public common::reporting_t {
         const uint32_t capacity;
 
         friend class worker_pool_t;   // access to private report functions
-        friend class worker_tx_rx_t;  // access to private job_slot_vec
+        friend class worker_tx_rx_t;  // access to wait_for_new_job_to()
 
     private:
         std::vector<std::string> report_start() const override final;

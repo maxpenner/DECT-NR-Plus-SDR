@@ -448,6 +448,7 @@ nlohmann::ordered_json rx_synced_t::get_json() const {
 
     json["sto_fractional"] = estimator_sto->get_fractional_sto_in_samples(N_b_DFT_os);
     json["snr"] = estimator_snr->get_current_snr_dB_estimation();
+    json["MCS"] = packet_sizes->psdef.mcs_index;
 
     // we may export less information than available
     const uint32_t N_RX_export = std::min(N_RX, limits::dectnrp_max_nof_antennas);

@@ -141,6 +141,10 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     contact_pt.mimo_csi.update_from_phy(phy_machigh.pdc_report.mimo_report,
                                         phy_machigh.phy_maclow.sync_report);
 
+    contact_pt.mimo_csi.update_from_phy(
+        cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),
+        phy_machigh.phy_maclow.sync_report);
+
     // check if we can generate any uplink
     phy::machigh_phy_t machigh_phy;
 

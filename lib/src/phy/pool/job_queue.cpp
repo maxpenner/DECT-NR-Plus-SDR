@@ -54,7 +54,7 @@ bool job_queue_t::enqueue_nto(job_t&& job) {
     bool ret = false;
 
     lockv.lock();
-    ret = enqueue_under_lock(job);
+    ret = enqueue_under_lock(std::move(job));
     lockv.unlock();
 
 #ifdef PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
@@ -98,7 +98,7 @@ std::vector<std::string> job_queue_t::report_stop() const {
     return lines;
 }
 
-bool job_queue_t::enqueue_under_lock(job_t& job) {
+bool job_queue_t::enqueue_under_lock(job_t&& job) {
     // is there a free slot?
     if (get_free() == 0) {
 #ifdef PHY_POOL_JOB_QUEUE_JOB_SLOT_UNAVAILABILITY_FATAL_OR_DISCARD

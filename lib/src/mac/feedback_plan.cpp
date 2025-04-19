@@ -30,13 +30,11 @@ feedback_plan_t::feedback_plan_t(const std::vector<uint32_t>&& feedback_format_v
     : feedback_format_vec(feedback_format_vec_),
       idx(0) {}
 
-uint32_t feedback_plan_t::get_next_feedback_format() {
-    const uint32_t ret = feedback_format_vec.at(idx);
+uint32_t feedback_plan_t::get_current_feedback_format() { return feedback_format_vec.at(idx); }
 
+void feedback_plan_t::set_next_feedback_format() {
     ++idx;
     idx %= feedback_format_vec.size();
-
-    return ret;
 }
 
 }  // namespace dectnrp::mac

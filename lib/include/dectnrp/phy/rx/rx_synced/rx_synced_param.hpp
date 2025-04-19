@@ -277,6 +277,13 @@ extern "C" {
  */
 #define RX_SYNCED_PARAM_MIMO_USE_ALL_W_MATRICES_OR_ONLY_NON_ZERO
 
+/// option A: highest minimum power across all antennas
+#define RX_SYNCED_PARAM_MODE_3_7_METRIC_HIGHEST_MIN_RX_POWER 0
+/// option B: maximum power across all antennas
+#define RX_SYNCED_PARAM_MODE_3_7_METRIC_MAX_RX_POWER 1
+// choice
+#define RX_SYNCED_PARAM_MODE_3_7_METRIC RX_SYNCED_PARAM_MODE_3_7_METRIC_HIGHEST_MIN_RX_POWER
+
 // ########################################################################################################
 // Temporary System Restrictions
 // ########################################################################################################

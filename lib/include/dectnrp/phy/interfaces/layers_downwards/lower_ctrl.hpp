@@ -70,7 +70,7 @@ class lower_ctrl_t {
                       2.0f,
                       duration_lut.get_duration(section3::duration_ec_t::ms001, 1)},
                   phy::agc::agc_t::OFDM_AMPLITUDE_FACTOR_MINUS_20dB,
-                  20.0f)) {}
+                  15.0f)) {}
 
         radio::hw_t& hw;
         const radio::buffer_rx_t& buffer_rx;

@@ -191,16 +191,19 @@ void worker_tx_rx_t::work() {
                 // reset for next reception
                 rx_synced->reset_for_next_pcc();
 
-                // unlocking does not necessarily imply resetting as this depends on how the MAC
-                // layer configured the HARQ process
-                maclow_phy.hp_rx->finalize(pdc_report.crc_status);
-
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
-                // export data if requested
+                /* Export data if requested. Must be exported before HARQ process is finalized,
+                 * otherwise packet size is reset.
+                 */
                 if (json_export != nullptr) {
                     collect_and_write_json(std::get<sync_report_t>(job.content), maclow_phy);
                 }
 #endif
+
+                // unlocking does not necessarily imply resetting as this depends on how the MAC
+                // layer configured the HARQ process
+                maclow_phy.hp_rx->finalize(pdc_report.crc_status);
+
             } else if (std::holds_alternative<upper::upper_report_t>(job.content)) {
                 TOKEN_LOCK_FIFO_OR_RETURN
                 auto machigh_phy = tpoint->work_upper(std::get<upper::upper_report_t>(job.content));
