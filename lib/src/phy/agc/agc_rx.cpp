@@ -25,6 +25,7 @@
 #include "dectnrp/common/adt/decibels.hpp"
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/phy/agc/agc_rx_param.hpp"
 
 namespace dectnrp::phy::agc {
 
@@ -103,6 +104,25 @@ const common::ant_t agc_rx_t::get_gain_step_dB(const int64_t t_64,
     // much
     const float B = A - sensitivity_offset_max_dB;
 
+#ifdef PHY_AGC_RX_ANTENNA_SENSITIVITY_EQUAL_OR_INDIVIDUALLY
+
+    const auto idx_max = rms_measured_last_known.get_index_of_max();
+
+    const float C = common::adt::mag2db(rms_measured_last_known.at(idx_max) / rms_target);
+
+    const float D = B - rx_power_ant_0dBFS.at(idx_max);
+
+    // take the larger of both values
+    const float arbitrary_gain_step_dB_equal = std::max(C, D);
+
+    // calculate arbitrary step for every antenna
+    common::ant_t arbitrary_gain_step_dB(agc_config.nof_antennas);
+    for (size_t i = 0; i < agc_config.nof_antennas; ++i) {
+        arbitrary_gain_step_dB.at(i) = arbitrary_gain_step_dB_equal;
+    }
+
+#else
+
     // calculate arbitrary step for every antenna
     common::ant_t arbitrary_gain_step_dB(agc_config.nof_antennas);
     for (size_t i = 0; i < agc_config.nof_antennas; ++i) {
@@ -136,6 +156,8 @@ const common::ant_t agc_rx_t::get_gain_step_dB(const int64_t t_64,
         // take the larger of both values
         arbitrary_gain_step_dB.at(i) = std::max(C, D);
     }
+
+#endif
 
     return quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB);
 }
