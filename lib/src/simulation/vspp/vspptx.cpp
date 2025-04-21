@@ -79,7 +79,7 @@ void vspptx_t::meta_t::set_reasonable_default_values() {
     net_bandwidth_norm = 1.0f;
 
     tx_power_ant_0dBFS = 0.0f;
-    tx_into_rx_leakage_dB = 60.0f;
+    tx_into_rx_leakage_dB = 1000.0f;
 }
 
 }  // namespace dectnrp::simulation
