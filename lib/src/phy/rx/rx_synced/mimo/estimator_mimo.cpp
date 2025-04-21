@@ -39,7 +39,7 @@ estimator_mimo_t::estimator_mimo_t(const uint32_t N_RX_, const uint32_t N_TS_max
       N_RX(N_RX_),
       N_TS_max(N_TS_max_) {
     dectnrp_assert(0 < RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS, "must be positive");
-    dectnrp_assert(RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS <= 8, "too large");
+    dectnrp_assert(RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS <= 14, "too large");
     dectnrp_assert(RX_SYNCED_PARAM_MIMO_N_WIDEBAND_CELLS % 2 == 0, "must be even");
 
     for (std::size_t i = 0; i < N_RX; ++i) {
@@ -188,8 +188,13 @@ uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W
         // single beamforming matrix to test
         const auto& W_mat_single = W_mat[wm];
 
-        // sum of power across all RX antennas
+#if RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_HIGHEST_MIN_RX_POWER
+        float power_inner = 1000.0f;
+#elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MAX_RX_POWER
         float power_inner = 0.0f;
+#else
+#error "undefined mode 3 and 7 metric"
+#endif
 
         // RX antennas of opposite size
         for (std::size_t rx = 0; rx < N_RX_virt; ++rx) {
