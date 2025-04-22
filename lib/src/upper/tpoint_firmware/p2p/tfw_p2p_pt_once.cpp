@@ -123,7 +123,7 @@ void tfw_p2p_pt_t::init_simulation_if_detected() {
     const float firmware_id_f = static_cast<float>(tpoint_config.firmware_id);
 
     // place portable around origin
-    const auto offset = simulation::topology::position_t::from_polar(20.0f, firmware_id_f * 60.0f);
+    const auto offset = simulation::topology::position_t::from_polar(20.0f, firmware_id_f * 180.0f);
 
     // add movement
     hw_simulator->set_trajectory(

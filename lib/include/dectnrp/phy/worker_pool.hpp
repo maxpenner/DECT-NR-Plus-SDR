@@ -27,9 +27,9 @@
 #include <vector>
 
 #include "dectnrp/common/json_export.hpp"
+#include "dectnrp/common/json_switch.hpp"
 #include "dectnrp/common/layer/layer_unit.hpp"
 #include "dectnrp/phy/interfaces/layers_downwards/phy_radio.hpp"
-#include "dectnrp/phy/json_switch.hpp"
 #include "dectnrp/phy/pool/baton.hpp"
 #include "dectnrp/phy/pool/job_queue.hpp"
 #include "dectnrp/phy/pool/token.hpp"

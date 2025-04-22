@@ -28,11 +28,10 @@ extern "C" {
 #include "srsran/config.h"
 }
 
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "dectnrp/common/json_switch.hpp"
 #include "dectnrp/phy/harq/buffer_rx.hpp"
 #include "dectnrp/phy/harq/buffer_rx_plcf.hpp"
 #include "dectnrp/phy/interfaces/maclow_phy.hpp"
-#include "dectnrp/phy/json_switch.hpp"
 #include "dectnrp/phy/mix/mixer.hpp"
 #include "dectnrp/phy/rx/rx_pacer.hpp"
 #include "dectnrp/phy/rx/rx_synced/aoa/estimator_aoa.hpp"
@@ -53,6 +52,10 @@ extern "C" {
 // #define PHY_RX_RX_SYNCED_TCP_SCOPE
 #ifdef PHY_RX_RX_SYNCED_TCP_SCOPE
 #include "dectnrp/common/adt/tcp_scope.hpp"
+#endif
+
+#ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
+#include "dectnrp/external/nlohmann/json.hpp"
 #endif
 
 namespace dectnrp::phy {
@@ -109,7 +112,6 @@ class rx_synced_t final : public tx_rx_t, public rx_pacer_t {
         void reset_for_next_pcc();
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
-        /// JSON export of information to worker_tx_rx
         nlohmann::ordered_json get_json() const;
 #endif
 

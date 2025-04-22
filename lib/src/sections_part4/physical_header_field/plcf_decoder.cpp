@@ -152,4 +152,18 @@ const plcf_base_t* plcf_decoder_t::get_plcf_base(const uint32_t PLCF_type) const
     return nullptr;
 }
 
+#ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
+nlohmann::ordered_json plcf_decoder_t::get_json(const uint32_t PLCF_type) const {
+    const plcf_base_t* plcf_base = get_plcf_base(PLCF_type);
+
+    dectnrp_assert(plcf_base != nullptr, "plcf_base invalid");
+
+    nlohmann::ordered_json json_sync_report;
+    json_sync_report["PLCF_type"] = PLCF_type;
+    json_sync_report["HeaderFormat"] = plcf_base->get_HeaderFormat();
+
+    return json_sync_report;
+}
+#endif
+
 }  // namespace dectnrp::section4

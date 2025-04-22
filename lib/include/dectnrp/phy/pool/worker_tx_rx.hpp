@@ -23,9 +23,9 @@
 #include <memory>
 
 #include "dectnrp/common/json_export.hpp"
+#include "dectnrp/common/json_switch.hpp"
 #include "dectnrp/phy/interfaces/layers_downwards/phy_radio.hpp"
 #include "dectnrp/phy/interfaces/machigh_phy.hpp"
-#include "dectnrp/phy/json_switch.hpp"
 #include "dectnrp/phy/pool/token.hpp"
 #include "dectnrp/phy/pool/worker.hpp"
 #include "dectnrp/phy/rx/chscan/chscanner.hpp"
@@ -75,6 +75,7 @@ class worker_tx_rx_t final : public worker_t {
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
         void collect_and_write_json(const sync_report_t& sync_report,
+                                    const phy_maclow_t& phy_maclow,
                                     const maclow_phy_t& maclow_phy);
 #endif
 

@@ -196,7 +196,8 @@ void worker_tx_rx_t::work() {
                  * otherwise packet size is reset.
                  */
                 if (json_export != nullptr) {
-                    collect_and_write_json(std::get<sync_report_t>(job.content), maclow_phy);
+                    collect_and_write_json(
+                        std::get<sync_report_t>(job.content), phy_maclow, maclow_phy);
                 }
 #endif
 
@@ -322,6 +323,7 @@ void worker_tx_rx_t::run_tx_chscan(const tx_descriptor_vec_t& tx_descriptor_vec,
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
 void worker_tx_rx_t::collect_and_write_json(const sync_report_t& sync_report,
+                                            const phy_maclow_t& phy_maclow,
                                             const maclow_phy_t& maclow_phy) {
     nlohmann::ordered_json json;
 
@@ -352,13 +354,17 @@ void worker_tx_rx_t::collect_and_write_json(const sync_report_t& sync_report,
     json_sync_report["detection_rms"] = sync_report.detection_rms;
     json_sync_report["detection_metric"] = sync_report.detection_metric;
     json_sync_report["u"] = sync_report.u;
-    json_sync_report["b"] = sync_report.b;
     json_sync_report["coarse_peak_array"] = sync_report.coarse_peak_array.get_ary();
     json_sync_report["rms_array"] = sync_report.rms_array.get_ary();
     json_sync_report["cfo_f"] = sync_report.cfo_fractional_rad;
+    json_sync_report["b"] = sync_report.b;
     json_sync_report["cfo_i"] = sync_report.cfo_integer_rad;
+    json_sync_report["coarse_peak_time"] = sync_report.coarse_peak_time_64;
     json_sync_report["N_eff_TX"] = sync_report.N_eff_TX;
-    json_sync_report["fine_peak"] = sync_report.fine_peak_time_64;
+    json_sync_report["fine_peak_time"] = sync_report.fine_peak_time_64;
+    json_sync_report["sto_fractional"] = sync_report.sto_fractional;
+    json_sync_report["fine_peak_time_corrected_by_sto_fractional"] =
+        sync_report.fine_peak_time_corrected_by_sto_fractional_64;
 
     json["PHY"]["sync_report"] = json_sync_report;
     json["PHY"]["rx_synced"] = rx_synced->get_json();
@@ -366,7 +372,8 @@ void worker_tx_rx_t::collect_and_write_json(const sync_report_t& sync_report,
     // ####################################
     // MAC
 
-    json["MAC"]["empty"] = true;
+    json["MAC"]["plcf"] =
+        phy_maclow.pcc_report.plcf_decoder.get_json(maclow_phy.hp_rx->get_PLCF_type());
 
     // ####################################
     // save

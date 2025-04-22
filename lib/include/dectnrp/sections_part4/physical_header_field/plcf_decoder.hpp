@@ -23,10 +23,15 @@
 #include <array>
 #include <cstdint>
 
+#include "dectnrp/common/json_switch.hpp"
 #include "dectnrp/sections_part3/derivative/fec_cfg.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_10.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_20.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_21.hpp"
+
+#ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
+#include "dectnrp/external/nlohmann/json.hpp"
+#endif
 
 namespace dectnrp::section4 {
 
@@ -102,6 +107,10 @@ class plcf_decoder_t {
          * \return base pointer to PLCF with correct header format, otherwise nullptr
          */
         [[nodiscard]] const plcf_base_t* get_plcf_base(const uint32_t PLCF_type) const;
+
+#ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
+        nlohmann::ordered_json get_json(const uint32_t PLCF_type) const;
+#endif
 
     private:
         const uint32_t PacketLength_max;
