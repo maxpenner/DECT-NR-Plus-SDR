@@ -120,7 +120,7 @@ cd bin/
 sudo ./dectnrp "../configurations/basic_simulator/"
 ```
 
-The SDR is stopped by pressing control+c. The executable `dectnrp` requires exactly one argument, which is a path to a directory containing three configuration files `radio.json`, `phy.json` and `upper.json`. Each configuration file configures its respective layer(s). In the case of `upper.json`, this also implies the name of the firmware to load.
+The executable `dectnrp` requires exactly one argument, which is a path to a directory containing three configuration files `radio.json`, `phy.json` and `upper.json`. Each configuration file configures its respective layer(s). In the case of `upper.json`, this also implies the name of the firmware to load. The SDR is stopped by pressing control+c.
 
 The configuration files may also contain multiple instances of the SDR. In fact, each configuration file configures its layer(s) by listing one or multiple layer units:
 
@@ -291,21 +291,21 @@ The following tuning tips have been tested with Ubuntu and help achieving low-la
 
 ## Firmware
 
-The following firmware examples each demonstrate different capabilities of the SDR. Most examples have a small code base, only the firmware [p2p](#p2p) is more complex demonstrating a full duplex packet IP pipe with PLCF feedback reporting and beamforming.
+The following firmware examples each demonstrate different capabilities of the SDR. Most examples have a small code base, only the firmware [p2p](#p2p) is more complex demonstrating a full duplex IP packet pipe with PLCF feedback reporting and beamforming.
 
-### basic
+### [basic](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp)
 
 This is the smallest and simplest firmware possible. All virtual functions are empty except for a few asserts. This firmware uses a simulator on the radio layer, i.e. it does not require real radio hardware to be started. If a new firmware is written from scratch, a renamed copy of this firmware is the recommended starting point. 
 
-### chscanner
+### [chscanner](lib/include/dectnrp/upper/tpoint_firmware/chscanner/tfw_chscanner.hpp)
 
 This firmware starts channel measurements in regular intervals and writes the result to the log file.
 
-### loopback
+### [loopback](lib/include/dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp)
 
 This firmware is a simulation with a single device which loops its TX signal back into its own RX path. It is used to test the SDR functionality such as synchronization and packet error rate (PER) over SNR. The wireless channel model can be switched in `radio.json` from an AWGN channel to a doubly selective Rayleigh fading channel.
 
-### p2p
+### [p2p](lib/include/dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp)
 
 The P2P (point-to-point) firmware is started on two separate host computers, each connected to an USRP (in this example an X410). One combination of host and USRP acts as a fixed termination point (FT), while the other is the portable termination point (PT). The FT is connected to the internet and once both FT and PT are started, the PT can access the internet through the wireless DECT NR+ connection acting as pipe for IP packets.
 
@@ -364,7 +364,7 @@ sudo ./defaultgateway_dns.sh -a 172.23.180.101 -i tuntap_pt
 
 On the PT, internet access should now happen through the DECT NR+ connection. This can be verified by running a speed test and observing the spectrum with a spectrum analyzer, or by checking the packet count in the log file in [bin/](bin/).
 
-### rtt
+### [rtt](lib/include/dectnrp/upper/tpoint_firmware/rtt/tfw_rtt.hpp)
 
 This firmware tests the achievable round-trip time (RTT) between two instances of the SDR.
 
@@ -380,6 +380,6 @@ In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310
 "firmware_id": 1
 ```
 
-### timesync
+### [timesync](lib/include/dectnrp/upper/tpoint_firmware/timesync/tfw_timesync.hpp)
 
 This firmware measures the synchronization between the host system and the radio hardware if they are synchronized as described in [PPS Export and PTP](#pps-export-and-ptp). Synchronization must be established with an external device such as a Raspberry Pi.
