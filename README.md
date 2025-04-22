@@ -157,7 +157,7 @@ If you use this repository for any publication, please cite the repository accor
 3. If asserts are enabled, the program may stop abruptly if IQ samples are not processed fast enough. This is triggered by a backlog of unprocessed IQ samples within synchronization.
 4. For some combinations of operating system, CPU and DPDK, pressing control+c does not stop the SDR. The SDR process must then be stopped manually.
 5. With gcc 12 and above, a [warning is issued in relation to fmt](https://github.com/fmtlib/fmt/issues/3354) which becomes an error due to the compiler flag *Werror* being used by default. It can be disabled in [CMakeLists.txt](CMakeLists.txt) by turning off the option *ENABLE_WERROR*.
-6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclical rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
+6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclic rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
 
 ## To Do
 
@@ -170,13 +170,13 @@ If you use this repository for any publication, please cite the repository accor
 
 - [ ] **$\mu$** detection
 - [ ] integer CFO
-- [ ] increase look-ahead of sync_chunk_t
+- [ ] increase look-ahead of sync_chunk_t (increases latency)
 - [ ] add parallel queues in job_queue_t for asynchronous jobs
-- [ ] batch enqueuing into job queue
+- [ ] make job queue lockable by producer to enqueue multiple jobs (weakens encapsulation)
 - [ ] residual STO based on DRS
 - [ ] residual CFO based on STF
 - [ ] residual CFO based on DRS
-- [ ] AoA estimation based on DRS
+- [ ] [AoA estimation](https://en.wikipedia.org/wiki/Wi-Fi_positioning_system#Angle_of_arrival) based on DRS
 - [ ] MIMO modes with two or more spatial streams
 - [ ] 1024-QAM
 
