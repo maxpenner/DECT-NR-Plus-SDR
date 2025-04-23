@@ -2,7 +2,7 @@
   <img src="docs/logo.png" style="width: 100%; background-color: transparent;" alt="logo.png"/>
 </p>
 
-This repository contains a work-in-progress SDR implementation of DECT NR+ ([ETSI TS 103 636, Part 1 to 5](https://www.etsi.org/committee/1394-dect)). DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](https://www.etsi.org/newsroom/press-releases/1988-2021-10-world-s-first-non-cellular-5g-technology-etsi-dect-2020-gets-itu-r-approval-setting-example-of-new-era-connectivity). Introductions are available at [ETSI](https://www.etsi.org/technologies/dect), [DECT Forum](https://www.dect.org/nrplus) and [Wikipedia](https://en.wikipedia.org/wiki/DECT-2020).
+This repository contains my work-in-progress SDR implementation of DECT NR+ ([ETSI TS 103 636, Part 1 to 5](https://www.etsi.org/committee/1394-dect)). DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](https://www.etsi.org/newsroom/press-releases/1988-2021-10-world-s-first-non-cellular-5g-technology-etsi-dect-2020-gets-itu-r-approval-setting-example-of-new-era-connectivity). Introductions are available at [ETSI](https://www.etsi.org/technologies/dect), [DECT Forum](https://www.dect.org/nrplus) and [Wikipedia](https://en.wikipedia.org/wiki/DECT-2020).
 
 While commonly referred to as DECT NR+, the standard's official designation is DECT-2020 New Radio (NR).
 
@@ -16,7 +16,7 @@ While commonly referred to as DECT NR+, the standard's official designation is D
 6. [Citation](#citation)
 7. [Limitations of an SDR with Host Processing](#limitations-of-an-sdr-with-host-processing)
 8. [Known Issues](#known-issues)
-9. [To Do](#to-do)
+9. [Future Work](#future-work)
 
 Advanced Topics
 
@@ -159,7 +159,7 @@ If you use this repository for any publication, please cite the repository accor
 5. With gcc 12 and above, a [warning is issued in relation to fmt](https://github.com/fmtlib/fmt/issues/3354) which becomes an error due to the compiler flag *Werror* being used by default. It can be disabled in [CMakeLists.txt](CMakeLists.txt) by turning off the option *ENABLE_WERROR*.
 6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclic rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
 
-## To Do
+## Future Work
 
 ### Radio Layer
 
@@ -223,7 +223,7 @@ One drawback of a software AGC is that packets can be masked. This happens when 
 |     4     |          10.42          |           20.83           |
 |     8     |          10.42          |           10.42           |
 
-In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels.
+In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. 10 dB. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
 
 ## Resampling
 

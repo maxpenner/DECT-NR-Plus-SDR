@@ -231,7 +231,7 @@ std::vector<cf_t> drs_t::get_Y_DRS_i_single(const uint32_t b_idx, const uint32_t
 
     // fill y_DRS_i
 
-    // error in standard, should be  t<4, so t=0,1,2 and 3
+    // error in standard, should be t<4, so t=0,1,2 and 3
     // if(t<=4){
     if (t < 4) {
         for (uint32_t i = 0; i <= N_b_OCC / 4 - 1; ++i) {
@@ -240,7 +240,7 @@ std::vector<cf_t> drs_t::get_Y_DRS_i_single(const uint32_t b_idx, const uint32_t
             y_DRS_i.push_back(value);
         }
     }
-    // error in standart, should be  t>=4, so t=4, 5, 6 and 7
+    // error in standard, should be t>=4, so t=4, 5, 6 and 7
     // else if(t>4){
     else if (t >= 4) {
         for (uint32_t i = 0; i <= N_b_OCC / 4 - 1; ++i) {

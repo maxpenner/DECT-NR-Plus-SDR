@@ -59,7 +59,7 @@ class worker_sync_t final : public worker_t {
          */
         void warmup();
 
-        static constexpr std::size_t warmup_sec{2};
+        static constexpr std::size_t warmup_sec{1};
 
         void enqueue_job_nto(const sync_report_t& sync_report);
 

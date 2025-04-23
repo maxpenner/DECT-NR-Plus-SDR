@@ -72,7 +72,6 @@ int main(int argc, char** argv) {
     dectnrp_log_inf("configuration_directory {}", configuration_directory);
 
 #ifdef ASSERT_ENABLED
-    // verify SIMD libraries use same alignment
     dectnrp::common::simd::assert_simd_libs_use_same_alignment();
 #endif
 

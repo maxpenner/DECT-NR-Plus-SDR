@@ -49,7 +49,7 @@ class tpoint_t : public common::layer_unit_t {
          * \brief This class tpoint_t (tpoint = termination point) is a base class every firmware
          * has to derive from. It declares the absolute minimum interface of functions and members
          * that every firmware must implement. Additional methods and members should not be included
-         * here, but in deriving classes/firmwares.
+         * here, but in deriving classes/firmware.
          *
          * To load a new firmware at SDR startup, its class deriving from tpoint_t must have a
          * unique static member "firmware_name" of type std::string, and it must be added to the
@@ -166,10 +166,10 @@ class tpoint_t : public common::layer_unit_t {
 
     protected:
         /**
-         * \brief Once the entire stack (radio, PHY and upper) has been fully initialized and all
-         * constructors called, this function is called by the main thread of the executable
-         * dectnrp. It can be used to start threads. Most firmwares will need to start threads for
-         * the application layer interface.
+         * \brief For any firmware, this function is always called first. It is called by the main
+         * thread once the entire stack (radio, PHY and upper) has been fully initialized and all
+         * constructors called. It can be used to start threads. Most firmware will need to start
+         * threads for the application layer interface.
          *
          * \return lines to log
          */
@@ -179,10 +179,10 @@ class tpoint_t : public common::layer_unit_t {
          * \brief Function will be called by the main thread when the SDR is supposed to shut down
          * because the user pressed ctrl+c. A firmware may block this function until all DECT NR+
          * connections have been shut down gracefully. After that, all job queues should be made
-         * impermeable so that the work-function will no longer be called. Lastly, all threads must
-         * be shut down.
+         * impermeable so that the work-function will no longer be called after processing the
+         * remaining jobs. Lastly, all threads must be shut down.
          *
-         * \return
+         * \return lines to log
          */
         virtual std::vector<std::string> stop_threads() override = 0;
 
@@ -190,8 +190,9 @@ class tpoint_t : public common::layer_unit_t {
         // Radio Layer + PHY
 
         /**
-         * \brief Vector giving MAC layer control over lower part of stack. Each element represents
-         * one combination of PHY plus radio layer. Thus, a single firmware can control multiple
+         * \brief This member gives the MAC layer control over the lower part of stack. In can
+         * contain multiple lower stacks in mac_lower.lower_ctrl_vec, each representing one
+         * combination of PHY plus radio layer. Thus, a single firmware can control multiple
          * hardware radios.
          */
         phy::mac_lower_t mac_lower;
@@ -259,7 +260,7 @@ class tpoint_t : public common::layer_unit_t {
          * \param PLCF_type PLCF type to decode
          * \param network_id network ID for scrambling on PHY
          * \param rv redundancy version for decoding on PHY
-         * \param frx finale action applied to HARQ buffer after PHY used it
+         * \param frx final action applied to HARQ buffer after PHY used it
          * \param mph handle to identify PCC when PHY calls with decoded PDC
          * \param process_id id of HARQ process created, must not be nullptr if kept running
          * \return
@@ -277,7 +278,7 @@ class tpoint_t : public common::layer_unit_t {
          *
          * \param process_id HARQ process id
          * \param rv redundancy version
-         * \param frx finale action applied to HARQ buffer after PHY used it
+         * \param frx final action applied to HARQ buffer after PHY used it
          * \param mph handle to identify PCC when PHY calls with decoded PDC
          * \return
          */
