@@ -24,21 +24,15 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
-#include <fstream>
-#include <iomanip>
 #include <limits>
-#include <sstream>
 
 #include "dectnrp/common/adt/freq_shift.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/constants.hpp"
-#include "dectnrp/external/nlohmann/json.hpp"
 #include "dectnrp/phy/rx/sync/sync_param.hpp"
 
 namespace dectnrp::upper::tfw::loopback {
-
-const std::string tfw_loopback_t::firmware_name("loopback");
 
 tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {
@@ -64,7 +58,8 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     dectnrp_assert(hw_simulator != nullptr, "hw not simulator");
 
     // called from tpoint firmware, thread-safe
-    // hw_simulator->set_position(const simulation::topology::position_t position);
+    hw_simulator->set_trajectory(simulation::topology::trajectory_t(
+        simulation::topology::position_t::from_cartesian(0.0f, 0.0f, 0.0f)));
     hw_simulator->set_net_bandwidth_norm(1.0f / static_cast<float>(worker_pool_config.os_min));
     hw_simulator->set_tx_into_rx_leakage_dB(0.0f);
     hw_simulator->set_rx_noise_figure_dB(0.0f);
@@ -124,8 +119,8 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     // ##################################################
     // measurement logic
 
-    state = STATE_t::SET_MCS;
-    state_time_reference_64 = 0;
+    state = STATE_t::SET_CHANNEL_SNR;
+    state_time_reference_64 = common::adt::UNDEFINED_EARLY_64;
 
     // ##################################################
     // What do we measure?
@@ -135,30 +130,10 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     snr_stop = 10;
     snr = snr_start;
 
-    mcs_index_start = 1;
-    mcs_index_end = 2;
-    mcs_index = mcs_index_start;
-    mcs_cnt = 0;
+    nof_experiment = 50;
+    nof_experiment_cnt = 0;
 
-    nof_packets = 50;
-
-    reset_for_new_run();
-
-    for (uint32_t i = mcs_index_start; i <= mcs_index_end; ++i) {
-        TB_bits.push_back(0);
-        PER_pcc_crc.push_back(std::vector<float>());
-        PER_pcc_crc_and_plcf.push_back(std::vector<float>());
-        PER_pdc_crc.push_back(std::vector<float>());
-    }
-
-    // ##################################################
-    // additional debugging
-
-    packet_tx_time_multiple = 1;
     cfo_symmetric_range_subc_multiple = 1.75f;
-
-    // ##################################################
-    // utilities
 
     randomgen.shuffle();
 }
@@ -167,6 +142,8 @@ void tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
     // start some time in the near future
     state_time_reference_64 = start_time_64 + duration_lut.get_N_samples_from_duration(
                                                   section3::duration_ec_t::ms001, 123);
+
+    reset_result_counter_for_next_snr();
 }
 
 phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
@@ -182,26 +159,13 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
 
     switch (state) {
         using enum STATE_t;
-        case SET_MCS:
-            {
-                psdef.mcs_index = mcs_index;
-
-                plcf_10.DFMCS = psdef.mcs_index;
-                plcf_20.DFMCS = psdef.mcs_index;
-                plcf_21.DFMCS = psdef.mcs_index;
-
-                state = SET_SNR;
-
-                break;
-            }
-
-        case SET_SNR:
+        case SET_CHANNEL_SNR:
             {
                 hw_simulator->set_rx_snr_in_net_bandwidth_norm_dB(snr);
 
-                reset_for_new_run();
+                reset_result_counter_for_next_snr();
 
-                state = SET_SMALL_SCALE_FADING;
+                state = SET_CHANNEL_SMALL_SCALE_FADING;
 
                 state_time_reference_64 = now_64 + duration_lut.get_N_samples_from_duration(
                                                        section3::duration_ec_t::ms001, 5);
@@ -209,12 +173,11 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
                 break;
             }
 
-        case SET_SMALL_SCALE_FADING:
+        case SET_CHANNEL_SMALL_SCALE_FADING:
             {
-                // randomize channel
                 hw_simulator->wchannel_randomize_small_scale();
 
-                state = GENERATE_PACKET;
+                state = EXPERIMENT_GENERATE_PACKETS;
 
                 state_time_reference_64 = now_64 + duration_lut.get_N_samples_from_duration(
                                                        section3::duration_ec_t::ms001, 5);
@@ -222,72 +185,53 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
                 break;
             }
 
-        case GENERATE_PACKET:
+        case EXPERIMENT_GENERATE_PACKETS:
             {
-                generate_packet(now_64, machigh_phy);
+                generate_single_experiment_at_current_snr(now_64, machigh_phy);
 
-                ++nof_packets_cnt;
+                ++nof_experiment_cnt;
 
-                if (nof_packets_cnt < nof_packets) {
-                    state = SET_SMALL_SCALE_FADING;
+                if (nof_experiment_cnt < nof_experiment) {
+                    state = SET_CHANNEL_SMALL_SCALE_FADING;
                 } else {
-                    state = SAVE_RESULTS;
+                    state = EXPERIMENT_SAVE_RESULTS;
                 }
 
-                // must include the entire packet
+                // should be much longer than a single experiment
                 state_time_reference_64 = now_64 + duration_lut.get_N_samples_from_duration(
                                                        section3::duration_ec_t::ms001, 13);
 
                 break;
             }
 
-        case SAVE_RESULTS:
+        case EXPERIMENT_SAVE_RESULTS:
             {
-                dectnrp_assert(nof_packets_cnt == nof_packets, "incorrect number of packets");
+                dectnrp_assert(nof_experiment_cnt == nof_experiment,
+                               "incorrect number of experiments");
 
-                const float per_pcc_crc = 1.0f - float(n_pcc_crc) / float(nof_packets);
-                const float per_pcc_crc_and_plcf =
-                    1.0f - float(n_pcc_crc_and_plcf) / float(nof_packets);
-                const float per_pdc_crc = 1.0f - float(n_pdc_crc) / float(nof_packets);
+                save_result_of_current_snr();
 
-                PER_pcc_crc[mcs_cnt].push_back(per_pcc_crc);
-                PER_pcc_crc_and_plcf[mcs_cnt].push_back(per_pcc_crc_and_plcf);
-                PER_pdc_crc[mcs_cnt].push_back(per_pdc_crc);
-
-                dectnrp_log_inf(
-                    "MCS={} SNR={} nof_packets={} | per_pcc_crc={} per_pcc_crc_and_plcf={} per_pdc_crc={} | snr_max={} snr_min={}",
-                    mcs_index,
-                    snr,
-                    nof_packets,
-                    per_pcc_crc,
-                    per_pcc_crc_and_plcf,
-                    per_pdc_crc,
-                    snr_max,
-                    snr_min);
-
-                state = SETUP_NEXT_MEASUREMENT;
+                state = SET_PARAMETER;
 
                 break;
             }
 
-        case SETUP_NEXT_MEASUREMENT:
+        case SET_PARAMETER:
             {
                 snr += snr_step;
 
-                state = SET_MCS;
+                state = SET_CHANNEL_SNR;
 
                 // abort condition for SNR
                 if (snr > snr_stop) {
                     snr = snr_start;
-                    ++mcs_index;
-                    ++mcs_cnt;
 
                     dectnrp_log_inf(" ");
 
-                    // global abort condition for MCS
-                    if (mcs_index > mcs_index_end) {
+                    // abort condition for outer parameter
+                    if (set_next_parameter_or_go_to_dead_end()) {
                         state = DEAD_END;
-                        dectnrp_log_inf("All measurements finished.");
+                        dectnrp_log_inf("all measurements finished");
                     }
                 }
 
@@ -304,43 +248,6 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
     return machigh_phy;
 }
 
-phy::maclow_phy_t tfw_loopback_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
-    ++n_pcc_crc;
-
-    // base pointer to extract PLCF_type
-    const auto* plcf_base = phy_maclow.pcc_report.plcf_decoder.get_plcf_base(PLCF_type);
-
-    // is this the correct PLCF type?
-    if (plcf_base == nullptr) {
-        return phy::maclow_phy_t();
-    }
-
-    // is this the correct header type?
-    if (plcf_base->get_HeaderFormat() != PLCF_type_header_format) {
-        return phy::maclow_phy_t();
-    }
-
-    ++n_pcc_crc_and_plcf;
-
-    return worksub_pcc2pdc(phy_maclow,
-                           PLCF_type,
-                           identity.NetworkID,
-                           0,
-                           phy::harq::finalize_rx_t::reset_and_terminate,
-                           phy::maclow_phy_handle_t());
-}
-
-phy::machigh_phy_t tfw_loopback_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
-    if (phy_machigh.pdc_report.crc_status) {
-        ++n_pdc_crc;
-
-        snr_max = std::max(snr_max, phy_machigh.pdc_report.snr_dB);
-        snr_min = std::min(snr_min, phy_machigh.pdc_report.snr_dB);
-    }
-
-    return phy::machigh_phy_t();
-}
-
 phy::machigh_phy_t tfw_loopback_t::work_upper(const upper::upper_report_t& upper_report) {
     return phy::machigh_phy_t();
 }
@@ -349,30 +256,17 @@ phy::machigh_phy_tx_t tfw_loopback_t::work_chscan_async(const phy::chscan_t& chs
     return phy::machigh_phy_tx_t();
 }
 
-std::vector<std::string> tfw_loopback_t::start_threads() {
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
-}
+std::vector<std::string> tfw_loopback_t::start_threads() { return std::vector<std::string>(); }
 
 std::vector<std::string> tfw_loopback_t::stop_threads() {
     if (state == STATE_t::DEAD_END) {
-        save_to_files();
+        save_all_results_to_file();
     }
 
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
+    return std::vector<std::string>();
 }
 
-void tfw_loopback_t::reset_for_new_run() {
-    nof_packets_cnt = 0;
-
-    n_pcc_crc = 0;
-    n_pcc_crc_and_plcf = 0;
-    n_pdc_crc = 0;
-
-    snr_max = -100.0e6;
-    snr_min = -snr_max;
-}
-
-void tfw_loopback_t::generate_packet(const int64_t now_64, phy::machigh_phy_t& machigh_phy) {
+void tfw_loopback_t::generate_packet(const int64_t tx_time_64, phy::machigh_phy_t& machigh_phy) {
     // request harq process
     auto* hp_tx = hpp->get_process_tx(
         PLCF_type, identity.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
@@ -406,9 +300,6 @@ void tfw_loopback_t::generate_packet(const int64_t now_64, phy::machigh_phy_t& m
         a_tb[i] = std::rand() % 256;
     }
 
-    // save number of bits in transport block directly into results container
-    TB_bits[mcs_cnt] = packet_sizes.N_TB_bits;
-
     // pick beamforming codebook index
     uint32_t codebook_index = 0;
 
@@ -426,60 +317,14 @@ void tfw_loopback_t::generate_packet(const int64_t now_64, phy::machigh_phy_t& m
         .GI_percentage = 25};
 
     // radio meta
-    radio::buffer_tx_meta_t buffer_tx_meta = {
-        .tx_order_id = tx_order_id,
-        .tx_time_64 = now_64 + hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround)};
-
-    // add a random jitter to the transmission time
-    buffer_tx_meta.tx_time_64 += static_cast<int64_t>(randomgen.randi(
-        0,
-        static_cast<uint32_t>(
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::subslot_u1_001))));
-
-    // force transmission time to multiple of packet_tx_time_multiple
-    const int64_t res = buffer_tx_meta.tx_time_64 % packet_tx_time_multiple;
-    if (res != 0) {
-        buffer_tx_meta.tx_time_64 += packet_tx_time_multiple - res;
-    }
+    const radio::buffer_tx_meta_t buffer_tx_meta = {.tx_order_id = tx_order_id,
+                                                    .tx_time_64 = tx_time_64};
 
     ++tx_order_id;
 
     // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
-}
-
-void tfw_loopback_t::save_to_files() const {
-    // create SNR vector
-    std::vector<float> snr_vec;
-    for (float snr_ = snr_start; snr_ <= snr_stop; snr_ += snr_step) {
-        snr_vec.push_back(snr_);
-    }
-
-    // save one file for every MCS
-    uint32_t mcs_cnt_local = 0;
-    for (uint32_t i = mcs_index_start; i <= mcs_index_end; ++i) {
-        // save all data to json file
-        std::ostringstream filename;
-        filename << "rx_loopback_MCS_" << std::setw(4) << std::setfill('0') << i;
-
-        nlohmann::ordered_json j_packet_data;
-
-        j_packet_data["nof_packets"] = nof_packets;
-        j_packet_data["MCS_index"] = i;
-        j_packet_data["TB_bits"] = TB_bits[mcs_cnt_local];
-
-        j_packet_data["data"]["snr_vec"] = snr_vec;
-        j_packet_data["data"]["PER_pcc_crc"] = PER_pcc_crc[mcs_cnt_local];
-        j_packet_data["data"]["PER_pcc_crc_and_plcf"] = PER_pcc_crc_and_plcf[mcs_cnt_local];
-        j_packet_data["data"]["PER_pdc_crc"] = PER_pdc_crc[mcs_cnt_local];
-
-        std::ofstream out_file(filename.str());
-        out_file << std::setw(4) << j_packet_data << std::endl;
-        out_file.close();
-
-        ++mcs_cnt_local;
-    }
 }
 
 }  // namespace dectnrp::upper::tfw::loopback

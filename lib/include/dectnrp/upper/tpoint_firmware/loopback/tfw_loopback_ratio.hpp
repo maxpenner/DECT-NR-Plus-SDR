@@ -1,0 +1,80 @@
+/*
+ * Copyright 2023-2025 Maxim Penner
+ *
+ * This file is part of DECTNRP.
+ *
+ * DECTNRP is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of
+ * the License, or (at your option) any later version.
+ *
+ * DECTNRP is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
+ *
+ * A copy of the GNU Affero General Public License can be found in
+ * the LICENSE file in the top-level directory of this distribution
+ * and at http://www.gnu.org/licenses/.
+ */
+
+#pragma once
+
+#include "dectnrp/common/multidim.hpp"
+#include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp"
+
+namespace dectnrp::upper::tfw::loopback {
+
+class tfw_loopback_ratio_t final : public tfw_loopback_t {
+    public:
+        tfw_loopback_ratio_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
+        ~tfw_loopback_ratio_t() = default;
+
+        tfw_loopback_ratio_t() = delete;
+        tfw_loopback_ratio_t(const tfw_loopback_ratio_t&) = delete;
+        tfw_loopback_ratio_t& operator=(const tfw_loopback_ratio_t&) = delete;
+        tfw_loopback_ratio_t(tfw_loopback_ratio_t&&) = delete;
+        tfw_loopback_ratio_t& operator=(tfw_loopback_ratio_t&&) = delete;
+
+        static const std::string firmware_name;
+
+        phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override;
+        phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
+
+    private:
+        // MCS range to measure
+        uint32_t mcs_index_start;
+        uint32_t mcs_index_end;
+        uint32_t mcs_index;
+        uint32_t mcs_cnt;
+
+        /// at every SNR the success metrics are CRC hits and the PLCF content
+        uint32_t n_pcc_crc;
+        uint32_t n_pcc_crc_and_plcf;
+        uint32_t n_pdc_crc;
+
+        /// at every SNR we also save the measured SNR of the PDC
+        float snr_max;
+        float snr_min;
+
+        /// global results container to later write results to file
+        common::vec2d<float> PER_pcc_crc;
+        common::vec2d<float> PER_pcc_crc_and_plcf;
+        common::vec2d<float> PER_pdc_crc;
+
+        /// transmission time to a specific sample multiple
+        int64_t packet_tx_time_multiple;
+
+        void reset_result_counter_for_next_snr() override final;
+
+        void generate_single_experiment_at_current_snr(
+            const int64_t now_64, phy::machigh_phy_t& machigh_phy) override final;
+
+        void save_result_of_current_snr() override final;
+
+        bool set_next_parameter_or_go_to_dead_end() override final;
+
+        void save_all_results_to_file() const override final;
+};
+
+}  // namespace dectnrp::upper::tfw::loopback

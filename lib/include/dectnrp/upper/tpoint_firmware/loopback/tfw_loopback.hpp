@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include "dectnrp/common/multidim.hpp"
 #include "dectnrp/common/randomgen.hpp"
 #include "dectnrp/radio/hw_simulator.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
@@ -28,7 +27,7 @@
 
 namespace dectnrp::upper::tfw::loopback {
 
-class tfw_loopback_t final : public tpoint_t {
+class tfw_loopback_t : public tpoint_t {
     public:
         tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
         ~tfw_loopback_t() = default;
@@ -39,16 +38,14 @@ class tfw_loopback_t final : public tpoint_t {
         tfw_loopback_t(tfw_loopback_t&&) = delete;
         tfw_loopback_t& operator=(tfw_loopback_t&&) = delete;
 
-        static const std::string firmware_name;
-
         void work_start_imminent(const int64_t start_time_64) override;
         phy::machigh_phy_t work_regular(const phy::phy_mac_reg_t& phy_mac_reg) override;
-        phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override;
-        phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
+        // phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override;
+        // phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
         phy::machigh_phy_t work_upper(const upper::upper_report_t& upper_report) override;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override;
 
-    private:
+    protected:
         std::vector<std::string> start_threads() override final;
         std::vector<std::string> stop_threads() override final;
 
@@ -60,9 +57,9 @@ class tfw_loopback_t final : public tpoint_t {
         // ##################################################
         // MAC Layer
 
-        section3::packet_sizes_def_t psdef;
-
         section4::mac_architecture::identity_t identity;
+
+        section3::packet_sizes_def_t psdef;
 
         section4::plcf_10_t plcf_10;
         section4::plcf_20_t plcf_20;
@@ -76,12 +73,11 @@ class tfw_loopback_t final : public tpoint_t {
         // measurement logic
 
         enum class STATE_t {
-            SET_MCS,
-            SET_SNR,
-            SET_SMALL_SCALE_FADING,
-            GENERATE_PACKET,
-            SAVE_RESULTS,
-            SETUP_NEXT_MEASUREMENT,
+            SET_CHANNEL_SNR,
+            SET_CHANNEL_SMALL_SCALE_FADING,
+            EXPERIMENT_GENERATE_PACKETS,
+            EXPERIMENT_SAVE_RESULTS,
+            SET_PARAMETER,
             DEAD_END
         } state;
 
@@ -89,55 +85,39 @@ class tfw_loopback_t final : public tpoint_t {
         int64_t state_time_reference_64;
 
         // ##################################################
-        // What do we measure?
+        // SNR range and number of experiments per SNR
 
-        /// we measure PER over SNR ....
+        /// we measure PER over SNR regardless of the mode
         float snr_start;
         float snr_step;
         float snr_stop;
         float snr;
 
-        /// ... and MCS
-        uint32_t mcs_index_start;
-        uint32_t mcs_index_end;
-        uint32_t mcs_index;  // current MCS index, first value can be >0
-        uint32_t mcs_cnt;    // current MCS counter, always starts with 0
+        /// at every SNR the same number of experiments is conducted
+        uint32_t nof_experiment;
+        uint32_t nof_experiment_cnt;
 
-        /// at every SNR and each MCS, we measure the same number of packets
-        uint32_t nof_packets;
-        uint32_t nof_packets_cnt;
-
-        /// At every SNR and each MCS, we count CRC successes. We don't compare bit by bit.
-        uint32_t n_pcc_crc;
-        uint32_t n_pcc_crc_and_plcf;
-        uint32_t n_pdc_crc;
-
-        /// at every SNR and each MCS, we also save the measured SNR of the PDC
-        float snr_max;
-        float snr_min;
-
-        /// to later save the results in a file, we write them to these containers
-        std::vector<uint32_t> TB_bits;
-        common::vec2d<float> PER_pcc_crc;
-        common::vec2d<float> PER_pcc_crc_and_plcf;
-        common::vec2d<float> PER_pdc_crc;
-
-        // ##################################################
-        // additional debugging
-
-        /// for transmission time to a specific sample multiple
-        int64_t packet_tx_time_multiple;
-
-        /// fractional CFO is two subcarriers
+        /// fractional CFO
         float cfo_symmetric_range_subc_multiple;
 
-        // ##################################################
-        // utilities
-
+        /// random number generation
         common::randomgen_t randomgen;
-        void reset_for_new_run();
-        void generate_packet(const int64_t now_64, phy::machigh_phy_t& machigh_phy);
-        void save_to_files() const;
+
+        void generate_packet(const int64_t tx_time_64, phy::machigh_phy_t& machigh_phy);
+
+        // ##################################################
+        // virtual functions called in state machine
+
+        virtual void reset_result_counter_for_next_snr() = 0;
+
+        virtual void generate_single_experiment_at_current_snr(const int64_t now_64,
+                                                               phy::machigh_phy_t& machigh_phy) = 0;
+
+        virtual void save_result_of_current_snr() = 0;
+
+        virtual bool set_next_parameter_or_go_to_dead_end() = 0;
+
+        virtual void save_all_results_to_file() const = 0;
 };
 
 }  // namespace dectnrp::upper::tfw::loopback

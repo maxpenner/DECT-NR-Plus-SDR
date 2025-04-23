@@ -3,7 +3,7 @@
   {
     "hw_name": "simulator",
     "nof_buffer_tx": 4,
-    "turnaround_time_us": 500,
+    "turnaround_time_us": 1000,
     "tx_burst_leading_zero_us": 0,
     "tx_time_advance_smpl": 0,
     "rx_prestream_ms": 0,

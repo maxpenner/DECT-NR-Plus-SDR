@@ -26,7 +26,8 @@
 #include "dectnrp/phy/pool/token.hpp"
 #include "dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp"
 #include "dectnrp/upper/tpoint_firmware/chscanner/tfw_chscanner.hpp"
-#include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp"
+#include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback_ratio.hpp"
+#include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback_snr.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_ft.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_pt.hpp"
 #include "dectnrp/upper/tpoint_firmware/rtt/tfw_rtt.hpp"
@@ -160,8 +161,10 @@ void upper_t::add_tpoint(const tpoint_config_t& tpoint_config, phy::mac_lower_t&
         layer_unit_vec.push_back(std::make_unique<tfw::basic::tfw_basic_t>(TFW_ARGS));
     } else if (TFW_NAME_STARTS_WITH(tfw::chscanner::tfw_chscanner_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::chscanner::tfw_chscanner_t>(TFW_ARGS));
-    } else if (TFW_NAME_STARTS_WITH(tfw::loopback::tfw_loopback_t::firmware_name)) {
-        layer_unit_vec.push_back(std::make_unique<tfw::loopback::tfw_loopback_t>(TFW_ARGS));
+    } else if (TFW_NAME_STARTS_WITH(tfw::loopback::tfw_loopback_ratio_t::firmware_name)) {
+        layer_unit_vec.push_back(std::make_unique<tfw::loopback::tfw_loopback_ratio_t>(TFW_ARGS));
+    } else if (TFW_NAME_STARTS_WITH(tfw::loopback::tfw_loopback_snr_t::firmware_name)) {
+        layer_unit_vec.push_back(std::make_unique<tfw::loopback::tfw_loopback_snr_t>(TFW_ARGS));
     } else if (TFW_NAME_STARTS_WITH(tfw::p2p::tfw_p2p_ft_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::p2p::tfw_p2p_ft_t>(TFW_ARGS));
     } else if (TFW_NAME_STARTS_WITH(tfw::p2p::tfw_p2p_pt_t::firmware_name)) {
