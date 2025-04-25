@@ -132,6 +132,7 @@ class autocorrelator_peak_t final : public correlator_t {
 
 #ifdef PHY_RX_AUTOCORRELATOR_PEAK_JSON_EXPORT
         common::vec2d<float> waveform_power;
+        common::vec2d<float> waveform_rms;
         common::vec2d<float> waveform_metric;
         common::vec2d<float> waveform_metric_smooth;
         std::vector<uint32_t> waveform_metric_max_idx;

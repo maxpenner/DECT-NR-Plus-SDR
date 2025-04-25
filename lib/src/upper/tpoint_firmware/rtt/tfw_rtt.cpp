@@ -314,7 +314,7 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
                                     .DAC_scale = agc_tx.get_ofdm_amplitude_factor(),
                                     .iq_phase_rad = 0.0f,
                                     .iq_phase_increment_s2s_post_resampling_rad = 0.0f,
-                                    .GI_percentage = 25};
+                                    .GI_percentage = 5};
 
     // radio meta
     radio::buffer_tx_meta_t buffer_tx_meta = {

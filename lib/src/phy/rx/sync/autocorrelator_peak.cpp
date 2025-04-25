@@ -123,10 +123,13 @@ void autocorrelator_peak_t::set_initial_state(const uint32_t detection_time_loca
 #ifdef PHY_RX_AUTOCORRELATOR_PEAK_JSON_EXPORT
     waveform_power.clear();
     waveform_power.resize(nof_antennas_limited);
+    waveform_rms.clear();
+    waveform_rms.resize(nof_antennas_limited);
     waveform_metric.clear();
     waveform_metric.resize(nof_antennas_limited);
     waveform_metric_smooth.clear();
     waveform_metric_smooth.resize(nof_antennas_limited);
+    waveform_metric_max_idx.clear();
     waveform_metric_max_idx.resize(nof_antennas_limited);
 #endif
 }
@@ -182,6 +185,8 @@ bool autocorrelator_peak_t::search_by_correlation(const uint32_t localbuffer_cnt
 
 #ifdef PHY_RX_AUTOCORRELATOR_PEAK_JSON_EXPORT
             waveform_power[ant_idx].push_back(power);
+            waveform_rms[ant_idx].push_back(
+                std::sqrt(power / static_cast<float>(stf_bos_length_samples)));
             waveform_metric[ant_idx].push_back(metric);
             waveform_metric_smooth[ant_idx].push_back(metric_smoother[ant_idx].get_mean());
 #endif
@@ -391,7 +396,7 @@ void autocorrelator_peak_t::write_all_data_to_json(const sync_report_t& sync_rep
     j_packet_data["nof_antennas_limited"] = nof_antennas_limited;
 
     j_packet_data["sync_report"]["cfo_fractional_rad"] = sync_report.cfo_fractional_rad;
-    j_packet_data["sync_report"]["rms"] = sync_report.rms;
+    j_packet_data["sync_report"]["rms_array"] = sync_report.rms_array.get_ary();
 
     auto concatenate = [](const common::vec2d<float>& vec) {
         // concatenate metric vec of each antenna
@@ -406,6 +411,7 @@ void autocorrelator_peak_t::write_all_data_to_json(const sync_report_t& sync_rep
     };
 
     j_packet_data["waveform_power"] = concatenate(waveform_power);
+    j_packet_data["waveform_rms"] = concatenate(waveform_rms);
     j_packet_data["waveform_metric"] = concatenate(waveform_metric);
     j_packet_data["waveform_metric_smooth"] = concatenate(waveform_metric_smooth);
     j_packet_data["waveform_metric_max_idx"] = waveform_metric_max_idx;

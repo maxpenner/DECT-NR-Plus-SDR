@@ -20,7 +20,10 @@
 
 #pragma once
 
+#include <vector>
+
 #include "dectnrp/common/multidim.hpp"
+#include "dectnrp/upper/tpoint_firmware/loopback/result.hpp"
 #include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp"
 
 namespace dectnrp::upper::tfw::loopback {
@@ -42,28 +45,11 @@ class tfw_loopback_snr_t final : public tfw_loopback_t {
         phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
 
     private:
-        // MCS range to measure
-        uint32_t mcs_index_start;
-        uint32_t mcs_index_end;
-        uint32_t mcs_index;
-        uint32_t mcs_cnt;
+        /// MCS range to measure
+        std::vector<uint32_t> mcs_vec;
 
-        /// at every SNR the success metrics are CRC hits and the PLCF content
-        uint32_t n_pcc_crc;
-        uint32_t n_pcc_crc_and_plcf;
-        uint32_t n_pdc_crc;
-
-        /// at every SNR we also save the measured SNR of the PDC
-        float snr_max;
-        float snr_min;
-
-        /// global results container to later write results to file
-        common::vec2d<float> PER_pcc_crc;
-        common::vec2d<float> PER_pcc_crc_and_plcf;
-        common::vec2d<float> PER_pdc_crc;
-
-        /// transmission time to a specific sample multiple
-        int64_t packet_tx_time_multiple;
+        /// measured values
+        result_t result;
 
         void reset_result_counter_for_next_snr() override final;
 

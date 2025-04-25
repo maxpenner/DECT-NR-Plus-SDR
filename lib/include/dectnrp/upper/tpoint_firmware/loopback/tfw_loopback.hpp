@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "dectnrp/common/randomgen.hpp"
 #include "dectnrp/radio/hw_simulator.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
@@ -49,29 +51,9 @@ class tfw_loopback_t : public tpoint_t {
         std::vector<std::string> start_threads() override final;
         std::vector<std::string> stop_threads() override final;
 
-        // ##################################################
-        // Radio Layer + PHY
-
         radio::hw_simulator_t* hw_simulator;
 
-        // ##################################################
-        // MAC Layer
-
-        section4::mac_architecture::identity_t identity;
-
-        section3::packet_sizes_def_t psdef;
-
-        section4::plcf_10_t plcf_10;
-        section4::plcf_20_t plcf_20;
-        section4::plcf_21_t plcf_21;
-
-        /// PLCF to test
-        uint32_t PLCF_type;
-        uint32_t PLCF_type_header_format;
-
-        // ##################################################
-        // measurement logic
-
+        /// state machine for for experiment coordination
         enum class STATE_t {
             SET_CHANNEL_SNR,
             SET_CHANNEL_SMALL_SCALE_FADING,
@@ -84,26 +66,52 @@ class tfw_loopback_t : public tpoint_t {
         /// timing between states
         int64_t state_time_reference_64;
 
-        // ##################################################
-        // SNR range and number of experiments per SNR
+        /// every deriving class uses a parameter vector
+        uint32_t parameter_cnt;
 
         /// we measure PER over SNR regardless of the mode
-        float snr_start;
-        float snr_step;
-        float snr_stop;
-        float snr;
+        std::vector<float> snr_vec;
+        uint32_t snr_cnt;
 
         /// at every SNR the same number of experiments is conducted
-        uint32_t nof_experiment;
-        uint32_t nof_experiment_cnt;
-
-        /// fractional CFO
-        float cfo_symmetric_range_subc_multiple;
+        uint32_t nof_experiment_per_snr;
+        uint32_t nof_experiment_per_snr_cnt;
 
         /// random number generation
         common::randomgen_t randomgen;
 
-        void generate_packet(const int64_t tx_time_64, phy::machigh_phy_t& machigh_phy);
+        /// meta data used in generate_packet()
+        struct packet_params_t {
+                section3::packet_sizes_def_t psdef;
+                uint32_t N_samples_in_packet_length;
+
+                /// PLCF to test
+                uint32_t PLCF_type;
+                uint32_t PLCF_type_header_format;
+
+                section4::mac_architecture::identity_t identity;
+                section4::plcf_10_t plcf_10;
+                section4::plcf_20_t plcf_20;
+                section4::plcf_21_t plcf_21;
+
+                void update_plcf_unpacked();
+
+                /// force transmission time to multiple of this value
+                int64_t tx_time_multiple_64;
+
+                // actual transmission time to use
+                int64_t tx_time_64;
+
+                /// amplitude scaling
+                float amplitude_scale;
+
+                /// fractional CFO
+                float cfo_symmetric_range_subc_multiple;
+        } pp;
+
+        void generate_packet(phy::machigh_phy_t& machigh_phy);
+
+        int64_t get_random_tx_time(const int64_t now_64);
 
         // ##################################################
         // virtual functions called in state machine
