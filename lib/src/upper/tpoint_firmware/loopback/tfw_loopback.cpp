@@ -311,13 +311,8 @@ void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
         }
     }
 
-    // fill MAC PDU with random data
-    uint8_t* a_tb = hp_tx->get_a_tb();
-    for (uint32_t i = 0; i < packet_sizes.N_TB_byte; ++i) {
-        a_tb[i] = std::rand() % 256;
-    }
+    set_mac_pdu(hp_tx->get_a_tb(), packet_sizes.N_TB_byte);
 
-    // pick beamforming codebook index
     uint32_t codebook_index = 0;
 
     // determine a random CFO
@@ -342,6 +337,12 @@ void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
     // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
+}
+
+void tfw_loopback_t::set_mac_pdu(uint8_t* a_tb, const uint32_t N_TB_byte) {
+    for (uint32_t i = 0; i < N_TB_byte; ++i) {
+        a_tb[i] = std::rand() % 256;
+    }
 }
 
 int64_t tfw_loopback_t::get_random_tx_time(const int64_t now_64) {
