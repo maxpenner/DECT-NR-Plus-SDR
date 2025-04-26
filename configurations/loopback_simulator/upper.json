@@ -1,9 +1,9 @@
 {
   "TPOINT0":
   {
-    "firmware_name": "loopback",
+    "firmware_name": "loopback_snr",
     "firmware_id": 0,
-    "network_ids": [100, 101, 102, 103, 104, 105],
+    "network_ids": [100, 123],
     "app_server_thread_config": [0, -1],
     "app_client_thread_config": [0, -1]
   }

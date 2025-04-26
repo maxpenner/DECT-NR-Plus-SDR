@@ -252,9 +252,9 @@ std::vector<std::string> hw_simulator_t::start_threads() {
     dectnrp_assert(!keep_running.load(std::memory_order_acquire), "keep_running already true");
 
     dectnrp_assert(0 < nof_antennas && nof_antennas <= nof_antennas_max,
-                   "Number of antennas not set correctly.");
-    dectnrp_assert(samp_rate > 0, "Sample rate not set correctly.");
-    dectnrp_assert(n_samples_gap > 0, "Minimum size of gap not set correctly.");
+                   "number of antennas not set correctly");
+    dectnrp_assert(samp_rate > 0, "sample rate not set correctly");
+    dectnrp_assert(n_samples_gap > 0, "minimum size of gap not set correctly");
 
     // set before starting threads
     keep_running.store(true, std::memory_order_release);
@@ -262,7 +262,7 @@ std::vector<std::string> hw_simulator_t::start_threads() {
     // start tx thread
     if (!common::threads_new_rt_mask_custom(
             &thread_tx, &work_tx, this, hw_config.tx_thread_config)) {
-        dectnrp_assert_failure("Simulator unable to start TX thread.");
+        dectnrp_assert_failure("simulator unable to start TX thread");
     }
 
     dectnrp_log_inf(
@@ -277,7 +277,7 @@ std::vector<std::string> hw_simulator_t::start_threads() {
     // start rx thread
     if (!common::threads_new_rt_mask_custom(
             &thread_rx, &work_rx, this, hw_config.rx_thread_config)) {
-        dectnrp_assert_failure("Simulator unable to start RX thread.");
+        dectnrp_assert_failure("simulator unable to start RX thread");
     }
 
     dectnrp_log_inf(
@@ -367,42 +367,38 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
         int32_t buffer_tx_idx =
             buffer_tx_pool.get_specific_tx_order_id_if_available(tx_order_id_expected);
 
-        // expected buffer ready?
         if (buffer_tx_idx >= 0) {
-            /* Once we are at this point, we know that a packet can be transmitted. We now keep
-             * transmitting zeros until the packets starts, and then we transmit the actual samples.
-             * This process cannot be interrupted and we always wait for the virtual space with no
-             * timeout (nto).
+            /* At this point, we know that a packet can be transmitted. We now keep transmitting
+             * zeros until the packets starts, and then we transmit the actual samples. This process
+             * cannot be interrupted and we always wait for the virtual space with no timeout (nto).
              */
 
             // transmission length
-            const uint32_t tx_length_samples = buffer_tx_vec[buffer_tx_idx]->tx_length_samples;
+            uint32_t tx_length_samples = buffer_tx_vec[buffer_tx_idx]->tx_length_samples;
 
             dectnrp_assert(tx_length_samples > spp_size,
-                           "Transmission length must be larger than one spp.");
+                           "transmission length must be larger than one spp");
 
             // transmission time
-            const int64_t tx_time_64 = buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_time_64;
+            int64_t tx_time_64 = buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_time_64;
 
             dectnrp_assert(tx_time_64 >= now_64,
-                           "Transmission time of expected packet earlier than current time.");
+                           "transmission time of expected packet earlier than current time");
 
             // how many zero samples must be transmitted before the first sample of the packet?
             const int64_t time2tx = tx_time_64 - now_64;
 
-            // how many full zero spp must be transmitted before the first sample of the packet?
+            // how many full zero spp are that?
             int64_t nof_spp_zero = time2tx / static_cast<int64_t>(spp_size);
 
-            // zero spp
             vspptx.spp_zero();
             vspptx.tx_set_no_non_zero_samples();
 
-            // keep transmitting full zero spp
             while (nof_spp_zero > 0) {
                 // wait for vspace to become ready with no timeout
                 vspace.wait_writable_nto(calling_instance->id);
 
-                // send zeros to virtual space
+                // send zeros into virtual space
                 {
                     std::unique_lock<std::mutex> lock(hw_mtx);
                     vspptx.meta.now_64 = now_64;
@@ -412,15 +408,15 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                 // increase local simulation time
                 now_64 += static_cast<int64_t>(spp_size);
 
-                nof_spp_zero--;
+                --nof_spp_zero;
             }
 
             // how many zero samples are left before the first sample of the packet?
             uint32_t spp_offset = static_cast<uint32_t>(tx_time_64 - now_64);
 
-            dectnrp_assert(spp_offset < spp_size, "Nof leading zeros larger than one spp.");
+            dectnrp_assert(spp_offset < spp_size, "nof leading zeros larger than one spp");
 
-            // nof transmitted samples
+            // number of transmitted samples
             uint32_t tx_length_samples_cnt = 0;
 
 #ifdef SET_BREAKPOINT_AT_START_OF_EVERY_PACKET
@@ -431,12 +427,12 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                                    static_cast<double>(calling_instance->get_samp_rate()));
 #endif
 
+            vspptx.spp_zero();
+
             // start transmitting until the entire packet is gone
             while (tx_length_samples_cnt < tx_length_samples) {
-                vspptx.spp_zero();
-
                 // how many non-zero samples can we put into the spp?
-                const uint32_t tx_length_samples_this_spp =
+                uint32_t tx_length_samples_this_spp =
                     std::min(tx_length_samples - tx_length_samples_cnt, spp_size - spp_offset);
 
                 // wait until enough samples are available
@@ -447,7 +443,7 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                 buffer_tx_vec[buffer_tx_idx]->get_ant_streams_offset(ant_streams,
                                                                      tx_length_samples_cnt);
 
-                // copy to interface
+                // copy to vspptx for later deep copy
                 vspptx.spp_write_v(ant_streams, spp_offset, tx_length_samples_this_spp);
 
                 // apply hardware effects directly to spp
@@ -456,6 +452,97 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                 // set meta data of transmission
                 vspptx.tx_idx = static_cast<int32_t>(spp_offset);
                 vspptx.tx_length = static_cast<int32_t>(tx_length_samples_this_spp);
+
+                // add processed samples
+                tx_length_samples_cnt += tx_length_samples_this_spp;
+
+                dectnrp_assert(tx_length_samples_cnt <= tx_length_samples,
+                               "more samples counted than packet has in total");
+
+                // were these the final samples of the current packet?
+                if (tx_length_samples_cnt == tx_length_samples) {
+                    // set buffer as transmitted
+                    buffer_tx_vec[buffer_tx_idx]->set_transmitted_or_abort();
+
+#ifdef SET_BREAKPOINT_AT_END_OF_EVERY_PACKET
+                    dectnrp_debugbreak(
+                        "End of packet.   id={} tx_time_64={}", calling_instance->id, tx_time_64);
+#endif
+
+                    // this buffer is as good as sent ...
+                    if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_order_id_expect_next < 0) {
+                        // ... so either increase ID counter for next packet by one ...
+                        ++tx_order_id_expected;
+                    } else {
+                        // ... or overwrite if firmware wants to change the order
+                        tx_order_id_expected =
+                            buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_order_id_expect_next;
+                    }
+
+                    ++calling_instance->tx_stats.buffer_tx_sent;
+
+                    /* Check whether packet ends somewhere in the center of the spp. If so, another
+                     * transmission could be started in the current spp.
+                     */
+                    if (spp_offset + tx_length_samples_this_spp < spp_size) {
+                        // check if the currently expected TX buffer is ready
+                        buffer_tx_idx = buffer_tx_pool.get_specific_tx_order_id_if_available(
+                            tx_order_id_expected);
+
+                        if (buffer_tx_idx >= 0) {
+                            // transmission length
+                            tx_length_samples = buffer_tx_vec[buffer_tx_idx]->tx_length_samples;
+
+                            dectnrp_assert(tx_length_samples > spp_size,
+                                           "transmission length must be larger than one spp");
+
+                            // transmission time
+                            tx_time_64 = buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_time_64;
+
+                            dectnrp_assert(
+                                tx_time_64 >= now_64 + static_cast<int64_t>(
+                                                           spp_offset + tx_length_samples_this_spp),
+                                "transmission time of expected packet earlier than current time");
+
+                            // does the transmission start in the current spp?
+                            if (tx_time_64 < now_64 + static_cast<int64_t>(spp_size)) {
+                                // reset counter
+                                tx_length_samples_cnt = 0;
+
+                                // set offset to start of current packet
+                                spp_offset = static_cast<int64_t>(tx_time_64 - now_64);
+
+                                dectnrp_assert(spp_offset < spp_size,
+                                               "nof leading samples larger than one spp");
+
+                                // how many non-zero samples can we put into the spp?
+                                tx_length_samples_this_spp = spp_size - spp_offset;
+
+                                // wait until enough samples are available
+                                buffer_tx_vec[buffer_tx_idx]->wait_for_samples_busy_nto(
+                                    tx_length_samples_this_spp);
+
+                                // get pointer to TX buffer with correct offset
+                                buffer_tx_vec[buffer_tx_idx]->get_ant_streams_offset(ant_streams,
+                                                                                     0);
+
+                                // copy to vspptx for later deep copy
+                                vspptx.spp_write_v(
+                                    ant_streams, spp_offset, tx_length_samples_this_spp);
+
+                                // apply hardware effects directly to spp
+                                /// \todo
+
+                                // set meta data of transmission
+                                vspptx.tx_idx = static_cast<int32_t>(0);
+                                vspptx.tx_length = static_cast<int32_t>(spp_size);
+
+                                // add processed samples
+                                tx_length_samples_cnt += tx_length_samples_this_spp;
+                            }
+                        }
+                    }
+                }
 
                 // wait for vspace to become ready with no timeout
                 vspace.wait_writable_nto(calling_instance->id);
@@ -470,32 +557,11 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                 // increase local simulation time
                 now_64 += static_cast<int64_t>(spp_size);
 
-                // add processed samples
-                tx_length_samples_cnt += tx_length_samples_this_spp;
-
                 // starting with the second TX spp, offset is always zero
                 spp_offset = 0;
+
+                vspptx.spp_zero();
             }
-
-            // set buffer as transmitted
-            buffer_tx_vec[buffer_tx_idx]->set_transmitted_or_abort();
-
-#ifdef SET_BREAKPOINT_AT_END_OF_EVERY_PACKET
-            dectnrp_debugbreak(
-                "End of packet.   id={} tx_time_64={}", calling_instance->id, tx_time_64);
-#endif
-
-            // this buffer is as good as sent ...
-            if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_order_id_expect_next < 0) {
-                // ... so either increase ID counter for next packet by one ...
-                ++tx_order_id_expected;
-            } else {
-                // ... or overwrite if firmware wants to change the order
-                tx_order_id_expected =
-                    buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_order_id_expect_next;
-            }
-
-            ++calling_instance->tx_stats.buffer_tx_sent;
         }
         // expected TX buffer not available, so send zeros
         else {

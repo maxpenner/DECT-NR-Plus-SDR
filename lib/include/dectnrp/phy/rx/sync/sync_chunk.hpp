@@ -104,6 +104,22 @@ class sync_chunk_t final : public rx_pacer_t {
         const uint32_t stf_bos_length_samples;
         const uint32_t stf_bos_pattern_length_samples;
 
+        /* The value of chunk_length_samples refers to the hardware sample rate and it is always a
+         * multiple of L. A is the chunk length in samples after resampling at the DECTNRP sample
+         * rate, and B is an additional overlap region between chunks. The autocorrelator for
+         * detection must search at least until the end of B, but not beyond C. The autocorrelator
+         * for peak search may not search beyond D. The pacer must output at least D samples.
+         *
+         *               A after resampling                B     C    D
+         *    |_______________________________________|_________|_|_______|
+         *                                                        |       |
+         *                                                        |       |
+         *         autocorrelator can detect packets up to this point     |
+         *                                                                |
+         *                         coarse peaks can be found up to this point
+         */
+        const uint32_t A, B, C, D;
+
         /// internal time keeping
         int64_t chunk_time_start_64;
         void set_next_chunk();

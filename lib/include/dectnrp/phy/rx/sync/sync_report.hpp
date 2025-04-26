@@ -44,6 +44,7 @@ class sync_report_t {
         float detection_rms{-1.0f};
         float detection_metric{-1.0f};
         uint32_t detection_time_local{std::numeric_limits<uint32_t>::max()};
+        uint32_t detection_time_with_jump_back_local{std::numeric_limits<uint32_t>::max()};
 
         /// mu
         uint32_t u{0};
