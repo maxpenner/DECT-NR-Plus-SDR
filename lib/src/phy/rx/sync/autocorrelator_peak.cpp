@@ -49,7 +49,8 @@ autocorrelator_peak_t::autocorrelator_peak_t(const std::vector<cf_t*> localbuffe
                                              const uint32_t nof_antennas_limited_,
                                              const uint32_t bos_fac_,
                                              const uint32_t stf_bos_length_samples_,
-                                             const uint32_t stf_bos_pattern_length_samples_)
+                                             const uint32_t stf_bos_pattern_length_samples_,
+                                             const uint32_t search_length_samples_)
     : correlator_t(localbuffer_),
 
       nof_antennas_limited(nof_antennas_limited_),
@@ -57,23 +58,21 @@ autocorrelator_peak_t::autocorrelator_peak_t(const std::vector<cf_t*> localbuffe
       stf_bos_pattern_length_samples(stf_bos_pattern_length_samples_),
       stf_nof_pattern(stf_bos_length_samples / stf_bos_pattern_length_samples),
 
-      max_search_length_samples(
-          static_cast<uint32_t>(RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_MAX_SEARCH_LENGTH_IN_STFS_DP *
-                                static_cast<double>(stf_bos_length_samples))),
-      detect2peak_threshold_samples(
-          static_cast<uint32_t>(RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_DETEC2PEAK_THRESHOLD_IN_STFS_DP *
-                                static_cast<double>(stf_bos_length_samples))),
+      search_length_samples(search_length_samples_),
+      detection2peak_samples_64(
+          static_cast<int64_t>(RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_DETECTION2PEAK_IN_STFS_DP *
+                               static_cast<double>(stf_bos_length_samples))),
       prefactor(static_cast<float>(stf_nof_pattern) / static_cast<float>(stf_nof_pattern - 1)),
 
       metric_smoother_bos_offset_to_center_samples(
           RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_MOVMEAN_SMOOTH_RIGHT * bos_fac_)
 
 {
-    multiplication_stage_correlation = srsran_vec_cf_malloc(max_search_length_samples);
+    multiplication_stage_correlation = srsran_vec_cf_malloc(search_length_samples);
 
     // we make it slightly longer for faster power calculation
     multiplication_stage_power =
-        srsran_vec_cf_malloc(std::max(stf_bos_length_samples, max_search_length_samples));
+        srsran_vec_cf_malloc(std::max(stf_bos_length_samples, search_length_samples));
 
     movsums_correlation.resize(nof_antennas_limited);
     movsums_power.resize(nof_antennas_limited);
@@ -104,11 +103,12 @@ autocorrelator_peak_t::~autocorrelator_peak_t() {
     free(multiplication_stage_power);
 }
 
-void autocorrelator_peak_t::set_initial_state(const uint32_t detection_time_local_) {
-    dectnrp_assert(stf_bos_length_samples <= detection_time_local_, "detection too early");
+void autocorrelator_peak_t::set_initial_state(const uint32_t detection_time_with_jump_back_local_) {
+    dectnrp_assert(stf_bos_length_samples <= detection_time_with_jump_back_local_,
+                   "detection with jump back too early");
 
-    localbuffer_cnt_r = detection_time_local_;
-    localbuffer_cnt_r_max = detection_time_local_ + max_search_length_samples;
+    localbuffer_cnt_r = detection_time_with_jump_back_local_;
+    localbuffer_cnt_r_max = detection_time_with_jump_back_local_ + search_length_samples;
 
     set_initial_movsums(localbuffer_cnt_r - stf_bos_length_samples);
 
@@ -147,7 +147,7 @@ bool autocorrelator_peak_t::search_by_correlation(const uint32_t localbuffer_cnt
 
     const uint32_t consumable = localbuffer_cnt_r_limit - localbuffer_cnt_r;
 
-    dectnrp_assert(consumable <= max_search_length_samples, "too many samples");
+    dectnrp_assert(consumable <= search_length_samples, "too many samples");
 
     for (uint32_t ant_idx = 0; ant_idx < nof_antennas_limited; ++ant_idx) {
         // readability pointers
@@ -295,8 +295,8 @@ bool autocorrelator_peak_t::post_processing_validity(sync_report_t& sync_report)
         }
 
         // peak validity requirement 1: minimum distance between detection point and coarse peak
-        if (sync_report.detection_time_local + detect2peak_threshold_samples >=
-            peak_vec[ant_idx].index) {
+        if (static_cast<int64_t>(sync_report.detection_time_local) + detection2peak_samples_64 >=
+            static_cast<int64_t>(peak_vec[ant_idx].index)) {
             continue;
         }
 
@@ -309,7 +309,7 @@ bool autocorrelator_peak_t::post_processing_validity(sync_report_t& sync_report)
 
 #ifdef PHY_RX_AUTOCORRELATOR_PEAK_JSON_EXPORT
         waveform_metric_max_idx[ant_idx] =
-            peak_vec[ant_idx].index - sync_report.detection_time_local;
+            peak_vec[ant_idx].index - sync_report.detection_time_with_jump_back_local;
 #endif
     }
 

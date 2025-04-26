@@ -65,11 +65,12 @@ class autocorrelator_detection_t final : public correlator_t {
         const uint32_t stf_nof_pattern;
 
         const uint32_t search_step_samples;
-        const uint32_t search_jump_back_samples;
-        const uint32_t search_start_samples;
         const uint32_t search_length_samples;
 
     private:
+        const uint32_t search_jump_back_samples;
+        const uint32_t search_start_samples;
+
         // ##################################################
         // accumulation of power and correlation
 

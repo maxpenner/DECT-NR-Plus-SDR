@@ -59,8 +59,8 @@ namespace dectnrp::phy {
  * \brief Due to the multi-threaded structure of the synchronization and the split into chunks on
  * the time axis, it can happen that two threads synchronize the same packet in the common overlap
  * area of two neighbouring chunks - a double detection. To avoid those, a packet's synchronization
- * time must be at least this amount of time after the packet before it. Otherwise, the
- * worker_sync_t instance discards the packet.
+ * time must be at least this amount of time after the packet before it. Otherwise, the instance of
+ * worker_sync_t that received the second version of the packet discards it.
  */
 #define RX_SYNC_PARAM_SYNC_TIME_UNIQUE_LIMIT_IN_STF_PATTERNS_DP 1.0
 
@@ -78,15 +78,14 @@ namespace dectnrp::phy {
 
 /**
  * \brief The maximum step width for STF detection is one STF pattern, i.e. 16*b*oversampling
- * (16*7=112, 16*9=144). This step width is active when the step divider is set to 1. This should be
- * sufficient for most SNRs. When set to 2, the step width is halved to 8*b*oversampling, which is
- * enough even for very low SNRs. Note that the step width also influences other aspects of
- * synchronization.
+ * (16*7=112, 16*9=144). The step width can be reduced avoid missing a STF at the cost of a higher
+ * computation load. For an STF with the cover sequence, the coarse metric is narrower and thus the
+ * step width must be smaller.
  */
 #ifdef SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
 #define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_STEP_DIVIDER 4
 #else
-#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_STEP_DIVIDER 2
+#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_STEP_DIVIDER 4
 #endif
 
 /**
@@ -138,9 +137,9 @@ namespace dectnrp::phy {
  * correlation window than at the back. This way we make sure the first packet is no longer within
  * the correlation window.
  */
-#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_N_STEPS_FRONT 2
-#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_N_STEPS_BACK 2
-#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_STEPS_RATIO_FRONT_TO_BACK 1.0f
+#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_FRONT_STEPS 2
+#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_BACK_STEPS 2
+#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_FRONT_TO_BACK_RATIO 0.5
 
 /**
  * \brief Normalized coarse metric thresholds for detection.
@@ -158,7 +157,7 @@ namespace dectnrp::phy {
 #ifdef SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
 #define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_THRESHOLD_MIN_SP 0.18f
 #else
-#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_THRESHOLD_MIN_SP 0.30f
+#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_THRESHOLD_MIN_SP 0.25f
 #endif
 #define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_THRESHOLD_MAX_SP 1.50f
 
@@ -166,7 +165,7 @@ namespace dectnrp::phy {
  * \brief During detection, the metric must increase multiple times in a row to make sure we
  * detected a rising edge of the coarse metric.
  */
-#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_STREAK_RELATIVE_GAIN 1.005
+#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_STREAK_RELATIVE_GAIN_SP 0.0f
 #ifdef SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
 #define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_STREAK 1
 #else
@@ -178,7 +177,11 @@ namespace dectnrp::phy {
  * the coarse peak. If the SNR is small, or the coarse metric very narrow (for instance due to the
  * cover sequence), we can potentially hit the falling edge of the coarse metric during detection.
  */
+#ifdef SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
 #define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_JUMP_BACK_IN_PATTERNS 1
+#else
+#define RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_JUMP_BACK_IN_PATTERNS 1
+#endif
 
 /**
  * \brief When a packet was detected and we found a rising edge with a valid coarse peak afterwards,
@@ -197,10 +200,10 @@ namespace dectnrp::phy {
 /// see RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RESUM_PERIODICITY_IN_STEPS
 #define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_RESUM_PERIODICITY_IN_STEPS 64
 
-/// search length after detection point, should take into consideration the jump back width
+/// search length after detection point, must take into consideration the jump back width
 #define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_MAX_SEARCH_LENGTH_IN_STFS_DP 1.0
 
-/// to smoothen the coarse peak, we apply some averaging
+/// to smoothen the coarse peak, apply some averaging
 #ifdef SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
 #define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_MOVMEAN_SMOOTH_LEFT 1
 #define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_MOVMEAN_SMOOTH_RIGHT 1
@@ -209,11 +212,28 @@ namespace dectnrp::phy {
 #define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_MOVMEAN_SMOOTH_RIGHT 1
 #endif
 
-/// the coarse peak metric must be larger by this amount than metric at the detection point
-#define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_METRIC_ABOVE_DETECTION_THRESHOLD_SP 0.05f
+/**
+ * \brief The coarse peak metric must be larger by this absolute normalized amount than the metric
+ * at the detection point. The optimal value depends on whether the cover sequence is used or not.
+ * The value may also be negative.
+ */
+#ifdef SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
+#define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_METRIC_ABOVE_DETECTION_THRESHOLD_SP -0.25f
+#else
+#define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_METRIC_ABOVE_DETECTION_THRESHOLD_SP -0.1f
+#endif
 
-/// minimum distance between the detection point and the coarse peak
-#define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_DETEC2PEAK_THRESHOLD_IN_STFS_DP 0.1
+/**
+ * \brief Minimum distance between the detection point and the coarse peak. The optimal value
+ * depends on whether the cover sequence is used or not. If the cover sequence is used, the coarse
+ * metric is so narrow that the detection may occur after the peak. For that reason, the value may
+ * also be negative.
+ */
+#ifdef SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
+#define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_DETECTION2PEAK_IN_STFS_DP -0.3
+#else
+#define RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_DETECTION2PEAK_IN_STFS_DP 0.0
+#endif
 
 /**
  * \brief If a radio device class defines a maximum of b=8, the synchronization is triggered by
@@ -250,8 +270,13 @@ namespace dectnrp::phy {
  * multiplied by b*oversampling. The maximum values allowed is two STF patterns both to the left and
  * right, i.e. a total search range of 4 pattern.
  */
+#ifdef SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
 #define RX_SYNC_PARAM_CROSSCORRELATOR_SEARCH_LEFT_SAMPLES 16   // maximum allowed is 2*16=32
 #define RX_SYNC_PARAM_CROSSCORRELATOR_SEARCH_RIGHT_SAMPLES 16  // maximum allowed is 2*16=32
+#else
+#define RX_SYNC_PARAM_CROSSCORRELATOR_SEARCH_LEFT_SAMPLES 16   // maximum allowed is 2*16=32
+#define RX_SYNC_PARAM_CROSSCORRELATOR_SEARCH_RIGHT_SAMPLES 16  // maximum allowed is 2*16=32
+#endif
 
 /**
  * \brief Perform crosscorrelation across all antennas or only the strongest antenna as provided by
@@ -274,8 +299,8 @@ namespace dectnrp::phy {
  * To also force the fine synchronization point to this sample multiple, overwrite these values with
  * zero:
  *
- *      #define RX_SYNC_PARAM_CROSSCORRELATOR_SEARCH_LEFT_SAMPLES 20
- *      #define RX_SYNC_PARAM_CROSSCORRELATOR_SEARCH_RIGHT_SAMPLES 20
+ *      #define RX_SYNC_PARAM_CROSSCORRELATOR_SEARCH_LEFT_SAMPLES 0
+ *      #define RX_SYNC_PARAM_CROSSCORRELATOR_SEARCH_RIGHT_SAMPLES 0
  */
 // #define RX_SYNC_PARAM_DBG_COARSE_SYNC_PEAK_FORCED_TO_TIME_MULTIPLE 1007
 

@@ -250,10 +250,10 @@ void worker_pool_t::check_sync_param() const {
     // get long cover sequence for u=2
     const auto cs = section3::stf_t::get_cover_sequence(2);
 
-    dectnrp_assert(RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_N_STEPS_FRONT >=
+    dectnrp_assert(RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_FRONT_STEPS >=
                        RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_STEP_DIVIDER / 2,
                    "front minimum length is half a pattern");
-    dectnrp_assert(RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_N_STEPS_BACK >=
+    dectnrp_assert(RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_BACK_STEPS >=
                        RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_STEP_DIVIDER / 2,
                    "back minimum length is half a pattern");
 

@@ -22,6 +22,7 @@
 
 #include <volk/volk.h>
 
+#include <algorithm>
 #include <cmath>
 
 #include "dectnrp/common/prog/assert.hpp"
@@ -45,10 +46,11 @@ autocorrelator_detection_t::autocorrelator_detection_t(
 
       search_step_samples(stf_bos_pattern_length_samples /
                           RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_STEP_DIVIDER),
+      search_length_samples(search_length_samples_),
+
       search_jump_back_samples(RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_JUMP_BACK_IN_PATTERNS *
                                stf_bos_pattern_length_samples),
       search_start_samples(stf_bos_length_samples_ + search_jump_back_samples),
-      search_length_samples(search_length_samples_),
 
       power_normalizer(static_cast<float>(stf_bos_length_samples_)),
 
@@ -85,7 +87,7 @@ autocorrelator_detection_t::autocorrelator_detection_t(
 
         metric_streak_vec.push_back(
             streak_t(RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_THRESHOLD_MIN_SP,
-                     RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_STREAK_RELATIVE_GAIN,
+                     RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_STREAK_RELATIVE_GAIN_SP,
                      RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_METRIC_STREAK));
     }
 }
@@ -213,15 +215,14 @@ bool autocorrelator_detection_t::search_by_correlation(const uint32_t localbuffe
 
                 // RMS of back elements
                 const float rms_back = std::sqrt(movsums_power[ant_idx].get_sum_back(
-                    RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_N_STEPS_BACK));
+                    RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_BACK_STEPS));
 
                 // power of front elements
                 const float rms_front = std::sqrt(movsums_power[ant_idx].get_sum_front(
-                    RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_N_STEPS_FRONT));
+                    RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_FRONT_STEPS));
 
                 // compare
-                if (rms_back *
-                        RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_STEPS_RATIO_FRONT_TO_BACK >=
+                if (rms_back * RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_FRONT_TO_BACK_RATIO >=
                     rms_front) {
                     continue;
                 }
@@ -263,6 +264,8 @@ bool autocorrelator_detection_t::search_by_correlation(const uint32_t localbuffe
                 sync_report.detection_rms = rms;
                 sync_report.detection_metric = metric;
                 sync_report.detection_time_local = localbuffer_cnt_r;
+                sync_report.detection_time_with_jump_back_local =
+                    sync_report.detection_time_local - search_jump_back_samples;
 
                 // leave prematurely as immediate action is required
                 return true;
@@ -310,7 +313,7 @@ autocorrelator_detection_t::streak_t::streak_t(const float value_start_,
 bool autocorrelator_detection_t::streak_t::check(const float value_) {
     if (value < value_) {
         ++cnt;
-        value = value_ * value_multiplier;
+        value = std::max(value_ * value_multiplier, value_start);
         return cnt >= cnt_goal;
     }
 

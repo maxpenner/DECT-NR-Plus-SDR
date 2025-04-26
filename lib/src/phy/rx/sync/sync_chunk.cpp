@@ -56,56 +56,25 @@ sync_chunk_t::sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
 
       bos_fac(worker_pool_config_.radio_device_class.b_min * worker_pool_config_.os_min),
       stf_bos_length_samples(section3::stf_t::get_N_samples_stf(u_max) * bos_fac),
-      stf_bos_pattern_length_samples(stf_bos_length_samples / stf_nof_pattern)
-//
-{
-    // clang-format off
-    /* The value of chunk_length_samples refers to the hardware sample rate and it is always a
-     * multiple of L. A is the chunk length in samples after resampling at the DECTNRP sample
-     * rate, and B is an additional overlap region between chunks. The autocorrelator must search
-     * at least until the end of B.
-     *
-     *               A after resampling                B
-     *    |_______________________________________|_________|
-     *
-     * A = chunk_length_samples / worker_pool_config_.resampler_param.L * worker_pool_config_.resampler_param.M
-     * B = static_cast<uint32_t>(RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_OVERLAP_LENGTH_IN_STFS_DP * static_cast<double>(stf_bos_length_samples))
-     */
-    // clang-format on
-    const uint32_t search_length_samples =
-        chunk_length_samples / worker_pool_config_.resampler_param.L *
-            worker_pool_config_.resampler_param.M +
-        static_cast<uint32_t>(RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_OVERLAP_LENGTH_IN_STFS_DP *
-                              static_cast<double>(stf_bos_length_samples));
+      stf_bos_pattern_length_samples(stf_bos_length_samples / stf_nof_pattern),
 
-    /* The resampler must output enough samples for autocorrelation and crosscorrelation:
-     *
-     *               A after resampling                B     C    D
-     *    |_______________________________________|_________|_|_______|
-     *                                                        |       |
-     *                                                        |       |
-     *         autocorrelator can detect packets up to this point     |
-     *                                                                |
-     *                         coarse peaks can be found up to this point
-     *
-     * A = see above
-     * B = see above
-     * C = stf_bos_pattern_length_samples
-     * D = stf_bos_length_samples
-     */
-    const uint32_t autocorrelator_peak_find_length_samples =
-        search_length_samples + stf_bos_pattern_length_samples + stf_bos_length_samples;
-
-    const std::vector<cf_t*> localbuffer_resample =
-        get_initialized_localbuffer(rx_pacer_t::localbuffer_choice_t::LOCALBUFFER_RESAMPLE,
-                                    autocorrelator_peak_find_length_samples);
+      A(chunk_length_samples / worker_pool_config_.resampler_param.L *
+        worker_pool_config_.resampler_param.M),
+      B(static_cast<uint32_t>(RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_OVERLAP_LENGTH_IN_STFS_DP *
+                              static_cast<double>(stf_bos_length_samples))),
+      C(stf_bos_pattern_length_samples),
+      D(static_cast<uint32_t>(RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_MAX_SEARCH_LENGTH_IN_STFS_DP *
+                              static_cast<double>(stf_bos_length_samples))) {
+    // initialize buffer where samples after resampling will be written to
+    const std::vector<cf_t*> localbuffer_resample = get_initialized_localbuffer(
+        rx_pacer_t::localbuffer_choice_t::LOCALBUFFER_RESAMPLE, A + B + C + D);
 
     autocorrelator_detection =
         std::make_unique<autocorrelator_detection_t>(localbuffer_resample,
                                                      nof_antennas_limited,
                                                      stf_bos_length_samples,
                                                      stf_bos_pattern_length_samples,
-                                                     search_length_samples,
+                                                     A + B,
                                                      worker_pool_config_.get_dect_samp_rate_max());
 
     autocorrelator_peak =
@@ -115,10 +84,11 @@ sync_chunk_t::sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
                                                 nof_antennas_limited,
                                                 bos_fac,
                                                 stf_bos_length_samples,
-                                                stf_bos_pattern_length_samples);
+                                                stf_bos_pattern_length_samples,
+                                                D);
 
     /* The exact number of samples is calculated in the crosscorrelator. This, however, is a very
-     * precise estimate of the number of samples the crosscorrelator requires.
+     * precise estimate of the number of samples the crosscorrelator will requires at most.
      */
     const uint32_t crosscorrelator_localbuffer_length_samples =
         (RX_SYNC_PARAM_CROSSCORRELATOR_SEARCH_LEFT_SAMPLES * bos_fac +
@@ -142,10 +112,10 @@ sync_chunk_t::sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
     // assert we allocated enough for the crosscorrelator, but not way too much
     dectnrp_assert(0 <= (static_cast<int32_t>(crosscorrelator_localbuffer_length_samples) -
                          static_cast<int32_t>(crosscorrelator->get_nof_samples_required())),
-                   "localbuffer of crosscorrelator too small");
+                   "too small");
     dectnrp_assert((static_cast<int32_t>(crosscorrelator_localbuffer_length_samples) -
                     static_cast<int32_t>(crosscorrelator->get_nof_samples_required())) <= 5,
-                   "localbuffer of crosscorrelator too large");
+                   "too large");
 }
 
 void sync_chunk_t::wait_for_first_chunk_nto(const int64_t search_time_start_64_) {
@@ -198,14 +168,11 @@ std::optional<sync_report_t> sync_chunk_t::search() {
             sync_report.u = u_max;
 
             dectnrp_assert(
-                stf_bos_length_samples + autocorrelator_detection->search_jump_back_samples <=
-                    sync_report.detection_time_local,
+                stf_bos_length_samples <= sync_report.detection_time_with_jump_back_local,
                 "detection time too early");
 
             // configure coarse peak search ...
-            autocorrelator_peak->set_initial_state(
-                sync_report.detection_time_local -
-                autocorrelator_detection->search_jump_back_samples);
+            autocorrelator_peak->set_initial_state(sync_report.detection_time_with_jump_back_local);
 
             // ... and run it
             while (1) {

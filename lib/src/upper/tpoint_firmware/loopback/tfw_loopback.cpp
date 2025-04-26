@@ -76,7 +76,7 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
 
     snr_cnt = 0;
 
-    nof_experiment_per_snr = 50;
+    nof_experiment_per_snr = 10;
     nof_experiment_per_snr_cnt = 0;
 
     randomgen.shuffle();

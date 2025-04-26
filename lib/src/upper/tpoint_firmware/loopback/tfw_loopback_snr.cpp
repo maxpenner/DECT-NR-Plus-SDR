@@ -35,6 +35,13 @@ const std::string tfw_loopback_snr_t::firmware_name("loopback_snr");
 tfw_loopback_snr_t::tfw_loopback_snr_t(const tpoint_config_t& tpoint_config_,
                                        phy::mac_lower_t& mac_lower_)
     : tfw_loopback_t(tpoint_config_, mac_lower_) {
+    // clear and overwrite snr vector
+    snr_vec.clear();
+    for (float snr = -2.0f; snr <= 20.0f; snr += 1.0f) {
+        snr_vec.push_back(snr);
+    }
+    nof_experiment_per_snr = 100;
+
     mcs_vec = std::vector<uint32_t>{1, 2, 3, 4, 5, 6};
 
     result = result_t(mcs_vec.size(), snr_vec.size());

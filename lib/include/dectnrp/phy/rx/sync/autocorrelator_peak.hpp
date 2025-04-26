@@ -48,7 +48,8 @@ class autocorrelator_peak_t final : public correlator_t {
                                        const uint32_t nof_antennas_limited_,
                                        const uint32_t bos_fac_,
                                        const uint32_t stf_bos_length_samples_,
-                                       const uint32_t stf_bos_pattern_length_samples_);
+                                       const uint32_t stf_bos_pattern_length_samples_,
+                                       const uint32_t search_length_samples_);
         ~autocorrelator_peak_t();
 
         autocorrelator_peak_t() = delete;
@@ -57,9 +58,8 @@ class autocorrelator_peak_t final : public correlator_t {
         autocorrelator_peak_t(autocorrelator_peak_t&&) = delete;
         autocorrelator_peak_t& operator=(autocorrelator_peak_t&&) = delete;
 
-        /// put into a state so that we can conduct a coarse peak search starting from
-        /// detection_time_local_
-        void set_initial_state(const uint32_t detection_time_local_);
+        /// put into a state so that we can conduct a coarse peak search
+        void set_initial_state(const uint32_t detection_time_with_jump_back_local_);
 
         uint32_t get_nof_samples_required() const override final;
 
@@ -72,8 +72,22 @@ class autocorrelator_peak_t final : public correlator_t {
         const uint32_t stf_bos_pattern_length_samples;
         const uint32_t stf_nof_pattern;
 
-        const uint32_t max_search_length_samples;
-        const uint32_t detect2peak_threshold_samples;
+        const uint32_t search_length_samples;
+
+        /**
+         * \brief In in earlier version of the TS, the STF was used without a cover sequence and the
+         * coarse metric has a long concave shape. As a consequence, the coarse metric was always
+         * detected BEFORE the coarse peak and the value of detection2peak_samples was always
+         * positive and thus an uint32_t.
+         *
+         * However, with the new cover sequence, the coarse metric has become very narrow. It is
+         * possible that the coarse metric is detected on a falling edge, i.e. BEHIND the coarse
+         * peak. For that reason, the variable detection2peak_samples may also be negative. Its type
+         * is changed to the next larger signed integer int64_t.
+         *
+         */
+        const int64_t detection2peak_samples_64;
+
         const float prefactor;
 
         uint32_t localbuffer_cnt_r_max;

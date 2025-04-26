@@ -36,13 +36,14 @@ const std::string tfw_loopback_ratio_t::firmware_name("loopback_ratio");
 tfw_loopback_ratio_t::tfw_loopback_ratio_t(const tpoint_config_t& tpoint_config_,
                                            phy::mac_lower_t& mac_lower_)
     : tfw_loopback_t(tpoint_config_, mac_lower_) {
-    // clear snr vector
+    // clear and overwrite snr vector
     snr_vec.clear();
-    for (float snr = -2.0; snr <= 12.0f; snr += 2.0f) {
+    for (float snr = 0.0f; snr <= 10.0f; snr += 1.0f) {
         snr_vec.push_back(snr);
     }
+    nof_experiment_per_snr = 100;
 
-    ratio_vec = std::vector<int32_t>{-80, -20, -10, -5, 0, 5, 10, 20, 30, 40, 50, 60, 70, 100};
+    ratio_vec = std::vector<int32_t>{30, 40, 50, 60, 70, 80};
 
     identity_A = section4::mac_architecture::identity_t(100, 10000000, 1000);
     identity_B = section4::mac_architecture::identity_t(101, 10000001, 1001);

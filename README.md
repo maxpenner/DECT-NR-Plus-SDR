@@ -303,7 +303,7 @@ This firmware starts channel measurements in regular intervals and writes the re
 
 ### [loopback](lib/include/dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp)
 
-This firmware is a simulation with a single device which loops its TX signal back into its own RX path. It is used to test the SDR functionality such as synchronization and packet error rate (PER) over SNR. The wireless channel model can be switched in `radio.json` from an AWGN channel to a doubly selective Rayleigh fading channel.
+This is a firmware family. Each individual firmware is a simulation with a single device looping its TX signal back into its own RX path. It is used to test SDR functionality such as synchronization and packet error rate (PER) over SNR. The wireless channel model can be switched in `radio.json` from an AWGN channel to a doubly selective Rayleigh fading channel.
 
 ### [p2p](lib/include/dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp)
 
