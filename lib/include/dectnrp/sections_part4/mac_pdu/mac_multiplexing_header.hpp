@@ -69,15 +69,18 @@ class mac_multiplexing_header_t final : public common::serdes::packing_t {
             Group_Assignment_IE = 0b10111,
             Load_Info_IE = 0b11000,
             Measurement_Report_IE = 0b11001,
+            // Source_Routing_IE = 0b11010,
+            // Joining_Beacon_Message = 0b11011,
+            // Joining_Information_IE = 0b11100,
             // Reserved
             Escape = 0b111110,
             IE_Type_Extension = 0b111111,
             /*
              * The following MMIEs are not part of the standard, and exist only in this project.
              */
-            Power_Target_IE = 0b11010,
-            Forward_To_IE = 0b11011,
-            Time_Announce_IE = 0b11100
+            Power_Target_IE = 0b11101,
+            Forward_To_IE = 0b11110,
+            Time_Announce_IE = 0b11111
         };
 
         ///  IE type field encoding for MAC extension field encoding 11 and payload length 0 byte
@@ -86,8 +89,9 @@ class mac_multiplexing_header_t final : public common::serdes::packing_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             Padding_IE = 0,
             Configuration_Request_IE = 0b1,
+            // Keep_alive_IE = 0b10,
             // Reserved
-            Security_Info_IE = 0b10000,
+            MAC_Security_Info_IE = 0b10000,
             // Reserved
             Escape = 0b11110
             // Reserved
@@ -99,6 +103,8 @@ class mac_multiplexing_header_t final : public common::serdes::packing_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             Padding_IE = 0,
             Radio_Device_Status_IE = 0b1,
+            // Radio_capability_short_IE = 0b10,
+            // Association_Control_IE = 0b11,
             // Reserved
             Escape = 0b11110
             // Reserved
@@ -187,7 +193,7 @@ E from_coded_value(const std::underlying_type_t<E> value) {
     switch (value) {
         case std::to_underlying(E::Padding_IE):
         case std::to_underlying(E::Configuration_Request_IE):
-        case std::to_underlying(E::Security_Info_IE):
+        case std::to_underlying(E::MAC_Security_Info_IE):
         case std::to_underlying(E::Escape):
             return static_cast<E>(value);
 
