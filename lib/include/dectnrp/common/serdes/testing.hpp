@@ -27,7 +27,8 @@ class testing_t {
         testing_t() = default;
         virtual ~testing_t() = default;
 
-        virtual void set_valid_random_configuration() = 0;
+        virtual void testing_set_random() = 0;
+        virtual bool testing_is_equal(const testing_t& rhs) const = 0;
 };
 
 }  // namespace dectnrp::common::serdes

@@ -23,12 +23,15 @@
 
 #include <optional>
 
+#include "dectnrp/common/serdes/testing.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/network_beacon_message.hpp"
 
 namespace dectnrp::section4 {
 
-class cluster_beacon_message_t final : public mmie_packing_peeking_t, public mu_depending_t {
+class cluster_beacon_message_t final : public mmie_packing_peeking_t,
+                                       public mu_depending_t,
+                                       public common::serdes::testing_t {
     public:
         // Table 6.4.2.3-1, field CountToTrigger
         enum class count_to_trigger_t : uint32_t {
@@ -75,6 +78,9 @@ class cluster_beacon_message_t final : public mmie_packing_peeking_t, public mu_
         count_to_trigger_t count_to_trigger;
         quality_threshold_t rel_quality;
         quality_threshold_t min_quality;
+
+        void testing_set_random() override final;
+        bool testing_is_equal(const testing_t& rhs) const override final;
 
     private:
         void zero() override;

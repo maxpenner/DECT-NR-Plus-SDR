@@ -182,8 +182,7 @@ class tx_t final : public tx_rx_t {
         void run_residual_resampling();
         void run_GI();
 
-        /// called for each OFDM symbol (arguments are necessary to distinguish STF from the other
-        /// symbols)
+        /// called for each OFDM symbol (arguments are necessary to distinguish STF and DF symbols)
         void run_zero_stages();
         void run_beamforming(const uint32_t N_TS_non_zero);
         void run_ifft_cp_scale(const uint32_t N_samples_in_CP_os, float scale);

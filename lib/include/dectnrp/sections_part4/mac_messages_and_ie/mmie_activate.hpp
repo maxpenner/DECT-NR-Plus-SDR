@@ -53,11 +53,15 @@
 // ##################################################
 // Table 6.3.4-3
 
+// #define ACTIVATE_Padding_IE                  // activated above
 // #define ACTIVATE_Configuration_Request_IE
+// #define ACTIVATE_Keep_Alive_IE               // added in 2024-10
+// #define ACTIVATE_MAC_Security_Info_IE
 
 // ##################################################
 // Table 6.3.4-4
 
+// #define ACTIVATE_Padding_IE                  // activated above
 // #define ACTIVATE_Radio_Device_Status_IE
 // #define ACTIVATE_RD_Capability_Short_IE      // added in 2024-10
 // #define ACTIVATE_Association_Control_IE      // added in 2024-10

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <iterator>
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
@@ -68,10 +69,10 @@ class mmie_pool_tx_t {
         mmie_pool_tx_t(mmie_pool_tx_t&&) = delete;
         mmie_pool_tx_t& operator=(mmie_pool_tx_t&&) = delete;
 
-        // number of MMIEs that elements are preallocated for
+        /// number of MMIEs that elements are preallocated for
         std::size_t get_nof_mmie() const { return pool.size(); }
 
-        // number of elements across all MMIEs
+        /// number of elements across all MMIEs
         std::size_t get_nof_elements_all_mmie() const {
             std::size_t cnt = 0;
             for (const auto& vec : pool) {
@@ -114,6 +115,11 @@ class mmie_pool_tx_t {
             return *static_cast<T*>(ptr);
         }
 
+        mmie_t& get_by_index(const std::size_t i, const std::size_t j = 0) const {
+            auto vec = std::next(pool.begin(), i);
+            return *(vec->second.at(j).get());
+        }
+
         /**
          * \brief Fill final unused bytes with paddings IEs. At the receiver, the first padding IE
          * should terminate the decoding.
@@ -124,8 +130,10 @@ class mmie_pool_tx_t {
         void fill_with_padding_ies(uint8_t* mac_pdu_offset, const uint32_t N_bytes_to_fill);
 
     protected:
-        /// Unordered map that represents the actual pool. The container maps a MMIE type to a
-        /// vector of unique base pointers, each pointing to an instance of the indexed MMIE type.
+        /**
+         * \brief Unordered map that represents the actual pool. The container maps a MMIE type to a
+         * vector of unique base pointers, each pointing to an instance of the indexed MMIE type.
+         */
         std::unordered_map<std::type_index, std::vector<std::unique_ptr<mmie_t>>> pool;
 };
 

@@ -26,6 +26,7 @@
 #include "dectnrp/phy/pool/token.hpp"
 #include "dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp"
 #include "dectnrp/upper/tpoint_firmware/chscanner/tfw_chscanner.hpp"
+#include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback_mmie.hpp"
 #include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback_ratio.hpp"
 #include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback_snr.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_ft.hpp"
@@ -159,20 +160,31 @@ void upper_t::add_tpoint(const tpoint_config_t& tpoint_config, phy::mac_lower_t&
      */
     if (TFW_NAME_STARTS_WITH(tfw::basic::tfw_basic_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::basic::tfw_basic_t>(TFW_ARGS));
+
     } else if (TFW_NAME_STARTS_WITH(tfw::chscanner::tfw_chscanner_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::chscanner::tfw_chscanner_t>(TFW_ARGS));
+
+    } else if (TFW_NAME_STARTS_WITH(tfw::loopback::tfw_loopback_mmie_t::firmware_name)) {
+        layer_unit_vec.push_back(std::make_unique<tfw::loopback::tfw_loopback_mmie_t>(TFW_ARGS));
+
     } else if (TFW_NAME_STARTS_WITH(tfw::loopback::tfw_loopback_ratio_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::loopback::tfw_loopback_ratio_t>(TFW_ARGS));
+
     } else if (TFW_NAME_STARTS_WITH(tfw::loopback::tfw_loopback_snr_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::loopback::tfw_loopback_snr_t>(TFW_ARGS));
+
     } else if (TFW_NAME_STARTS_WITH(tfw::p2p::tfw_p2p_ft_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::p2p::tfw_p2p_ft_t>(TFW_ARGS));
+
     } else if (TFW_NAME_STARTS_WITH(tfw::p2p::tfw_p2p_pt_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::p2p::tfw_p2p_pt_t>(TFW_ARGS));
+
     } else if (TFW_NAME_STARTS_WITH(tfw::rtt::tfw_rtt_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::rtt::tfw_rtt_t>(TFW_ARGS));
+
     } else if (TFW_NAME_STARTS_WITH(tfw::timesync::tfw_timesync_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::timesync::tfw_timesync_t>(TFW_ARGS));
+
     } else {
         dectnrp_assert_failure("unknown tpoint firmware name {}", tpoint_config.firmware_name);
     }

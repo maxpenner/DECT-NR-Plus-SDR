@@ -34,13 +34,13 @@ An MMIE deriving from this abstract parent class has the following properties:
 
 MMIEs of this type are:
 
-1. association_control_ie_t
+1. association_control_ie_t (missing)
 2. association_release_message_t
 3. mac_security_info_ie_t
 4. radio_device_status_ie_t
-5. rd_capability_short_ie_t
+5. rd_capability_short_ie_t (missing)
 6. route_info_ie_t
-7. source_routing_ie_t
+7. source_routing_ie_t (missing)
 
 [Additional, non-standard compliant MMIEs](extensions/) or this type are:
 
@@ -57,13 +57,13 @@ An MMIE deriving from this abstract parent class has the following properties:
 
 MMIEs of this type are:
 
-1. association_request_message_t
+1. association_request_message_t 
 2. association_response_message_t
 3. broadcast_indication_ie_t
 4. cluster_beacon_message_t
 5. group_assignment_ie_t
-6. joining_beacon_message_t
-7. joining_information_ie_t
+6. joining_beacon_message_t (missing)
+7. joining_information_ie_t (missing)
 8. load_info_ie_t
 9. measurement_report_ie_t
 10. neighbouring_ie_t
@@ -83,8 +83,8 @@ An MMIE deriving from this abstract parent class has the following properties:
 
 MMIEs of this type are:
 
-1. user_plane_data_t
-2. higher_layer_signalling_t
+1. higher_layer_signalling_t
+2. user_plane_data_t
 
 ### mu_depending_t
 
@@ -99,7 +99,7 @@ void set_mu(const uint32_t mu_);
 
 The MMIE of type configuration_request_ie_t has zero length. It directly derives from [mmie_t](mmie.hpp).
 
-#### Keep Alive IE
+#### Keep Alive IE (missing)
 
 The MMIE of type keep_alive_ie_t has zero length. It directly derives from [mmie_t](mmie.hpp).
 

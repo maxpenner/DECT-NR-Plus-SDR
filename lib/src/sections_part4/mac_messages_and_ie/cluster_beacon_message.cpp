@@ -42,6 +42,18 @@ cluster_beacon_message_t::cluster_beacon_message_t() {
     dectnrp_assert(check_validity_at_runtime(this), "mmie invalid");
 }
 
+void cluster_beacon_message_t::testing_set_random() {
+    //
+
+    // dectnrp_assert(is_valid(), "mmie invalid");
+}
+
+bool cluster_beacon_message_t::testing_is_equal(const testing_t& rhs) const {
+    //
+
+    return true;
+}
+
 void cluster_beacon_message_t::zero() {
     system_frame_number = common::adt::UNDEFINED_NUMERIC_32;
 

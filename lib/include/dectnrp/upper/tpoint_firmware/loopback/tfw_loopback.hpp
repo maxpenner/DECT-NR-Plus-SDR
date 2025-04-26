@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <vector>
 
 #include "dectnrp/common/randomgen.hpp"
@@ -118,6 +119,8 @@ class tfw_loopback_t : public tpoint_t {
         } pp;
 
         void generate_packet(phy::machigh_phy_t& machigh_phy);
+
+        virtual void set_mac_pdu(uint8_t* a_tb, const uint32_t N_TB_byte);
 
         int64_t get_random_tx_time(const int64_t now_64);
 
