@@ -134,10 +134,9 @@ void tfw_loopback_snr_t::save_result_of_current_snr() {
     result.set_PERs(parameter_cnt, snr_cnt, nof_experiment_per_snr);
 
     dectnrp_log_inf(
-        "mcs={} SNR={} nof_experiment_per_snr={} | per_pcc_crc={} per_pcc_crc_and_plcf={} per_pdc_crc={} | snr_max={} snr_min={}",
+        "mcs={} SNR={} | per_pcc_crc={} per_pcc_crc_and_plcf={} per_pdc_crc={} | snr_max={} snr_min={}",
         mcs_vec.at(parameter_cnt),
         snr_vec.at(snr_cnt),
-        nof_experiment_per_snr,
         result.PER_pcc.at(parameter_cnt).at(snr_cnt),
         result.PER_pcc_and_plcf.at(parameter_cnt).at(snr_cnt),
         result.PER_pdc.at(parameter_cnt).at(snr_cnt),

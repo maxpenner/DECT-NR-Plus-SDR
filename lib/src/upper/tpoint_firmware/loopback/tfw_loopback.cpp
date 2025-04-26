@@ -64,7 +64,14 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     hw_simulator->set_rx_noise_figure_dB(0.0f);
     hw_simulator->set_rx_snr_in_net_bandwidth_norm_dB(0.0f);
 
-    state = STATE_t::SET_CHANNEL_SNR;
+    state = STATE_t::A_SET_CHANNEL_SNR;
+
+    stt.x_to_A_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 20);
+    stt.A_to_B_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 5);
+    stt.B_to_C_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 5);
+    stt.C_to_B_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 15);
+    stt.C_to_D_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 15);
+
     state_time_reference_64 = common::adt::UNDEFINED_EARLY_64;
 
     parameter_cnt = 0;
@@ -112,8 +119,7 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
 
 void tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
     // start some time in the near future
-    state_time_reference_64 = start_time_64 + duration_lut.get_N_samples_from_duration(
-                                                  section3::duration_ec_t::ms001, 123);
+    state_time_reference_64 = start_time_64 + stt.x_to_A_64;
 
     reset_result_counter_for_next_snr();
 }
@@ -131,68 +137,68 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
 
     switch (state) {
         using enum STATE_t;
-        case SET_CHANNEL_SNR:
+        case A_SET_CHANNEL_SNR:
             {
                 hw_simulator->set_rx_snr_in_net_bandwidth_norm_dB(snr_vec.at(snr_cnt));
 
                 reset_result_counter_for_next_snr();
 
-                state = SET_CHANNEL_SMALL_SCALE_FADING;
+                state = B_SET_CHANNEL_SMALL_SCALE_FADING;
 
-                state_time_reference_64 = now_64 + duration_lut.get_N_samples_from_duration(
-                                                       section3::duration_ec_t::ms001, 5);
+                state_time_reference_64 = now_64 + stt.A_to_B_64;
 
                 break;
             }
 
-        case SET_CHANNEL_SMALL_SCALE_FADING:
+        case B_SET_CHANNEL_SMALL_SCALE_FADING:
             {
                 hw_simulator->wchannel_randomize_small_scale();
 
-                state = EXPERIMENT_GENERATE_PACKETS;
+                state = C_EXPERIMENT_GENERATE_PACKETS;
 
-                state_time_reference_64 = now_64 + duration_lut.get_N_samples_from_duration(
-                                                       section3::duration_ec_t::ms001, 5);
+                state_time_reference_64 = now_64 + stt.B_to_C_64;
 
                 break;
             }
 
-        case EXPERIMENT_GENERATE_PACKETS:
+        case C_EXPERIMENT_GENERATE_PACKETS:
             {
                 generate_single_experiment_at_current_snr(now_64, machigh_phy);
 
                 ++nof_experiment_per_snr_cnt;
 
                 if (nof_experiment_per_snr_cnt < nof_experiment_per_snr) {
-                    state = SET_CHANNEL_SMALL_SCALE_FADING;
-                } else {
-                    state = EXPERIMENT_SAVE_RESULTS;
-                }
+                    state = B_SET_CHANNEL_SMALL_SCALE_FADING;
 
-                // should be much longer than a single experiment
-                state_time_reference_64 = now_64 + duration_lut.get_N_samples_from_duration(
-                                                       section3::duration_ec_t::ms001, 13);
+                    // should be much longer than a single experiment
+                    state_time_reference_64 = now_64 + stt.C_to_B_64;
+                } else {
+                    state = D_EXPERIMENT_SAVE_RESULTS;
+
+                    // should be much longer than a single experiment
+                    state_time_reference_64 = now_64 + stt.C_to_D_64;
+                }
 
                 break;
             }
 
-        case EXPERIMENT_SAVE_RESULTS:
+        case D_EXPERIMENT_SAVE_RESULTS:
             {
                 dectnrp_assert(nof_experiment_per_snr_cnt == nof_experiment_per_snr,
                                "incorrect number of experiments");
 
                 save_result_of_current_snr();
 
-                state = SET_PARAMETER;
+                state = E_SET_PARAMETER;
 
                 break;
             }
 
-        case SET_PARAMETER:
+        case E_SET_PARAMETER:
             {
                 ++snr_cnt;
 
-                state = SET_CHANNEL_SNR;
+                state = A_SET_CHANNEL_SNR;
 
                 // abort condition for SNR
                 if (snr_cnt == snr_vec.size()) {

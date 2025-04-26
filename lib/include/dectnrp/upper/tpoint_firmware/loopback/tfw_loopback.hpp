@@ -55,13 +55,21 @@ class tfw_loopback_t : public tpoint_t {
 
         /// state machine for for experiment coordination
         enum class STATE_t {
-            SET_CHANNEL_SNR,
-            SET_CHANNEL_SMALL_SCALE_FADING,
-            EXPERIMENT_GENERATE_PACKETS,
-            EXPERIMENT_SAVE_RESULTS,
-            SET_PARAMETER,
+            A_SET_CHANNEL_SNR,
+            B_SET_CHANNEL_SMALL_SCALE_FADING,
+            C_EXPERIMENT_GENERATE_PACKETS,
+            D_EXPERIMENT_SAVE_RESULTS,
+            E_SET_PARAMETER,
             DEAD_END
         } state;
+
+        struct state_transition_time_t {
+                int64_t x_to_A_64;
+                int64_t A_to_B_64;
+                int64_t B_to_C_64;
+                int64_t C_to_B_64;
+                int64_t C_to_D_64;
+        } stt;
 
         /// timing between states
         int64_t state_time_reference_64;

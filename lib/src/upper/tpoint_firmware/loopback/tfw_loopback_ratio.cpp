@@ -46,7 +46,7 @@ tfw_loopback_ratio_t::tfw_loopback_ratio_t(const tpoint_config_t& tpoint_config_
     ratio_vec = std::vector<int32_t>{30, 40, 50, 60, 70, 80};
 
     identity_A = section4::mac_architecture::identity_t(100, 10000000, 1000);
-    identity_B = section4::mac_architecture::identity_t(101, 10000001, 1001);
+    identity_B = section4::mac_architecture::identity_t(123, 12345678, 1234);
 
     result = result_t(ratio_vec.size(), snr_vec.size());
 }
@@ -80,14 +80,14 @@ phy::maclow_phy_t tfw_loopback_ratio_t::work_pcc(const phy::phy_maclow_t& phy_ma
             // cast guaranteed to work
             const auto* plcf_20 = static_cast<const section4::plcf_20_t*>(plcf_base);
 
-            if (plcf_20->TransmitterIdentity != pp.identity.ShortRadioDeviceID) {
+            if (plcf_20->TransmitterIdentity != identity_B.ShortRadioDeviceID) {
                 return phy::maclow_phy_t();
             }
         } else {
             // cast guaranteed to work
             const auto* plcf_21 = static_cast<const section4::plcf_21_t*>(plcf_base);
 
-            if (plcf_21->TransmitterIdentity != pp.identity.ShortRadioDeviceID) {
+            if (plcf_21->TransmitterIdentity != identity_B.ShortRadioDeviceID) {
                 return phy::maclow_phy_t();
             }
         }
@@ -97,7 +97,7 @@ phy::maclow_phy_t tfw_loopback_ratio_t::work_pcc(const phy::phy_maclow_t& phy_ma
 
     return worksub_pcc2pdc(phy_maclow,
                            pp.PLCF_type,
-                           pp.identity.NetworkID,
+                           identity_B.NetworkID,
                            0,
                            phy::harq::finalize_rx_t::reset_and_terminate,
                            phy::maclow_phy_handle_t());
@@ -147,10 +147,9 @@ void tfw_loopback_ratio_t::save_result_of_current_snr() {
     result.set_PERs(parameter_cnt, snr_cnt, nof_experiment_per_snr);
 
     dectnrp_log_inf(
-        "ratio={} SNR={} nof_experiment_per_snr={} | per_pcc_crc={} per_pcc_crc_and_plcf={} per_pdc_crc={} | snr_max={} snr_min={}",
+        "ratio={} SNR={} | per_pcc_crc={} per_pcc_crc_and_plcf={} per_pdc_crc={} | snr_max={} snr_min={}",
         ratio_vec.at(parameter_cnt),
         snr_vec.at(snr_cnt),
-        nof_experiment_per_snr,
         result.PER_pcc.at(parameter_cnt).at(snr_cnt),
         result.PER_pcc_and_plcf.at(parameter_cnt).at(snr_cnt),
         result.PER_pdc.at(parameter_cnt).at(snr_cnt),
