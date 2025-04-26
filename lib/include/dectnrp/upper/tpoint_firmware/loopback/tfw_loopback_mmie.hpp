@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "dectnrp/common/multidim.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/mmie_pool_tx.hpp"
 #include "dectnrp/upper/tpoint_firmware/loopback/result.hpp"
 #include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp"
 
@@ -45,8 +46,9 @@ class tfw_loopback_mmie_t final : public tfw_loopback_t {
         phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
 
     private:
-        /// MCS range to measure
-        std::vector<uint32_t> mcs_vec;
+        /// MMIEs to test
+        section4::mmie_pool_tx_t mmie_pool_tx;
+        std::vector<std::size_t> mmie_idx_vec;
 
         /// measured values
         result_t result;

@@ -42,9 +42,17 @@ tfw_loopback_mmie_t::tfw_loopback_mmie_t(const tpoint_config_t& tpoint_config_,
     }
     nof_experiment_per_snr = 100;
 
-    mcs_vec = std::vector<uint32_t>{1, 2, 3, 4, 5, 6};
+    for (std::size_t mmie_idx = 0; mmie_idx < mmie_pool_tx.get_nof_mmie(); ++mmie_idx) {
+        if (const auto* ptr = dynamic_cast<const common::serdes::testing_t*>(
+                &mmie_pool_tx.get_by_index(mmie_idx, 0));
+            ptr != nullptr) {
+            mmie_idx_vec.push_back(mmie_idx);
+        }
+    }
 
-    result = result_t(mcs_vec.size(), snr_vec.size());
+    dectnrp_assert(0 < mmie_idx_vec.size(), "no MMIEs to test");
+
+    result = result_t(mmie_idx_vec.size(), snr_vec.size());
 }
 
 phy::maclow_phy_t tfw_loopback_mmie_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
@@ -111,10 +119,27 @@ phy::machigh_phy_t tfw_loopback_mmie_t::work_pdc_async(const phy::phy_machigh_t&
 }
 
 void tfw_loopback_mmie_t::set_mac_pdu(uint8_t* a_tb, const uint32_t N_TB_byte) {
+    // update content of MMIE
+    auto* ptr = dynamic_cast<common::serdes::testing_t*>(
+        &mmie_pool_tx.get_by_index(mmie_idx_vec.at(parameter_cnt), 0));
+
+    dectnrp_assert(ptr != nullptr, "not deriving from testing");
+
+    ptr->testing_set_random();
+
+    // pack into MAC PDU
+    // ToDO
+
+    // ##########################################
+    // ##########################################
+    // ##########################################
     // fill MAC PDU with random data
     for (uint32_t i = 0; i < N_TB_byte; ++i) {
         a_tb[i] = std::rand() % 256;
     }
+    // ##########################################
+    // ##########################################
+    // ##########################################
 }
 
 void tfw_loopback_mmie_t::reset_result_counter_for_next_snr() {
@@ -125,12 +150,6 @@ void tfw_loopback_mmie_t::reset_result_counter_for_next_snr() {
 
 void tfw_loopback_mmie_t::generate_single_experiment_at_current_snr(
     const int64_t now_64, phy::machigh_phy_t& machigh_phy) {
-    // update MCS
-    pp.psdef.mcs_index = mcs_vec.at(parameter_cnt);
-    pp.plcf_10.DFMCS = pp.psdef.mcs_index;
-    pp.plcf_20.DFMCS = pp.psdef.mcs_index;
-    pp.plcf_21.DFMCS = pp.psdef.mcs_index;
-
     // find next possible TX time
     pp.tx_time_64 = get_random_tx_time(now_64);
 
@@ -141,8 +160,9 @@ void tfw_loopback_mmie_t::save_result_of_current_snr() {
     result.set_PERs(parameter_cnt, snr_cnt, nof_experiment_per_snr);
 
     dectnrp_log_inf(
-        "mcs={} SNR={} | per_pcc_crc={} per_pcc_crc_and_plcf={} per_pdc_crc={} | snr_max={} snr_min={}",
-        mcs_vec.at(parameter_cnt),
+        "parameter_cnt={} of {} SNR={} | per_pcc_crc={} per_pcc_crc_and_plcf={} per_pdc_crc={} | snr_max={} snr_min={}",
+        parameter_cnt,
+        mmie_idx_vec.size(),
         snr_vec.at(snr_cnt),
         result.PER_pcc.at(parameter_cnt).at(snr_cnt),
         result.PER_pcc_and_plcf.at(parameter_cnt).at(snr_cnt),
@@ -154,7 +174,7 @@ void tfw_loopback_mmie_t::save_result_of_current_snr() {
 bool tfw_loopback_mmie_t::set_next_parameter_or_go_to_dead_end() {
     ++parameter_cnt;
 
-    if (parameter_cnt == mcs_vec.size()) {
+    if (parameter_cnt == mmie_idx_vec.size()) {
         return true;
     }
 
@@ -164,16 +184,16 @@ bool tfw_loopback_mmie_t::set_next_parameter_or_go_to_dead_end() {
 void tfw_loopback_mmie_t::save_all_results_to_file() const {
     // save one file for every MCS
     uint32_t parameter_cnt_local = 0;
-    for (const auto mcs : mcs_vec) {
+    for (const auto mmie_idx : mmie_idx_vec) {
         std::ostringstream filename;
-        filename << "rx_loopback_MCS_" << std::setw(4) << std::setfill('0') << mcs;
+        filename << "rx_loopback_mmie_" << std::setw(4) << std::setfill('0') << mmie_idx;
 
         nlohmann::ordered_json j_packet_data;
 
         j_packet_data["experiment_range"]["snr_vec"] = snr_vec;
         j_packet_data["experiment_range"]["nof_experiment_per_snr"] = nof_experiment_per_snr;
 
-        j_packet_data["parameter"]["mcs"] = mcs;
+        j_packet_data["parameter"]["mmie_idx"] = mmie_idx;
 
         // clang-format off
         j_packet_data["result"]["snr_max_vec"] = result.snr_max_vec[parameter_cnt_local];
