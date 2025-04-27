@@ -54,6 +54,8 @@ bool cluster_beacon_message_t::testing_is_equal(const testing_t& rhs) const {
     return true;
 }
 
+const char* cluster_beacon_message_t::testing_name() const { return typeid(*this).name(); }
+
 void cluster_beacon_message_t::zero() {
     system_frame_number = common::adt::UNDEFINED_NUMERIC_32;
 

@@ -29,6 +29,7 @@ class testing_t {
 
         virtual void testing_set_random() = 0;
         virtual bool testing_is_equal(const testing_t& rhs) const = 0;
+        virtual const char* testing_name() const = 0;
 };
 
 }  // namespace dectnrp::common::serdes

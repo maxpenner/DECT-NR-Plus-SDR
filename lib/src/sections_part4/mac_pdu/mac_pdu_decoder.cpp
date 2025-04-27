@@ -32,7 +32,7 @@ mac_pdu_decoder_t::mac_pdu_decoder_t() {
     set_nof_elements<user_plane_data_t>(limits::max_nof_user_plane_data_per_mac_pdu);
 
     index_next_ie.reserve(get_nof_mmie());
-    mmie_decoded_vec.reserve(get_nof_elements_all_mmie());
+    mmie_decoded_vec.reserve(get_nof_mmie_elements());
 }
 
 void mac_pdu_decoder_t::set_configuration(uint8_t* a_,

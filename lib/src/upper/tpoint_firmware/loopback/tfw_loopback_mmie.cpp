@@ -51,6 +51,9 @@ tfw_loopback_mmie_t::tfw_loopback_mmie_t(const tpoint_config_t& tpoint_config_,
     }
 
     dectnrp_assert(0 < mmie_idx_vec.size(), "no MMIEs to test");
+    dectnrp_assert(
+        mmie_idx_vec.size() == mmie_pool_tx.get_nof_mmie_derived_from<common::serdes::testing_t>(),
+        "incorrect number");
 
     result = result_t(mmie_idx_vec.size(), snr_vec.size());
 }
@@ -159,8 +162,14 @@ void tfw_loopback_mmie_t::generate_single_experiment_at_current_snr(
 void tfw_loopback_mmie_t::save_result_of_current_snr() {
     result.set_PERs(parameter_cnt, snr_cnt, nof_experiment_per_snr);
 
+    const auto* ptr = dynamic_cast<common::serdes::testing_t*>(
+        &mmie_pool_tx.get_by_index(mmie_idx_vec.at(parameter_cnt)));
+
+    dectnrp_assert(ptr != nullptr, "not derived from testing");
+
     dectnrp_log_inf(
-        "parameter_cnt={} of {} SNR={} | per_pcc_crc={} per_pcc_crc_and_plcf={} per_pdc_crc={} | snr_max={} snr_min={}",
+        "{} index {} of {} SNR={} | per_pcc_crc={} per_pcc_crc_and_plcf={} per_pdc_crc={} | snr_max={} snr_min={}",
+        ptr->testing_name(),
         parameter_cnt,
         mmie_idx_vec.size(),
         snr_vec.at(snr_cnt),

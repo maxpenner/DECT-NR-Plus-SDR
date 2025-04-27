@@ -81,6 +81,7 @@ class cluster_beacon_message_t final : public mmie_packing_peeking_t,
 
         void testing_set_random() override final;
         bool testing_is_equal(const testing_t& rhs) const override final;
+        const char* testing_name() const override final;
 
     private:
         void zero() override;
