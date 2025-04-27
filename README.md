@@ -2,9 +2,14 @@
   <img src="docs/logo.png" style="width: 100%; background-color: transparent;" alt="logo.png"/>
 </p>
 
-This repository contains my work-in-progress SDR implementation of DECT NR+ ([ETSI TS 103 636, Part 1 to 5](https://www.etsi.org/committee/1394-dect)). DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](https://www.etsi.org/newsroom/press-releases/1988-2021-10-world-s-first-non-cellular-5g-technology-etsi-dect-2020-gets-itu-r-approval-setting-example-of-new-era-connectivity). Introductions are available at [ETSI](https://www.etsi.org/technologies/dect), [DECT Forum](https://www.dect.org/nrplus) and [Wikipedia](https://en.wikipedia.org/wiki/DECT-2020).
+This repository contains my work-in-progress SDR implementation of DECT NR+ ([ETSI TS 103 636, Part 1 to 5](https://www.etsi.org/committee/1394-dect)) with the following features:
 
-While commonly referred to as DECT NR+, the standard's official designation is DECT-2020 New Radio (NR).
+- **Entensive**: support all values of $\mu$, $\beta$ and N<sub>TX</sub>
+- **Extensible**: enables custom firmware based on slim interfaces to the PHY and application layer
+- **Fast**: supports low latencies and high data rates
+- **Reliable**: supports MIMO (transmit diversity, beamforming etc.) for diversity combining
+
+DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](https://www.etsi.org/newsroom/press-releases/1988-2021-10-world-s-first-non-cellular-5g-technology-etsi-dect-2020-gets-itu-r-approval-setting-example-of-new-era-connectivity). Introductions are available at [ETSI](https://www.etsi.org/technologies/dect), [DECT Forum](https://www.dect.org/nrplus) and [Wikipedia](https://en.wikipedia.org/wiki/DECT-2020). While commonly referred to as DECT NR+, the standard's official designation is DECT-2020 New Radio (NR).
 
 ## Table of Contents
 
