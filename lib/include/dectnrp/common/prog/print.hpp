@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include <fmt/color.h>
-#include <fmt/core.h>
-#include <fmt/format.h>
+#define FMT_HEADER_ONLY
+#include "dectnrp/external/fmt/color.h"
+#include "dectnrp/external/fmt/core.h"
+#include "dectnrp/external/fmt/format.h"
 
 #define COMMON_PROG_PRINTS_WITH_FILEPATH_OR_FILENAME_ONLY
 

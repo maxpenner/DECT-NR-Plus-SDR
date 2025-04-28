@@ -19,7 +19,7 @@
 #
 
 add_library(dectnrp_common STATIC)
-target_link_libraries(dectnrp_common pthread fmt::fmt)
+target_link_libraries(dectnrp_common pthread)
 
 file(GLOB DECTNRP_COMMON_SOURCES "*.cpp")
 target_sources(dectnrp_common PRIVATE ${DECTNRP_COMMON_SOURCES})

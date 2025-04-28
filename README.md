@@ -97,12 +97,11 @@ For any firmware, start_threads() is always called first, followed by work_start
 
 ## Installation
 
-The SDR has been tested on Ubuntu 22.04 and 24.04. It has five dependencies:
+The SDR has been tested on Ubuntu 22.04 and 24.04. It has four dependencies that must be installed:
 - [UHD](https://github.com/EttusResearch/uhd): Radio Devices
 - [srsRAN 4G](https://github.com/srsran/srsRAN_4G): Turbo coding, PHY processing, SIMD
 - [VOLK](https://github.com/gnuradio/volk): SIMD
 - [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page): Matrix Inversion
-- [fmt](https://github.com/fmtlib/fmt): Logging
 
 Installation instructions for these dependencies can be found in [scripts/install_dependencies.sh](scripts/install_dependencies.sh). After installing the dependencies, the SDR can be either downloaded and compiled with [scripts/install_sdr.sh](scripts/install_sdr.sh), or manually with: 
 
@@ -161,8 +160,7 @@ If you use this repository for any publication, please cite the repository accor
 2. [MAC messages and information elements (MMIEs)](lib/include/dectnrp/sections_part4/mac_messages_and_ie) in the standard are subject to frequent changes. Previously completed MMIEs are currently being revised and will be updated soon.
 3. If asserts are enabled, the program may stop abruptly if IQ samples are not processed fast enough. This is triggered by a backlog of unprocessed IQ samples within synchronization.
 4. For some combinations of operating system, CPU and DPDK, pressing control+c does not stop the SDR. The SDR process must then be stopped manually.
-5. With gcc 12 and above, a [warning is issued in relation to fmt](https://github.com/fmtlib/fmt/issues/3354) which becomes an error due to the compiler flag *Werror* being used by default. It can be disabled in [CMakeLists.txt](CMakeLists.txt) by turning off the option *ENABLE_WERROR*.
-6. In an earlier version of the standard, the number of transmit streams was signaled by a cyclic rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
+5. In an earlier version of the standard, the number of transmit streams was signaled by a cyclic rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
 
 ## Future Work
 

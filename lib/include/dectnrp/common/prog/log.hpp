@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include <fmt/core.h>
-#include <fmt/format.h>
+#include "dectnrp/common/prog/defined.hpp"
 
 #define FMTLOG_HEADER_ONLY
-#include "dectnrp/common/prog/defined.hpp"
-#include "dectnrp/external/fmtlog/fmtlog.hpp"
+#include "dectnrp/external/fmt/core.h"
+#include "dectnrp/external/fmt/format.h"
+#include "dectnrp/external/fmtlog/fmtlog.h"
 
 namespace dectnrp::log {
 

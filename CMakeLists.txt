@@ -224,9 +224,6 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 set(EIGEN3_DIR /usr/include/eigen3)
 include_directories(${EIGEN3_DIR})
 
-# printing and logging
-find_package(fmt REQUIRED)
-
 ########################################################################
 # Instruction Set Architecture setup
 ########################################################################

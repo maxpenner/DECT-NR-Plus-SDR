@@ -20,6 +20,8 @@
 
 #include "dectnrp/apps/udp.hpp"
 
+#include <unistd.h>
+
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::apps {

@@ -167,7 +167,7 @@ class job_queue_t final : public common::reporting_t {
 #include <memory>
 
 #include "dectnrp/common/reporting.hpp"
-#include "dectnrp/external/cameron314/blockingconcurrentqueue.hpp"
+#include "dectnrp/external/cameron314/blockingconcurrentqueue.h"
 #include "dectnrp/phy/pool/job.hpp"
 #include "dectnrp/phy/pool/job_slot.hpp"
 
