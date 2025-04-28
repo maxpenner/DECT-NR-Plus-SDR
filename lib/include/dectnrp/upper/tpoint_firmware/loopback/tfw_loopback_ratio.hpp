@@ -61,14 +61,14 @@ class tfw_loopback_ratio_t final : public tfw_loopback_t {
         /// measured values
         result_t result;
 
-        void reset_result_counter_for_next_snr() override final;
+        void A_reset_result_counter_for_next_snr() override final;
 
-        void generate_single_experiment_at_current_snr(
+        void C_generate_single_experiment_at_current_snr(
             const int64_t now_64, phy::machigh_phy_t& machigh_phy) override final;
 
-        void save_result_of_current_snr() override final;
+        void D_save_result_of_current_snr() override final;
 
-        bool set_next_parameter_or_go_to_dead_end() override final;
+        bool E_set_next_parameter_or_go_to_dead_end() override final;
 
         void save_all_results_to_file() const override final;
 };

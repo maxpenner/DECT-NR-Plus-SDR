@@ -145,13 +145,13 @@ void tfw_loopback_mmie_t::set_mac_pdu(uint8_t* a_tb, const uint32_t N_TB_byte) {
     // ##########################################
 }
 
-void tfw_loopback_mmie_t::reset_result_counter_for_next_snr() {
+void tfw_loopback_mmie_t::A_reset_result_counter_for_next_snr() {
     nof_experiment_per_snr_cnt = 0;
 
     result.reset();
 }
 
-void tfw_loopback_mmie_t::generate_single_experiment_at_current_snr(
+void tfw_loopback_mmie_t::C_generate_single_experiment_at_current_snr(
     const int64_t now_64, phy::machigh_phy_t& machigh_phy) {
     // find next possible TX time
     pp.tx_time_64 = get_random_tx_time(now_64);
@@ -159,7 +159,7 @@ void tfw_loopback_mmie_t::generate_single_experiment_at_current_snr(
     tfw_loopback_t::generate_packet(machigh_phy);
 }
 
-void tfw_loopback_mmie_t::save_result_of_current_snr() {
+void tfw_loopback_mmie_t::D_save_result_of_current_snr() {
     result.set_PERs(parameter_cnt, snr_cnt, nof_experiment_per_snr);
 
     const auto* ptr = dynamic_cast<common::serdes::testing_t*>(
@@ -180,7 +180,7 @@ void tfw_loopback_mmie_t::save_result_of_current_snr() {
         result.snr_min_vec.at(parameter_cnt).at(snr_cnt));
 }
 
-bool tfw_loopback_mmie_t::set_next_parameter_or_go_to_dead_end() {
+bool tfw_loopback_mmie_t::E_set_next_parameter_or_go_to_dead_end() {
     ++parameter_cnt;
 
     if (parameter_cnt == mmie_idx_vec.size()) {

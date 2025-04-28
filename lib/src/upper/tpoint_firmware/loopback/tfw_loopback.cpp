@@ -121,7 +121,7 @@ void tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
     // start some time in the near future
     state_time_reference_64 = start_time_64 + stt.x_to_A_64;
 
-    reset_result_counter_for_next_snr();
+    A_reset_result_counter_for_next_snr();
 }
 
 phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
@@ -141,7 +141,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
             {
                 hw_simulator->set_rx_snr_in_net_bandwidth_norm_dB(snr_vec.at(snr_cnt));
 
-                reset_result_counter_for_next_snr();
+                A_reset_result_counter_for_next_snr();
 
                 state = B_SET_CHANNEL_SMALL_SCALE_FADING;
 
@@ -163,7 +163,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
 
         case C_EXPERIMENT_GENERATE_PACKETS:
             {
-                generate_single_experiment_at_current_snr(now_64, machigh_phy);
+                C_generate_single_experiment_at_current_snr(now_64, machigh_phy);
 
                 ++nof_experiment_per_snr_cnt;
 
@@ -187,7 +187,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
                 dectnrp_assert(nof_experiment_per_snr_cnt == nof_experiment_per_snr,
                                "incorrect number of experiments");
 
-                save_result_of_current_snr();
+                D_save_result_of_current_snr();
 
                 state = E_SET_PARAMETER;
 
@@ -207,7 +207,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
                     dectnrp_log_inf(" ");
 
                     // abort condition for outer parameter
-                    if (set_next_parameter_or_go_to_dead_end()) {
+                    if (E_set_next_parameter_or_go_to_dead_end()) {
                         state = DEAD_END;
                         dectnrp_log_inf("all measurements finished");
                     }
