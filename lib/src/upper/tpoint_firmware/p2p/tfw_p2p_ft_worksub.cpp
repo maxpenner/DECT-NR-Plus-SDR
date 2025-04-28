@@ -139,7 +139,6 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     // OPTIONAL: change content of PLCF, MAC header type and MAC common header
     // -
 
-    // pack headers
     uint32_t a_cnt_w = ppmp_beacon.pack_first_3_header(hp_tx->get_a_plcf(), hp_tx->get_a_tb());
 
     // change content of cluster_beacon_message_t
@@ -160,24 +159,20 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     mmie_pool_tx.fill_with_padding_ies(hp_tx->get_a_tb() + a_cnt_w,
                                        packet_sizes.N_TB_byte - a_cnt_w);
 
-    // pick beamforming codebook index
     uint32_t codebook_index = 0;
 
-    // PHY meta
     const phy::tx_meta_t& tx_meta = {.optimal_scaling_DAC = false,
                                      .DAC_scale = agc_tx.get_ofdm_amplitude_factor(),
                                      .iq_phase_rad = 0.0f,
                                      .iq_phase_increment_s2s_post_resampling_rad = 0.0f,
                                      .GI_percentage = 5};
 
-    // radio meta
     radio::buffer_tx_meta_t buffer_tx_meta = {
         .tx_order_id = tx_order_id, .tx_time_64 = allocation_ft.get_beacon_time_scheduled()};
 
     ++tx_order_id;
     tx_earliest_64 = allocation_ft.get_beacon_time_scheduled();
 
-    // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
 

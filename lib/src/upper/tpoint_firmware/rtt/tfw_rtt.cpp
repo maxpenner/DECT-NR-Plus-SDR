@@ -288,7 +288,6 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // this is now a well-defined packet size
     const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    // pack headers
     plcf_10.pack(hp_tx->get_a_plcf());
 
     // define MAC PDU
@@ -306,17 +305,14 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
         memcpy(hp_tx->get_a_tb(), &stage_a[0], packet_sizes.N_TB_byte);
     }
 
-    // pick beamforming codebook index
     uint32_t codebook_index = 0;
 
-    // PHY meta
     const phy::tx_meta_t tx_meta = {.optimal_scaling_DAC = false,
                                     .DAC_scale = agc_tx.get_ofdm_amplitude_factor(),
                                     .iq_phase_rad = 0.0f,
                                     .iq_phase_increment_s2s_post_resampling_rad = 0.0f,
                                     .GI_percentage = 5};
 
-    // radio meta
     radio::buffer_tx_meta_t buffer_tx_meta = {
         .tx_order_id = tx_order_id,
         .tx_time_64 = std::max(
@@ -327,7 +323,6 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     tx_earliest_64 = buffer_tx_meta.tx_time_64 + section3::get_N_samples_in_packet_length(
                                                      hp_tx->get_packet_sizes(), hw.get_samp_rate());
 
-    // add to tx_descriptor_vec
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
 }

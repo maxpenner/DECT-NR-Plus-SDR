@@ -297,7 +297,6 @@ void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
     // this is now a well-defined packet size
     const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    // pack headers
     if (pp.PLCF_type == 1) {
         dectnrp_assert(hp_tx->get_rv() == pp.plcf_10.get_DFRedundancyVersion(), "incorrect rv");
         pp.plcf_10.pack(hp_tx->get_a_plcf());
@@ -319,7 +318,6 @@ void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
     const float cfo_Hz = randomgen.rand_m1p1() * pp.cfo_symmetric_range_subc_multiple *
                          static_cast<float>(pp.psdef.u * constants::subcarrier_spacing_min_u_b);
 
-    // PHY meta
     const phy::tx_meta_t tx_meta = {
         .optimal_scaling_DAC = false,
         .DAC_scale = phy::agc::agc_t::OFDM_AMPLITUDE_FACTOR_MINUS_00dB * pp.amplitude_scale,
@@ -328,13 +326,11 @@ void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
             common::adt::get_sample2sample_phase_inc(cfo_Hz, hw.get_samp_rate()),
         .GI_percentage = 5};
 
-    // radio meta
     const radio::buffer_tx_meta_t buffer_tx_meta = {.tx_order_id = tx_order_id,
                                                     .tx_time_64 = pp.tx_time_64};
 
     ++tx_order_id;
 
-    // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
 }
