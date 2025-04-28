@@ -25,12 +25,12 @@
 
 namespace dectnrp::application {
 
-app_server_t::app_server_t(const uint32_t id,
-                           const common::threads_core_prio_config_t thread_config,
-                           phy::job_queue_t& job_queue,
+app_server_t::app_server_t(const uint32_t id_,
+                           const common::threads_core_prio_config_t thread_config_,
+                           phy::job_queue_t& job_queue_,
                            const uint32_t N_queue,
                            const queue_size_t queue_size)
-    : app_t(id, thread_config, job_queue, N_queue, queue_size) {
+    : app_t(id_, thread_config_, job_queue_, N_queue, queue_size) {
     pfds.resize(N_queue);
 }
 
@@ -46,7 +46,7 @@ void app_server_t::work_sc() {
 
         // any sockets with events? if not, poll timed out
         if (num_events > 0) {
-            for (int i = 0; i < pfds.size(); ++i) {
+            for (std::size_t i = 0; i < pfds.size(); ++i) {
                 pollin_happened = pfds[i].revents & POLLIN;
 
                 if (pollin_happened) {

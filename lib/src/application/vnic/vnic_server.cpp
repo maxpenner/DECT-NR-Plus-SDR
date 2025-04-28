@@ -35,12 +35,12 @@
 
 namespace dectnrp::application::vnic {
 
-vnic_server_t::vnic_server_t(const uint32_t id,
-                             const common::threads_core_prio_config_t thread_config,
-                             phy::job_queue_t& job_queue,
+vnic_server_t::vnic_server_t(const uint32_t id_,
+                             const common::threads_core_prio_config_t thread_config_,
+                             phy::job_queue_t& job_queue_,
                              const vnic_config_t vnic_config_,
                              const queue_size_t queue_size)
-    : app_server_t(id, thread_config, job_queue, 1, queue_size),
+    : app_server_t(id_, thread_config_, job_queue_, 1, queue_size),
       vnic_t(),
       vnic_config(vnic_config_) {
     dectnrp_assert(!(vnic_config.tun_name.size() == 0 && vnic_config.tap_name.size() == 0),
