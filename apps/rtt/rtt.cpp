@@ -46,7 +46,7 @@
 #include "dectnrp/common/prog/print.hpp"
 #include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/common/thread/watch.hpp"
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "header_only/nlohmann/json.hpp"
 
 // ctrl+c
 static std::atomic<bool> ctrl_c_pressed{false};

@@ -23,9 +23,9 @@
 #include "dectnrp/common/prog/defined.hpp"
 
 #define FMTLOG_HEADER_ONLY
-#include "dectnrp/external/fmt/core.h"
-#include "dectnrp/external/fmt/format.h"
-#include "dectnrp/external/fmtlog/fmtlog.h"
+#include "header_only/fmt/core.h"
+#include "header_only/fmt/format.h"
+#include "header_only/fmtlog/fmtlog.h"
 
 namespace dectnrp::log {
 

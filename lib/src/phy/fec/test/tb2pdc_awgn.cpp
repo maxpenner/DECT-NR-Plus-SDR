@@ -29,11 +29,11 @@
 
 #include "dectnrp/common/prog/print.hpp"
 #include "dectnrp/common/randomgen.hpp"
-#include "dectnrp/external/nlohmann/json.hpp"
 #include "dectnrp/phy/fec/fec.hpp"
 #include "dectnrp/phy/phy_config.hpp"
 #include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
 #include "dectnrp/sections_part3/radio_device_class.hpp"
+#include "header_only/nlohmann/json.hpp"
 #include "srsran/srsran.h"
 
 #define MCS_MIN 0

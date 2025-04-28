@@ -167,9 +167,9 @@ class job_queue_t final : public common::reporting_t {
 #include <memory>
 
 #include "dectnrp/common/reporting.hpp"
-#include "dectnrp/external/cameron314/blockingconcurrentqueue.h"
 #include "dectnrp/phy/pool/job.hpp"
 #include "dectnrp/phy/pool/job_slot.hpp"
+#include "header_only/cameron314/blockingconcurrentqueue.h"
 
 // #define PHY_POOL_JOB_QUEUE_MOODYCAMEL_USES_MUTEX_OR_SPINLOCK
 #ifdef PHY_POOL_JOB_QUEUE_MOODYCAMEL_USES_MUTEX_OR_SPINLOCK

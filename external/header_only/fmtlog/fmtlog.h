@@ -30,7 +30,7 @@ SOFTWARE.
 #include <vector>
 
 #define FMT_HEADER_ONLY
-#include "dectnrp/external/fmt/format.h"
+#include "header_only/fmt/format.h"
 
 #ifdef _MSC_VER
 #include <intrin.h>

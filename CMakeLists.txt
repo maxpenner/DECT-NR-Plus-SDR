@@ -312,6 +312,7 @@ endif(ENABLE_TIDY)
 # Add subdirectories
 ########################################################################
 include_directories(${PROJECT_SOURCE_DIR}/lib/include)
+include_directories(${PROJECT_SOURCE_DIR}/external)
 include_directories(${PROJECT_BINARY_DIR}/lib/include)
 add_subdirectory(apps)
 add_subdirectory(lib)

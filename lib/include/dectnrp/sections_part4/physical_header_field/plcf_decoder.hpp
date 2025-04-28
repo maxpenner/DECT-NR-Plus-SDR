@@ -30,7 +30,7 @@
 #include "dectnrp/sections_part4/physical_header_field/plcf_21.hpp"
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "header_only/nlohmann/json.hpp"
 #endif
 
 namespace dectnrp::section4 {

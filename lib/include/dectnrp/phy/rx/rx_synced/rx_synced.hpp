@@ -55,7 +55,7 @@ extern "C" {
 #endif
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "header_only/nlohmann/json.hpp"
 #endif
 
 namespace dectnrp::phy {

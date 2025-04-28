@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "header_only/nlohmann/json.hpp"
 
 namespace dectnrp::common::jsonparse {
 

@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include "dectnrp/external/debugbreak/debugbreak.h"
+#include "header_only/debugbreak/debugbreak.h"
 
 #define FMT_HEADER_ONLY
-#include "dectnrp/external/fmt/color.h"
-#include "dectnrp/external/fmt/core.h"
-#include "dectnrp/external/fmt/format.h"
+#include "header_only/fmt/color.h"
+#include "header_only/fmt/core.h"
+#include "header_only/fmt/format.h"
 
 #define COMMON_PROG_DEBUGBREAKPOINT_WITH_FILEPATH_OR_FILENAME_ONLY
 
