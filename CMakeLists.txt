@@ -56,7 +56,7 @@ include(${CMAKE_BINARY_DIR}/buildinfo.cmake)
 ########################################################################
 # Options
 ########################################################################
-option(ENABLE_WERROR      "Stop compilation on errors"                ON)
+option(ENABLE_WERROR      "Stop compilation on warnings"              ON)
 option(ENABLE_ASAN        "Enable gcc/clang address sanitizer"        OFF)
 option(ENABLE_TSAN        "Enable clang thread sanitizer"             OFF)
 option(ENABLE_GCOV        "Enable code coverage"                      OFF)

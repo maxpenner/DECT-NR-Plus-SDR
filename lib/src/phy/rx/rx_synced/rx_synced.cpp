@@ -37,7 +37,7 @@ extern "C" {
 #endif
 
 #include "dectnrp/common/complex.hpp"
-#include "dectnrp/common/json_export.hpp"
+#include "dectnrp/common/json/json_export.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/phy/resample/resampler_param.hpp"

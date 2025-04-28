@@ -41,7 +41,7 @@
 #include <sstream>
 
 #include "dectnrp/apps/udp.hpp"
-#include "dectnrp/common/json_export.hpp"
+#include "dectnrp/common/json/json_export.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/print.hpp"
 #include "dectnrp/common/thread/threads.hpp"

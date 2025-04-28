@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-#include "dectnrp/common/json_parse.hpp"
+#include "dectnrp/common/json/json_parse.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/external/nlohmann/json.hpp"
 

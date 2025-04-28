@@ -4,10 +4,10 @@
 
 This repository contains my work-in-progress SDR implementation of DECT NR+ ([ETSI TS 103 636, Part 1 to 5](https://www.etsi.org/committee/1394-dect)) with the following features:
 
-- **Entensive**: support all values of $\mu$, $\beta$ and N<sub>TX</sub>
+- **Entensive**: supports all values of $\mu$, $\beta$ and N<sub>TX</sub>
 - **Extensible**: enables custom firmware based on slim interfaces to the PHY and application layer
-- **Fast**: supports low latencies and high data rates
-- **Reliable**: supports MIMO (transmit diversity, beamforming etc.) for diversity combining
+- **Fast**: supports low latencies (<250 $\mu s$) and high data rates (>100 $Mbps$)
+- **Reliable**: supports MIMO (transmit diversity, beamforming etc.) for diversity combining and SINR maximization
 
 DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](https://www.etsi.org/newsroom/press-releases/1988-2021-10-world-s-first-non-cellular-5g-technology-etsi-dect-2020-gets-itu-r-approval-setting-example-of-new-era-connectivity). Introductions are available at [ETSI](https://www.etsi.org/technologies/dect), [DECT Forum](https://www.dect.org/nrplus) and [Wikipedia](https://en.wikipedia.org/wiki/DECT-2020). While commonly referred to as DECT NR+, the standard's official designation is DECT-2020 New Radio (NR).
 
@@ -64,7 +64,7 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
 | 8 | start_threads()          | called once during SDR startup to start application layer threads         |
 | 9 | stop_threads()           | called once during SDR shutdown to stop application layer threads         |
 
-For any firmware, start_threads() is always called first, followed by work_start_imminent(). Only then are all other work-functions called. For event-driven functions, calls are only made if and when the associated event occurs. As soon as the SDR is to be terminated, stop_threads() is called, and any firmware must stop.
+For any firmware, start_threads() is always called first, followed by work_start_imminent(). Only then all other work-functions are called. For event-driven functions, calls are only made if and when the associated event occurs. Once the SDR receives a signal triggered by pressing ctrl+c, stop_threads() is called and the running firmware must stop such that the SDR can shut down.
 
 ## Directories
 

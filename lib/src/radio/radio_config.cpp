@@ -23,7 +23,7 @@
 #include <iostream>
 #include <limits>
 
-#include "dectnrp/common/json_parse.hpp"
+#include "dectnrp/common/json/json_parse.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::radio {
