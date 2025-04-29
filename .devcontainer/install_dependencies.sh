@@ -79,14 +79,14 @@ libusb-dev python3-dev python3-mako python3-numpy python3-requests python3-scipy
 python3-ruamel.yaml
 
 # clone the source code
-sudo -u "$SUDO_USER" git clone --depth 1 --branch UHD-4.6 https://github.com/EttusResearch/uhd.git
+git clone --depth 1 --branch UHD-4.6 https://github.com/EttusResearch/uhd.git
 
 # build and install
 cd uhd/host
-sudo -u "$SUDO_USER" mkdir build
+mkdir build
 cd build
-sudo -u "$SUDO_USER" cmake ../
-sudo -u "$SUDO_USER" make -j
+cmake ../
+make -j
 make install
 
 ldconfig
@@ -103,14 +103,14 @@ cd $cwd
 apt-get -y install build-essential cmake
 
 # clone the source code
-sudo -u "$SUDO_USER" git clone --depth 1 --branch v3.1.0 --recurse-submodules -j8 https://github.com/gnuradio/volk.git
+git clone --depth 1 --branch v3.1.0 --recurse-submodules -j8 https://github.com/gnuradio/volk.git
 
 # build and install
 cd volk
-sudo -u "$SUDO_USER" mkdir build
+mkdir build
 cd build
-sudo -u "$SUDO_USER" cmake ../
-sudo -u "$SUDO_USER" make -j
+cmake ../
+make -j
 make install
 
 ldconfig
@@ -130,16 +130,16 @@ cd $cwd
 apt-get -y install build-essential cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev
 
 # clone the source code
-sudo -u "$SUDO_USER" git clone --depth 1 --branch release_23_11 https://github.com/srsRAN/srsRAN_4G.git
+git clone --depth 1 --branch release_23_11 https://github.com/srsRAN/srsRAN_4G.git
 
 # build and install
 cd srsRAN_4G
-sudo -u "$SUDO_USER" mkdir build
+mkdir build
 cd build
 # With gcc 12 or later, there are false alarms warnings of type Warray-bounds.
 # To allow compilation with gcc 12 or later, Werror is disabled. 
-sudo -u "$SUDO_USER" cmake -DENABLE_WERROR=OFF ../
-sudo -u "$SUDO_USER" make -j
+cmake -DENABLE_WERROR=OFF ../
+make -j
 make install
 
 ldconfig
