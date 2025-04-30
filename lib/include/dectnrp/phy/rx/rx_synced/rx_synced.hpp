@@ -24,10 +24,7 @@
 #include <memory>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/common/json/json_switch.hpp"
 #include "dectnrp/phy/harq/buffer_rx.hpp"
 #include "dectnrp/phy/harq/buffer_rx_plcf.hpp"

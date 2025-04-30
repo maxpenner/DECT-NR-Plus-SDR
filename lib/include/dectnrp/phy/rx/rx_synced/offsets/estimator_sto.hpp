@@ -25,10 +25,7 @@
 #include <cstdint>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/phy/rx/rx_synced/estimator/estimator.hpp"
 
 namespace dectnrp::phy {

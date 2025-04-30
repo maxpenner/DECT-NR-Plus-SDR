@@ -23,11 +23,8 @@
 #include <cstdint>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
 #include "dectnrp/common/ant.hpp"
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/simulation/topology/position.hpp"
 #include "dectnrp/simulation/vspp/vspp.hpp"
 

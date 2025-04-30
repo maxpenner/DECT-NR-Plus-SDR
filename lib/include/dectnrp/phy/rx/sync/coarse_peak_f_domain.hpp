@@ -26,10 +26,7 @@
 #include <utility>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/phy/dft/ofdm.hpp"
 
 namespace dectnrp::phy {

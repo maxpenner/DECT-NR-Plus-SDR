@@ -20,4 +20,8 @@
 
 #pragma once
 
+extern "C" {
+#include "srsran/config.h"
+}
+
 #define conjj(x) (cf_t{__real__(x), -__imag__(x)})

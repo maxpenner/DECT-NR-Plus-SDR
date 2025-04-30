@@ -24,11 +24,8 @@
 #include <cstdint>
 #include <string>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
 #include "dectnrp/common/adt/cast.hpp"
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/common/reporting.hpp"
 #include "header_only/nlohmann/json.hpp"
 

@@ -204,10 +204,9 @@ namespace dectnrp::phy {
 #define RX_SYNCED_PARAM_WEIGHTS_TYPE float
 #define RX_SYNCED_PARAM_WEIGHTS_TYPE_INTERNAL double
 #elif RX_SYNCED_PARAM_WEIGHTS_TYPE_CHOICE == RX_SYNCED_PARAM_WEIGHTS_TYPE_COMP
-extern "C" {
-#include "srsran/config.h"
-}
 #include <complex>
+
+#include "dectnrp/common/complex.hpp"
 #define RX_SYNCED_PARAM_WEIGHTS_TYPE cf_t
 #define RX_SYNCED_PARAM_WEIGHTS_TYPE_INTERNAL std::complex<double>
 #endif

@@ -1,1 +1,1 @@
-Utilities classes and function specific for the apps in the top-level folder.
+Utility classes and functions specific for apps in the top-level folder apps/.
