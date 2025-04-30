@@ -125,7 +125,7 @@ cd bin/
 sudo ./dectnrp "../configurations/basic_simulator/"
 ```
 
-The executable `dectnrp` requires exactly one argument, which is a path to a directory containing three configuration files `radio.json`, `phy.json` and `upper.json`. Each configuration file configures its respective layer(s). In the case of `upper.json`, this also implies the name of the firmware to load. The SDR is stopped by pressing control+c.
+The executable `dectnrp` requires exactly one argument, which is a path to a directory containing three configuration files `radio.json`, `phy.json` and `upper.json`. Each configuration file configures its respective layer(s). In the case of `upper.json`, this also implies the name of the firmware to load. The SDR is stopped by pressing ctrl+c.
 
 The configuration files may also contain multiple instances of the SDR. In fact, each configuration file configures its layer(s) by listing one or multiple layer units:
 
@@ -160,7 +160,7 @@ If you use this repository for any publication, please cite the repository accor
 - The channel coding requires verification. It is based on [srsRAN 4G](https://github.com/srsran/srsRAN_4G) with multiple changes, for instance, an additional maximum code block size $Z=2048$. Furthermore, channel coding with a limited number of soft bits is not implemented yet.
 - [MAC messages and information elements (MMIEs)](lib/include/dectnrp/sections_part4/mac_messages_and_ie) in the standard are subject to frequent changes. Previously completed MMIEs are currently being revised and will be updated soon.
 - If asserts are enabled, the program may stop abruptly if IQ samples are not processed fast enough. This is triggered by a backlog of unprocessed IQ samples within synchronization.
-- For some combinations of operating system, CPU and DPDK, pressing control+c does not stop the SDR. The SDR process must then be stopped manually.
+- For some combinations of operating system, CPU and DPDK, pressing ctrl+c does not stop the SDR. The SDR process must then be stopped manually.
 - In an earlier version of the standard, the number of transmit streams was signaled by a cyclic rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
 
 ## Future Work
@@ -198,10 +198,11 @@ If you use this repository for any publication, please cite the repository accor
 
 ## Troubleshooting
 
-- If combining large bandwidths ($\beta$ >= 8), large number of antennas (N<sub>TX</sub> >= 4) and resampling, the resampling may be too demanding for synchronization. In that case the number of antennas used by synchronization can be reduced in [lib/include/dectnrp/phy/rx/sync/sync_param.hpp](lib/include/dectnrp/phy/rx/sync/sync_param.hpp) by setting ```RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT``` to a lower value.
-- If there are occasional packet losses, oversampling in `phy.json` can be increased. This is particularly true if [resampling](#resampling) is used.
+- If combining large bandwidths ($\beta$ >= 8), a large number of antennas (N<sub>TX</sub> >= 4) and resampling, the resampling may be too demanding for synchronization. In that case the number of antennas utilized by synchronization can be reduced in [lib/include/dectnrp/phy/rx/sync/sync_param.hpp](lib/include/dectnrp/phy/rx/sync/sync_param.hpp) by setting ```RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT``` to either $1$, $2$ or $4$.
+- If there are occasional packet losses, oversampling in `phy.json` can be increased. This is particularly helpful if [resampling](#resampling) is used. Downside is that the nominal bandwidth is increased while the actual signal bandwidth remains the same.
 - If the SNR is low despite a high receive power, [resampling](#resampling) has to be tuned.
 - DPDK and SDR threads should run on separate cores.
+- For the best possible performance in terms of PER, the spectrum the SDR operates in should be interference-free.
 
 ## Architecture
 
@@ -234,7 +235,7 @@ One drawback of a software AGC is that packets can be masked. This happens when 
 |    $4$    |         $10.42$         |          $20.83$          |
 |    $8$    |         $10.42$         |          $10.42$          |
 
-In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT in the uplink is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. $10 dB$. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
+In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. $10 dB$. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
 
 ## Resampling
 
@@ -250,7 +251,7 @@ Most SDR devices support a limited set of sample rates, which typically do not m
 
 Fractional resampling is computationally expensive. To reduce the computational load and enable larger bandwidths, the implicit FIR low-pass filter of the resampler can be made shorter. However, this also leads to more aliasing and thus to a larger EVM at the receiver. The resampler parameters are defined in [lib/include/dectnrp/phy/resample/resampler_param.hpp](lib/include/dectnrp/phy/resample/resampler_param.hpp).
 
-Another option is to disable resampling entirely and generate DECT NR+ packets directly at $1.92 MS/s$ or multiples thereof. The internal time of the SDR then runs at $1.92 MS/s$ and it is still possible, for example, to send out packets exactly every $10ms$. However, the packets have a wider bandwidth and are shorter in time domain. Fractional resampling to a DECT NR+ sample rate is disabled by setting `"enforce_dectnrp_samp_rate_by_resampling": false` in `phy.json`.
+Another option is to disable resampling entirely and generate DECT NR+ packets directly at $1.92 MS/s$ or multiples thereof. The internal time of the SDR then runs at $1.92 MS/s$ or multiples thereof and it is still possible, for example, to send out packets exactly every $10ms$. However, the packets have a wider bandwidth and are shorter in time domain. Fractional resampling to a DECT NR+ sample rate is disabled by setting `"enforce_dectnrp_samp_rate_by_resampling": false` in `phy.json`.
 
 ## Synchronization
 
@@ -260,7 +261,7 @@ Synchronization of packets based on the STF is described in [DECT-NR-Plus-Simula
 // #define SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
 ```
 
-With the SDR, synchronization is more reliable if no cover sequence is applied to the STF. This is due to the [coarse metric without a cover sequence being wider](https://github.com/maxpenner/DECT-NR-Plus-Simulation?tab=readme-ov-file#synchronization), and thus harder to miss.
+For the SDR, synchronization is more reliable if no cover sequence is applied to the STF. This is due to the [coarse metric without a cover sequence being wider](https://github.com/maxpenner/DECT-NR-Plus-Simulation?tab=readme-ov-file#synchronization), and thus harder to miss.
 
 ## Compatibility
 
@@ -314,7 +315,7 @@ This firmware starts channel measurements in regular intervals and writes the re
 
 ### [loopback](lib/include/dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp)
 
-This is a firmware family. Each individual firmware is a simulation with a single device looping its TX signal back into its own RX path. It is used to test SDR functionality such as synchronization and packet error rate (PER) over SNR. The wireless channel model can be switched in `radio.json` from an AWGN channel to a doubly selective Rayleigh fading channel.
+This is a firmware family. Each individual firmware is a simulation with a single device looping its TX signal back into its own RX path. It is used to test SDR functionality such as synchronization and packet error rates (PERs) over SNR. The wireless channel model can be switched in `radio.json` from an AWGN channel to a doubly selective Rayleigh fading channel.
 
 ### [p2p](lib/include/dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp)
 
