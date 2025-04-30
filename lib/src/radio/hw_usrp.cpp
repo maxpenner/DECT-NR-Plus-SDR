@@ -532,7 +532,7 @@ void hw_usrp_t::pps_wait_for_next() const {
 }
 
 void hw_usrp_t::pps_full_sec_at_next(const int64_t full_sec) const {
-    m_usrp->set_time_next_pps(uhd::time_spec_t(full_sec * static_cast<int64_t>(samp_rate)));
+    m_usrp->set_time_next_pps(uhd::time_spec_t(full_sec));
 }
 
 std::vector<std::string> hw_usrp_t::start_threads() {
