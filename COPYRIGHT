@@ -25,27 +25,35 @@ Files:      File in DECTNRP                           Full or partial copy?     
 Copyright:  2013-2023 Software Radio Systems Limited
 License:    GNU Affero GPL (same license as DECTNRP, see LICENSE file)
 
-Files:      include/dectnrp/external/nlohmann/json.hpp
-Copyright:  2013-2023 Niels Lohmann
+Files:      external/header_only/arparse/argparse.hpp
+Copyright:  2018 Pranav Srinivas Kumar
 License:    MIT
 
-Files:      include/dectnrp/external/fmtlog/fmtlog-inl.hpp
-            include/dectnrp/external/fmtlog/fmtlog.hpp
-Copyright:  2021 Meng Rao
-License:    MIT
-
-Files:      include/dectnrp/external/cameron314/blockingconcurrentqueue.hpp
-            include/dectnrp/external/cameron314/concurrentqueue.hpp
-            include/dectnrp/external/cameron314/lightweightsemaphore.hpp
+Files:      external/header_only/cameron314/blockingconcurrentqueue.hpp
+            external/header_only/cameron314/concurrentqueue.hpp
+            external/header_only/cameron314/lightweightsemaphore.hpp
 Copyright:  2013-2023, Cameron Desrochers
 License:    Simplified BSD license
 
-Files:      include/dectnrp/external/hinnant/date.hpp
+Files:      external/header_only/debugbreak/debugbreak.h
+Copyright:  2011-2021 Scott Tsai
+License:    BSD-2
+
+Files:      external/header_only/fmt/*.h
+Copyright:  2012 - present Victor Zverovich
+License:    GPL
+
+Files:      external/header_only/fmtlog/fmtlog-inl.hpp
+            external/header_only/fmtlog/fmtlog.hpp
+Copyright:  2021 Meng Rao
+License:    MIT
+
+Files:      external/header_only/hinnant/date.hpp
 Copyright:  2013-2023, Howard Hinnant
 License:    MIT
 
-Files:      include/dectnrp/external/arparse/argparse.hpp
-Copyright:  2018 Pranav Srinivas Kumar
+Files:      external/header_only/nlohmann/json.hpp
+Copyright:  2013-2023 Niels Lohmann
 License:    MIT
 
 License: MIT

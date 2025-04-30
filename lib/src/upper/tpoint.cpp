@@ -49,7 +49,7 @@ tpoint_t::tpoint_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_
 };
 
 #ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
-phy::machigh_phy_t tpoint_t::work_pcc_incorrect_crc(const phy::phy_maclow_t& phy_maclow) {
+phy::machigh_phy_t tpoint_t::work_pcc_crc_error(const phy::phy_maclow_t& phy_maclow) {
     return phy::machigh_phy_t();
 };
 #endif

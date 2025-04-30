@@ -51,7 +51,7 @@ class tpoint_t : public common::layer_unit_t {
          * that every firmware must implement. Additional methods and members should not be included
          * here, but in deriving classes/firmware.
          *
-         * To load a new firmware at SDR startup, its class deriving from tpoint_t must have a
+         * To load a new firmware at SDR startup, the class deriving from tpoint_t must have a
          * unique static member "firmware_name" of type std::string, and it must be added to the
          * function upper_t::add_tpoint() in upper.cpp. The value of "firmware_name" can then be
          * used in any configuration file "upper.json".
@@ -70,7 +70,7 @@ class tpoint_t : public common::layer_unit_t {
 
         /**
          * \brief Function is called shortly before PHY and radio layer become operational and start
-         * processing IQ samples. At the same time, the other work-functions will start being
+         * processing IQ samples. Once operational, the other work-functions will start being
          * called. This function should be used to make time-critical settings, e.g. setting the
          * time of the first beacon. It must return ASAP.
          *
@@ -124,7 +124,7 @@ class tpoint_t : public common::layer_unit_t {
          * \param phy_maclow information provided by PHY about synchronization and PCC
          * \return
          */
-        virtual phy::machigh_phy_t work_pcc_incorrect_crc(const phy::phy_maclow_t& phy_maclow);
+        virtual phy::machigh_phy_t work_pcc_crc_error(const phy::phy_maclow_t& phy_maclow);
 #endif
 
         /**
@@ -140,7 +140,7 @@ class tpoint_t : public common::layer_unit_t {
         virtual phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) = 0;
 
         /**
-         * \brief Function called to notify lower layer of new data being available on the
+         * \brief Function called to notify lower layers of new data being available on the
          * application layer.
          *
          * 1. Call rate depends on settings on application layer.
@@ -161,10 +161,10 @@ class tpoint_t : public common::layer_unit_t {
          */
         virtual phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) = 0;
 
+    protected:
         /// configuration received during construction
         const tpoint_config_t tpoint_config;
 
-    protected:
         /**
          * \brief For any firmware, this function is always called first. It is called by the main
          * thread once the entire stack (radio, PHY and upper) has been fully initialized and all
@@ -190,7 +190,7 @@ class tpoint_t : public common::layer_unit_t {
         // Radio Layer + PHY
 
         /**
-         * \brief This member gives the MAC layer control over the lower part of stack. In can
+         * \brief This member gives the MAC layer control over the lower part of all stacks. It can
          * contain multiple lower stacks in mac_lower.lower_ctrl_vec, each representing one
          * combination of PHY plus radio layer. Thus, a single firmware can control multiple
          * hardware radios.
