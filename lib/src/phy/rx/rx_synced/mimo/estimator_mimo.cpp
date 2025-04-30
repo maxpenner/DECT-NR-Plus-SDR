@@ -180,8 +180,16 @@ uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W
 
     dectnrp_assert(A < W_mat.size(), "no matrices to use");
 
-    // every beamforming matrix is tested, the one with the highest receive power is picked
-    float power_outer = -1000.0f;
+#if RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_HIGHEST_MIN_RX_POWER
+    float power_outer = -1.0e6;
+#elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MAX_RX_POWER
+    float power_outer = -1.0e6;
+#elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MIN_SPREAD_RX_POWER
+    float power_outer = 1.0e6;
+#else
+#error "undefined mode 3 and 7 metric"
+#endif
+
     int32_t ret = -1;
 
     for (std::size_t wm = A; wm < W_mat.size(); ++wm) {
@@ -189,8 +197,12 @@ uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W
         const auto& W_mat_single = W_mat[wm];
 
 #if RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_HIGHEST_MIN_RX_POWER
-        float power_inner = 1000.0f;
+        float power_inner = 1.0e6;
 #elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MAX_RX_POWER
+        float power_inner = 0.0f;
+#elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MIN_SPREAD_RX_POWER
+        float power_max = -1.0e6;
+        float power_min = 1.0e6;
         float power_inner = 0.0f;
 #else
 #error "undefined mode 3 and 7 metric"
@@ -223,6 +235,10 @@ uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W
             }
 #elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MAX_RX_POWER
             power_inner += std::abs(sum);
+#elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MIN_SPREAD_RX_POWER
+            power_min = std::min(power_min, std::abs(sum));
+            power_max = std::max(power_max, std::abs(sum));
+            power_inner = power_max - power_min;
 #else
 #error "undefined mode 3 and 7 metric"
 #endif
@@ -230,10 +246,24 @@ uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W
 
         power_inner *= scaling_factor[wm];
 
+#if RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_HIGHEST_MIN_RX_POWER
         if (power_outer < power_inner) {
             power_outer = power_inner;
             ret = wm;
         }
+#elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MAX_RX_POWER
+        if (power_outer < power_inner) {
+            power_outer = power_inner;
+            ret = wm;
+        }
+#elif RX_SYNCED_PARAM_MODE_3_7_METRIC == RX_SYNCED_PARAM_MODE_3_7_METRIC_MIN_SPREAD_RX_POWER
+        if (power_outer > power_inner) {
+            power_outer = power_inner;
+            ret = wm;
+        }
+#else
+#error "undefined mode 3 and 7 metric"
+#endif
     }
 
     dectnrp_assert(0 <= ret, "invalid matrix index");

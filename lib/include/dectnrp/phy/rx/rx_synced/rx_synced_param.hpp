@@ -281,6 +281,8 @@ extern "C" {
 #define RX_SYNCED_PARAM_MODE_3_7_METRIC_HIGHEST_MIN_RX_POWER 0
 /// option B: maximum power across all antennas
 #define RX_SYNCED_PARAM_MODE_3_7_METRIC_MAX_RX_POWER 1
+/// option C: minimum power spread across all antennas
+#define RX_SYNCED_PARAM_MODE_3_7_METRIC_MIN_SPREAD_RX_POWER 2
 // choice
 #define RX_SYNCED_PARAM_MODE_3_7_METRIC RX_SYNCED_PARAM_MODE_3_7_METRIC_HIGHEST_MIN_RX_POWER
 
