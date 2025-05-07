@@ -34,8 +34,8 @@ class mimo_csi_t {
         mimo_csi_t() = default;
 
         /**
-         * \brief The CSI can also be updated based on the receiver's feedback as part of the PLCF.
-         * In that case, the channel does not have to be reciprocal as the receiver sees the radio
+         * \brief The CSI can be updated based on the receiver's feedback as part of the PLCF. In
+         * that case, the channel does not have to be reciprocal as the receiver sees the radio
          * hardware as part of its own channel. Once updated, the CSI may be applied immediately.
          *
          * \param feedback_format feedback format received
@@ -47,10 +47,10 @@ class mimo_csi_t {
                                   const sync_report_t& sync_report);
 
         /**
-         * \brief The current channel state information (CSI) can be updated based on the reporting
-         * of the physical layer. This is a valid approach under the assumption that the channel is
-         * reciprocal, which depends on the radio hardware in use. Once updated, the CSI may be
-         * applied immediately.
+         * \brief The current channel state information (CSI) can also be updated based on the
+         * reporting of the physical layer. This is a valid approach under the assumption that the
+         * channel is reciprocal, which depends on the radio hardware in use. Once updated, the CSI
+         * may be applied immediately.
          *
          * \param mimo_report
          * \param sync_report contains time of reception

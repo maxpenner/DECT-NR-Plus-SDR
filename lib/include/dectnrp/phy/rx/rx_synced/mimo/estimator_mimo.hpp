@@ -66,17 +66,17 @@ class estimator_mimo_t final : public estimator_t {
         const uint32_t N_RX;
         const uint32_t N_TS_max;
 
-        // beamforming matrix LUT
+        /// beamforming matrix LUT
         section3::W_t W;
 
-        // working copy
+        /// working copy filled in process_stf() and process_drs()
         mimo_report_t mimo_report{};
 
-        // wideband spectrum subcarrier spacing and offset
+        /// wideband spectrum subcarrier spacing and offset
         uint32_t step_width;
         uint32_t step_offset;
 
-        // for SIMD
+        /// for SIMD
         std::vector<cf_t*> stage_rx_ts_vec;
         std::vector<cf_t*> stage_rx_ts_transpose_vec;
         cf_t* stage_multiplication;
