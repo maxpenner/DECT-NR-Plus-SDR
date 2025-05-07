@@ -171,10 +171,10 @@ uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W
     const auto& W_mat = W.get_W(1, N_TX_virt);
     const auto& scaling_factor = W.get_scaling_factor(1, N_TX_virt);
 
-// What is the index of the first W_mat without any zero elements?
 #ifdef RX_SYNCED_PARAM_MIMO_USE_ALL_W_MATRICES_OR_ONLY_NON_ZERO
     const uint32_t A = 0;
 #else
+    // What is the index of the first W_mat without any zero elements?
     const uint32_t A = W.get_codebook_index_nonzero(1, N_TX_virt);
 #endif
 

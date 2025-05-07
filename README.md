@@ -106,7 +106,7 @@ The SDR has been tested on Ubuntu 22.04 and 24.04. It has four dependencies that
 
 Installation instructions for these dependencies can be found in [scripts/install_dependencies.sh](scripts/install_dependencies.sh). After installing the dependencies, the SDR can be either downloaded and compiled with [scripts/install_sdr.sh](scripts/install_sdr.sh), or manually with: 
 
-```console
+```shell
 git clone --recurse-submodules https://github.com/maxpenner/DECT-NR-Plus-SDR
 cd DECT-NR-Plus-SDR
 mkdir build
@@ -120,12 +120,12 @@ The compiled code is kept local in [bin/](bin/) and not copied to any operating 
 
 To start the SDR, the main executable `dectnrp` must be invoked. It is located in [bin/](bin/) after compilation.
 
-```console
+```shell
 cd bin/
 sudo ./dectnrp "../configurations/basic_simulator/"
 ```
 
-The executable `dectnrp` requires exactly one argument, which is a path to a directory containing three configuration files `radio.json`, `phy.json` and `upper.json`. Each configuration file configures its respective layer(s). In the case of `upper.json`, this also implies the name of the firmware to load. The SDR is stopped by pressing ctrl+c.
+The executable `dectnrp` requires exactly one argument, which is a path to a directory containing three configuration files `radio.json`, `phy.json` and `upper.json` as exemplified in [configurations/](configurations/). Each configuration file configures its respective layer(s). In the case of `upper.json`, this also implies the name of the firmware to load. The SDR is stopped by pressing ctrl+c.
 
 The configuration files may also contain multiple instances of the SDR. In fact, each configuration file configures its layer(s) by listing one or multiple layer units:
 
@@ -137,7 +137,7 @@ The configuration files may also contain multiple instances of the SDR. In fact,
   <img src="docs/layer_and_layer_units.drawio.png" style="width: 75%; background-color: transparent;" alt="layer_and_layer_units.drawio.png"/>
 </p>
 
-If `radio.json` and `phy.json` contain multiple layer instances, each trio of [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp), [worker_pool_t](lib/include/dectnrp/phy/worker_pool.hpp) and [hw_t](lib/include/dectnrp/radio/hw.hpp) is either started independently, or a single [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) controls multiple duos of [worker_pool_t](lib/include/dectnrp/phy/worker_pool.hpp) and [hw_t](lib/include/dectnrp/radio/hw.hpp).
+If `radio.json` and `phy.json` contain multiple layer instances, each trio of [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp), [worker_pool_t](lib/include/dectnrp/phy/worker_pool.hpp) and [hw_t](lib/include/dectnrp/radio/hw.hpp) is either started independently (center figure), or a single [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) controls multiple duos of [worker_pool_t](lib/include/dectnrp/phy/worker_pool.hpp) and [hw_t](lib/include/dectnrp/radio/hw.hpp) (right figure).
 
 Furthermore, a set of configuration files is not bound to a specific firmware. By replacing the firmware name in `upper.json`, the configuration files can be combined with a different firmware. It is up to the firmware to verify at runtime whether the applied configuration is compatible.
 
@@ -183,6 +183,7 @@ If you use this repository for any publication, please cite the repository accor
 - [ ] [AoA estimation](https://en.wikipedia.org/wiki/Wi-Fi_positioning_system#Angle_of_arrival) based on DRS
 - [ ] MIMO modes with two or more spatial streams
 - [ ] 1024-QAM
+- [ ] Crest factor reduction and predistortion
 
 ### Upper layers
 
@@ -198,7 +199,7 @@ If you use this repository for any publication, please cite the repository accor
 
 ## Troubleshooting
 
-- If combining large bandwidths ($\beta$ >= 8), a large number of antennas (N<sub>TX</sub> >= 4) and resampling, the resampling may be too demanding for synchronization. In that case the number of antennas utilized by synchronization can be reduced in [lib/include/dectnrp/phy/rx/sync/sync_param.hpp](lib/include/dectnrp/phy/rx/sync/sync_param.hpp) by setting ```RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT``` to either $1$, $2$ or $4$.
+- If combining large bandwidths ($\beta$ >= 8), a large number of antennas (N<sub>TX</sub> >= 4) and resampling, the resampling may be too demanding for synchronization. In that case the number of antennas utilized by synchronization can be reduced in [lib/include/dectnrp/phy/rx/sync/sync_param.hpp](lib/include/dectnrp/phy/rx/sync/sync_param.hpp) by setting ```RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT``` to either 1, 2 or 4.
 - If there are occasional packet losses, oversampling in `phy.json` can be increased. This is particularly helpful if [resampling](#resampling) is used. Downside is that the nominal bandwidth is increased while the actual signal bandwidth remains the same.
 - If the SNR is low despite a high receive power, [resampling](#resampling) has to be tuned.
 - DPDK and SDR threads should run on separate cores.
@@ -217,41 +218,41 @@ The key takeaways are:
 - The radio layer uses a single RX ring buffer of type [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) to distribute IQ samples to all workers. For TX, it uses multiple independent [buffer_tx_t](lib/include/dectnrp/radio/buffer_tx.hpp) instances from a [buffer_tx_pool_t](lib/include/dectnrp/radio/buffer_tx_pool.hpp). The number of buffers is defined in `radio.json`, and their size by the radio device class and the oversampling in `phy.json`.
 - The PHY has workers for synchronization ([worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp)) and workers for packet encoding/decoding and modulation/demodulation ([worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp)). The number of workers, their CPU affinity and priority are set in `phy.json`. Both worker types communicate through a MPMC [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp).
 - When synchronization detects a DECT NR+ packet, it creates a job with a [sync_report_t](lib/include/dectnrp/phy/rx/sync/sync_report.hpp), which is then processed by instances of [worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp). During packet processing, these workers call the firmware through the virtual work_*() functions mentioned in [Core Idea](#core-idea). Access to the firmware is thread-safe as each worker has to acquire a [token_t](lib/include/dectnrp/phy/pool/token.hpp). All jobs are processed in the same order as they are inserted into the queue.
-- Synchronization also creates regular jobs with a [time_report_t](lib/include/dectnrp/phy/rx/sync/time_report.hpp). Each of these jobs contains a time update for the firmware, and the starting time of the last known packet. The rate of regular jobs depends on how processing of [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) is split up between instances of [worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp) in `phy.json`. A typical rate is one job for each $2$ slots, equivalent to $1200$ jobs per second. 
+- Synchronization also creates regular jobs with a [time_report_t](lib/include/dectnrp/phy/rx/sync/time_report.hpp). Each of these jobs contains a time update for the firmware, and the starting time of the last known packet. The rate of regular jobs depends on how processing of [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) is split up between instances of [worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp) in `phy.json`. A typical rate is one job for each 2 slots, equivalent to 1200 jobs per second. 
 - The firmware of the SDR is not executed in an independent thread. Instead, the firmware is equivalent to a thread-safe state machine whose state changes are triggered by calls of the work_*() functions. The type of firmware executed is defined in `upper.json`.
 - Each firmware starts and controls its own application layer interface ([app_t](lib/include/dectnrp/application/app.hpp)). To allow immediate action for new application layer data, [app_t](lib/include/dectnrp/application/app.hpp) is given access to [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp). The job type created by [app_t](lib/include/dectnrp/application/app.hpp) contains an [upper_report_t](lib/include/dectnrp/upper/upper_report.hpp) with the number and size of datagrams available on the application layer.
 - The application layer interface is either a [set of UDP ports](lib/include/dectnrp/application/socket/) or a [virtual NIC](lib/include/dectnrp/application/vnic/).
 
 ## AGC
 
-An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains $50$ times per second in regular intervals.
+An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second in regular intervals.
 
 One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
 
 | **$\mu$** | **GI length ($\mu s$)** | **STF length ($\mu s$)**  |
 |:---------:|:-----------------------:|:-------------------------:|
-|    $1$    |         $18.52$         |          $64.81$          |
-|    $2$    |         $20.83$         |          $41.67$          |
-|    $4$    |         $10.42$         |          $20.83$          |
-|    $8$    |         $10.42$         |          $10.42$          |
+|     1     |          18.52          |           64.81           |
+|     2     |          20.83          |           41.67           |
+|     4     |          10.42          |           20.83           |
+|     8     |          10.42          |           10.42           |
 
-In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. $10 dB$. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
+In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. 10 $dB$. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
 
 ## Resampling
 
-Most SDR devices support a limited set of sample rates, which typically do not match the DECT NR+ base rate of $1.728 MS/s$ or multiples thereof. A sample rate supported by most SDRs is $30.72 MS/s$. Therefore, the SDR uses fractional resampling with a polyphase filter to output IQ samples at the new base rate of $30.72 MS/s : 16 = 1.92 MS/s$ or multiples thereof.
+Most SDR devices support a limited set of sample rates, which typically do not match the DECT NR+ base rate of $1.728 MSs^{-1}$ or multiples thereof. A sample rate supported by most SDRs is $30.72 MSs^{-1}$. Therefore, the SDR uses fractional resampling with a polyphase filter to output IQ samples at the new base rate of $30.72 MSs^{-1} / 16 = 1.92 MSs^{-1}$ or multiples thereof.
 
 ### Examples
 
-- $1.728 MS/s$ without oversampling is resampled to $30.72 MS/s : 16 = 1.92 MS/s$
-- $1.728 MS/s$ with oversampling by 2 is resampled to $30.72 MS/s : 8 = 3.84 MS/s$
-- $27.648 MS/s$ with oversampling by 2 is resampled to $30.72 MS/s * 2 = 61.44 MS/s$
+- $1.728 MSs^{-1}$ without oversampling is resampled to $30.72 MSs^{-1} / 16 = 1.92 MSs^{-1}$
+- $1.728 MSs^{-1}$ with oversampling by 2 is resampled to $30.72 MSs^{-1} / 8 = 3.84 MSs^{-1}$
+- $27.648 MSs^{-1}$ with oversampling by 2 is resampled to $30.72 MSs^{-1} \cdot 2 = 61.44 MSs^{-1}$
 
 ### Tuning
 
 Fractional resampling is computationally expensive. To reduce the computational load and enable larger bandwidths, the implicit FIR low-pass filter of the resampler can be made shorter. However, this also leads to more aliasing and thus to a larger EVM at the receiver. The resampler parameters are defined in [lib/include/dectnrp/phy/resample/resampler_param.hpp](lib/include/dectnrp/phy/resample/resampler_param.hpp).
 
-Another option is to disable resampling entirely and generate DECT NR+ packets directly at $1.92 MS/s$ or multiples thereof. The internal time of the SDR then runs at $1.92 MS/s$ or multiples thereof and it is still possible, for example, to send out packets exactly every $10ms$. However, the packets have a wider bandwidth and are shorter in time domain. Fractional resampling to a DECT NR+ sample rate is disabled by setting `"enforce_dectnrp_samp_rate_by_resampling": false` in `phy.json`.
+Another option is to disable resampling entirely and generate DECT NR+ packets directly at $1.92 MSs^{-1}$ or multiples thereof. The internal time of the SDR then runs at $1.92 MSs^{-1}$ or multiples thereof and it is still possible, for example, to send out packets exactly every $10ms$. However, the packets have a wider bandwidth and are shorter in time domain. Fractional resampling to a DECT NR+ sample rate is disabled by setting `"enforce_dectnrp_samp_rate_by_resampling": false` in `phy.json`.
 
 ## Synchronization
 
@@ -269,7 +270,7 @@ Packets generated with the SDR are compatible with the MATLAB code in [DECT-NR-P
 
 ## JSON Export
 
-Each worker pool can export JSON files with information about received DECT NR+ packets. The export is activated by changing the value of `"json_export_length"` in `phy.json` to $100$ or higher, i.e. the worker pool collects information of at least $100$ packets before exporting all in a single JSON file. To enable the export without jeopardizing the real-time operation of the SDR, the worker pool must have at least two instances of [worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp). This way, at least one worker can continue processing IQ samples while another worker saves a JSON file.
+Each worker pool can export JSON files with information about received DECT NR+ packets. The export is activated by changing the value of `"json_export_length"` in `phy.json` to 100 or higher, i.e. the worker pool collects information of at least 100 packets before exporting all in a single JSON file. To enable the export without jeopardizing the real-time operation of the SDR, the worker pool must have at least two instances of [worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp). This way, at least one worker can continue processing IQ samples while another worker saves a JSON file.
 
 Exported files can be analyzed with [DECT-NR-Plus-SDR-json](https://github.com/maxpenner/DECT-NR-Plus-SDR-json.git).
 
@@ -340,17 +341,17 @@ The CPU cores used may also require modification as both FT and PT use specific 
 "rx_thread_config": [0, 1]
 ```
 
-The first number 0 is the priority offset (or niceness), so here the thread is started with the highest priority $99 - 0 = 99$. The second number $1$ specifies the CPU core. Both numbers can also be negative, in which case the scheduler selects the priority and/or the CPU core. Further thread specifications can be found in all `.json` configuration files. 
+The first number 0 is the priority offset (or niceness), so here the thread is started with the highest priority 99 - 0 = 99. The second number 1 specifies the CPU core. Both numbers can also be negative, in which case the scheduler selects the priority and/or the CPU core. Further thread specifications can be found in all `.json` configuration files. 
 
 #### On the FT:
 
-```console
+```shell
 cd bin/
 sudo ./dectnrp "../configurations/p2p_usrpX410/"
 ```
 Once the SDR is running, a TUN interface is instantiated which can be verified with `ifconfig`. To enable internet sharing at the FT, the interface to the internet is masqueraded:
 
-```console
+```shell
 cd scripts/
 sudo ./masquerade.sh <Interface Name>
 ```
@@ -364,13 +365,13 @@ In the file [configurations/p2p_usrpX410/upper.json](configurations/p2p_usrpX410
 
 Then the SDR is started.
 
-```console
+```shell
 cd bin/
 sudo ./dectnrp "../configurations/p2p_usrpX410/"
 ```
 Once the SDR is running, a TUN interface is instantiated which can be verified with `ifconfig`. To access the internet through that TUN interface, is it made the default gateway:
 
-```console
+```shell
 sudo ./defaultgateway_dns.sh -a 172.23.180.101 -i tuntap_pt
 ```
 
