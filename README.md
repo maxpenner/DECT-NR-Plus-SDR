@@ -69,21 +69,22 @@ For any firmware, start_threads() is always called first, followed by work_start
 
 ## Directories
 
+    ├─ .devcontainer/           docker container setup in VSCode
     ├─ .vscode/                 VS Code settings
     ├─ apps/                    apps sources
     ├─ bin/                     apps post-compilation binaries
     ├─ cmake/                   CMake modules
     ├─ configurations/          configuration files required to start the SDR
     ├─ docs/                    documentation (doxygen, graphics etc.)
+    ├─ external/                external libraries
     ├─ gnuradio/                flow graphs (SDR oscilloscope, USRP calibration etc.)
     ├─ json/                    submodule to analyze exported JSON files in Matlab
     ├─ lib/                     library code used by applications
-    │  ├─ include/
+    │  ├─ include/dectnrp/
     │  |  ├─ application/       application layer interfaces
     │  |  ├─ apps/              utilities for apps in directory apps/
     │  |  ├─ common/            common functionality across all layers/directories
     │  |  ├─ dlccl/             DLC and convergence layer
-    │  |  ├─ external/          external libraries
     │  |  ├─ mac/               MAC layer
     │  |  ├─ phy/               physical layer
     │  |  ├─ radio/             radio layer
@@ -299,7 +300,7 @@ The following tuning tips have been tested with Ubuntu and help achieving low-la
     - [DPDK with UHD](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD)
     - [Adjusted send_frame_size and recv_frame_size](https://files.ettus.com/manual/page_transport.html#transport_param_overrides) in `radio.json`
     - [Increased buffer sizes](https://kb.ettus.com/USRP_Host_Performance_Tuning_Tips_and_Tricks#Adjust_Network_Buffers)
-    - In each `radio.json`, the value `“turnaround_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR timestamp. For UHD, the SDR time is a [64-bit counter in the FPGA](https://kb.ettus.com/Synchronizing_USRP_Events_Using_Timed_Commands_in_UHD#Radio_Core_Block_Timing). The smaller the turn around time, the lower the latency. Under optimal conditions, between $80\mu s$ to $150\mu s$ microseconds are possible.
+    - In each `radio.json`, the value `“turnaround_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR timestamp. For UHD, the SDR time is a [64-bit counter in the FPGA](https://kb.ettus.com/Synchronizing_USRP_Events_Using_Timed_Commands_in_UHD#Radio_Core_Block_Timing). The smaller the turn around time, the lower the latency. Under optimal conditions, between $80\mu s$ to $150\mu s$ are possible.
 - Low-latency kernel
 
 ## Firmware
