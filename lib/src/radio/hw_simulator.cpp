@@ -446,9 +446,6 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                 // copy to vspptx for later deep copy
                 vspptx.spp_write_v(ant_streams, spp_offset, tx_length_samples_this_spp);
 
-                // apply hardware effects directly to spp
-                /// \todo
-
                 // set meta data of transmission
                 vspptx.tx_idx = static_cast<int32_t>(spp_offset);
                 vspptx.tx_length = static_cast<int32_t>(tx_length_samples_this_spp);
@@ -542,6 +539,15 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                             }
                         }
                     }
+                }
+
+                // apply hardware effects directly to spp
+                if (calling_instance->hw_config.simulator_clip_and_quantize) {
+                    clip_and_quantize(vspptx.spp,
+                                      vspptx.spp,
+                                      vspptx.spp_size,
+                                      symmetric_clipping_amplitude,
+                                      calling_instance->get_DAC_bits());
                 }
 
                 // wait for vspace to become ready with no timeout
@@ -661,7 +667,13 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
         vspprx.spp_read_v(ant_streams, spp_size);
 
         // apply hardware effects directly to spp
-        /// \todo
+        if (calling_instance->hw_config.simulator_clip_and_quantize) {
+            clip_and_quantize(vspprx.spp,
+                              vspprx.spp,
+                              vspprx.spp_size,
+                              symmetric_clipping_amplitude,
+                              calling_instance->get_ADC_bits());
+        }
 
         // advance internal time
         buffer_rx.get_ant_streams_next(ant_streams, now_64, spp_size);

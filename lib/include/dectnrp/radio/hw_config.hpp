@@ -88,7 +88,7 @@ struct hw_config_t {
         } pps_time_base;
 
         /// simulator specifics
-        /// nothing so far
+        bool simulator_clip_and_quantize;
 
         /// USRP arguments, must be specific enough to identify exactly one USRP
         std::string uspr_args;

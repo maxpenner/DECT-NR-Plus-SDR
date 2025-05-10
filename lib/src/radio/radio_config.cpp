@@ -78,7 +78,8 @@ radio_config_t::radio_config_t(const std::string directory)
 
             // simulator specifics
             if (hw_config.hw_name == "simulator") {
-                // nothing to do here
+                hw_config.simulator_clip_and_quantize =
+                    common::jsonparse::read_bool(it, "simulator_clip_and_quantize");
             }
             // USRP specific
             else if (hw_config.hw_name == "usrp") {

@@ -10,7 +10,8 @@
     "rx_notification_period_us": 250,
     "tx_thread_config": [0, -1],
     "rx_thread_config": [0, -1],
-    "pps_time_base": "zero"
+    "pps_time_base": "zero",
+    "simulator_clip_and_quantize": false
   },
   "SIMULATION":
   {

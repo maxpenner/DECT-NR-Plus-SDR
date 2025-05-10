@@ -41,6 +41,10 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
         1e3 <= RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_THRESHOLD_MAX_SP,
         "Loopback firmware requires large RMS limit. Set RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_THRESHOLD_MAX_SP to 1e3 and recompile.");
 
+    dectnrp_assert(
+        hw.hw_config.simulator_clip_and_quantize,
+        "Loopback firmware requires large RMS limit. Clipping and quantization must not be applied.");
+
     // set frequency, TX and RX power
     hw.set_command_time();
     hw.set_freq_tc(0.0);
