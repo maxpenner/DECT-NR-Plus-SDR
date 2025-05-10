@@ -40,7 +40,7 @@ class baton_t {
     public:
         explicit baton_t(const uint32_t nof_worker_sync_,
                          const int64_t sync_time_unique_limit_64_,
-                         const uint32_t job_regular_period_);
+                         const uint32_t rx_job_regular_period_);
         ~baton_t() = default;
 
         baton_t() = delete;
@@ -86,7 +86,7 @@ class baton_t {
     private:
         const uint32_t nof_worker_sync;
         const int64_t sync_time_unique_limit_64;
-        const uint32_t job_regular_period;
+        const uint32_t rx_job_regular_period;
 
         // registration
         std::mutex register_mtx;
@@ -108,7 +108,7 @@ class baton_t {
 
         /// not thread-safe, write and read only when holding the baton
         int64_t sync_time_last_64;
-        uint32_t job_regular_period_cnt;
+        uint32_t rx_job_regular_period_cnt;
 };
 
 }  // namespace dectnrp::phy

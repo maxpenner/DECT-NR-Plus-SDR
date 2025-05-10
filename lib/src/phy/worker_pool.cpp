@@ -78,7 +78,7 @@ worker_pool_t::worker_pool_t(const worker_pool_config_t& worker_pool_config_,
     // baton requires number of sync workers
     baton = std::make_unique<baton_t>(worker_pool_config.threads_core_prio_config_sync_vec.size(),
                                       get_sync_time_unique_limit(),
-                                      worker_pool_config.job_regular_period);
+                                      worker_pool_config.rx_job_regular_period);
 
     // create sync workers
     for (uint32_t worker_id = 0;

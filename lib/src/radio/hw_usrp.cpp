@@ -428,10 +428,10 @@ void hw_usrp_t::initialize_device() {
 }
 
 void hw_usrp_t::initialize_buffer_tx_pool(const uint32_t ant_streams_length_samples_max) {
-    dectnrp_assert(n_samples_gap > 0, "allowed gap size should be larger than 0");
+    dectnrp_assert(tx_gap_samples > 0, "allowed gap size should be larger than 0");
 
     buffer_tx_pool = std::make_unique<buffer_tx_pool_t>(
-        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + n_samples_gap);
+        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + tx_gap_samples);
 }
 
 void hw_usrp_t::initialize_buffer_rx(const uint32_t ant_streams_length_samples) {
@@ -541,7 +541,7 @@ std::vector<std::string> hw_usrp_t::start_threads() {
     dectnrp_assert(0 < nof_antennas && nof_antennas <= nof_antennas_max,
                    "Number of antennas not set correctly.");
     dectnrp_assert(samp_rate > 0, "Sample rate not set correctly.");
-    dectnrp_assert(n_samples_gap > 0, "Minimum size of gap not set correctly.");
+    dectnrp_assert(tx_gap_samples > 0, "Minimum size of gap not set correctly.");
 
     // give the threads the okay to execute
     keep_running.store(true, std::memory_order_release);
@@ -723,7 +723,7 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
     // for readability
     auto& buffer_tx_pool = *calling_instance->buffer_tx_pool.get();
     auto& keep_running = calling_instance->keep_running;
-    const auto n_samples_gap = calling_instance->n_samples_gap;
+    const auto tx_gap_samples = calling_instance->tx_gap_samples;
     auto buffer_tx_vec = buffer_tx_pool.get_buffer_tx_vec();
 
     // hw usrp parameters for readability
@@ -749,8 +749,8 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
 #endif
 
 #ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
-    const int64_t tx_time_advance_smpl =
-        static_cast<int64_t>(calling_instance->hw_config.tx_time_advance_smpl);
+    const int64_t tx_time_advance_samples =
+        static_cast<int64_t>(calling_instance->hw_config.tx_time_advance_samples);
 #endif
 
     // working copy
@@ -801,7 +801,7 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
 
 #ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
             // artificially move tx time forward
-            buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -= tx_time_advance_smpl;
+            buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -= tx_time_advance_samples;
 #endif
 
             // when should the packet be transmitted?
@@ -926,14 +926,14 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                 }
 
                 // assume there are no gap samples
-                uint32_t n_samples_gap_this = 0;
+                uint32_t tx_gap_samples_this = 0;
 
                 // packet available?
                 if (next_buffer_tx >= 0) {
 #ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
                     // artificially move tx time forward
                     buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -=
-                        tx_time_advance_smpl;
+                        tx_time_advance_samples;
 #endif
 
                     // transmission time of potential consecutive transmission
@@ -948,12 +948,12 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                                    next_buffer_tx_time);
 
                     // gap between this buffer's final sample and the next buffers first sample
-                    n_samples_gap_this =
+                    tx_gap_samples_this =
                         static_cast<uint32_t>(next_buffer_tx_time - tx_time_in_samples_end);
 
                     // gap too large? burst ends here
-                    if (n_samples_gap_this > n_samples_gap) {
-                        n_samples_gap_this = 0;
+                    if (tx_gap_samples_this > tx_gap_samples) {
+                        tx_gap_samples_this = 0;
                         tx_md.end_of_burst = true;
                         consecutive_transmission_on = false;
                     }
@@ -963,7 +963,7 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
 
                         // zero gap samples at the end of the buffer so we don't send garbage
                         buffer_tx_vec[current_buffer_tx]->set_zero(n_samples_of_packet,
-                                                                   n_samples_gap_this);
+                                                                   tx_gap_samples_this);
                     }
                 }
                 // no packet found, burst ends here
@@ -976,7 +976,7 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                 buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(n_samples_of_packet);
 
                 // artificially increase size of packet by the number of gap samples
-                n_samples_of_packet += n_samples_gap_this;
+                n_samples_of_packet += tx_gap_samples_this;
 
                 // transmit until we have no more samples left
                 while (n_samples_cnt < n_samples_of_packet) {

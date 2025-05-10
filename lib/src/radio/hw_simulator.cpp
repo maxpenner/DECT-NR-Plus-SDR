@@ -70,7 +70,7 @@ hw_simulator_t::hw_simulator_t(const hw_config_t& hw_config_, simulation::vspace
 }
 
 void hw_simulator_t::set_samp_rate(const uint32_t samp_rate_in) {
-    dectnrp_assert(0 < samp_rate_in, "Sample rate is 0");
+    dectnrp_assert(0 < samp_rate_in, "sample rate is 0");
 
     if (!hw_config_t::sim_samp_rate_lte) {
         // assume we can generate any DECTNRP sample rate
@@ -94,7 +94,7 @@ void hw_simulator_t::set_samp_rate(const uint32_t samp_rate_in) {
         }
     }
 
-    dectnrp_assert(samp_rate_in <= samp_rate, "Sample rate smaller than input sample rate");
+    dectnrp_assert(samp_rate_in <= samp_rate, "sample rate smaller than input sample rate");
 
     // convert from us to samples
     for (std::size_t i = 0; i < std::to_underlying(tmin_t::CARDINALITY); ++i) {
@@ -124,10 +124,10 @@ void hw_simulator_t::initialize_device() {
 }
 
 void hw_simulator_t::initialize_buffer_tx_pool(const uint32_t ant_streams_length_samples_max) {
-    dectnrp_assert(n_samples_gap > 0, "allowed gap size should be larger than 0");
+    dectnrp_assert(tx_gap_samples > 0, "allowed gap size should be larger than 0");
 
     buffer_tx_pool = std::make_unique<buffer_tx_pool_t>(
-        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + n_samples_gap);
+        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + tx_gap_samples);
 }
 
 void hw_simulator_t::initialize_buffer_rx(const uint32_t ant_streams_length_samples) {
@@ -253,7 +253,7 @@ std::vector<std::string> hw_simulator_t::start_threads() {
     dectnrp_assert(0 < nof_antennas && nof_antennas <= nof_antennas_max,
                    "number of antennas not set correctly");
     dectnrp_assert(samp_rate > 0, "sample rate not set correctly");
-    dectnrp_assert(n_samples_gap > 0, "minimum size of gap not set correctly");
+    dectnrp_assert(tx_gap_samples > 0, "minimum size of gap not set correctly");
 
     // set before starting threads
     keep_running.store(true, std::memory_order_release);

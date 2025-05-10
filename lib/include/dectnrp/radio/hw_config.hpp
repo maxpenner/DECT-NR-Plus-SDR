@@ -56,7 +56,7 @@ struct hw_config_t {
          * radio hardware. The exact amount of time advance samples depends on the radio hardware
          * and its settings such as sample rate, filter stages etc.
          */
-        uint32_t tx_time_advance_smpl;
+        uint32_t tx_time_advance_samples;
 
         /**
          * \brief Immediately after the SDR has started, the radio layer can prestream for some

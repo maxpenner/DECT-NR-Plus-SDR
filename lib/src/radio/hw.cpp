@@ -31,25 +31,25 @@ namespace dectnrp::radio {
 
 void hw_t::set_nof_antennas(const uint32_t nof_antennas_) {
     dectnrp_assert(0 < nof_antennas_ && nof_antennas_ <= nof_antennas_max,
-                   "Number of antennas must be larger 0 and smaller/equal nof_antennas_max");
+                   "number of antennas must be larger 0 and smaller/equal nof_antennas_max");
     dectnrp_assert(nof_antennas_ <= limits::dectnrp_max_nof_antennas,
-                   "Number of antennas cannot exceed 8");
+                   "number of antennas cannot exceed 8");
     dectnrp_assert((nof_antennas_ & (nof_antennas_ - 1)) == 0,
-                   "Number of antennas must be a power of 2");
+                   "number of antennas must be a power of 2");
 
     nof_antennas = nof_antennas_;
 
     rx_power_ant_0dBFS = common::ant_t(nof_antennas);
 }
 
-void hw_t::set_n_samples_gap(const uint32_t n_samples_gap_) {
+void hw_t::set_tx_gap_samples(const uint32_t tx_gap_samples_) {
     /* We zero the gap in the TX thread of the hw. Zeroing large gaps jeopardizes timing. Instead,
      * increase the maximum TX buffer size on the PHY layer and do the zeroing there in dedicated
      * threads.
      */
-    dectnrp_assert(n_samples_gap_ <= HW_MAXIMUM_GAP_SIZE, "gap too large");
+    dectnrp_assert(tx_gap_samples_ <= HW_TX_GAP_SAMPLES_MAX, "gap too large");
 
-    n_samples_gap = n_samples_gap_;
+    tx_gap_samples = tx_gap_samples_;
 }
 
 float hw_t::adjust_tx_power_ant_0dBFS_tc(const float adj_dB) {

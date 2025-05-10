@@ -49,8 +49,8 @@ radio_config_t::radio_config_t(const std::string directory)
             hw_config.tx_burst_leading_zero_us =
                 common::jsonparse::read_int(it, "tx_burst_leading_zero_us", 0, 500);
 
-            hw_config.tx_time_advance_smpl =
-                common::jsonparse::read_int(it, "tx_time_advance_smpl", 0, 200);
+            hw_config.tx_time_advance_samples =
+                common::jsonparse::read_int(it, "tx_time_advance_samples", 0, 200);
 
             hw_config.rx_prestream_ms = common::jsonparse::read_int(it, "rx_prestream_ms", 0, 5000);
 
