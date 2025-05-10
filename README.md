@@ -168,7 +168,8 @@ If you use this repository for any publication, please cite the repository accor
 ### Radio Layer
 
 - [ ] GPIO support for B210, currently only X410 supported
-- [ ] B210 USB transfer stability and latency
+- [ ] B210 USB transfer stability and 
+- [ ] integrate [SoapySDR](https://github.com/pothosware/SoapySDR)
 
 ### Physical Layer
 
