@@ -24,6 +24,8 @@
 #include <cstdint>
 #include <string>
 
+#include "dectnrp/common/prog/compiler.hpp"
+
 namespace dectnrp::common {
 
 using nano = std::chrono::nanoseconds;
@@ -34,9 +36,29 @@ using seconds = std::chrono::seconds;
 using steady_clock = std::chrono::steady_clock;
 using system_clock = std::chrono::system_clock;
 
+#ifdef GCC_VERSION
+#if GCC_VERSION >= 130000
 using utc_clock = std::chrono::utc_clock;
 using tai_clock = std::chrono::tai_clock;
 using gps_clock = std::chrono::gps_clock;
+#else
+using utc_clock = std::chrono::steady_clock;
+using tai_clock = std::chrono::steady_clock;
+using gps_clock = std::chrono::steady_clock;
+#endif
+#endif
+
+#ifdef CLANG_VERSION
+#if CLANG_VERSION >= 180000
+using utc_clock = std::chrono::utc_clock;
+using tai_clock = std::chrono::tai_clock;
+using gps_clock = std::chrono::gps_clock;
+#else
+using utc_clock = std::chrono::steady_clock;
+using tai_clock = std::chrono::steady_clock;
+using gps_clock = std::chrono::steady_clock;
+#endif
+#endif
 
 class watch_t {
     public:

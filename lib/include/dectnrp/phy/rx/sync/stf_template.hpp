@@ -23,10 +23,7 @@
 #include <cstdint>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/common/multidim.hpp"
 #include "dectnrp/phy/resample/resampler_param.hpp"
 #include "dectnrp/sections_part3/stf.hpp"

@@ -20,4 +20,13 @@
 
 #pragma once
 
-#define RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
+#if defined(__GNUC__) && !defined(__clang__)
+#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#endif
+
+#ifdef __clang__
+#define CLANG_VERSION (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
+#ifdef GCC_VERSION
+#error ("GCC and Clang defined")
+#endif
+#endif

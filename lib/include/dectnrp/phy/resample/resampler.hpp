@@ -23,10 +23,7 @@
 #include <cstdint>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/common/multidim.hpp"
 
 namespace dectnrp::phy {

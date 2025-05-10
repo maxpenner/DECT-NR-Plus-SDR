@@ -71,7 +71,7 @@ class hw_t : public common::layer_unit_t {
         hw_t& operator=(hw_t&&) = delete;
 
         static constexpr double HW_DEFAULT_FREQ_HZ = 100.0e6;
-        static constexpr uint32_t HW_MAXIMUM_GAP_SIZE = 100;
+        static constexpr uint32_t HW_TX_GAP_SAMPLES_MAX = 100;
 
         uint32_t get_nof_antennas_max() const { return nof_antennas_max; };
         uint32_t get_nof_antennas() const { return nof_antennas; };
@@ -91,14 +91,14 @@ class hw_t : public common::layer_unit_t {
         virtual void set_samp_rate(const uint32_t samp_rate_in) = 0;
 
         /**
-         * \brief If hw detects a gap smaller or equal to n_samples_gap_ between consecutive TX
+         * \brief If hw detects a gap smaller or equal to tx_gap_samples_ between consecutive TX
          * buffer transmissions, if will fill the gap with zeros. In this period of time, the RX
          * path remains detached from the antenna. This approach helps stabilizing TX buffer
          * transmission.
          *
-         * \param n_samples_gap_ maximum width of gap in samples
+         * \param tx_gap_samples_ maximum width of gap in samples
          */
-        void set_n_samples_gap(const uint32_t n_samples_gap_);
+        void set_tx_gap_samples(const uint32_t tx_gap_samples_);
 
         /**
          * \brief Call after nof antennas and sample rate have been negotiated. Puts device into a
@@ -279,7 +279,7 @@ class hw_t : public common::layer_unit_t {
         /// must be negotiated with PHY
         uint32_t nof_antennas{};
         uint32_t samp_rate{};
-        uint32_t n_samples_gap{};
+        uint32_t tx_gap_samples{};
 
         /// look up table for gain at specific frequency and power
         gain_lut_t gain_lut{};

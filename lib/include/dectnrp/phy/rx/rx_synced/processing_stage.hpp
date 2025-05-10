@@ -24,10 +24,7 @@
 #include <type_traits>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::phy {

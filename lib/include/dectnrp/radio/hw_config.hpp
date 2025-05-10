@@ -56,7 +56,7 @@ struct hw_config_t {
          * radio hardware. The exact amount of time advance samples depends on the radio hardware
          * and its settings such as sample rate, filter stages etc.
          */
-        uint32_t tx_time_advance_smpl;
+        uint32_t tx_time_advance_samples;
 
         /**
          * \brief Immediately after the SDR has started, the radio layer can prestream for some
@@ -78,12 +78,30 @@ struct hw_config_t {
         common::threads_core_prio_config_t tx_thread_config;
         common::threads_core_prio_config_t rx_thread_config;
 
-        /// simulator specifics
-        /// nothing so far
+        /**
+         * \brief Before streaming samples, the radio device's internal clock can be synchronized to
+         * a time base. Time is aligned to the start of a full second at the next PPS.
+         */
+        enum class pps_time_base_t {
+            zero,
+            TAI,
+        } pps_time_base;
 
-        /// USRP arguments, must be specific enough to identify exactly one USRP
+        // ##################################################
+        // simulator specifics
+
+        /// clip TX and RX signals and quantize with bit width of hw_simulator_t
+        bool simulator_clip_and_quantize;
+
+        // ##################################################
+        // USRP specifics
+
+        /// USRP arguments must be specific enough to identify exactly one USRP
         std::string uspr_args;
         common::threads_core_prio_config_t usrp_tx_async_helper_thread_config;
+
+        // ##################################################
+        // simulation specifics
 
         /// simulation variables are the same for every tpoint
         static bool sim_samp_rate_lte;

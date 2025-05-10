@@ -28,7 +28,7 @@ static constexpr uint32_t N_b_DFT_min_u_b{64};
 static constexpr uint32_t N_b_CP_min_u_b{8};
 static constexpr uint32_t N_b_DFT_CP_min_u_b{N_b_DFT_min_u_b + N_b_CP_min_u_b};
 
-// see Table 4.3-1, ratio between FFT size and cyclic prefix length 1/8=12.5%
+/// see Table 4.3-1, ratio between FFT size and cyclic prefix length 1/8=12.5%
 static constexpr uint32_t N_b_DFT_to_N_b_CP{N_b_DFT_min_u_b / N_b_CP_min_u_b};
 
 static constexpr uint32_t samp_rate_min_u_b{1728000};
@@ -52,12 +52,12 @@ static constexpr uint32_t N_samples_stf_pattern{16};
 static constexpr uint32_t N_samples_stf_u1{N_stf_pattern_u1 * N_samples_stf_pattern};
 static constexpr uint32_t N_samples_stf_u248{N_stf_pattern_u248 * N_samples_stf_pattern};
 
-// for beta=1, there are 14 occupied STF cells across the full spectrum
+/// for beta=1, there are 14 occupied STF cells across the full spectrum
 static constexpr uint32_t N_STF_cells_b_1{14};
 static constexpr uint32_t N_STF_cells_separation{4};
 static constexpr uint32_t N_STF_cells_separation_center{8};
 
-// antenna and MIMO configurations
+/// antenna and MIMO configurations
 static constexpr uint32_t N_TS_max{8};
 
 /**

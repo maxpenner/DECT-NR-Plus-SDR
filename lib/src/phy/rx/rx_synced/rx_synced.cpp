@@ -37,7 +37,7 @@ extern "C" {
 #endif
 
 #include "dectnrp/common/complex.hpp"
-#include "dectnrp/common/json_export.hpp"
+#include "dectnrp/common/json/json_export.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/phy/resample/resampler_param.hpp"
@@ -626,7 +626,7 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
 }
 
 void rx_synced_t::run_stf_rms_estimation(sync_report_t& sync_report_) {
-    dectnrp_assert(sync_report_.rms_array.get_any_larger(0.0f),
+    dectnrp_assert(sync_report_.rms_array.has_any_larger(0.0f),
                    "not a single RMS value provided by sync");
 
     // create an array with one value for each physical antenna

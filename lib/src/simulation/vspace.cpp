@@ -25,7 +25,6 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/thread/watch.hpp"
-#include "dectnrp/radio/pps_sync_param.hpp"
 #include "dectnrp/simulation/topology/graph.hpp"
 #include "dectnrp/simulation/wireless/channel_awgn.hpp"
 #include "dectnrp/simulation/wireless/channel_doubly.hpp"
@@ -81,7 +80,7 @@ void vspace_t::hw_register_tx(const vspptx_t& vspptx) {
         vspptx.id, vspptx.nof_antennas, vspptx.samp_rate, vspptx.spp_size);
 
     // all devices registered?
-    if (check_if_last_to_register_tx()) {
+    if (is_last_to_register_tx()) {
         // extract common values, assume the first device has the reference values
         samp_rate_common = vspptx_vec[0]->samp_rate;
         spp_size_common = vspptx_vec[0]->spp_size;
@@ -112,7 +111,7 @@ void vspace_t::hw_register_rx(const vspprx_t& vspprx) {
                    "hw counterpart already registered");
 
     // if first device overwrite time
-    if (check_if_first_to_register_rx()) {
+    if (is_first_to_register_rx()) {
         dectnrp_assert(now_64 == 0, "now_64 not zero");
         now_start_64 = vspprx.meta.now_64;
         now_64 = now_start_64;
@@ -126,7 +125,7 @@ void vspace_t::hw_register_rx(const vspprx_t& vspprx) {
     dectnrp_assert(vspprx.meta.now_64 == now_64, "now the same time");
 
     // all devices registered?
-    if (check_if_last_to_register_rx()) {
+    if (is_last_to_register_rx()) {
         // allow TX threads to write to virtual space, but block RX threads from reading
         set_status_tx_written(false);
         set_status_rx_read(true);
@@ -215,7 +214,7 @@ void vspace_t::write(vspptx_t& vspptx) {
     status_tx_written[vspptx.id] = true;
 
     // check whether this is the last call
-    if (check_if_last_to_write()) {
+    if (is_last_to_write()) {
         // if so, set all RX buffers as not read ...
         set_status_rx_read(false);
 
@@ -237,7 +236,7 @@ void vspace_t::read(vspprx_t& vspprx) {
     status_rx_read[vspprx.id] = true;
 
     // check whether this is the last device to read its RX data
-    if (check_if_last_to_read()) {
+    if (is_last_to_read()) {
         // increase system time
         now_64 += static_cast<int64_t>(spp_size_common);
 
@@ -301,7 +300,7 @@ void vspace_t::realign_realtime_with_simulation_time(const common::watch_t& watc
     }
 }
 
-bool vspace_t::check_if_first_to_register_tx() const {
+bool vspace_t::is_first_to_register_tx() const {
     for (auto& elem : vspptx_vec) {
         if (elem.get() != nullptr) {
             return false;
@@ -311,7 +310,7 @@ bool vspace_t::check_if_first_to_register_tx() const {
     return true;
 }
 
-bool vspace_t::check_if_last_to_register_tx() const {
+bool vspace_t::is_last_to_register_tx() const {
     for (auto& elem : vspptx_vec) {
         if (elem.get() == nullptr) {
             return false;
@@ -321,7 +320,7 @@ bool vspace_t::check_if_last_to_register_tx() const {
     return true;
 }
 
-bool vspace_t::check_if_first_to_register_rx() const {
+bool vspace_t::is_first_to_register_rx() const {
     dectnrp_assert(all_tx_registered_and_inits_done, "TX not registered yet");
 
     for (auto& elem : vspptx_vec) {
@@ -333,7 +332,7 @@ bool vspace_t::check_if_first_to_register_rx() const {
     return true;
 }
 
-bool vspace_t::check_if_last_to_register_rx() const {
+bool vspace_t::is_last_to_register_rx() const {
     dectnrp_assert(all_tx_registered_and_inits_done, "TX not registered yet");
 
     for (auto& elem : vspptx_vec) {
@@ -345,7 +344,7 @@ bool vspace_t::check_if_last_to_register_rx() const {
     return true;
 }
 
-bool vspace_t::check_if_last_to_write() const {
+bool vspace_t::is_last_to_write() const {
     if (std::find(status_tx_written.begin(), status_tx_written.end(), false) !=
         status_tx_written.end()) {
         return false;
@@ -354,7 +353,7 @@ bool vspace_t::check_if_last_to_write() const {
     return true;
 }
 
-bool vspace_t::check_if_last_to_read() const {
+bool vspace_t::is_last_to_read() const {
     if (std::find(status_rx_read.begin(), status_rx_read.end(), false) != status_rx_read.end()) {
         return false;
     }

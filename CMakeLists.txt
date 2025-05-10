@@ -56,7 +56,7 @@ include(${CMAKE_BINARY_DIR}/buildinfo.cmake)
 ########################################################################
 # Options
 ########################################################################
-option(ENABLE_WERROR      "Stop compilation on errors"                ON)
+option(ENABLE_WERROR      "Stop compilation on warnings"              ON)
 option(ENABLE_ASAN        "Enable gcc/clang address sanitizer"        OFF)
 option(ENABLE_TSAN        "Enable clang thread sanitizer"             OFF)
 option(ENABLE_GCOV        "Enable code coverage"                      OFF)
@@ -224,9 +224,6 @@ find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 set(EIGEN3_DIR /usr/include/eigen3)
 include_directories(${EIGEN3_DIR})
 
-# printing and logging
-find_package(fmt REQUIRED)
-
 ########################################################################
 # Instruction Set Architecture setup
 ########################################################################
@@ -315,6 +312,7 @@ endif(ENABLE_TIDY)
 # Add subdirectories
 ########################################################################
 include_directories(${PROJECT_SOURCE_DIR}/lib/include)
+include_directories(${PROJECT_SOURCE_DIR}/external)
 include_directories(${PROJECT_BINARY_DIR}/lib/include)
 add_subdirectory(apps)
 add_subdirectory(lib)

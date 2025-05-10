@@ -26,7 +26,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "header_only/nlohmann/json.hpp"
 
 namespace dectnrp::upper::tfw::loopback {
 
@@ -110,13 +110,13 @@ phy::machigh_phy_t tfw_loopback_snr_t::work_pdc_async(const phy::phy_machigh_t& 
     return phy::machigh_phy_t();
 }
 
-void tfw_loopback_snr_t::reset_result_counter_for_next_snr() {
+void tfw_loopback_snr_t::A_reset_result_counter_for_next_snr() {
     nof_experiment_per_snr_cnt = 0;
 
     result.reset();
 }
 
-void tfw_loopback_snr_t::generate_single_experiment_at_current_snr(
+void tfw_loopback_snr_t::C_generate_single_experiment_at_current_snr(
     const int64_t now_64, phy::machigh_phy_t& machigh_phy) {
     // update MCS
     pp.psdef.mcs_index = mcs_vec.at(parameter_cnt);
@@ -130,7 +130,7 @@ void tfw_loopback_snr_t::generate_single_experiment_at_current_snr(
     generate_packet(machigh_phy);
 }
 
-void tfw_loopback_snr_t::save_result_of_current_snr() {
+void tfw_loopback_snr_t::D_save_result_of_current_snr() {
     result.set_PERs(parameter_cnt, snr_cnt, nof_experiment_per_snr);
 
     dectnrp_log_inf(
@@ -144,7 +144,7 @@ void tfw_loopback_snr_t::save_result_of_current_snr() {
         result.snr_min_vec.at(parameter_cnt).at(snr_cnt));
 }
 
-bool tfw_loopback_snr_t::set_next_parameter_or_go_to_dead_end() {
+bool tfw_loopback_snr_t::E_set_next_parameter_or_go_to_dead_end() {
     ++parameter_cnt;
 
     if (parameter_cnt == mcs_vec.size()) {

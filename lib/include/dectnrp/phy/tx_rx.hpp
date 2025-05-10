@@ -23,10 +23,7 @@
 #include <memory>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/phy/dft/ofdm.hpp"
 #include "dectnrp/phy/fec/fec.hpp"
 #include "dectnrp/phy/phy_config.hpp"

@@ -1,6 +1,6 @@
-<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.1.1 Chrome/132.0.6834.210 Electron/34.3.3 Safari/537.36" version="26.1.1">
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.2.15 Chrome/134.0.6998.205 Electron/35.2.1 Safari/537.36" version="26.2.15">
   <diagram id="aQhpeuAyKN3efvRNQwSn" name="Draft 0">
-    <mxGraphModel dx="1434" dy="895" grid="0" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+    <mxGraphModel dx="2066" dy="1164" grid="0" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -280,15 +280,15 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="A43RT7BLHncz933INCX8-46" value="work_start_imminent()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_regular()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_pcc()&lt;br&gt;work_pdc_async()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_upper()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_chscan_async()" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=default;rounded=1;" parent="A43RT7BLHncz933INCX8-5" vertex="1" connectable="0">
+        <mxCell id="A43RT7BLHncz933INCX8-46" value="work_start_imminent()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_regular()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_pcc()&lt;div&gt;work_pcc_crc_error()&lt;br&gt;work_pdc_async()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_upper()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_chscan_async()&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=default;rounded=1;" parent="A43RT7BLHncz933INCX8-5" vertex="1" connectable="0">
           <mxGeometry x="0.2081" relative="1" as="geometry">
-            <mxPoint x="-3" y="16" as="offset" />
+            <mxPoint x="7" y="16" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="A43RT7BLHncz933INCX8-7" value="items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#FF6666;strokeWidth=1;" parent="1" vertex="1">
+        <mxCell id="A43RT7BLHncz933INCX8-7" value="queue of datagrams" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#FF6666;strokeWidth=1;" parent="1" vertex="1">
           <mxGeometry x="610" y="190" width="80" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="A43RT7BLHncz933INCX8-9" value="items" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#FF6666;strokeWidth=1;" parent="1" vertex="1">
+        <mxCell id="A43RT7BLHncz933INCX8-9" value="queue of datagrams" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#FF6666;strokeWidth=1;" parent="1" vertex="1">
           <mxGeometry x="470" y="190" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="A43RT7BLHncz933INCX8-20" value="" style="endArrow=classic;html=1;rounded=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;strokeColor=light-dark(#ff0000, #ededed);strokeWidth=3;" parent="1" source="tikB4HTSyY_nNc-XHg-T-57" target="tikB4HTSyY_nNc-XHg-T-5" edge="1">

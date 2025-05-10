@@ -18,7 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/common/json_parse.hpp"
+#include "dectnrp/common/json/json_parse.hpp"
 
 #include <fstream>
 

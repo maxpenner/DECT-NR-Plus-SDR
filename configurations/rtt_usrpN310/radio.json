@@ -5,11 +5,12 @@
     "nof_buffer_tx": 16,
     "turnaround_time_us": 150,
     "tx_burst_leading_zero_us": 5,
-    "tx_time_advance_smpl": 0,
+    "tx_time_advance_samples": 0,
     "rx_prestream_ms": 1000,
     "rx_notification_period_us": 0,
     "tx_thread_config": [0, 0],
     "rx_thread_config": [0, 1],
+    "pps_time_base": "zero",
     "uspr_args": "type=n3xx,addr=192.168.10.2,second_addr=192.168.20.2,mgmt_addr=192.168.1.2,master_clock_rate=122.88e6,send_frame_size=2000,recv_frame_size=2000,init_cals=ALL,track_cals=ALL",
     "usrp_tx_async_helper_thread_config": [0, -1]
   }

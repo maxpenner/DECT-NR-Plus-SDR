@@ -22,9 +22,7 @@
 
 #include <cstddef>
 
-extern "C" {
-#include "srsran/config.h"
-}
+#include "dectnrp/common/complex.hpp"
 
 namespace dectnrp::radio {
 

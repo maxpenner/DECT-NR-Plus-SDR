@@ -143,7 +143,7 @@ std::optional<sync_report_t> sync_chunk_t::search() {
     // create a fresh sync_report, by default indicating that no packet was found
     sync_report_t sync_report(nof_antennas_limited);
 
-    dectnrp_assert(!sync_report.coarse_peak_array.get_any_larger(0.0f), "antenna already valid");
+    dectnrp_assert(!sync_report.coarse_peak_array.has_any_larger(0.0f), "antenna already valid");
 
     // when being called, we might have processed the entire chunk, in that case jump to next
     // chunk
@@ -193,7 +193,7 @@ std::optional<sync_report_t> sync_chunk_t::search() {
              * valid peak after the coarse detection. Here, we check whether it found a peak. If so,
              * we most likely detected a rising edge.
              */
-            if (sync_report.coarse_peak_array.get_any_larger(0.0f)) {
+            if (sync_report.coarse_peak_array.has_any_larger(0.0f)) {
                 ++stats.coarse_peaks;
 
                 autocorrelator_detection->skip_after_peak(sync_report.coarse_peak_time_local);

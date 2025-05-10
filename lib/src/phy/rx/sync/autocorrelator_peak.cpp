@@ -35,7 +35,7 @@ extern "C" {
 #ifdef PHY_RX_AUTOCORRELATOR_PEAK_JSON_EXPORT
 #include <atomic>
 
-#include "dectnrp/common/json_export.hpp"
+#include "dectnrp/common/json/json_export.hpp"
 
 // must be static in case multiple threads can save files
 static std::atomic<uint32_t> json_file_cnt{0};

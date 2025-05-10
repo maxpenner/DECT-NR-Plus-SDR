@@ -86,7 +86,7 @@ int generate_random_TX_packet_within_rdc_limits(std::string radio_device_class_s
     hw->set_nof_antennas(packet_sizes_maximum.tm_mode.N_TX);
     hw->set_samp_rate(dectnrp::phy::resampler_t::get_samp_rate_converted_with_temporary_overflow(
         dect_samp_rate_os, L, M));
-    hw->set_n_samples_gap(1);
+    hw->set_tx_gap_samples(1);
 
     // we are interested in the signal shape at the correct sample rate
     const bool enforce_dectnrp_samp_rate_by_resampling = true;

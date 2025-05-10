@@ -22,10 +22,7 @@
 
 #include <cstdint>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/simulation/vspp/vspprx.hpp"
 #include "dectnrp/simulation/vspp/vspptx.hpp"
 

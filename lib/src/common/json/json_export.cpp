@@ -18,7 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/common/json_export.hpp"
+#include "dectnrp/common/json/json_export.hpp"
 
 #include <fstream>
 #include <sstream>

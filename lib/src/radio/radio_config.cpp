@@ -23,7 +23,7 @@
 #include <iostream>
 #include <limits>
 
-#include "dectnrp/common/json_parse.hpp"
+#include "dectnrp/common/json/json_parse.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::radio {
@@ -49,8 +49,8 @@ radio_config_t::radio_config_t(const std::string directory)
             hw_config.tx_burst_leading_zero_us =
                 common::jsonparse::read_int(it, "tx_burst_leading_zero_us", 0, 500);
 
-            hw_config.tx_time_advance_smpl =
-                common::jsonparse::read_int(it, "tx_time_advance_smpl", 0, 200);
+            hw_config.tx_time_advance_samples =
+                common::jsonparse::read_int(it, "tx_time_advance_samples", 0, 200);
 
             hw_config.rx_prestream_ms = common::jsonparse::read_int(it, "rx_prestream_ms", 0, 5000);
 
@@ -67,9 +67,19 @@ radio_config_t::radio_config_t(const std::string directory)
             hw_config.rx_thread_config.prio_offset = rx_thread_config_array[0];
             hw_config.rx_thread_config.cpu_core = rx_thread_config_array[1];
 
+            const auto pps_time_base = common::jsonparse::read_string(it, "pps_time_base");
+            if (pps_time_base == "zero") {
+                hw_config.pps_time_base = hw_config_t::pps_time_base_t::zero;
+            } else if (pps_time_base == "TAI") {
+                hw_config.pps_time_base = hw_config_t::pps_time_base_t::TAI;
+            } else {
+                dectnrp_assert_failure("undefined pps_time_base {}", pps_time_base);
+            }
+
             // simulator specifics
             if (hw_config.hw_name == "simulator") {
-                // nothing to do here
+                hw_config.simulator_clip_and_quantize =
+                    common::jsonparse::read_bool(it, "simulator_clip_and_quantize");
             }
             // USRP specific
             else if (hw_config.hw_name == "usrp") {
@@ -82,7 +92,7 @@ radio_config_t::radio_config_t(const std::string directory)
                 hw_config.usrp_tx_async_helper_thread_config.cpu_core =
                     usrp_tx_async_helper_thread_config_array[1];
             } else {
-                dectnrp_assert_failure("Undefined hardware type {}.", hw_config.hw_name);
+                dectnrp_assert_failure("undefined hardware type {}", hw_config.hw_name);
             }
 
             dectnrp_assert(

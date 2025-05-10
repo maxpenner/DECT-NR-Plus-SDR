@@ -30,7 +30,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/constants.hpp"
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "header_only/nlohmann/json.hpp"
 
 namespace dectnrp::upper::tfw::loopback {
 

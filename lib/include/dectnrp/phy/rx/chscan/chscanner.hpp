@@ -22,10 +22,7 @@
 
 #include <cstdint>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/phy/rx/chscan/chscan.hpp"
 #include "dectnrp/radio/buffer_rx.hpp"
 #include "dectnrp/sections_part3/derivative/duration_lut.hpp"

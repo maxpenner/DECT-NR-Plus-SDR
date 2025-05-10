@@ -49,7 +49,7 @@ class ant_t {
         [[nodiscard]] const ary_t& get_ary() const;
 
         // convenience functions to extract specific values
-        [[nodiscard]] bool get_any_larger(const float threshold) const;
+        [[nodiscard]] bool has_any_larger(const float threshold) const;
         [[nodiscard]] std::size_t get_nof_larger(const float threshold) const;
         [[nodiscard]] float get_sum() const;
         [[nodiscard]] float get_max() const;

@@ -24,10 +24,7 @@
 #include <memory>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/phy/resample/resampler.hpp"
 #include "dectnrp/phy/rx/localbuffer.hpp"
 #include "dectnrp/radio/buffer_rx.hpp"

@@ -41,6 +41,10 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
         1e3 <= RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_THRESHOLD_MAX_SP,
         "Loopback firmware requires large RMS limit. Set RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_THRESHOLD_MAX_SP to 1e3 and recompile.");
 
+    dectnrp_assert(
+        hw.hw_config.simulator_clip_and_quantize,
+        "Loopback firmware requires large RMS limit. Clipping and quantization must not be applied.");
+
     // set frequency, TX and RX power
     hw.set_command_time();
     hw.set_freq_tc(0.0);
@@ -121,7 +125,7 @@ void tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
     // start some time in the near future
     state_time_reference_64 = start_time_64 + stt.x_to_A_64;
 
-    reset_result_counter_for_next_snr();
+    A_reset_result_counter_for_next_snr();
 }
 
 phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
@@ -141,7 +145,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
             {
                 hw_simulator->set_rx_snr_in_net_bandwidth_norm_dB(snr_vec.at(snr_cnt));
 
-                reset_result_counter_for_next_snr();
+                A_reset_result_counter_for_next_snr();
 
                 state = B_SET_CHANNEL_SMALL_SCALE_FADING;
 
@@ -163,7 +167,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
 
         case C_EXPERIMENT_GENERATE_PACKETS:
             {
-                generate_single_experiment_at_current_snr(now_64, machigh_phy);
+                C_generate_single_experiment_at_current_snr(now_64, machigh_phy);
 
                 ++nof_experiment_per_snr_cnt;
 
@@ -187,7 +191,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
                 dectnrp_assert(nof_experiment_per_snr_cnt == nof_experiment_per_snr,
                                "incorrect number of experiments");
 
-                save_result_of_current_snr();
+                D_save_result_of_current_snr();
 
                 state = E_SET_PARAMETER;
 
@@ -207,7 +211,7 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
                     dectnrp_log_inf(" ");
 
                     // abort condition for outer parameter
-                    if (set_next_parameter_or_go_to_dead_end()) {
+                    if (E_set_next_parameter_or_go_to_dead_end()) {
                         state = DEAD_END;
                         dectnrp_log_inf("all measurements finished");
                     }
@@ -297,7 +301,6 @@ void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
     // this is now a well-defined packet size
     const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    // pack headers
     if (pp.PLCF_type == 1) {
         dectnrp_assert(hp_tx->get_rv() == pp.plcf_10.get_DFRedundancyVersion(), "incorrect rv");
         pp.plcf_10.pack(hp_tx->get_a_plcf());
@@ -319,7 +322,6 @@ void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
     const float cfo_Hz = randomgen.rand_m1p1() * pp.cfo_symmetric_range_subc_multiple *
                          static_cast<float>(pp.psdef.u * constants::subcarrier_spacing_min_u_b);
 
-    // PHY meta
     const phy::tx_meta_t tx_meta = {
         .optimal_scaling_DAC = false,
         .DAC_scale = phy::agc::agc_t::OFDM_AMPLITUDE_FACTOR_MINUS_00dB * pp.amplitude_scale,
@@ -328,13 +330,11 @@ void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
             common::adt::get_sample2sample_phase_inc(cfo_Hz, hw.get_samp_rate()),
         .GI_percentage = 5};
 
-    // radio meta
     const radio::buffer_tx_meta_t buffer_tx_meta = {.tx_order_id = tx_order_id,
                                                     .tx_time_64 = pp.tx_time_64};
 
     ++tx_order_id;
 
-    // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
 }

@@ -122,12 +122,12 @@ class vspace_t {
                                                           const int64_t simulation_now_start_64,
                                                           const int64_t simulation_now_64);
 
-        bool check_if_first_to_register_tx() const;
-        bool check_if_last_to_register_tx() const;
-        bool check_if_first_to_register_rx() const;
-        bool check_if_last_to_register_rx() const;
-        bool check_if_last_to_write() const;
-        bool check_if_last_to_read() const;
+        bool is_first_to_register_tx() const;
+        bool is_last_to_register_tx() const;
+        bool is_first_to_register_rx() const;
+        bool is_last_to_register_rx() const;
+        bool is_last_to_write() const;
+        bool is_last_to_read() const;
         void set_status_tx_written(const bool val);
         void set_status_rx_read(const bool val);
 

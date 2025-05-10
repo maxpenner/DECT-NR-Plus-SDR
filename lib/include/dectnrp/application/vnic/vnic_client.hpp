@@ -27,9 +27,9 @@ namespace dectnrp::application::vnic {
 
 class vnic_client_t final : public app_client_t, public vnic_t {
     public:
-        explicit vnic_client_t(const uint32_t id,
-                               const common::threads_core_prio_config_t thread_config,
-                               phy::job_queue_t& job_queue,
+        explicit vnic_client_t(const uint32_t id_,
+                               const common::threads_core_prio_config_t thread_config_,
+                               phy::job_queue_t& job_queue_,
                                const int tuntap_fd_,
                                const queue_size_t queue_size);
         ~vnic_client_t() = default;

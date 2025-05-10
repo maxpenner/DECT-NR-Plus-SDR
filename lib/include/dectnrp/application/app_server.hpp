@@ -34,9 +34,9 @@ namespace dectnrp::application {
 
 class app_server_t : public app_t {
     public:
-        explicit app_server_t(const uint32_t id,
-                              const common::threads_core_prio_config_t thread_config,
-                              phy::job_queue_t& job_queue,
+        explicit app_server_t(const uint32_t id_,
+                              const common::threads_core_prio_config_t thread_config_,
+                              phy::job_queue_t& job_queue_,
                               const uint32_t N_queue,
                               const queue_size_t queue_size);
         virtual ~app_server_t() = default;

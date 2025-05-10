@@ -26,8 +26,8 @@
 #include <string>
 #include <vector>
 
-#include "dectnrp/common/json_export.hpp"
-#include "dectnrp/common/json_switch.hpp"
+#include "dectnrp/common/json/json_export.hpp"
+#include "dectnrp/common/json/json_switch.hpp"
 #include "dectnrp/common/layer/layer_unit.hpp"
 #include "dectnrp/phy/interfaces/layers_downwards/phy_radio.hpp"
 #include "dectnrp/phy/pool/baton.hpp"
@@ -88,9 +88,9 @@ class worker_pool_t final : public common::layer_unit_t {
          */
         void add_network_id(const uint32_t network_id);
 
+    private:
         const worker_pool_config_t worker_pool_config;
 
-    private:
         std::vector<std::string> start_threads() override final;
         std::vector<std::string> stop_threads() override final;
 

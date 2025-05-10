@@ -24,11 +24,8 @@
 #include <memory>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
-#include "dectnrp/common/json_switch.hpp"
+#include "dectnrp/common/complex.hpp"
+#include "dectnrp/common/json/json_switch.hpp"
 #include "dectnrp/phy/harq/buffer_rx.hpp"
 #include "dectnrp/phy/harq/buffer_rx_plcf.hpp"
 #include "dectnrp/phy/interfaces/maclow_phy.hpp"
@@ -55,7 +52,7 @@ extern "C" {
 #endif
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "header_only/nlohmann/json.hpp"
 #endif
 
 namespace dectnrp::phy {

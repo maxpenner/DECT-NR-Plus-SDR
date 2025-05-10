@@ -22,14 +22,15 @@
 
 // SOURCE: https://github.com/srsran/srsRAN_Project/blob/main/include/srsran/support/srsran_assert.h
 
-#include <fmt/color.h>
-#include <fmt/core.h>
-#include <fmt/format.h>
-
 #include <cstdio>
 #include <string>
 
 #include "dectnrp/common/prog/defined.hpp"
+
+#define FMT_HEADER_ONLY
+#include "header_only/fmt/color.h"
+#include "header_only/fmt/core.h"
+#include "header_only/fmt/format.h"
 
 namespace dectnrp::assert {
 

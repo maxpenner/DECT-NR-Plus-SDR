@@ -72,7 +72,7 @@ phy_t::phy_t(const phy_config_t& phy_config_, const radio::radio_t& radio_)
         // save resampling configuration as part of the worker pool configuration
         worker_pool_config.set_resampler_param(resampler_param);
 
-        hw.set_n_samples_gap(worker_pool_config.nof_samples_interpacket_gap_max);
+        hw.set_tx_gap_samples(worker_pool_config.tx_gap_samples);
 
         hw.initialize_device();
 

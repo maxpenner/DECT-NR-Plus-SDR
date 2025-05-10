@@ -23,9 +23,7 @@
 #include <cstdint>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
+#include "dectnrp/common/complex.hpp"
 
 namespace dectnrp::simulation {
 

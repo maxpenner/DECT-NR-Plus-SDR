@@ -24,13 +24,10 @@
 #include <cstdint>
 #include <string>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
 #include "dectnrp/common/adt/cast.hpp"
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/common/reporting.hpp"
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "header_only/nlohmann/json.hpp"
 
 #define COMMON_JSON_EXPORT_USES_MUTEX_OR_SPINLOCK
 #ifdef COMMON_JSON_EXPORT_USES_MUTEX_OR_SPINLOCK

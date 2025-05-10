@@ -73,7 +73,7 @@ const ant_t::ary_t& ant_t::get_ary() const {
     return ary;
 };
 
-bool ant_t::get_any_larger(const float threshold) const {
+bool ant_t::has_any_larger(const float threshold) const {
     ASSERT_NUMBER_OF_ANTENNAS_IS_POSITIVE;
 
     return std::any_of(ary.begin(), ary.begin() + nof_antennas, [threshold](const auto& val) {

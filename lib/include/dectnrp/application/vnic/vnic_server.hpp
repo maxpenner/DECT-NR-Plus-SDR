@@ -47,9 +47,9 @@ class vnic_server_t final : public app_server_t, public vnic_t {
                 std::string phynic_name;  // TAP
         };
 
-        explicit vnic_server_t(const uint32_t id,
-                               const common::threads_core_prio_config_t thread_config,
-                               phy::job_queue_t& job_queue,
+        explicit vnic_server_t(const uint32_t id_,
+                               const common::threads_core_prio_config_t thread_config_,
+                               phy::job_queue_t& job_queue_,
                                const vnic_config_t vnic_config_,
                                const queue_size_t queue_size);
         ~vnic_server_t();

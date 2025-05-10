@@ -23,14 +23,14 @@
 #include <array>
 #include <cstdint>
 
-#include "dectnrp/common/json_switch.hpp"
+#include "dectnrp/common/json/json_switch.hpp"
 #include "dectnrp/sections_part3/derivative/fec_cfg.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_10.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_20.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_21.hpp"
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
-#include "dectnrp/external/nlohmann/json.hpp"
+#include "header_only/nlohmann/json.hpp"
 #endif
 
 namespace dectnrp::section4 {

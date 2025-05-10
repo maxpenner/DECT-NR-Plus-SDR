@@ -29,9 +29,9 @@ namespace dectnrp::application::sockets {
 
 class socket_server_t final : public app_server_t, public socketx_t {
     public:
-        explicit socket_server_t(const uint32_t id,
-                                 const common::threads_core_prio_config_t thread_config,
-                                 phy::job_queue_t& job_queue,
+        explicit socket_server_t(const uint32_t id_,
+                                 const common::threads_core_prio_config_t thread_config_,
+                                 phy::job_queue_t& job_queue_,
                                  const std::vector<uint32_t> ports,
                                  const queue_size_t queue_size);
         ~socket_server_t();

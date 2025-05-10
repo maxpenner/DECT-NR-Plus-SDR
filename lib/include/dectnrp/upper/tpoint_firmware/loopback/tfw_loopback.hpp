@@ -125,16 +125,18 @@ class tfw_loopback_t : public tpoint_t {
         int64_t get_random_tx_time(const int64_t now_64);
 
         // ##################################################
-        // virtual functions called in state machine
+        /* Virtual functions called in state machine. Prefixed letter is the state in which the
+         * functions are called.
+         */
 
-        virtual void reset_result_counter_for_next_snr() = 0;
+        virtual void A_reset_result_counter_for_next_snr() = 0;
 
-        virtual void generate_single_experiment_at_current_snr(const int64_t now_64,
-                                                               phy::machigh_phy_t& machigh_phy) = 0;
+        virtual void C_generate_single_experiment_at_current_snr(
+            const int64_t now_64, phy::machigh_phy_t& machigh_phy) = 0;
 
-        virtual void save_result_of_current_snr() = 0;
+        virtual void D_save_result_of_current_snr() = 0;
 
-        virtual bool set_next_parameter_or_go_to_dead_end() = 0;
+        virtual bool E_set_next_parameter_or_go_to_dead_end() = 0;
 
         virtual void save_all_results_to_file() const = 0;
 };

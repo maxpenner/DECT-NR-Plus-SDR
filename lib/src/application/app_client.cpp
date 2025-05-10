@@ -25,12 +25,12 @@
 
 namespace dectnrp::application {
 
-app_client_t::app_client_t(const uint32_t id,
-                           const common::threads_core_prio_config_t thread_config,
-                           phy::job_queue_t& job_queue,
+app_client_t::app_client_t(const uint32_t id_,
+                           const common::threads_core_prio_config_t thread_config_,
+                           phy::job_queue_t& job_queue_,
                            const uint32_t N_queue,
                            const queue_size_t queue_size)
-    : app_t(id, thread_config, job_queue, N_queue, queue_size),
+    : app_t(id_, thread_config_, job_queue_, N_queue, queue_size),
       indicator_cnt{0} {}
 
 void app_client_t::trigger_forward_nto(const uint32_t datagram_cnt) {

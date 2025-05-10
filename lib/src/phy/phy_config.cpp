@@ -22,7 +22,7 @@
 
 #include <cmath>
 
-#include "dectnrp/common/json_parse.hpp"
+#include "dectnrp/common/json/json_parse.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/phy/resample/resampler.hpp"
@@ -128,9 +128,6 @@ phy_config_t::phy_config_t(const std::string directory)
         worker_pool_config.maximum_packet_sizes =
             section3::get_maximum_packet_sizes(worker_pool_config.radio_device_class_string);
 
-        worker_pool_config.nof_samples_interpacket_gap_max =
-            common::jsonparse::read_int(it, "nof_samples_interpacket_gap_max", 0, 50);
-
         worker_pool_config.os_min = common::jsonparse::read_int(it, "os_min", 1, 8);
 
         worker_pool_config.enforce_dectnrp_samp_rate_by_resampling =
@@ -138,6 +135,9 @@ phy_config_t::phy_config_t(const std::string directory)
 
         // moodycamel requires at least 32
         worker_pool_config.nof_jobs = common::jsonparse::read_int(it, "nof_jobs", 32, 1024);
+
+        worker_pool_config.tx_gap_samples =
+            common::jsonparse::read_int(it, "tx_gap_samples", 0, 50);
 
         // 12 is 5ms, 240 is 100ms
         worker_pool_config.rx_ant_streams_length_slots =
@@ -151,8 +151,8 @@ phy_config_t::phy_config_t(const std::string directory)
         worker_pool_config.rx_chunk_unit_length_u8subslot =
             common::jsonparse::read_int(it, "rx_chunk_unit_length_u8subslot", 1, 64);
 
-        worker_pool_config.job_regular_period =
-            common::jsonparse::read_int(it, "job_regular_period", 1, 48);
+        worker_pool_config.rx_job_regular_period =
+            common::jsonparse::read_int(it, "rx_job_regular_period", 1, 48);
 
         const auto threads_core_prio_config_sync_vec_array =
             common::jsonparse::read_int_array(it, "threads_core_prio_config_sync_vec", 2, 8, 2);

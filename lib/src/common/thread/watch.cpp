@@ -20,7 +20,7 @@
 
 #include "dectnrp/common/thread/watch.hpp"
 
-#include "dectnrp/external/hinnant/date.hpp"
+#include "header_only/hinnant/date.h"
 
 namespace dectnrp::common {
 

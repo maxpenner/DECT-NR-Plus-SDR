@@ -31,7 +31,7 @@
 #include "dectnrp/common/prog/print.hpp"
 #include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/common/thread/watch.hpp"
-#include "dectnrp/external/argparse/argparse.hpp"
+#include "header_only/argparse/argparse.hpp"
 
 // ctrl+c
 static std::atomic<bool> ctrl_c_pressed{false};

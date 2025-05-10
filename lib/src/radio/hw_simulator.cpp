@@ -27,7 +27,6 @@
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/calibration/cal_simulator.hpp"
 #include "dectnrp/radio/complex.hpp"
-#include "dectnrp/radio/pps_sync_param.hpp"
 #include "dectnrp/simulation/hardware/clip.hpp"
 #include "dectnrp/simulation/hardware/quantize.hpp"
 
@@ -71,7 +70,7 @@ hw_simulator_t::hw_simulator_t(const hw_config_t& hw_config_, simulation::vspace
 }
 
 void hw_simulator_t::set_samp_rate(const uint32_t samp_rate_in) {
-    dectnrp_assert(0 < samp_rate_in, "Sample rate is 0");
+    dectnrp_assert(0 < samp_rate_in, "sample rate is 0");
 
     if (!hw_config_t::sim_samp_rate_lte) {
         // assume we can generate any DECTNRP sample rate
@@ -95,7 +94,7 @@ void hw_simulator_t::set_samp_rate(const uint32_t samp_rate_in) {
         }
     }
 
-    dectnrp_assert(samp_rate_in <= samp_rate, "Sample rate smaller than input sample rate");
+    dectnrp_assert(samp_rate_in <= samp_rate, "sample rate smaller than input sample rate");
 
     // convert from us to samples
     for (std::size_t i = 0; i < std::to_underlying(tmin_t::CARDINALITY); ++i) {
@@ -125,10 +124,10 @@ void hw_simulator_t::initialize_device() {
 }
 
 void hw_simulator_t::initialize_buffer_tx_pool(const uint32_t ant_streams_length_samples_max) {
-    dectnrp_assert(n_samples_gap > 0, "allowed gap size should be larger than 0");
+    dectnrp_assert(tx_gap_samples > 0, "allowed gap size should be larger than 0");
 
     buffer_tx_pool = std::make_unique<buffer_tx_pool_t>(
-        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + n_samples_gap);
+        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + tx_gap_samples);
 }
 
 void hw_simulator_t::initialize_buffer_rx(const uint32_t ant_streams_length_samples) {
@@ -254,7 +253,7 @@ std::vector<std::string> hw_simulator_t::start_threads() {
     dectnrp_assert(0 < nof_antennas && nof_antennas <= nof_antennas_max,
                    "number of antennas not set correctly");
     dectnrp_assert(samp_rate > 0, "sample rate not set correctly");
-    dectnrp_assert(n_samples_gap > 0, "minimum size of gap not set correctly");
+    dectnrp_assert(tx_gap_samples > 0, "minimum size of gap not set correctly");
 
     // set before starting threads
     keep_running.store(true, std::memory_order_release);
@@ -355,9 +354,10 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
     const int64_t now_start_64 = calling_instance->buffer_rx->get_rx_time_passed();
     int64_t now_64 = now_start_64;
 
-#ifndef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
-    dectnrp_assert(now_64 == 0, "buffer RX time not at zero");
-#endif
+    dectnrp_assert(
+        !(calling_instance->hw_config.pps_time_base == hw_config_t::pps_time_base_t::zero &&
+          now_64 != 0),
+        "buffer RX time not at zero");
 
     // measure wall clock execution time
     common::watch_t watch;
@@ -445,9 +445,6 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
 
                 // copy to vspptx for later deep copy
                 vspptx.spp_write_v(ant_streams, spp_offset, tx_length_samples_this_spp);
-
-                // apply hardware effects directly to spp
-                /// \todo
 
                 // set meta data of transmission
                 vspptx.tx_idx = static_cast<int32_t>(spp_offset);
@@ -544,6 +541,15 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                     }
                 }
 
+                // apply hardware effects directly to spp
+                if (calling_instance->hw_config.simulator_clip_and_quantize) {
+                    clip_and_quantize(vspptx.spp,
+                                      vspptx.spp,
+                                      vspptx.spp_size,
+                                      symmetric_clipping_amplitude,
+                                      calling_instance->get_DAC_bits());
+                }
+
                 // wait for vspace to become ready with no timeout
                 vspace.wait_writable_nto(calling_instance->id);
 
@@ -629,9 +635,10 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
     const int64_t now_start_64 = calling_instance->buffer_rx->get_rx_time_passed();
     int64_t now_64 = now_start_64;
 
-#ifndef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
-    dectnrp_assert(now_64 == 0, "buffer RX time not at zero");
-#endif
+    dectnrp_assert(
+        !(calling_instance->hw_config.pps_time_base == hw_config_t::pps_time_base_t::zero &&
+          now_64 != 0),
+        "buffer RX time not at zero");
 
     // wait until all simulators are registered
     vspace.wait_for_all_rx_registered_and_inits_done_nto();
@@ -660,7 +667,13 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
         vspprx.spp_read_v(ant_streams, spp_size);
 
         // apply hardware effects directly to spp
-        /// \todo
+        if (calling_instance->hw_config.simulator_clip_and_quantize) {
+            clip_and_quantize(vspprx.spp,
+                              vspprx.spp,
+                              vspprx.spp_size,
+                              symmetric_clipping_amplitude,
+                              calling_instance->get_ADC_bits());
+        }
 
         // advance internal time
         buffer_rx.get_ant_streams_next(ant_streams, now_64, spp_size);

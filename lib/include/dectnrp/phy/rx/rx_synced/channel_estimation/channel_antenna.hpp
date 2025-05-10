@@ -22,13 +22,10 @@
 
 #include <array>
 #include <cstdint>
+#include <dectnrp/constants.hpp>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
-#include <dectnrp/constants.hpp>
+#include "dectnrp/common/complex.hpp"
 
 namespace dectnrp::phy {
 

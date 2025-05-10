@@ -20,12 +20,13 @@
 
 #pragma once
 
-#include <fmt/core.h>
-#include <fmt/format.h>
-
-#define FMTLOG_HEADER_ONLY
 #include "dectnrp/common/prog/defined.hpp"
-#include "dectnrp/external/fmtlog/fmtlog.hpp"
+
+#define FMT_HEADER_ONLY
+#define FMTLOG_HEADER_ONLY
+#include "header_only/fmt/core.h"
+#include "header_only/fmt/format.h"
+#include "header_only/fmtlog/fmtlog.h"
 
 namespace dectnrp::log {
 
@@ -35,21 +36,17 @@ void save();
 }  // namespace dectnrp::log
 
 // clang-format off
-#ifdef LOG_ENABLED
-
-#define dectnrp_log_setup(logfilename) dectnrp::log::setup(logfilename)
-#define dectnrp_log(logLevel, fmtstr, ...) FMTLOG(logLevel, "{}", fmt::format(FMT_STRING(fmtstr), ##__VA_ARGS__));
-#define dectnrp_log_inf(fmtstr, ...) FMTLOG(fmtlog::LogLevel::INF, "{}", fmt::format(FMT_STRING(fmtstr), ##__VA_ARGS__));
-#define dectnrp_log_wrn(fmtstr, ...) FMTLOG(fmtlog::LogLevel::WRN, "{}", fmt::format(FMT_STRING(fmtstr), ##__VA_ARGS__));
-#define dectnrp_log_save() dectnrp::log::save()
-
-#else
-
-#define dectnrp_log_setup(logfilename)
-#define dectnrp_log(logLevel, fmtstr, ...)
-#define dectnrp_log_inf(fmtstr, ...)
-#define dectnrp_log_wrn(fmtstr, ...)
-#define dectnrp_log_save()
-
-#endif
+ #ifdef LOG_ENABLED
+ #define dectnrp_log_setup(logfilename) dectnrp::log::setup(logfilename)
+ #define dectnrp_log(logLevel, fmtstr, ...) FMTLOG(logLevel, "{}", fmt::format(FMT_STRING(fmtstr), ##__VA_ARGS__));
+ #define dectnrp_log_inf(fmtstr, ...) FMTLOG(fmtlog::LogLevel::INF, "{}", fmt::format(FMT_STRING(fmtstr), ##__VA_ARGS__));
+ #define dectnrp_log_wrn(fmtstr, ...) FMTLOG(fmtlog::LogLevel::WRN, "{}", fmt::format(FMT_STRING(fmtstr), ##__VA_ARGS__));
+ #define dectnrp_log_save() dectnrp::log::save()
+ #else
+ #define dectnrp_log_setup(logfilename)
+ #define dectnrp_log(logLevel, fmtstr, ...)
+ #define dectnrp_log_inf(fmtstr, ...)
+ #define dectnrp_log_wrn(fmtstr, ...)
+ #define dectnrp_log_save()
+ #endif
 // clang-format on

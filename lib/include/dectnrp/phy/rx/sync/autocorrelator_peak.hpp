@@ -25,10 +25,7 @@
 #include <memory>
 #include <vector>
 
-extern "C" {
-#include "srsran/config.h"
-}
-
+#include "dectnrp/common/complex.hpp"
 #include "dectnrp/common/multidim.hpp"
 #include "dectnrp/phy/rx/sync/coarse_peak_f_domain.hpp"
 #include "dectnrp/phy/rx/sync/correlator.hpp"

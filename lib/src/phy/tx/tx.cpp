@@ -40,7 +40,7 @@ extern "C" {
 #include "dectnrp/sections_part3/fix/mod.hpp"
 
 #ifdef PHY_TX_JSON_EXPORT
-#include "dectnrp/common/json_export.hpp"
+#include "dectnrp/common/json/json_export.hpp"
 #include "dectnrp/constants.hpp"
 
 // must be static in case TX is recreated for different packets

@@ -68,7 +68,7 @@ apt-get update
 apt-get -y install dpdk dpdk-dev
 
 # Option A: using package manager, https://files.ettus.com/manual/page_install.html
-sudo apt-get install libuhd-dev uhd-host
+apt-get -y install libuhd-dev uhd-host
 
 # Option B: building from source
 : '
@@ -99,6 +99,8 @@ ldconfig
 cd $cwd
 
 # https://github.com/gnuradio/volk
+
+apt-get -y install build-essential cmake
 
 # clone the source code
 sudo -u "$SUDO_USER" git clone --depth 1 --branch v3.1.0 --recurse-submodules -j8 https://github.com/gnuradio/volk.git
@@ -134,7 +136,9 @@ sudo -u "$SUDO_USER" git clone --depth 1 --branch release_23_11 https://github.c
 cd srsRAN_4G
 sudo -u "$SUDO_USER" mkdir build
 cd build
-sudo -u "$SUDO_USER" cmake ../
+# With gcc 12 or later, there are false alarms warnings of type Warray-bounds.
+# To allow compilation with gcc 12 or later, Werror is disabled. 
+sudo -u "$SUDO_USER" cmake -DENABLE_WERROR=OFF ../
 sudo -u "$SUDO_USER" make -j
 make install
 
@@ -147,7 +151,7 @@ ldconfig
 cd $cwd
 
 # dependencies
-apt-get -y install libeigen3-dev libfmt-dev
+apt-get -y install libeigen3-dev
 
 ###############################################
 # indicate installation process has finished

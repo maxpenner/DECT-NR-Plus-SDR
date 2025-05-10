@@ -116,7 +116,7 @@ void worker_tx_rx_t::work() {
                     const phy_maclow_t phy_maclow{std::get<sync_report_t>(job.content), pcc_report};
 
                     TOKEN_LOCK_FIFO_OR_RETURN
-                    auto machigh_phy = tpoint->work_pcc_incorrect_crc(phy_maclow);
+                    auto machigh_phy = tpoint->work_pcc_crc_error(phy_maclow);
                     token->unlock_fifo();
 
                     run_tx_chscan(machigh_phy.tx_descriptor_vec, machigh_phy.chscan_opt);

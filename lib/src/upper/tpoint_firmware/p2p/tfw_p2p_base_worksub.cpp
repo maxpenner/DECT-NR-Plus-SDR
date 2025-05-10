@@ -111,21 +111,18 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     const uint32_t codebook_index = 0;
 #endif
 
-    // PHY meta
     const phy::tx_meta_t& tx_meta = {.optimal_scaling_DAC = false,
                                      .DAC_scale = agc_tx.get_ofdm_amplitude_factor(),
                                      .iq_phase_rad = 0.0f,
                                      .iq_phase_increment_s2s_post_resampling_rad = 0.0f,
                                      .GI_percentage = 5};
 
-    // radio meta
     const radio::buffer_tx_meta_t buffer_tx_meta = {.tx_order_id = tx_order_id,
                                                     .tx_time_64 = tx_opportunity.tx_time_64};
 
     ++tx_order_id;
     tx_earliest_64 = tx_opportunity.get_end();
 
-    // add to transmit vector
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
 
