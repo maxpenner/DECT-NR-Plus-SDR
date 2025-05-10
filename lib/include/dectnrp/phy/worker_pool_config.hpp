@@ -46,13 +46,13 @@ struct worker_pool_config_t {
         section3::packet_sizes_t maximum_packet_sizes;
 
         /**
-         * \brief When generating individual packets from PHY to radio layer in different, the gap
-         * between consecutive packets can be zero or very small (e.g. a few samples for
-         * timing/clock correction). When that happens, the hardware should not switch from TX to RX
-         * and (almost) immediately back to TX. Instead, the radio layer can detect these small gaps
-         * and fill them with zeros to remain in TX mode. To detect gaps, both packets and their
-         * respective buffers must be available to the hardware when the final samples of the first
-         * packet are read.
+         * \brief When generating individual packets from PHY to radio layer, the gap between
+         * consecutive packets can be zero or very small (e.g. a few samples for timing/clock
+         * correction). When that happens, the hardware should not switch from TX to RX and (almost)
+         * immediately back to TX. Instead, the radio layer can detect these small gaps and fill
+         * them with zeros to remain in TX mode. To detect gaps, both packets and their respective
+         * buffers must be available to the hardware when the final samples of the first packet are
+         * read.
          */
         uint32_t nof_samples_interpacket_gap_max;
 

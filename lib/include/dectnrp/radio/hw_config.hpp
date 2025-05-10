@@ -87,12 +87,21 @@ struct hw_config_t {
             TAI,
         } pps_time_base;
 
-        /// simulator specifics
+        // ##################################################
+        // simulator specifics
+
+        /// clip TX and RX signals and quantize with bit width of hw_simulator_t
         bool simulator_clip_and_quantize;
 
-        /// USRP arguments, must be specific enough to identify exactly one USRP
+        // ##################################################
+        // USRP specifics
+
+        /// USRP arguments must be specific enough to identify exactly one USRP
         std::string uspr_args;
         common::threads_core_prio_config_t usrp_tx_async_helper_thread_config;
+
+        // ##################################################
+        // simulation specifics
 
         /// simulation variables are the same for every tpoint
         static bool sim_samp_rate_lte;
