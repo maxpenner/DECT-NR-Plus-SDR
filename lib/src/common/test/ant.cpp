@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    if (ant0.get_any_larger(0.0f)) {
+    if (ant0.has_any_larger(0.0f)) {
         return EXIT_FAILURE;
     }
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
 
     ant0.at(0) = f0;
 
-    if (!ant0.get_any_larger(0.0f)) {
+    if (!ant0.has_any_larger(0.0f)) {
         return EXIT_FAILURE;
     }
 
@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    if (ant1.get_any_larger(0.0f)) {
+    if (ant1.has_any_larger(0.0f)) {
         return EXIT_FAILURE;
     }
 
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    if (!ant1.get_any_larger(0.0f)) {
+    if (!ant1.has_any_larger(0.0f)) {
         return EXIT_FAILURE;
     }
 
@@ -116,13 +116,13 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    if (ant2.get_any_larger(0.0f)) {
+    if (ant2.has_any_larger(0.0f)) {
         return EXIT_FAILURE;
     }
 
     ant2.at(0) = f1;
 
-    if (!ant2.get_any_larger(0.0f)) {
+    if (!ant2.has_any_larger(0.0f)) {
         return EXIT_FAILURE;
     }
 

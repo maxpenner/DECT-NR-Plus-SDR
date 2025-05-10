@@ -38,7 +38,7 @@ class tfw_timesync_t final : public tpoint_t {
         /**
          * \brief Firmware begins exporting a PPS signal. This signal then must be used externally
          * to synchronize the host computer, for instance by converting the PPS to PTP with a
-         * Raspberry PI, and feeding the PTP back to the host computer.
+         * Raspberry Pi, and feeding the PTP back to the host computer.
          *
          * After some time (measurement_start_delay_s), this firmware begins comparing the SDR
          * sample count with the operating system time. Except for a static offset, the time axes

@@ -25,7 +25,6 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/thread/watch.hpp"
-#include "dectnrp/radio/pps_sync_param.hpp"
 #include "dectnrp/simulation/topology/graph.hpp"
 #include "dectnrp/simulation/wireless/channel_awgn.hpp"
 #include "dectnrp/simulation/wireless/channel_doubly.hpp"

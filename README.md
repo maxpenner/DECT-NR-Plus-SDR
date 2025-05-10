@@ -94,7 +94,7 @@ For any firmware, start_threads() is always called first, followed by work_start
     │  |  ├─ sections_part5/    sections of ETSI TS 103 636-5
     │  |  ├─ simulation/        wireless simulation
     │  |  ├─ upper/             upper layers, i.e. layers between PHY and application layer
-    │  ├─ src/                  source code (same directories as in include/)
+    │  ├─ src/                  source code (same directories as in include/dectnrp/)
     └─ scripts/                 shell scripts
 
 ## Installation
@@ -160,7 +160,6 @@ If you use this repository for any publication, please cite the repository accor
 
 - The channel coding requires verification. It is based on [srsRAN 4G](https://github.com/srsran/srsRAN_4G) with multiple changes, for instance, an additional maximum code block size $Z=2048$. Furthermore, channel coding with a limited number of soft bits is not implemented yet.
 - [MAC messages and information elements (MMIEs)](lib/include/dectnrp/sections_part4/mac_messages_and_ie) in the standard are subject to frequent changes. Previously completed MMIEs are currently being revised and will be updated soon.
-- If asserts are enabled, the program may stop abruptly if IQ samples are not processed fast enough. This is triggered by a backlog of unprocessed IQ samples within synchronization.
 - For some combinations of operating system, CPU and DPDK, pressing ctrl+c does not stop the SDR. The SDR process must then be stopped manually.
 - In an earlier version of the standard, the number of transmit streams was signaled by a cyclic rotation of the STF in frequency domain. This functionality will be kept for the time being. In the current version of the standard, the number of transmit streams in a packet must be tested blindly.
 
@@ -200,9 +199,9 @@ If you use this repository for any publication, please cite the repository accor
 
 ## Troubleshooting
 
-- If combining large bandwidths ($\beta$ >= 8), a large number of antennas (N<sub>TX</sub> >= 4) and resampling, the resampling may be too demanding for synchronization. In that case the number of antennas utilized by synchronization can be reduced in [lib/include/dectnrp/phy/rx/sync/sync_param.hpp](lib/include/dectnrp/phy/rx/sync/sync_param.hpp) by setting ```RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT``` to either 1, 2 or 4.
+- If combining large bandwidths ($\beta$ >= 8), a large number of antennas (N<sub>TX</sub> >= 4) and resampling, synchronization may not be able to process IQ samples fast enough across all antennas. In that case, the program may stop abruptly once the write pointer of the IQ ring buffer catches up with the read pointer. To prevent this from happening, the number of antennas utilized by synchronization can be reduced in [lib/include/dectnrp/phy/rx/sync/sync_param.hpp](lib/include/dectnrp/phy/rx/sync/sync_param.hpp) by setting ```RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT``` to either 1, 2 or 4.
 - If there are occasional packet losses, oversampling in `phy.json` can be increased. This is particularly helpful if [resampling](#resampling) is used. Downside is that the nominal bandwidth is increased while the actual signal bandwidth remains the same.
-- If the SNR is low despite a high receive power, [resampling](#resampling) has to be tuned.
+- If the SNR is low despite a high receive power, [resampling](#resampling) has to be tuned. To rule out any other causes, resampling may also be deactivated for testing purposes.
 - DPDK and SDR threads should run on separate cores.
 - For the best possible performance in terms of PER, the spectrum the SDR operates in should be interference-free.
 
@@ -230,12 +229,12 @@ An ideal fast AGC receives a packet and adjusts its gain settings within a fract
 
 One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
 
-| **$\mu$** | **GI length ($\mu s$)** | **STF length ($\mu s$)**  |
-|:---------:|:-----------------------:|:-------------------------:|
-|     1     |          18.52          |           64.81           |
-|     2     |          20.83          |           41.67           |
-|     4     |          10.42          |           20.83           |
-|     8     |          10.42          |           10.42           |
+| **$\mu$** | **GI length in $\mu s$** | **STF length in $\mu s$**  |
+|:---------:|:------------------------:|:--------------------------:|
+|     1     |           18.52          |            64.81           |
+|     2     |           20.83          |            41.67           |
+|     4     |           10.42          |            20.83           |
+|     8     |           10.42          |            10.42           |
 
 In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. 10 $dB$. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
 
@@ -279,7 +278,7 @@ Exported files can be analyzed with [DECT-NR-Plus-SDR-json](https://github.com/m
 
 With the [GPIOs of an USRP](https://files.ettus.com/manual/page_gpio_api.html), the SDR can create pulses that are synchronized to DECT NR+ events, for instance the beginning of a wirelessly received beacon. The generation of pulses is controlled by each firmware individually. The example [firmware p2p](#p2p) contains logic to export one pulse per second (PPS).
 
-A PPS signal itself is a frequently used clock for other systems. For example, a Raspberry PI can be disciplined with a PPS and at the same time act as a PTP source which itself operates synchronously with the PPS ([pi5-pps-ptp](https://github.com/maxpenner/pi5-pps-ptp)). Such a PTP source can then be used to discipline further systems:
+A PPS signal itself is a frequently used clock for other systems. For example, a Raspberry Pi can be disciplined with a PPS and at the same time act as a PTP source which itself operates synchronously with the PPS ([pi5-pps-ptp](https://github.com/maxpenner/pi5-pps-ptp)). Such a PTP source can then be used to discipline further systems:
 
 - The SDR's [host computer can synchronize to PTP](https://github.com/maxpenner/pi5-pps-ptp/blob/main/docs/client.md) such that the operating system time and the USRP sample count run synchronously.
 - The PPS is stable enough to allow deriving higher clock speeds, for instance 48kHz for distributed wireless audio applications.

@@ -251,9 +251,9 @@ class hw_t : public common::layer_unit_t {
         std::unique_ptr<buffer_tx_pool_t> buffer_tx_pool;
         std::unique_ptr<buffer_rx_t> buffer_rx;
 
-    protected:
         const hw_config_t hw_config;
 
+    protected:
         virtual std::vector<std::string> start_threads() override = 0;
         virtual std::vector<std::string> stop_threads() override = 0;
 

@@ -27,7 +27,6 @@
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/calibration/cal_simulator.hpp"
 #include "dectnrp/radio/complex.hpp"
-#include "dectnrp/radio/pps_sync_param.hpp"
 #include "dectnrp/simulation/hardware/clip.hpp"
 #include "dectnrp/simulation/hardware/quantize.hpp"
 
@@ -355,9 +354,10 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
     const int64_t now_start_64 = calling_instance->buffer_rx->get_rx_time_passed();
     int64_t now_64 = now_start_64;
 
-#ifndef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
-    dectnrp_assert(now_64 == 0, "buffer RX time not at zero");
-#endif
+    dectnrp_assert(
+        !(calling_instance->hw_config.pps_time_base == hw_config_t::pps_time_base_t::zero &&
+          now_64 != 0),
+        "buffer RX time not at zero");
 
     // measure wall clock execution time
     common::watch_t watch;
@@ -629,9 +629,10 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
     const int64_t now_start_64 = calling_instance->buffer_rx->get_rx_time_passed();
     int64_t now_64 = now_start_64;
 
-#ifndef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
-    dectnrp_assert(now_64 == 0, "buffer RX time not at zero");
-#endif
+    dectnrp_assert(
+        !(calling_instance->hw_config.pps_time_base == hw_config_t::pps_time_base_t::zero &&
+          now_64 != 0),
+        "buffer RX time not at zero");
 
     // wait until all simulators are registered
     vspace.wait_for_all_rx_registered_and_inits_done_nto();

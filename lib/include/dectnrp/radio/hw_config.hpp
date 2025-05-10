@@ -78,6 +78,15 @@ struct hw_config_t {
         common::threads_core_prio_config_t tx_thread_config;
         common::threads_core_prio_config_t rx_thread_config;
 
+        /**
+         * \brief Before streaming samples, the radio device's internal clock can be synchronized to
+         * a time base. Time is aligned to the start of a full second at the next PPS.
+         */
+        enum class pps_time_base_t {
+            zero,
+            TAI,
+        } pps_time_base;
+
         /// simulator specifics
         /// nothing so far
 

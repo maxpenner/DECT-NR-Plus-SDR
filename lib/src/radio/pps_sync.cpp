@@ -24,7 +24,6 @@
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/hw.hpp"
 #include "dectnrp/radio/hw_simulator.hpp"
-#include "dectnrp/radio/pps_sync_param.hpp"
 
 namespace dectnrp::radio {
 
@@ -60,17 +59,23 @@ void pps_sync_t::sync_procedure(hw_t& hw) {
     // wait for another PPS in case instances of hw do not share a common PPS signal
     hw.pps_wait_for_next();
 
-#ifdef RADIO_PPS_SYNC_SYNC_TO_TAI_OR_TO_ZERO
-    // sleep for a short time so that the full second of the operating system has certainly passed
-    common::watch_t::sleep<common::milli>(50);
+    switch (hw.hw_config.pps_time_base) {
+        using enum hw_config_t::pps_time_base_t;
+        case zero:
+            hw.pps_full_sec_at_next(0);
+            break;
 
-    // get full second, but set to value + 1 at next PPS
-    hw.pps_full_sec_at_next(
-        common::watch_t::get_elapsed_since_epoch<int64_t, common::seconds, common::tai_clock>() +
-        int64_t{1});
-#else
-    hw.pps_full_sec_at_next(0);
-#endif
+        case TAI:
+            // sleep for a short time so that the full second of the OS has certainly passed
+            common::watch_t::sleep<common::milli>(50);
+
+            // get full second, but set to value + 1 at next PPS
+            hw.pps_full_sec_at_next(common::watch_t::get_elapsed_since_epoch<int64_t,
+                                                                             common::seconds,
+                                                                             common::tai_clock>() +
+                                    int64_t{1});
+            break;
+    }
 
     // applies only for real hardware
     if (dynamic_cast<radio::hw_simulator_t*>(&hw) == nullptr) {

@@ -67,6 +67,15 @@ radio_config_t::radio_config_t(const std::string directory)
             hw_config.rx_thread_config.prio_offset = rx_thread_config_array[0];
             hw_config.rx_thread_config.cpu_core = rx_thread_config_array[1];
 
+            const auto pps_time_base = common::jsonparse::read_string(it, "pps_time_base");
+            if (pps_time_base == "zero") {
+                hw_config.pps_time_base = hw_config_t::pps_time_base_t::zero;
+            } else if (pps_time_base == "TAI") {
+                hw_config.pps_time_base = hw_config_t::pps_time_base_t::TAI;
+            } else {
+                dectnrp_assert_failure("undefined pps_time_base {}", pps_time_base);
+            }
+
             // simulator specifics
             if (hw_config.hw_name == "simulator") {
                 // nothing to do here
@@ -82,7 +91,7 @@ radio_config_t::radio_config_t(const std::string directory)
                 hw_config.usrp_tx_async_helper_thread_config.cpu_core =
                     usrp_tx_async_helper_thread_config_array[1];
             } else {
-                dectnrp_assert_failure("Undefined hardware type {}.", hw_config.hw_name);
+                dectnrp_assert_failure("undefined hardware type {}", hw_config.hw_name);
             }
 
             dectnrp_assert(
