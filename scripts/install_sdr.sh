@@ -29,7 +29,7 @@ sudo -u "$SUDO_USER" git clone --recurse-submodules https://github.com/maxpenner
 cd DECT-NR-Plus-SDR
 sudo -u "$SUDO_USER" mkdir build
 cd build
-sudo -u "$SUDO_USER" cmake ../
+sudo -u "$SUDO_USER" cmake ..
 sudo -u "$SUDO_USER" make -j
 
 echo "Finished!"

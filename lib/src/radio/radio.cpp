@@ -32,7 +32,7 @@ radio_t::radio_t(const radio_config_t& radio_config_)
       radio_config(radio_config_) {
     const uint32_t nof_radio_hardware = radio_config.get_nof_layer_unit_config();
 
-    dectnrp_assert(nof_radio_hardware > 0, "HW config vector of radio layer is empty");
+    dectnrp_assert(nof_radio_hardware > 0, "config vector of radio layer is empty");
 
     vspace_check_validity_and_init();
 
@@ -41,12 +41,12 @@ radio_t::radio_t(const radio_config_t& radio_config_)
 
         dectnrp_assert(hw_config.id == hw_id, "incorrect ID");
 
-        if (hw_config.hw_name == hw_usrp_t::name) {
-            layer_unit_vec.push_back(std::make_unique<hw_usrp_t>(hw_config));
-        } else if (hw_config.hw_name == hw_simulator_t::name) {
+        if (hw_config.hw_name == hw_simulator_t::name) {
             layer_unit_vec.push_back(std::make_unique<hw_simulator_t>(hw_config, *vspace.get()));
+        } else if (hw_config.hw_name == hw_usrp_t::name) {
+            layer_unit_vec.push_back(std::make_unique<hw_usrp_t>(hw_config));
         } else {
-            dectnrp_assert_failure("HW unknown radio type");
+            dectnrp_assert_failure("unknown radio type");
         }
     }
 }
@@ -68,12 +68,12 @@ void radio_t::vspace_check_validity_and_init() {
         } else if (hw_config.hw_name == hw_simulator_t::name) {
             ++nof_simulator;
         } else {
-            dectnrp_assert_failure("HW unknown radio type");
+            dectnrp_assert_failure("unknown radio type {}", hw_config.hw_name);
         }
     }
 
     dectnrp_assert(!(nof_simulator != 0 && nof_simulator != nof_radio_hardware),
-                   "HW devices not all real or virtual.");
+                   "devices not all real or virtual");
 
     /* At this point, all our hardware devices are either real physical devices or simulators. If
      * all devices are virtual, we have to initialize the virtual space in which the devices will
@@ -86,7 +86,7 @@ void radio_t::vspace_check_validity_and_init() {
             limits::simulation_samp_rate_speed_minimum <= hw_config_t::sim_samp_rate_speed &&
                 hw_config_t::sim_samp_rate_speed != -1 &&
                 hw_config_t::sim_samp_rate_speed <= limits::simulation_samp_rate_speed_maximum,
-            "samp_rate_speed out of bound.");
+            "samp_rate_speed out of bound");
 
         vspace = std::make_unique<simulation::vspace_t>(nof_radio_hardware,
                                                         hw_config_t::sim_samp_rate_speed,
