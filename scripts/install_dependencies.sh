@@ -85,38 +85,12 @@ sudo -u "$SUDO_USER" git clone --depth 1 --branch UHD-4.6 https://github.com/Ett
 cd uhd/host
 sudo -u "$SUDO_USER" mkdir build
 cd build
-sudo -u "$SUDO_USER" cmake ../
+sudo -u "$SUDO_USER" cmake ..
 sudo -u "$SUDO_USER" make -j
 make install
 
 ldconfig
 '
-
-###############################################
-# install VOLK
-###############################################
-
-cd $cwd
-
-# https://github.com/gnuradio/volk
-
-apt-get -y install build-essential cmake
-
-# clone the source code
-sudo -u "$SUDO_USER" git clone --depth 1 --branch v3.1.0 --recurse-submodules -j8 https://github.com/gnuradio/volk.git
-
-# build and install
-cd volk
-sudo -u "$SUDO_USER" mkdir build
-cd build
-sudo -u "$SUDO_USER" cmake ../
-sudo -u "$SUDO_USER" make -j
-make install
-
-ldconfig
-
-# optional
-volk_profile
 
 ###############################################
 # install srsRAN
@@ -136,8 +110,8 @@ sudo -u "$SUDO_USER" git clone --depth 1 --branch release_23_11 https://github.c
 cd srsRAN_4G
 sudo -u "$SUDO_USER" mkdir build
 cd build
-# With gcc 12 or later, there are false alarms warnings of type Warray-bounds.
-# To allow compilation with gcc 12 or later, Werror is disabled. 
+# With gcc 12 or higher, there are false alarms warnings of type Warray-bounds.
+# To allow compilation with gcc 12 or higher, Werror is disabled. 
 sudo -u "$SUDO_USER" cmake -DENABLE_WERROR=OFF ../
 sudo -u "$SUDO_USER" make -j
 make install
@@ -145,7 +119,33 @@ make install
 ldconfig
 
 ###############################################
-# install Eigen and fmt
+# install VOLK
+###############################################
+
+cd $cwd
+
+# https://github.com/gnuradio/volk
+
+apt-get -y install build-essential cmake
+
+# clone the source code
+sudo -u "$SUDO_USER" git clone --depth 1 --branch v3.1.0 --recurse-submodules -j8 https://github.com/gnuradio/volk.git
+
+# build and install
+cd volk
+sudo -u "$SUDO_USER" mkdir build
+cd build
+sudo -u "$SUDO_USER" cmake ..
+sudo -u "$SUDO_USER" make -j
+make install
+
+ldconfig
+
+# optional
+volk_profile
+
+###############################################
+# install Eigen
 ###############################################
 
 cd $cwd

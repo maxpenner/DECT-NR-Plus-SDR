@@ -49,7 +49,7 @@ MARK_AS_ADVANCED(SRSRAN_LIBRARIES SRSRAN_INCLUDE_DIRS)
 include(CheckCXXSourceCompiles)
 
 IF(SRSRAN_FOUND)
-  # UHD library directory
+  # SRSRAN library directory
   get_filename_component(SRSRAN_LIBRARY_DIR ${SRSRAN_LIBRARIES} DIRECTORY)
 
   # Save current required variables

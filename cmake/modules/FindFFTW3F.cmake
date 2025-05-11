@@ -60,4 +60,4 @@ include(FindPackageHandleStandardArgs)
 # if all listed variables are TRUE
 find_package_handle_standard_args(FFTW3F DEFAULT_MSG FFTW3F_LIBRARY FFTW3F_INCLUDE_DIR)
 
-mark_as_advanced(FFTW3F_INCLUDE_DIR FFTW3F_STATIC_LIBRARY FFTW3F_LIBRARY )
+mark_as_advanced(FFTW3F_INCLUDE_DIR FFTW3F_STATIC_LIBRARY FFTW3F_LIBRARY)
