@@ -114,7 +114,7 @@ uint32_t app_client_t::get_indicator_cnt_under_lock() {
 void app_client_t::forward_under_lock() {
     // process until all indicated datagrams have been processed
     while (get_indicator_cnt_under_lock() > 0) {
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
         bool all_queues_empty = true;
 #endif
 
@@ -133,13 +133,13 @@ void app_client_t::forward_under_lock() {
                 write_immediate(i, buffer_local, n);
                 dec_indicator_cnt_under_lock();
 
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
                 all_queues_empty = false;
 #endif
             }
         }
 
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
         dectnrp_assert(!all_queues_empty, "went over all queues and non has data");
 #endif
     }

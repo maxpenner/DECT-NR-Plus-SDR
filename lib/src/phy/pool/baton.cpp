@@ -36,7 +36,7 @@ baton_t::baton_t(const uint32_t nof_worker_sync_,
                  const int64_t sync_time_unique_limit_64_,
                  const uint32_t rx_job_regular_period_)
     :
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
       chunk_time_end_64(std::numeric_limits<int64_t>::max()),
 #endif
       nof_worker_sync(nof_worker_sync_),

@@ -29,7 +29,7 @@
 #include "dectnrp/phy/rx/localbuffer.hpp"
 #include "dectnrp/radio/buffer_rx.hpp"
 
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #endif
 
@@ -112,7 +112,7 @@ class rx_pacer_t {
         /// bring into default state
         void reset_localbuffer(const localbuffer_choice_t lbc, const int64_t ant_streams_time_64_);
 
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
         int64_t search_time_start_64{common::adt::UNDEFINED_EARLY_64};
         void check_time_lag(const int64_t time_to_check_for_lag_64) const;
 #endif

@@ -36,7 +36,7 @@
 #include "dectnrp/upper/upper.hpp"
 #include "dectnrp/upper/upper_config.hpp"
 
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
 #include "dectnrp/common/prog/simd.hpp"
 #endif
 
@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
     const std::string configuration_directory = argv[1];
     dectnrp_log_inf("configuration_directory {}", configuration_directory);
 
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
     dectnrp::common::simd::assert_simd_libs_use_same_alignment();
 #endif
 

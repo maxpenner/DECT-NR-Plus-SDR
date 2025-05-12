@@ -79,7 +79,7 @@ class baton_t {
         bool is_job_regular_due();
         int64_t get_sync_time_last() const { return sync_time_last_64; };
 
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
         int64_t chunk_time_end_64;
 #endif
 

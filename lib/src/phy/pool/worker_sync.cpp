@@ -194,7 +194,7 @@ void worker_sync_t::work() {
             ++stats.job_regular;
         }
 
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
         // don't check when called for the first time, indicated by baton.chunk_time_end_64 being
         // set to numeric maximum
         if (baton.chunk_time_end_64 < std::numeric_limits<int64_t>::max()) {
