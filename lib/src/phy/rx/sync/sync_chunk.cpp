@@ -119,7 +119,7 @@ sync_chunk_t::sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
 }
 
 void sync_chunk_t::wait_for_first_chunk_nto(const int64_t search_time_start_64_) {
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
     search_time_start_64 = search_time_start_64_;
 #endif
 
@@ -277,7 +277,7 @@ int64_t sync_chunk_t::get_chunk_time_end() const {
 }
 
 void sync_chunk_t::set_next_chunk() {
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
     check_time_lag(get_chunk_time_end());
 #endif
 

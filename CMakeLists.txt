@@ -66,8 +66,8 @@ option(ENABLE_EXPORT      "Enable PIC and export libraries"           OFF)
 option(ENABLE_TIDY        "Enable clang tidy"                         OFF)
 option(AUTO_DETECT_ISA    "Autodetect supported ISA extensions"       ON)
 option(BUILD_STATIC       "Attempt to statically link external deps"  OFF)
-option(ASSERT_ENABLED     "Enable asserts"                            ON)
-option(LOG_ENABLED        "Enable logging into file"                  ON)
+option(ENABLE_ASSERT      "Enable asserts"                            ON)
+option(ENABLE_LOG         "Enable logging into file"                  ON)
 
 if (ENABLE_WERROR)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
@@ -89,12 +89,12 @@ if (ENABLE_EXPORT)
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif (ENABLE_EXPORT)
 
-if (ASSERT_ENABLED)
-  add_definitions(-DASSERT_ENABLED)
+if (ENABLE_ASSERT)
+  add_definitions(-DENABLE_ASSERT)
 endif()
 
-if (LOG_ENABLED)
-  add_definitions(-DLOG_ENABLED)
+if (ENABLE_LOG)
+  add_definitions(-DENABLE_LOG)
 endif()
 
 ########################################################################

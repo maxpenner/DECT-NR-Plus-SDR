@@ -63,8 +63,8 @@ namespace dectnrp::assert {
 // ##################################################
 // assert failure without checking condition
 
-#define dectnrp_assert_failure(fmtstr, ...)            \
-    (void)((not DECTNRP_IS_DEFINED(ASSERT_ENABLED)) || \
+#define dectnrp_assert_failure(fmtstr, ...)           \
+    (void)((not DECTNRP_IS_DEFINED(ENABLE_ASSERT)) || \
            (DECTNRP_ASSERT_FAILURE__("no error condition", fmtstr, ##__VA_ARGS__), 0))
 
 // ##################################################
@@ -78,4 +78,4 @@ namespace dectnrp::assert {
            (DECTNRP_ALWAYS_ASSERT__(condition, fmtstr, ##__VA_ARGS__), 0))
 
 #define dectnrp_assert(condition, fmtstr, ...) \
-    DECTNRP_ALWAYS_ASSERT_IFDEF__(ASSERT_ENABLED, condition, fmtstr, ##__VA_ARGS__)
+    DECTNRP_ALWAYS_ASSERT_IFDEF__(ENABLE_ASSERT, condition, fmtstr, ##__VA_ARGS__)

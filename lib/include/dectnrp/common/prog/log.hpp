@@ -36,7 +36,7 @@ void save();
 }  // namespace dectnrp::log
 
 // clang-format off
- #ifdef LOG_ENABLED
+ #ifdef ENABLE_LOG
  #define dectnrp_log_setup(logfilename) dectnrp::log::setup(logfilename)
  #define dectnrp_log(logLevel, fmtstr, ...) FMTLOG(logLevel, "{}", fmt::format(FMT_STRING(fmtstr), ##__VA_ARGS__));
  #define dectnrp_log_inf(fmtstr, ...) FMTLOG(fmtlog::LogLevel::INF, "{}", fmt::format(FMT_STRING(fmtstr), ##__VA_ARGS__));

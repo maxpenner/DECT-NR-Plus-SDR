@@ -200,7 +200,7 @@ void rx_pacer_t::reset_localbuffer(const localbuffer_choice_t lbc,
     }
 }
 
-#ifdef ASSERT_ENABLED
+#ifdef ENABLE_ASSERT
 void rx_pacer_t::check_time_lag(const int64_t time_to_check_for_lag_64) const {
     // poll current time
     const int64_t now_64 = buffer_rx.get_rx_time_passed();
