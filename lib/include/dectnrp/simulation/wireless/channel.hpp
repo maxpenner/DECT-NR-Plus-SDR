@@ -60,7 +60,6 @@ class channel_t {
         static float get_large_scale_via_pathloss(const vspptx_t& vspptx,
                                                   const vspprx_t& vspprx,
                                                   const vspptx_t& vspptx_other,
-                                                  const size_t tx_idx,
                                                   const size_t rx_idx);
 
         const uint32_t id_0;

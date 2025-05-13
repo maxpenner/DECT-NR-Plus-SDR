@@ -56,7 +56,8 @@ void tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
         start_time_64 + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
 }
 
-phy::machigh_phy_t tfw_chscanner_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
+phy::machigh_phy_t tfw_chscanner_t::work_regular(
+    [[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
     // get current time
     const int64_t now_64 = buffer_rx.get_rx_time_passed();
 
@@ -84,15 +85,17 @@ phy::machigh_phy_t tfw_chscanner_t::work_regular(const phy::phy_mac_reg_t& phy_m
     return machigh_phy;
 }
 
-phy::maclow_phy_t tfw_chscanner_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
+phy::maclow_phy_t tfw_chscanner_t::work_pcc([[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
 
-phy::machigh_phy_t tfw_chscanner_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
+phy::machigh_phy_t tfw_chscanner_t::work_pdc_async(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_chscanner_t::work_upper(const upper::upper_report_t& upper_report) {
+phy::machigh_phy_t tfw_chscanner_t::work_upper(
+    [[maybe_unused]] const upper::upper_report_t& upper_report) {
     return phy::machigh_phy_t();
 }
 

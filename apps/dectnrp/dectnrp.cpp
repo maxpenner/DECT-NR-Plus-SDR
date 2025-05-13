@@ -42,7 +42,7 @@
 
 static std::atomic<bool> ctrl_c_pressed{false};
 
-static void signal_handler(int signo) { ctrl_c_pressed.store(true); }
+static void signal_handler([[maybe_unused]] int signo) { ctrl_c_pressed.store(true); }
 
 int main(int argc, char** argv) {
     // register signal handler

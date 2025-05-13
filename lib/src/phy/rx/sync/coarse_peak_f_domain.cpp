@@ -64,7 +64,8 @@ coarse_peak_f_domain_t::~coarse_peak_f_domain_t() {
     }
 }
 
-std::pair<uint32_t, float> coarse_peak_f_domain_t::process(const uint32_t coarse_peak_time_local) {
+std::pair<uint32_t, float> coarse_peak_f_domain_t::process(
+    [[maybe_unused]] const uint32_t coarse_peak_time_local) {
     // we only mix and FFT if required
 #if defined(RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_FIND_BETA_THRESHOLD_DB_OR_ASSUME_MAX_OF_RDC) || \
     defined(RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_FIND_INTEGER_CFO_SEARCH_RANGE_OR_ASSUME_ZERO)

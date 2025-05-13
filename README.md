@@ -325,7 +325,7 @@ The P2P (point-to-point) firmware is started on two separate host computers, eac
 
 #### Common settings on FT and PT
 
-If a different USRP type is used, the value of `“uspr_args”` in `radio.json` must be modified accordingly. Furthermore, FT and PT must be tuned to a common center frequency. This is done by opening the following two files
+If a different USRP type is used, the value of `“usrp_args”` in `radio.json` must be modified accordingly. Furthermore, FT and PT must be tuned to a common center frequency. This is done by opening the following two files
 
 - [lib/src/upper/tpoint_firmware/p2p/tfw_p2p_ft_once.cpp](lib/src/upper/tpoint_firmware/p2p/tfw_p2p_ft_once.cpp)
 - [lib/src/upper/tpoint_firmware/p2p/tfw_p2p_pt_once.cpp](lib/src/upper/tpoint_firmware/p2p/tfw_p2p_pt_once.cpp)

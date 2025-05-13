@@ -112,19 +112,22 @@ phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::phy_mac_reg_t& phy_ma
     return phy::machigh_phy_t();
 }
 
-phy::maclow_phy_t tfw_timesync_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
+phy::maclow_phy_t tfw_timesync_t::work_pcc([[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
 
-phy::machigh_phy_t tfw_timesync_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
+phy::machigh_phy_t tfw_timesync_t::work_pdc_async(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_timesync_t::work_upper(const upper::upper_report_t& upper_report) {
+phy::machigh_phy_t tfw_timesync_t::work_upper(
+    [[maybe_unused]] const upper::upper_report_t& upper_report) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t tfw_timesync_t::work_chscan_async(const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_timesync_t::work_chscan_async(
+    [[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

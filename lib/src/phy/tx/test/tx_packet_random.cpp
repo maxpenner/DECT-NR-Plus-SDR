@@ -233,7 +233,7 @@ int generate_random_TX_packet_within_rdc_limits(std::string radio_device_class_s
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     std::srand(time(NULL));
 
     const std::vector<std::string> rdc_vec = {

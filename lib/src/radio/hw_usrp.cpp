@@ -43,14 +43,14 @@ const std::string hw_usrp_t::name = "usrp";
 
 hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
     : hw_t(hw_config_) {
-    // hw_config.uspr_args must be specific enough to find only one USRP
-    device_addrs = uhd::device::find(hw_config.uspr_args, uhd::device::USRP);
+    // hw_config.usrp_args must be specific enough to find only one USRP
+    device_addrs = uhd::device::find(hw_config.usrp_args, uhd::device::USRP);
 
     dectnrp_assert(
         !device_addrs.empty(),
-        "Requested USRP not found. Check uspr_args, they must match your device. Also check if use_dpdk=1 is set.");
+        "Requested USRP not found. Check usrp_args, they must match your device. Also check if use_dpdk=1 is set.");
     dectnrp_assert(device_addrs.size() == 1,
-                   "More than one USRP found. Check if uspr_args are specific enough.");
+                   "More than one USRP found. Check if usrp_args are specific enough.");
 
     // Next check that the device is actually a supported USRP and set parameters.
     // source for master clock:
@@ -204,7 +204,7 @@ void hw_usrp_t::set_samp_rate(const uint32_t samp_rate_in) {
 
 void hw_usrp_t::initialize_device() {
     // now create the USRP
-    m_usrp = uhd::usrp::multi_usrp::make(hw_config.uspr_args);
+    m_usrp = uhd::usrp::multi_usrp::make(hw_config.usrp_args);
 
     /* Specify the subdev:
      * https://kb.ettus.com/USRP_N300/N310/N320/N321_Getting_Started_Guide#Subdevice_Specification_Mapping

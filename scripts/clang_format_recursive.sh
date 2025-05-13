@@ -20,12 +20,15 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-find . -type d \( -path ./build -o \
+find . -type d \( -path ./bin -o \
+                  -path ./build -o \
                   -path ./cmake -o \
                   -path ./configurations -o \
                   -path ./docs -o \
-                  -path ./lib/include/dectnrp/external -o \
-                  -path ./utils \
+                  -path ./external -o \
+                  -path ./gnuradio -o \
+                  -path ./json -o \
+                  -path ./scripts \
                \) -prune \
     -o -iname *.hpp -o -iname *.cpp \
     | xargs clang-format -style=file -i -fallback-style=none --verbose

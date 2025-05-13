@@ -26,8 +26,8 @@
 
 namespace dectnrp::phy {
 
-void estimator_cfo_t::process_stf(const channel_antennas_t& channel_antennas,
-                                  const process_stf_meta_t& process_stf_meta) {}
+void estimator_cfo_t::process_stf([[maybe_unused]] const channel_antennas_t& channel_antennas,
+                                  [[maybe_unused]] const process_stf_meta_t& process_stf_meta) {}
 
 void estimator_cfo_t::process_drs(const channel_antennas_t& channel_antennas,
                                   const process_drs_meta_t& process_drs_meta) {
@@ -60,7 +60,7 @@ float estimator_cfo_t::get_residual_CFO_s2s_rad(const uint32_t N_DF_symbol_sampl
 
 void estimator_cfo_t::reset_internal() {}
 
-void estimator_cfo_t::process_stf_phase_rotation(const cf_t* chestim_drs_zf) {
+void estimator_cfo_t::process_stf_phase_rotation([[maybe_unused]] const cf_t* chestim_drs_zf) {
     //
 
     //

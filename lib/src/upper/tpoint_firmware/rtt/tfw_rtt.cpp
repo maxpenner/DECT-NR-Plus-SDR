@@ -91,9 +91,9 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     stage_a.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
 }
 
-void tfw_rtt_t::work_start_imminent(const int64_t start_time_64) {}
+void tfw_rtt_t::work_start_imminent([[maybe_unused]] const int64_t start_time_64) {}
 
-phy::machigh_phy_t tfw_rtt_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
+phy::machigh_phy_t tfw_rtt_t::work_regular([[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
     return phy::machigh_phy_t();
 }
 
@@ -250,7 +250,7 @@ phy::machigh_phy_t tfw_rtt_t::work_upper(const upper::upper_report_t& upper_repo
     return machigh_phy;
 }
 
-phy::machigh_phy_tx_t tfw_rtt_t::work_chscan_async(const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_rtt_t::work_chscan_async([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

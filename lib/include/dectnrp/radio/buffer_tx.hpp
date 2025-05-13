@@ -76,7 +76,7 @@ class buffer_tx_t final : public common::lockable_outer_inner_t, public common::
 
         friend class buffer_tx_pool_t;
 
-        HW_FRIENDS;
+        HW_FRIENDS
 
     private:
         std::vector<std::string> report_start() const override final;

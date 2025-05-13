@@ -31,7 +31,7 @@ using namespace dectnrp;
 static uint8_t buffer_tx[1500];
 static uint8_t buffer_rx[1500];
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     apps::udp_t udp;
 
     udp.add_connection_tx("127.0.0.1", 8080);

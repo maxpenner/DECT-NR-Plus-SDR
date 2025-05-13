@@ -26,7 +26,14 @@
 #define FMTLOG_HEADER_ONLY
 #include "header_only/fmt/core.h"
 #include "header_only/fmt/format.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wignored-qualifiers"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #include "header_only/fmtlog/fmtlog.h"
+#pragma GCC diagnostic pop
 
 namespace dectnrp::log {
 

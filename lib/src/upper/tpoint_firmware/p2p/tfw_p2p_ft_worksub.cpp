@@ -30,11 +30,13 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-std::optional<phy::maclow_phy_t> tfw_p2p_ft_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
+std::optional<phy::maclow_phy_t> tfw_p2p_ft_t::worksub_pcc_10(
+    [[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return std::nullopt;
 }
 
-phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) {
+phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_20(
+    [[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
 
@@ -71,11 +73,13 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
                            phy::maclow_phy_handle_t(phy::handle_pcc2pdc_t::th21, lrdid));
 }
 
-phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) {
+phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_10(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_20(const phy::phy_machigh_t& phy_machigh) {
+phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_20(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 

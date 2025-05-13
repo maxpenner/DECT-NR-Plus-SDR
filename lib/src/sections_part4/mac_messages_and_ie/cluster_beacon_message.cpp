@@ -48,7 +48,7 @@ void cluster_beacon_message_t::testing_set_random() {
     // dectnrp_assert(is_valid(), "mmie invalid");
 }
 
-bool cluster_beacon_message_t::testing_is_equal(const testing_t& rhs) const {
+bool cluster_beacon_message_t::testing_is_equal([[maybe_unused]] const testing_t& rhs) const {
     //
 
     return true;

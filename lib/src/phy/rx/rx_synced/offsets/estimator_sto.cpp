@@ -46,7 +46,7 @@ estimator_sto_t::estimator_sto_t(const uint32_t b_max)
 estimator_sto_t::~estimator_sto_t() { free(stage); }
 
 void estimator_sto_t::process_stf(const channel_antennas_t& channel_antennas,
-                                  const process_stf_meta_t& process_stf_meta) {
+                                  [[maybe_unused]] const process_stf_meta_t& process_stf_meta) {
     dectnrp_assert(phase_increment_rad == 0.0f, "must be 0.0f for STF");
 
     // go over each RX antenna

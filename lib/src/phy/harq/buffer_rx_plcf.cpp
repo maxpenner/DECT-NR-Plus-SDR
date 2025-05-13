@@ -57,7 +57,7 @@ void buffer_rx_plcf_t::reset_a_cnt_and_softbuffer() {
     srsran_softbuffer_rx_reset(&softbuffer_d_type_2);
 }
 
-void buffer_rx_plcf_t::reset_a_cnt_and_softbuffer(const uint32_t nof_cb) {
+void buffer_rx_plcf_t::reset_a_cnt_and_softbuffer([[maybe_unused]] const uint32_t nof_cb) {
     // we only have one code block
     a_cnt = 0;
     srsran_softbuffer_rx_reset_cb_crc(&softbuffer_d_type_1, 1);

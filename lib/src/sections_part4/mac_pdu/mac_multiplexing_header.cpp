@@ -158,7 +158,7 @@ void mac_multiplexing_header_t::pack(uint8_t* mac_pdu_offset) const {
     }
 }
 
-bool mac_multiplexing_header_t::unpack(const uint8_t* mac_pdu_offset) {
+bool mac_multiplexing_header_t::unpack([[maybe_unused]] const uint8_t* mac_pdu_offset) {
     dectnrp_assert_failure("unpack is split in two functions");
     return false;
 }

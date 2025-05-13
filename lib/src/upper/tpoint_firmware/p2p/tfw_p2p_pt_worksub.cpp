@@ -84,7 +84,8 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
         phy::maclow_phy_handle_t(phy::handle_pcc2pdc_t::th10, identity_ft.ShortRadioDeviceID));
 }
 
-phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) {
+phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_20(
+    [[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
 
@@ -153,7 +154,8 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     return machigh_phy;
 }
 
-phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_20(const phy::phy_machigh_t& phy_machigh) {
+phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_20(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
@@ -214,14 +216,14 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
 }
 
 void tfw_p2p_pt_t::worksub_mmie_cluster_beacon_message(
-    const phy::phy_machigh_t& phy_machigh,
-    const section4::cluster_beacon_message_t& cluster_beacon_message) {
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh,
+    [[maybe_unused]] const section4::cluster_beacon_message_t& cluster_beacon_message) {
     // ToDo
 }
 
 void tfw_p2p_pt_t::worksub_mmie_time_announce(
-    const phy::phy_machigh_t& phy_machigh,
-    const section4::extensions::time_announce_ie_t& time_announce_ie) {
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh,
+    [[maybe_unused]] const section4::extensions::time_announce_ie_t& time_announce_ie) {
 #ifdef TFW_P2P_EXPORT_PPX
     // is this the first time_announce_ie ever received?
     if (!ppx.has_ppx_rising_edge()) {

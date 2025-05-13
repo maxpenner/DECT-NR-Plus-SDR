@@ -81,7 +81,7 @@ uint32_t socket_client_t::write_try(const uint32_t conn_idx, const uint8_t* inp,
     return queue_vec.at(conn_idx)->write_try(inp, n);
 }
 
-bool socket_client_t::filter_egress_datagram(const uint32_t conn_idx) {
+bool socket_client_t::filter_egress_datagram([[maybe_unused]] const uint32_t conn_idx) {
     // nothing to here so far
 
     return true;

@@ -34,7 +34,7 @@ project(DECTNRP)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wno-gnu-zero-variadic-macro-arguments")
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 include(version)
@@ -71,14 +71,6 @@ option(ENABLE_LOG         "Enable logging into file"                  ON)
 
 if (ENABLE_WERROR)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
-  # Disable gcc's maybe uninitialized analysis as it raises false positives
-  if (CMAKE_COMPILER_IS_GNUCXX)
-    include(CheckCXXCompilerFlag)
-    check_cxx_compiler_flag("-Wmaybe-uninitialized" HAS_MAYBE_UNINITIALIZED)
-    if (HAS_MAYBE_UNINITIALIZED)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=maybe-uninitialized")
-    endif()
-  endif()
 endif ()
 
 if (ENABLE_ASAN AND ENABLE_TSAN)

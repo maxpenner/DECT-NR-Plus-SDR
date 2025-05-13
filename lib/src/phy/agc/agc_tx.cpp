@@ -54,7 +54,7 @@ void agc_tx_t::set_power_ant_0dBFS_pending(const float power_ant_0dBFS_pending_,
     }
 }
 
-const float agc_tx_t::get_power_ant_0dBFS(const int64_t now_64) const {
+float agc_tx_t::get_power_ant_0dBFS(const int64_t now_64) const {
     // do we have a pending value?
     if (0 <= power_ant_0dBFS_pending_time_64) {
         // have we reached the time of the pending gain change?

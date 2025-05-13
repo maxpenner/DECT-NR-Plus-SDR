@@ -61,9 +61,9 @@ class random_access_resource_ie_t final : public mmie_packing_peeking_t, public 
         };
 
         struct repeat_info_t {
-                resource_allocation_ie_t::repeat_type_t repeat_type;
-                uint32_t repetition;
-                uint32_t validity;
+                resource_allocation_ie_t::repeat_type_t repeat_type{};
+                uint32_t repetition{};
+                uint32_t validity{};
         };
 
         random_access_resource_ie_t();

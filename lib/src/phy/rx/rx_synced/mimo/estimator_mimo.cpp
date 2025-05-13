@@ -68,8 +68,8 @@ estimator_mimo_t::~estimator_mimo_t() {
     }
 }
 
-void estimator_mimo_t::process_stf(const channel_antennas_t& channel_antennas,
-                                   const process_stf_meta_t& process_stf_meta) {
+void estimator_mimo_t::process_stf([[maybe_unused]] const channel_antennas_t& channel_antennas,
+                                   [[maybe_unused]] const process_stf_meta_t& process_stf_meta) {
     /* The STF uses only transmit stream 0, thus we can't estimate the complete channel estimate if
      * more than one transmit stream is used.
      */
