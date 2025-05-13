@@ -128,7 +128,8 @@ void tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
     A_reset_result_counter_for_next_snr();
 }
 
-phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
+phy::machigh_phy_t tfw_loopback_t::work_regular(
+    [[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
     // get current time
     const int64_t now_64 = buffer_rx.get_rx_time_passed();
 
@@ -230,11 +231,13 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(const phy::phy_mac_reg_t& phy_ma
     return machigh_phy;
 }
 
-phy::machigh_phy_t tfw_loopback_t::work_upper(const upper::upper_report_t& upper_report) {
+phy::machigh_phy_t tfw_loopback_t::work_upper(
+    [[maybe_unused]] const upper::upper_report_t& upper_report) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t tfw_loopback_t::work_chscan_async(const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_loopback_t::work_chscan_async(
+    [[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

@@ -140,7 +140,7 @@ void hw_simulator_t::initialize_buffer_rx(const uint32_t ant_streams_length_samp
                                               hw_config.rx_notification_period_us);
 }
 
-void hw_simulator_t::set_command_time(const int64_t set_time) {
+void hw_simulator_t::set_command_time([[maybe_unused]] const int64_t set_time) {
     // timed commands are not implemented for the simulator
 }
 

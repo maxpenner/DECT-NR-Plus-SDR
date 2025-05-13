@@ -35,7 +35,7 @@
 
 // ctrl+c
 static std::atomic<bool> ctrl_c_pressed{false};
-static void signal_handler(int signo) { ctrl_c_pressed.store(true); }
+static void signal_handler([[maybe_unused]] int signo) { ctrl_c_pressed.store(true); }
 
 // threading
 static pthread_t udp_thread;
@@ -48,7 +48,7 @@ static int64_t slowdown_factor_64{};
 static int64_t offset_sec_64{};
 static int64_t timeadvance_us_64{};
 
-static void* udp_thread_routine(void* ptr) {
+static void* udp_thread_routine([[maybe_unused]] void* ptr) {
     // create vector next times of each stream
     std::vector<int64_t> next_vec(streams.size());
 

@@ -67,7 +67,8 @@ int64_t stream_t::get_next_us() {
     return ret;
 }
 
-void stream_t::generate_payload(uint8_t* payload, const std::size_t payload_size_byte) {
+void stream_t::generate_payload([[maybe_unused]] uint8_t* payload,
+                                [[maybe_unused]] const std::size_t payload_size_byte) {
     // ToDo
 
     ++stats.tx;

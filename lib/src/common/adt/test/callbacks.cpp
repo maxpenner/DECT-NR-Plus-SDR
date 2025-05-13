@@ -32,16 +32,19 @@ class argument_t {
 
 class dummy_t {
     public:
-        void cb0(const int64_t now_64, const size_t idx, int64_t& next_64, int64_t& period_64) {
+        void cb0([[maybe_unused]] const int64_t now_64,
+                 [[maybe_unused]] const size_t idx,
+                 [[maybe_unused]] int64_t& next_64,
+                 [[maybe_unused]] int64_t& period_64) {
             ++cnt;
         };
 
-        void cb1(const int64_t now_64) { ++cnt; };
+        void cb1([[maybe_unused]] const int64_t now_64) { ++cnt; };
 
-        void cb2(const int64_t now_64,
-                 const size_t idx,
-                 int64_t& next_64,
-                 int64_t& period_64,
+        void cb2([[maybe_unused]] const int64_t now_64,
+                 [[maybe_unused]] const size_t idx,
+                 [[maybe_unused]] int64_t& next_64,
+                 [[maybe_unused]] int64_t& period_64,
                  argument_t& argument) {
             ++cnt;
             argument.d += 10;
@@ -53,7 +56,7 @@ class dummy_t {
 static argument_t argument;
 static dummy_t d0, d1, d2;
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     common::adt::callbacks_t<void> callbacks0;
     common::adt::callbacks_t<void, argument_t&> callbacks1;
 

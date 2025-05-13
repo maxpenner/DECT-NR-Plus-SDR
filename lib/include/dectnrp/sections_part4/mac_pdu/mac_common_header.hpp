@@ -96,8 +96,10 @@ class mch_empty_t final : public mac_common_header_t {
         virtual void zero() override final {};
         virtual bool is_valid() const override final { return true; };
         virtual uint32_t get_packed_size() const override final { return 0; };
-        virtual void pack(uint8_t* mch_front) const override final {};
-        virtual bool unpack(const uint8_t* mch_front) override final { return true; };
+        virtual void pack([[maybe_unused]] uint8_t* mch_front) const override final {};
+        virtual bool unpack([[maybe_unused]] const uint8_t* mch_front) override final {
+            return true;
+        };
 };
 
 }  // namespace dectnrp::section4

@@ -60,7 +60,7 @@ class buffer_tx_pool_t {
         const uint32_t nof_buffer_tx;
         const uint32_t ant_streams_length_samples;
 
-        HW_FRIENDS;
+        HW_FRIENDS
 
     private:
         std::vector<std::unique_ptr<buffer_tx_t>> buffer_tx_vec;

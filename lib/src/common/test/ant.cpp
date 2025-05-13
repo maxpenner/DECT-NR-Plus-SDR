@@ -24,7 +24,7 @@
 
 using namespace dectnrp;
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     common::ant_t ant0(1);
 
     if (ant0.get_nof_antennas() != 1) {

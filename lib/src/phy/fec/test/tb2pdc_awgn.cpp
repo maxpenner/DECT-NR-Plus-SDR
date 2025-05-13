@@ -382,7 +382,7 @@ int run_test(std::string radio_device_class_string, const uint32_t packet_length
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     std::srand(time(NULL));
 
     uint32_t packet_length_in_slots = 1;

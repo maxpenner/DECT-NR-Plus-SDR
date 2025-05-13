@@ -120,7 +120,7 @@ int test1() {
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     if (test0() != EXIT_SUCCESS) {
         return EXIT_FAILURE;
     }

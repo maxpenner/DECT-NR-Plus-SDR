@@ -46,7 +46,7 @@ estimator_snr_t::estimator_snr_t(const uint32_t b_max)
 estimator_snr_t::~estimator_snr_t() { free(subtraction_stage); }
 
 void estimator_snr_t::process_stf(const channel_antennas_t& channel_antennas,
-                                  const process_stf_meta_t& process_stf_meta) {
+                                  [[maybe_unused]] const process_stf_meta_t& process_stf_meta) {
     dectnrp_assert(snr_acc.S_plus_N_cnt == 0, "no reset");
     dectnrp_assert(snr_acc.N_cnt == 0, "no reset");
 

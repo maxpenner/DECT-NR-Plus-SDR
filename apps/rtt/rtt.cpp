@@ -50,7 +50,7 @@
 
 // ctrl+c
 static std::atomic<bool> ctrl_c_pressed{false};
-static void signal_handler(int signo) { ctrl_c_pressed.store(true); }
+static void signal_handler([[maybe_unused]] int signo) { ctrl_c_pressed.store(true); }
 
 // threading
 static pthread_t udp_thread;
@@ -183,9 +183,7 @@ static void analyze_total_time_and_rate(const std::vector<int64_t>& elapsed_ns,
                       static_cast<double>(rtt_fail) / static_cast<double>(elapsed_ns.size()));
 }
 
-static void analyze_min_max_mean(const std::string identifier,
-                                 std::vector<int64_t> elapsed_ns,
-                                 const int64_t elapsed_total_ns) {
+static void analyze_min_max_mean(const std::string identifier, std::vector<int64_t> elapsed_ns) {
     dectnrp_assert(elapsed_ns.size() == RTT_MEASUREMENTS_PER_PRINT,
                    "incorrect number of measurements");
 
@@ -250,7 +248,7 @@ static void save_as_json(const std::string identifier,
     dectnrp::common::json_export_t::write_to_disk(j_packet_data, filename.str());
 }
 
-static void* udp_thread_routine(void* ptr) {
+static void* udp_thread_routine([[maybe_unused]] void* ptr) {
     const size_t sdr_packet_length = probe_sdr_packet_length();
 
     if (sdr_packet_length == 0) {
@@ -312,8 +310,8 @@ static void* udp_thread_routine(void* ptr) {
 
         // analyse measurement and show results
         analyze_total_time_and_rate(elapsed_mac2mac_ns, elapsed_total_ns);
-        analyze_min_max_mean("mac2mac", elapsed_mac2mac_ns, elapsed_total_ns);
-        analyze_min_max_mean("rtt2rtt", elapsed_rtt2rtt_ns, elapsed_total_ns);
+        analyze_min_max_mean("mac2mac", elapsed_mac2mac_ns);
+        analyze_min_max_mean("rtt2rtt", elapsed_rtt2rtt_ns);
         save_as_json("mac2mac", elapsed_mac2mac_ns, elapsed_total_ns);
         save_as_json("rtt2rtt", elapsed_rtt2rtt_ns, elapsed_total_ns);
 
@@ -327,7 +325,7 @@ static void* udp_thread_routine(void* ptr) {
     return nullptr;
 }
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     dectnrp_assert(TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE <= TFW_RTT_TX_LENGTH_MAXIMUM_BYTE,
                    "verification length must be smaller than transmission length");
 

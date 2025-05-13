@@ -60,7 +60,7 @@ class agc_tx_t final : public agc_t {
          * \param now_64
          * \return
          */
-        const float get_power_ant_0dBFS(const int64_t now_64) const;
+        float get_power_ant_0dBFS(const int64_t now_64) const;
 
         /**
          * \brief TX gain change required to achieve rx_dBm_target at the opposite site.

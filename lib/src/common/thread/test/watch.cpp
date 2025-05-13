@@ -24,7 +24,7 @@
 
 using namespace dectnrp;
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     common::watch_t watch;
 
     const auto A = watch.get_elapsed_since_epoch<int64_t, common::seconds, common::system_clock>();

@@ -24,7 +24,8 @@
 
 namespace dectnrp::phy {
 
-estimator_aoa_t::estimator_aoa_t(const uint32_t b_max, const uint32_t N_RX_)
+estimator_aoa_t::estimator_aoa_t([[maybe_unused]] const uint32_t b_max,
+                                 [[maybe_unused]] const uint32_t N_RX_)
     : estimator_t(),
       N_RX(N_RX_) {
     (void)N_RX;
@@ -32,11 +33,11 @@ estimator_aoa_t::estimator_aoa_t(const uint32_t b_max, const uint32_t N_RX_)
 
 estimator_aoa_t::~estimator_aoa_t() {}
 
-void estimator_aoa_t::process_stf(const channel_antennas_t& channel_antennas,
-                                  const process_stf_meta_t& process_stf_meta) {}
+void estimator_aoa_t::process_stf([[maybe_unused]] const channel_antennas_t& channel_antennas,
+                                  [[maybe_unused]] const process_stf_meta_t& process_stf_meta) {}
 
-void estimator_aoa_t::process_drs(const channel_antennas_t& channel_antennas,
-                                  const process_drs_meta_t& process_drs_meta) {}
+void estimator_aoa_t::process_drs([[maybe_unused]] const channel_antennas_t& channel_antennas,
+                                  [[maybe_unused]] const process_drs_meta_t& process_drs_meta) {}
 
 void estimator_aoa_t::reset_internal() {}
 

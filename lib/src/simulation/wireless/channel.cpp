@@ -53,7 +53,6 @@ bool channel_t::check_args(const vspptx_t& vspptx, const vspprx_t& vspprx) const
 float channel_t::get_large_scale_via_pathloss(const vspptx_t& vspptx,
                                               const vspprx_t& vspprx,
                                               const vspptx_t& vspptx_other,
-                                              const size_t tx_idx,
                                               const size_t rx_idx) {
     // there are two ways to define large scale fading
     float large_scale_fading_dB = 0.0f;

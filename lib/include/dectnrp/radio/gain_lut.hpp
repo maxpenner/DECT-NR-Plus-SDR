@@ -41,7 +41,7 @@ class gain_lut_t {
         [[nodiscard]] achievable_power_gain_t get_achievable_power_gain_rx(const float power_dBm,
                                                                            const float freq_Hz);
 
-        HW_FRIENDS;
+        HW_FRIENDS
 
     private:
         /// TX and RX use the same frequencies, must be strictly ascending and at least two values

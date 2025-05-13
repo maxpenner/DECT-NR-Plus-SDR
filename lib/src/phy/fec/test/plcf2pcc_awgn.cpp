@@ -36,7 +36,7 @@
 
 #define N_REPETITIONS 1000
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     std::srand(time(NULL));
 
     // define our radio device

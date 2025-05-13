@@ -132,7 +132,7 @@ static int test_valid() {
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     if (test_t0() == EXIT_FAILURE) {
         return EXIT_FAILURE;
     }

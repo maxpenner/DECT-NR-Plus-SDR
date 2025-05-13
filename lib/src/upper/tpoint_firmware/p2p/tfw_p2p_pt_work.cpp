@@ -39,14 +39,16 @@ void tfw_p2p_pt_t::work_start_imminent(const int64_t start_time_64) {
                                                  worksub_callback_log_period_sec));
 }
 
-phy::machigh_phy_t tfw_p2p_pt_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
+phy::machigh_phy_t tfw_p2p_pt_t::work_regular(
+    [[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
     // update time of callbacks
     callbacks.run(buffer_rx.get_rx_time_passed());
 
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_p2p_pt_t::work_upper(const upper::upper_report_t& upper_report) {
+phy::machigh_phy_t tfw_p2p_pt_t::work_upper(
+    [[maybe_unused]] const upper::upper_report_t& upper_report) {
     phy::machigh_phy_t machigh_phy;
 
     worksub_tx_unicast_consecutive(machigh_phy);
@@ -54,7 +56,8 @@ phy::machigh_phy_t tfw_p2p_pt_t::work_upper(const upper::upper_report_t& upper_r
     return machigh_phy;
 }
 
-phy::machigh_phy_tx_t tfw_p2p_pt_t::work_chscan_async(const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_p2p_pt_t::work_chscan_async(
+    [[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

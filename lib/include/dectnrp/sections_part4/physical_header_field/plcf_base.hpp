@@ -52,7 +52,7 @@ class plcf_base_t : public common::serdes::packing_t {
             requires std::is_signed_v<T>
         T get_TransmitPower_dBm() const {
             return static_cast<T>(tx_power_table.at(TransmitPower));
-        };
+        }
 
         virtual uint32_t get_Type() const = 0;
         virtual uint32_t get_HeaderFormat() const = 0;

@@ -106,7 +106,7 @@ ssize_t vnic_server_t::read_datagram(const uint32_t conn_idx) {
     return read(pfds[conn_idx].fd, buffer_local, sizeof(buffer_local));
 }
 
-bool vnic_server_t::filter_ingress_datagram(const uint32_t conn_idx) {
+bool vnic_server_t::filter_ingress_datagram([[maybe_unused]] const uint32_t conn_idx) {
 #ifdef APPLICATION_VNIC_VNIC_SERVER_ONLY_FORWARD_IPV4
     if (get_ip_version(buffer_local) != 4) {
         return false;

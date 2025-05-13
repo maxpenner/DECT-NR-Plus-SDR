@@ -236,7 +236,7 @@ static int test_property_multi() {
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char** argv) {
+int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     if (test_bimap() == EXIT_FAILURE) {
         dectnrp_print_wrn("Test failed");
         return EXIT_FAILURE;

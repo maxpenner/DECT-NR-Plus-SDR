@@ -69,7 +69,7 @@ void channel_doubly_t::superimpose(const vspptx_t& vspptx,
         for (uint32_t rx_idx = 0; rx_idx < vspprx.nof_antennas; ++rx_idx) {
             // large scale also includes RX sensitivity
             const float large_scale =
-                get_large_scale_via_pathloss(vspptx, vspprx, vspptx_other, tx_idx, rx_idx);
+                get_large_scale_via_pathloss(vspptx, vspprx, vspptx_other, rx_idx);
 
             // apply large scale fading
             srsran_vec_sc_prod_cfc(

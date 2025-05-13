@@ -194,9 +194,8 @@ W_t::W_t() {
 }
 
 uint32_t W_t::clamp_W(const uint32_t N_TS, const uint32_t N_TX, const uint32_t codebook_idx) {
-    return std::min(
-        codebook_idx,
-        static_cast<decltype(codebook_idx)>(N_TS_N_TX_codebook_index_max.at(N_TS).at(N_TX)));
+    return std::min(codebook_idx,
+                    static_cast<uint32_t>(N_TS_N_TX_codebook_index_max.at(N_TS).at(N_TX)));
 }
 
 uint32_t W_t::clamp_W(const tmmode::tm_mode_t& tm_mode, const uint32_t codebook_idx) {

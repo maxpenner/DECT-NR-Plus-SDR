@@ -85,7 +85,7 @@ class buffer_rx_t {
         const uint32_t ant_streams_length_samples;  // buffer length an external observer can read
         const uint32_t samp_rate;                   // Samples/Second
 
-        HW_FRIENDS;
+        HW_FRIENDS
 
     private:
         void set_zero();

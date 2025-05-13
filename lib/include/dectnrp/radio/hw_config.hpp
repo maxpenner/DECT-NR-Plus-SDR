@@ -33,37 +33,37 @@ struct hw_config_t {
         static const std::string json_log_key_simulation;
 
         /// every hardware has a unique ID starting at 0
-        uint32_t id;
+        uint32_t id{};
 
         /// simulator, USRP
-        std::string hw_name;
+        std::string hw_name{};
 
         /// TX buffers that can be assigned to PHY threads, typical value is 16
-        uint32_t nof_buffer_tx;
+        uint32_t nof_buffer_tx{};
 
         /// hardware + driver properties, B210 2ms, N- and X-series as low as 100us
-        uint32_t turnaround_time_us;
+        uint32_t turnaround_time_us{};
 
         /**
          * \brief The radio layer can send zeros before transmitting a packet to mitigate effects of
          * transient responses at burst starts. If set to 0, no zeros are prepended. Given in
          * microseconds. A typical value is 5.
          */
-        uint32_t tx_burst_leading_zero_us;
+        uint32_t tx_burst_leading_zero_us{};
 
         /**
          * \brief The radio layer can send packets slightly earlier to compensate delays in the
          * radio hardware. The exact amount of time advance samples depends on the radio hardware
          * and its settings such as sample rate, filter stages etc.
          */
-        uint32_t tx_time_advance_samples;
+        uint32_t tx_time_advance_samples{};
 
         /**
          * \brief Immediately after the SDR has started, the radio layer can prestream for some
          * time instead of passing samples directly to PHY. This can help to avoid initial underruns
          * or overflows. Given in milliseconds, typical values are 1000ms to 2000ms.
          */
-        uint32_t rx_prestream_ms;
+        uint32_t rx_prestream_ms{};
 
         /**
          * \brief The RX thread is provided IQ samples by the radio hardware in very small chunks.
@@ -72,11 +72,11 @@ struct hw_config_t {
          * in microseconds. If set to 0, the PHY threads are notified at the maximum rate possible
          * which minimizes latency at the cost of higher CPU usage.
          */
-        uint32_t rx_notification_period_us;
+        uint32_t rx_notification_period_us{};
 
         /// cpu core and priority for TX/RX threads
-        common::threads_core_prio_config_t tx_thread_config;
-        common::threads_core_prio_config_t rx_thread_config;
+        common::threads_core_prio_config_t tx_thread_config{};
+        common::threads_core_prio_config_t rx_thread_config{};
 
         /**
          * \brief Before streaming samples, the radio device's internal clock can be synchronized to
@@ -85,20 +85,20 @@ struct hw_config_t {
         enum class pps_time_base_t {
             zero,
             TAI,
-        } pps_time_base;
+        } pps_time_base{};
 
         // ##################################################
         // simulator specifics
 
         /// clip TX and RX signals and quantize with bit width of hw_simulator_t
-        bool simulator_clip_and_quantize;
+        bool simulator_clip_and_quantize{};
 
         // ##################################################
         // USRP specifics
 
         /// USRP arguments must be specific enough to identify exactly one USRP
-        std::string uspr_args;
-        common::threads_core_prio_config_t usrp_tx_async_helper_thread_config;
+        std::string uspr_args{};
+        common::threads_core_prio_config_t usrp_tx_async_helper_thread_config{};
 
         // ##################################################
         // simulation specifics

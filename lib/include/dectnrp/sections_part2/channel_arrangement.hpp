@@ -26,28 +26,28 @@
 namespace dectnrp::section2 {
 
 struct absolute_channel_frequency_numbering_t {
-        uint32_t band_number;
-        uint32_t n_min;
-        uint32_t n_max;
+        uint32_t band_number{};
+        uint32_t n_min{};
+        uint32_t n_max{};
 
         /**
          * \brief"The actual operating channel raster (channel grid) and RF bandwidth restriction in
          * each band may vary depending on relevant regulatory requirements."
          */
-        uint32_t n_spacing;
+        uint32_t n_spacing{};
 };
 
 struct center_frequency_t {
-        absolute_channel_frequency_numbering_t acfn;
-        uint32_t n;
+        absolute_channel_frequency_numbering_t acfn{};
+        uint32_t n{};
 
-        int64_t F0_i;
-        int64_t channel_spacing_i;
-        int64_t FC_i;
+        int64_t F0_i{};
+        int64_t channel_spacing_i{};
+        int64_t FC_i{};
 
-        double F0;
-        double channel_spacing;
-        double FC;
+        double F0{};
+        double channel_spacing{};
+        double FC{};
 };
 
 constexpr uint32_t operating_channel_change_time_requirement_us{200};

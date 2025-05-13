@@ -310,6 +310,7 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
             case MAC_PDU_DONE:
                 {
                     dectnrp_assert_failure("decoding despite MAC PDU being done");
+                    break;
                 }
 
             case MAC_PDU_PREMATURE_ABORT:

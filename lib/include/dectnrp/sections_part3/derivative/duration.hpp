@@ -54,12 +54,12 @@ class duration_t {
         template <std::integral T = uint32_t>
         T get_samp_rate() const {
             return static_cast<T>(samp_rate);
-        };
+        }
 
         template <std::integral T = uint32_t>
         T get_N_samples() const {
             return static_cast<T>(N_samples);
-        };
+        }
 
     private:
         uint32_t samp_rate{};
