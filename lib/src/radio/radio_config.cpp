@@ -80,7 +80,20 @@ radio_config_t::radio_config_t(const std::string directory)
             if (hw_config.hw_name == "simulator") {
                 hw_config.simulator_clip_and_quantize =
                     common::jsonparse::read_bool(it, "simulator_clip_and_quantize");
-            } else if (hw_config.hw_name == "usrp") {
+            }
+#ifdef ENABLE_SOAPYSDR
+            else if (hw_config.hw_name == "soapysdr") {
+                hw_config.soapysdr_args = common::jsonparse::read_string(it, "soapysdr_args");
+                const auto soapysdr_tx_async_helper_thread_config_array =
+                    common::jsonparse::read_int_array(
+                        it, "soapysdr_tx_async_helper_thread_config", 2, 2, 2);
+                hw_config.soapysdr_tx_async_helper_thread_config.prio_offset =
+                    soapysdr_tx_async_helper_thread_config_array[0];
+                hw_config.soapysdr_tx_async_helper_thread_config.cpu_core =
+                    soapysdr_tx_async_helper_thread_config_array[1];
+            }
+#endif
+            else if (hw_config.hw_name == "usrp") {
                 hw_config.usrp_args = common::jsonparse::read_string(it, "usrp_args");
                 const auto usrp_tx_async_helper_thread_config_array =
                     common::jsonparse::read_int_array(

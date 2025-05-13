@@ -19,7 +19,17 @@
 #
 
 add_library(dectnrp_radio STATIC)
-target_link_libraries(dectnrp_radio dectnrp_common dectnrp_simulation srsran_phy ${UHD_LIBRARIES})
+
+if (ENABLE_SOAPYSDR)
+    target_link_libraries(dectnrp_radio dectnrp_common dectnrp_simulation srsran_phy ${UHD_LIBRARIES} SoapySDR)
+else()
+    target_link_libraries(dectnrp_radio dectnrp_common dectnrp_simulation srsran_phy ${UHD_LIBRARIES})
+endif()
 
 file(GLOB DECTNRP_RADIO_SOURCES "*.cpp")
+
+if (NOT ENABLE_SOAPYSDR)
+    list(REMOVE_ITEM DECTNRP_RADIO_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/hw_soapy.cpp)
+endif()
+
 target_sources(dectnrp_radio PRIVATE ${DECTNRP_RADIO_SOURCES})

@@ -25,6 +25,10 @@
 #include "dectnrp/radio/hw_simulator.hpp"
 #include "dectnrp/radio/hw_usrp.hpp"
 
+#ifdef ENABLE_SOAPYSDR
+#include "dectnrp/radio/hw_soapy.hpp"
+#endif
+
 namespace dectnrp::radio {
 
 radio_t::radio_t(const radio_config_t& radio_config_)
@@ -43,6 +47,10 @@ radio_t::radio_t(const radio_config_t& radio_config_)
 
         if (hw_config.hw_name == hw_simulator_t::name) {
             layer_unit_vec.push_back(std::make_unique<hw_simulator_t>(hw_config, *vspace.get()));
+#ifdef ENABLE_SOAPYSDR
+        } else if (hw_config.hw_name == hw_soapy_t::name) {
+            layer_unit_vec.push_back(std::make_unique<hw_soapy_t>(hw_config));
+#endif
         } else if (hw_config.hw_name == hw_usrp_t::name) {
             layer_unit_vec.push_back(std::make_unique<hw_usrp_t>(hw_config));
         } else {

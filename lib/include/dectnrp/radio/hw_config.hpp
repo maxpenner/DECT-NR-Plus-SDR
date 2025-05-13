@@ -100,6 +100,15 @@ struct hw_config_t {
         std::string usrp_args{};
         common::threads_core_prio_config_t usrp_tx_async_helper_thread_config{};
 
+#ifdef ENABLE_SOAPYSDR
+        // ##################################################
+        // SoapySDR specifics
+
+        /// arguments must be specific enough to identify exactly one device
+        std::string soapysdr_args{};
+        common::threads_core_prio_config_t soapysdr_tx_async_helper_thread_config{};
+#endif
+
         // ##################################################
         // simulation specifics
 

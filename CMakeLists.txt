@@ -68,6 +68,7 @@ option(AUTO_DETECT_ISA    "Autodetect supported ISA extensions"       ON)
 option(BUILD_STATIC       "Attempt to statically link external deps"  OFF)
 option(ENABLE_ASSERT      "Enable asserts"                            ON)
 option(ENABLE_LOG         "Enable logging into file"                  ON)
+option(ENABLE_SOAPYSDR    "Enable SoapySDR hardware driver"           OFF)
 
 if (ENABLE_WERROR)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
@@ -87,6 +88,10 @@ endif()
 
 if (ENABLE_LOG)
   add_definitions(-DENABLE_LOG)
+endif()
+
+if (ENABLE_SOAPYSDR)
+  add_definitions(-DENABLE_SOAPYSDR)
 endif()
 
 ########################################################################
@@ -198,6 +203,11 @@ endif()
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 set(EIGEN3_DIR /usr/include/eigen3)
 include_directories(${EIGEN3_DIR})
+
+# SoapySDR
+if (ENABLE_SOAPYSDR)
+  find_package(SoapySDR REQUIRED)
+endif()
 
 ########################################################################
 # Instruction Set Architecture setup

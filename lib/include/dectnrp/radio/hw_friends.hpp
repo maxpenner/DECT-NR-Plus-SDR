@@ -22,4 +22,5 @@
 
 #define HW_FRIENDS               \
     friend class hw_simulator_t; \
+    friend class hw_soapy_t;     \
     friend class hw_usrp_t;
