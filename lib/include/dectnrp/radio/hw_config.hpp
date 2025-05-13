@@ -97,7 +97,7 @@ struct hw_config_t {
         // USRP specifics
 
         /// USRP arguments must be specific enough to identify exactly one USRP
-        std::string uspr_args{};
+        std::string usrp_args{};
         common::threads_core_prio_config_t usrp_tx_async_helper_thread_config{};
 
         // ##################################################
