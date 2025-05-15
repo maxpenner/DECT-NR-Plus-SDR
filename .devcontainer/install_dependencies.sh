@@ -31,14 +31,34 @@ echo "All dependencies build from source will be downloaded into the current dir
 echo "    $cwd"
 echo "" 
 
-###############################################
-# running with sudo or as root?
-###############################################
+usage() {
+    echo "Usage: $0 [-j <number of threads>]"
+    exit 1;
+}
+
+n_threads=$(nproc)
+while getopts "j:" opt; do
+    case $opt in
+        j)
+            n_threads=$OPTARG;
+            if [[ ! $n_threads -gt 0 ]]; then
+                usage
+            fi
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
 
 error_handler () {
    echo "Error: $1 Exiting."
    exit -1
 }
+
+###############################################
+# running with sudo or as root?
+###############################################
 
 # https://serverfault.com/questions/37829
 if [[ $(/usr/bin/id -u) -ne 0 ]]; then
@@ -86,7 +106,7 @@ cd uhd/host
 mkdir build
 cd build
 cmake ..
-make -j
+make -j $n_threads
 make install
 
 ldconfig
@@ -113,7 +133,7 @@ cd build
 # With gcc 12 or higher, there are false alarms warnings of type Warray-bounds.
 # To allow compilation with gcc 12 or higher, Werror is disabled. 
 cmake -DENABLE_WERROR=OFF ../
-make -j
+make -j $n_threads
 make install
 
 ldconfig
@@ -136,7 +156,7 @@ cd volk
 mkdir build
 cd build
 cmake ..
-make -j
+make -j $n_threads
 make install
 
 ldconfig
