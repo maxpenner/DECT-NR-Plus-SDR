@@ -84,8 +84,13 @@ tx_rx_t::tx_rx_t(const section3::packet_sizes_t maximum_packet_sizes_,
                        fft_sizes_all.end(),
                    "unknown FFT size");
 
-    ofdm_vec.resize(std::find(fft_sizes_all.begin(), fft_sizes_all.end(), fft_size_max_required) -
-                    fft_sizes_all.begin());
+    const auto N_fft_sizes_required =
+        std::find(fft_sizes_all.begin(), fft_sizes_all.end(), fft_size_max_required) -
+        fft_sizes_all.begin() + 1;
+
+    ofdm_vec.resize(N_fft_sizes_required);
+
+    dectnrp_assert(ofdm_vec.size() > 0, "no FFT size defined");
 
     // always init every fft size
     for (uint32_t i = 0; i < ofdm_vec.size(); ++i) {
