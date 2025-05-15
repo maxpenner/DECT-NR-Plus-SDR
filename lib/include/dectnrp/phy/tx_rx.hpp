@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -65,8 +66,8 @@ class tx_rx_t {
                          const resampler_param_t resampler_param_);
 
         /// enough for 221.184MHz with oversampling=2, since 221.184Mhz*2/27kHz = 16384
-        static constexpr uint32_t N_fft_sizes{14};
-        static constexpr std::array<uint32_t, N_fft_sizes> fft_sizes{
+        static constexpr uint32_t N_fft_sizes_all{14};
+        static constexpr std::array<uint32_t, N_fft_sizes_all> fft_sizes_all{
             64, 128, 256, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 12288, 16384};
 
         // ##################################################
@@ -93,7 +94,7 @@ class tx_rx_t {
         /// We offer multiple different IFFT sizes. This way we can oversample every possible signal
         /// bandwidth and subcarrier spacing to dect_samp_rate_oversampled_max. A suitable IFFT size
         /// is picked for every packet.
-        std::array<dft::ofdm_t, N_fft_sizes> ofdm_array;
+        std::vector<dft::ofdm_t> ofdm_vec;
 
         /// will have a size of 196/2 = 98 complex symbols
         cf_t* pcc_qpsk_symbols;
@@ -107,7 +108,7 @@ class tx_rx_t {
         // TX/RX variables updated for every new packet
 
         uint32_t N_b_DFT_os;
-        uint32_t ofdm_array_idx_effective;
+        uint32_t ofdm_vec_idx_effective;
         uint32_t N_b_DFT;
         uint32_t N_b_OCC;
         uint32_t N_b_OCC_plus_DC;
@@ -132,7 +133,7 @@ class tx_rx_t {
         // ##################################################
         // TX/RX functions
 
-        void set_ofdm_array_idx_effective(const uint32_t N_b_DFT_os_);
+        void set_ofdm_vec_idx_effective(const uint32_t N_b_DFT_os_);
 
         void set_N_subc_offset_lower_half_os(const uint32_t N_b_DFT_os_,
                                              const uint32_t N_b_DFT_,

@@ -67,12 +67,17 @@ tx_t::tx_t(const section3::packet_sizes_t maximum_packet_sizes_,
     }
 
 #ifdef PHY_TX_OFDM_WINDOWING
-    for (uint32_t i = 0; i < fft_sizes.size(); ++i) {
-        dectnrp_assert(fft_sizes[i] % constants::N_b_DFT_to_N_b_CP == 0,
+    dectnrp_assert(ofdm_vec.size() > 0, "no FFT size defined");
+
+    windowing_vec.resize(ofdm_vec.size());
+
+    for (uint32_t i = 0; i < windowing_vec.size(); ++i) {
+        dectnrp_assert(fft_sizes_all[i] % constants::N_b_DFT_to_N_b_CP == 0,
                        "FFT size not a multiple of 8");
 
-        dft::get_windowing(
-            windowing_array[i], fft_sizes[i] / constants::N_b_DFT_to_N_b_CP, PHY_TX_OFDM_WINDOWING);
+        dft::get_windowing(windowing_vec[i],
+                           fft_sizes_all[i] / constants::N_b_DFT_to_N_b_CP,
+                           PHY_TX_OFDM_WINDOWING);
     }
 #endif
 
@@ -140,7 +145,7 @@ tx_t::~tx_t() {
     }
 
 #ifdef PHY_TX_OFDM_WINDOWING
-    for (auto& elem : windowing_array) {
+    for (auto& elem : windowing_vec) {
         dft::free_windowing(elem);
     }
 #endif
@@ -438,7 +443,7 @@ void tx_t::run_packet_dimensions() {
     N_b_DFT_os = dect_samp_rate_oversampled_max / packet_sizes->numerology.delta_u_f;
 
     // set IFFT size
-    set_ofdm_array_idx_effective(N_b_DFT_os);
+    set_ofdm_vec_idx_effective(N_b_DFT_os);
 
     dectnrp_assert(packet_sizes->psdef.b <= maximum_packet_sizes.psdef.b, "Beta too large");
 
@@ -873,7 +878,7 @@ void tx_t::run_ifft_cp_scale(const uint32_t N_samples_in_CP_os, float scale) {
 
     // transform antenna stream into time domain and add cyclic prefix
     for (uint32_t i = 0; i < tm_mode.N_TX; ++i) {
-        dft::single_symbol_tx_ofdm_zero_copy(ofdm_array[ofdm_array_idx_effective],
+        dft::single_symbol_tx_ofdm_zero_copy(ofdm_vec[ofdm_vec_idx_effective],
                                              antenna_mapper_stage[i],
                                              ifft_cp_stage[i],
                                              N_samples_in_CP_os);
@@ -888,23 +893,23 @@ void tx_t::run_ifft_cp_scale(const uint32_t N_samples_in_CP_os, float scale) {
             volk_32fc_32f_multiply_32fc(
                 (lv_32fc_t*)ifft_cp_stage[i],
                 (const lv_32fc_t*)ifft_cp_stage[i],
-                (const float*)windowing_array[ofdm_array_idx_effective].raised_cosine,
-                windowing_array[ofdm_array_idx_effective].length);
+                (const float*)windowing_vec[ofdm_vec_idx_effective].raised_cosine,
+                windowing_vec[ofdm_vec_idx_effective].length);
 
             // overlap falling edge of former OFDM symbol and overlap with cylic prefix
             volk_32fc_x2_add_32fc(
                 (lv_32fc_t*)ifft_cp_stage[i],
                 (const lv_32fc_t*)ifft_cp_stage[i],
                 (const lv_32fc_t*)&ifft_cp_stage[i][N_samples_in_CP_os + N_b_DFT_os],
-                windowing_array[ofdm_array_idx_effective].length);
+                windowing_vec[ofdm_vec_idx_effective].length);
         }
 
         // apply falling edge to front of current OFDM symbol and write to stage for later use
         volk_32fc_32f_multiply_32fc(
             (lv_32fc_t*)&ifft_cp_stage[i][N_samples_in_CP_os + N_b_DFT_os],
             (const lv_32fc_t*)&ifft_cp_stage[i][N_samples_in_CP_os],
-            (const float*)windowing_array[ofdm_array_idx_effective].raised_cosine_inv,
-            windowing_array[ofdm_array_idx_effective].length);
+            (const float*)windowing_vec[ofdm_vec_idx_effective].raised_cosine_inv,
+            windowing_vec[ofdm_vec_idx_effective].length);
     }
 #endif
 
