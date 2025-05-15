@@ -41,7 +41,6 @@ class hw_simulator_t final : public hw_t {
          * https://files.ettus.com/manual/structuhd_1_1stream__args__t.html#a4463f2eec2cc7ee70f84baacbb26e1ef
          * https://files.ettus.com/manual/page_transport.html
          *
-         * \param id_ unique ID in SDR
          * \param hw_config_ configuration taken from user configuration file
          * \param vspace_ reference to virtual space, where hw_simulator_t has to register
          */

@@ -201,7 +201,7 @@ pcc_report_t rx_synced_t::demoddecod_rx_pcc(sync_report_t& sync_report_) {
         dect_samp_rate_oversampled_max / (sync_report->u * constants::subcarrier_spacing_min_u_b);
 
     // set FFT size
-    set_ofdm_array_idx_effective(N_b_DFT_os);
+    set_ofdm_vec_idx_effective(N_b_DFT_os);
 
     /* At this point, synchronization is done and the sync_report is complete. It contains, among
      * other things, the values of u and b for the current packet. With the fixed sample rate given,
@@ -758,10 +758,8 @@ void rx_synced_t::run_cp_fft_scale(const uint32_t N_samples_in_CP_os) {
     // switch from time to frequency domain
     for (uint32_t ant_idx = 0; ant_idx < N_RX; ++ant_idx) {
         // transform onto FFT stage, implicitly skip CP
-        dft::single_symbol_rx_ofdm_zero_copy(ofdm_array[ofdm_array_idx_effective],
-                                             mixer_stage[ant_idx],
-                                             fft_stage,
-                                             N_samples_in_CP_os);
+        dft::single_symbol_rx_ofdm_zero_copy(
+            ofdm_vec[ofdm_vec_idx_effective], mixer_stage[ant_idx], fft_stage, N_samples_in_CP_os);
 
         // copy upper and lower half of spectrum from FFT stage into processing unit
         srsran_vec_cf_copy(&ofdm_symbol_now[ant_idx][N_b_OCC / 2], fft_stage, N_b_OCC / 2 + 1);

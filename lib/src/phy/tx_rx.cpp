@@ -20,6 +20,7 @@
 
 #include "dectnrp/phy/tx_rx.hpp"
 
+#include <algorithm>
 #include <limits>
 
 extern "C" {
@@ -75,9 +76,25 @@ tx_rx_t::tx_rx_t(const section3::packet_sizes_t maximum_packet_sizes_,
     // fec uses a lot of RAM for large lookup tables
     fec = std::make_unique<fec_t>(maximum_packet_sizes);
 
+    // what is the largest FFT size required?
+    const auto fft_size_max_required =
+        dect_samp_rate_oversampled_max / constants::subcarrier_spacing_min_u_b;
+
+    dectnrp_assert(std::find(fft_sizes_all.begin(), fft_sizes_all.end(), fft_size_max_required) !=
+                       fft_sizes_all.end(),
+                   "unknown FFT size");
+
+    const auto N_fft_sizes_required =
+        std::find(fft_sizes_all.begin(), fft_sizes_all.end(), fft_size_max_required) -
+        fft_sizes_all.begin() + 1;
+
+    ofdm_vec.resize(N_fft_sizes_required);
+
+    dectnrp_assert(ofdm_vec.size() > 0, "no FFT size defined");
+
     // always init every fft size
-    for (uint32_t i = 0; i < fft_sizes.size(); ++i) {
-        dft::get_ofdm(ofdm_array[i], fft_sizes[i]);
+    for (uint32_t i = 0; i < ofdm_vec.size(); ++i) {
+        dft::get_ofdm(ofdm_vec[i], fft_sizes_all[i]);
     }
 
     // PCC always has 196/2=98 complex QPSK symbols
@@ -111,7 +128,7 @@ tx_rx_t::tx_rx_t(const section3::packet_sizes_t maximum_packet_sizes_,
 }
 
 tx_rx_t::~tx_rx_t() {
-    for (auto& elem : ofdm_array) {
+    for (auto& elem : ofdm_vec) {
         dft::free_ofdm(elem);
     }
 
@@ -124,55 +141,56 @@ tx_rx_t::~tx_rx_t() {
 
 void tx_rx_t::add_new_network_id(const uint32_t network_id) { fec->add_new_network_id(network_id); }
 
-void tx_rx_t::set_ofdm_array_idx_effective(const uint32_t N_b_DFT_os_) {
-    ofdm_array_idx_effective = std::numeric_limits<uint32_t>::max();
+void tx_rx_t::set_ofdm_vec_idx_effective(const uint32_t N_b_DFT_os_) {
+    ofdm_vec_idx_effective = std::numeric_limits<uint32_t>::max();
     switch (N_b_DFT_os_) {
         case 64:
-            ofdm_array_idx_effective = 0;
+            ofdm_vec_idx_effective = 0;
             break;
         case 128:
-            ofdm_array_idx_effective = 1;
+            ofdm_vec_idx_effective = 1;
             break;
         case 256:
-            ofdm_array_idx_effective = 2;
+            ofdm_vec_idx_effective = 2;
             break;
         case 512:
-            ofdm_array_idx_effective = 3;
+            ofdm_vec_idx_effective = 3;
             break;
         case 768:
-            ofdm_array_idx_effective = 4;
+            ofdm_vec_idx_effective = 4;
             break;
         case 1024:
-            ofdm_array_idx_effective = 5;
+            ofdm_vec_idx_effective = 5;
             break;
         case 1536:
-            ofdm_array_idx_effective = 6;
+            ofdm_vec_idx_effective = 6;
             break;
         case 2048:
-            ofdm_array_idx_effective = 7;
+            ofdm_vec_idx_effective = 7;
             break;
         case 3072:
-            ofdm_array_idx_effective = 8;
+            ofdm_vec_idx_effective = 8;
             break;
         case 4096:
-            ofdm_array_idx_effective = 9;
+            ofdm_vec_idx_effective = 9;
             break;
         case 6144:
-            ofdm_array_idx_effective = 10;
+            ofdm_vec_idx_effective = 10;
             break;
         case 8192:
-            ofdm_array_idx_effective = 11;
+            ofdm_vec_idx_effective = 11;
             break;
         case 12288:
-            ofdm_array_idx_effective = 12;
+            ofdm_vec_idx_effective = 12;
             break;
         case 16384:
-            ofdm_array_idx_effective = 13;
+            ofdm_vec_idx_effective = 13;
             break;
     }
 
-    dectnrp_assert(ofdm_array_idx_effective < std::numeric_limits<uint32_t>::max(),
+    dectnrp_assert(ofdm_vec_idx_effective < std::numeric_limits<uint32_t>::max(),
                    "undefined FFT length");
+    dectnrp_assert(ofdm_vec_idx_effective < ofdm_vec.size(), "FFT length out-of-bound");
 }
 
 void tx_rx_t::set_N_subc_offset_lower_half_os(const uint32_t N_b_DFT_os_,

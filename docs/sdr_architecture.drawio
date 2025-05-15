@@ -325,7 +325,7 @@
             <mxRectangle x="880" y="80" width="140" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="A43RT7BLHncz933INCX8-35" value="Group of threads and resources that execute while keep_running=true" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=none;verticalAlign=top;dashed=1;" parent="A43RT7BLHncz933INCX8-42" vertex="1">
+        <mxCell id="A43RT7BLHncz933INCX8-35" value="Group of threads and resources that execute while keep_running==true" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=none;verticalAlign=top;dashed=1;" parent="A43RT7BLHncz933INCX8-42" vertex="1">
           <mxGeometry x="20" y="160" width="160" height="100" as="geometry" />
         </mxCell>
         <mxCell id="A43RT7BLHncz933INCX8-36" value="keep_running" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#97D077;strokeColor=#9AC7BF;strokeWidth=1;" parent="A43RT7BLHncz933INCX8-42" vertex="1">

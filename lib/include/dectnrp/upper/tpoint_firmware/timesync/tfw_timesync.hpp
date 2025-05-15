@@ -72,7 +72,7 @@ class tfw_timesync_t final : public tpoint_t {
         // ##################################################
         // PPS generation
 
-        // time when we generate another PPS pulse
+        /// time when we generate another PPS pulse
         int64_t sample_count_at_next_pps_change_64{};
 
 #ifdef TFW_TIMESYNC_EXPORT_1PPS

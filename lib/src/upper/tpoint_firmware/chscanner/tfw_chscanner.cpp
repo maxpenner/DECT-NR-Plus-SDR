@@ -150,12 +150,12 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& ch
 }
 
 std::vector<std::string> tfw_chscanner_t::start_threads() {
-    dectnrp_log_inf("start() called, press ctrl+c to stop program");
+    dectnrp_log_inf("start_threads() called, press ctrl+c to stop program");
     return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
 }
 
 std::vector<std::string> tfw_chscanner_t::stop_threads() {
-    dectnrp_log_inf("stop() called");
+    dectnrp_log_inf("stop_threads() called");
     return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
 }
 

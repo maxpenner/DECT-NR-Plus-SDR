@@ -87,7 +87,7 @@ class tx_t final : public tx_rx_t {
         std::array<srsran_modem_table_t, 5> srsran_modem_table;
 
 #ifdef PHY_TX_OFDM_WINDOWING
-        std::array<dft::windowing_t, N_fft_sizes> windowing_array;
+        std::vector<dft::windowing_t> windowing_vec;
 #endif
 
         /// beamforming
