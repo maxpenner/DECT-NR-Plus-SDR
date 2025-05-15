@@ -68,14 +68,14 @@ class tfw_rtt_t final : public tpoint_t {
         /// operating system clock to measure rtt
         common::watch_t watch;
 
-        // packet dimensions
+        /// packet dimensions
         section3::packet_sizes_def_t psdef;
 
         /// FT and PT must know both identities
         section4::mac_architecture::identity_t identity_ft;
         section4::mac_architecture::identity_t identity_pt;
 
-        // PLCF fixed to type 1 and header format 0
+        /// PLCF fixed to type 1 and header format 0
         section4::plcf_10_t plcf_10;
 
         /// FT receives data from application layer, and forwards data to application layer

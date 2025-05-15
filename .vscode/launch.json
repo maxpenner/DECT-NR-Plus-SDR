@@ -2,6 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "dectnrp basic",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/dectnrp",
+            "args": [
+                "../configurations/basic_simulator/"
+            ],
+            "environment": [],
+            "cwd": "${workspaceFolder}/bin/"
+        },
+        {
             "name": "dectnrp loopback",
             "type": "cppdbg",
             "request": "launch",

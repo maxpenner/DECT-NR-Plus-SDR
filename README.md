@@ -46,12 +46,12 @@ Advanced Topics
 
 The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware. In terms of the OSI model, the firmware is located on the MAC layer and the layers above as shown in [Architecture](#architecture). The SDR provides:
 
-- Radio Layer (typically part of PHY, here separate layer)
-- PHY Layer
+- Radio layer (typically part of PHY, here separate layer)
+- PHY
 - PHY to MAC layer interface
 - Application layer interface (e.g. UDP sockets, virtual NIC).
 
-Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for termination point which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/) with a brief description of each available under [Firmware](#firmware). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
+Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for [termination point](https://www.dect.org/dect-nrplus-standard-upper-layers-technology-faq-blog) which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/) with a brief description of each available under [Firmware](#firmware). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
 |   | **Virtual Function**  | **Properties**                                                            |
 |---|-----------------------|---------------------------------------------------------------------------|
@@ -65,7 +65,9 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
 | 8 | start_threads()       | called once during SDR startup to start application layer threads         |
 | 9 | stop_threads()        | called once during SDR shutdown to stop application layer threads         |
 
-For any firmware, start_threads() is always called first, followed by work_start_imminent(). Only then all other work-functions are called. For event-driven functions, calls are only made if and when the associated event occurs. Once the SDR receives a signal triggered by pressing ctrl+c, stop_threads() is called and the running firmware must stop such that the SDR can shut down.
+For any firmware, constructors are always called first. When the constructors are called, the underlying radio devices have already been initialized and hardware properties such as center frequency and gains may be changed. However, the radio devices are not streaming IQ samples yet.
+
+After all constructors have been called, start_threads() is called followed by work_start_imminent() which announces the beginning of IQ streaming. Only then all other work-functions are called. For event-driven functions, calls are only made if and when the associated event occurs. Once the SDR receives a signal triggered by pressing ctrl+c, stop_threads() is called and the running firmware must stop such that the SDR can shut down.
 
 ## Directories
 
@@ -152,9 +154,12 @@ If you use this repository for any publication, please cite the repository accor
 
 ## Limitations of an SDR with Host Processing
 
-- Quasi-instantaneous channel access with prior Listen-Before-Talk (LBT) is not possible since all channel measurements are carried out on the host. By the time the host has measured the channel as free and the TX packet arrives at the radio hardware, the channel measurements may already be stale.
+All processing of IQ samples and all decisions about the radio device state (gains, frequencies etc.) are made on the host. The host exchanges IQ samples and the radio device state with the radio device over an interface (100/10/1GbE, PCIe, USB etc.) which imposes a certain latency depending on the interface type and properties (Ethernet ideally less than 100 $\mu s$, USB up to 2 $ms$). The following restrictions arise as a result:
+- The time between receiving a packet and sending a response packet is comparatively large and latencies such as for IEEE 802.11 (e.g. SIFS  of 16 $\mu s$ or less) are not feasible.
+- Quasi-instantaneous channel access with prior Listen-Before-Talk (LBT) is not possible. By the time the host has measured the channel as free and the TX packet arrives at the radio device, the channel measurement may already be stale.
 - The [AGC](#agc) is slow. By the time the host has made the decision to change a gain setting, the channel conditions may have already changed significantly.
-- SDR devices are general-purpose devices with limitations regarding typical hardware parameters such as output power, linearity, receiver sensitivity, noise figure, selectivity etc.
+
+Furthermore, most SDRs are general-purpose devices with limitations regarding typical hardware parameters such as output power, linearity, receiver sensitivity, noise figure, selectivity etc.
     
 ## Known Issues
 

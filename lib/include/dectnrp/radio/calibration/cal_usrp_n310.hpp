@@ -72,7 +72,7 @@ const static common::vec2d<float> gains_rx_dB = {{75.0, 0.0},
                                                  {75.0, 0.0},
                                                  {75.0, 0.0}};
 
-// measured at TX/RX
+/// measured at TX/RX
 const static common::vec2d<float> powers_rx_dBm = {{-36.2, 38.8},
                                                    {-35.6, 39.4},
                                                    {-35.3, 39.7},
