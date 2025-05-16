@@ -24,6 +24,7 @@
 #include <limits>
 
 #include "dectnrp/common/adt/decibels.hpp"
+#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/sections_part2/channel_arrangement.hpp"
 
@@ -44,6 +45,11 @@ tfw_chscanner_t::tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
         }
     }
 
+    N_measurement =
+        common::adt::round_integer(measurement_duration_per_frequency_ms, measurement_period_ms);
+
+    dectnrp_assert(N_measurement > 0, "at least measurement required");
+
     // set frequency, TX and RX power
     hw.set_command_time();
     hw.set_tx_power_ant_0dBFS_tc(-1000.0f);
@@ -52,8 +58,8 @@ tfw_chscanner_t::tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
 }
 
 void tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
-    next_measurement_time_64 =
-        start_time_64 + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
+    next_measurement_time_64 = start_time_64 + duration_lut.get_N_samples_from_duration(
+                                                   section3::duration_ec_t::ms001, 50);
 }
 
 phy::machigh_phy_t tfw_chscanner_t::work_regular(
@@ -80,7 +86,8 @@ phy::machigh_phy_t tfw_chscanner_t::work_regular(
 
     // state machine is progressed in function work_chscan_async(), which gives us the result of the
     // channel measurement
-    next_measurement_time_64 = std::numeric_limits<int64_t>::max();
+    next_measurement_time_64 += duration_lut.get_N_samples_from_duration(
+        section3::duration_ec_t::ms001, measurement_period_ms);
 
     return machigh_phy;
 }
@@ -107,14 +114,7 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& ch
     ++N_measurement_cnt;
 
     // do we keep measuring in this run?
-    if (N_measurement_cnt < N_measurement) {
-        // trigger new measurement some time in the near future
-        next_measurement_time_64 =
-            buffer_rx.get_rx_time_passed() +
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 27);
-    }
-    // run is complete
-    else {
+    if (N_measurement_cnt == N_measurement) {
         // show result
         dectnrp_log_inf(
             "frequency: {}MHz | rms_min={} rms_max={}", freqs[freqs_idx] / 1.0e6, rms_min, rms_max);
@@ -134,16 +134,9 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& ch
         rms_min = 1.0e9;
         rms_max = -1.0e9;
 
-        // set new hardware frequency
-        hw.set_command_time(
-            buffer_rx.get_rx_time_passed() +
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 100));
+        // set new hardware frequency ASAP
+        hw.set_command_time();
         hw.set_freq_tc(freqs[freqs_idx]);
-
-        // trigger new run some distant time in the future
-        next_measurement_time_64 =
-            buffer_rx.get_rx_time_passed() +
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
     }
 
     return phy::machigh_phy_tx_t();

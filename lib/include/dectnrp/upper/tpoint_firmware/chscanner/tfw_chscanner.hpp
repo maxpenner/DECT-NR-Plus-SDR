@@ -64,8 +64,17 @@ class tfw_chscanner_t final : public tpoint_t {
         /// index of next frequency to measure
         uint32_t freqs_idx{};
 
-        /// number of measurements per run
-        const uint32_t N_measurement{50};
+        /**
+         * \brief Time a single frequency is measured. Only a approximation, actual duration will be
+         * a multiple of measurement_period_ms.
+         */
+        const uint32_t measurement_duration_per_frequency_ms{500};
+
+        /// time between two measurements
+        const uint32_t measurement_period_ms{29};
+
+        /// number of measurements per frequency
+        uint32_t N_measurement{0};
         uint32_t N_measurement_cnt{0};
 
         /// measured values during a single run
