@@ -101,7 +101,7 @@ After all constructors have been called, start_threads() is called followed by w
 
 ## Installation
 
-The SDR has been tested on Ubuntu 22.04 and 24.04. It has four dependencies that must be installed:
+The SDR has been tested on Ubuntu 22.04 and 24.04 (Intel and AMD x86-64) and Raspberry Pi OS (Raspberry Pi 5). It has four dependencies that must be installed:
 - [UHD](https://github.com/EttusResearch/uhd): Radio Devices
 - [srsRAN 4G](https://github.com/srsran/srsRAN_4G): Turbo coding, PHY processing, SIMD
 - [VOLK](https://github.com/gnuradio/volk): SIMD
