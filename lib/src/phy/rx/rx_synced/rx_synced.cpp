@@ -130,7 +130,6 @@ rx_synced_t::rx_synced_t(const radio::buffer_rx_t& buffer_rx_,
         N_RX, worker_pool_config_.maximum_packet_sizes.tm_mode.N_TS);
     estimator_aoa = std::make_unique<estimator_aoa_t>(b_max, N_RX);
 
-    // to init channel_luts, we require the symbol spacing in f- and t-domain
     const auto numerologies = section3::get_numerologies(u_max, 1);
 
     // initialize temporary vectors to init channel_luts
@@ -142,7 +141,6 @@ rx_synced_t::rx_synced_t(const radio::buffer_rx_t& buffer_rx_,
 
     // init channel_luts
     for (uint32_t i = 0; i < V0.size(); ++i) {
-        // define channel statistics
         const channel_statistics_t chst(
             numerologies.delta_u_f, numerologies.T_u_symb, V0[i], V1[i], V2[i], V3[i], V4[i]);
 
@@ -269,7 +267,6 @@ pcc_report_t rx_synced_t::demoddecod_rx_pcc(sync_report_t& sync_report_) {
      */
     ofdm_symb_ps_idx = 0;
 
-    // process STF
     run_stf(sync_report_);
 
     /* With the given packet configuration so far, we can also determine the maximum OFDM symbol
@@ -351,7 +348,6 @@ pdc_report_t rx_synced_t::demoddecod_rx_pdc(const maclow_phy_t& maclow_phy_) {
     fec_cfg.network_id = maclow_phy->hp_rx->get_network_id();
     fec_cfg.Z = packet_sizes->psdef.Z;
 
-    // prepare fec
     fec->segmentate_and_pick_scrambling_sequence(fec_cfg);
 
     dectnrp_assert(packet_sizes->psdef.mcs_index <= 9, "Unable to set modem table for MCS index");
@@ -511,7 +507,6 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
 
     run_stf_rms_estimation(sync_report_);
 
-    // determine number of patterns and number of samples per pattern
     const uint32_t N_samples_STF_os = N_samples_STF_CP_only_os + N_b_DFT_os;
     const uint32_t nof_pattern = section3::stf_t::get_N_stf_pattern(sync_report_.u);
     const uint32_t nof_samples_pattern = N_samples_STF_os / nof_pattern;
@@ -551,14 +546,11 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
         }
     }
 
-    // how much fractional CFO did we find?
     const float cfo_fractional_left_rad = std::arg(sum) / static_cast<float>(nof_samples_pattern);
 
-    // adjust fractional CFO in sync_report
     sync_report_.cfo_fractional_rad += cfo_fractional_left_rad;
 
 #ifdef RX_SYNCED_PARAM_CFO_CORRECTION
-    // adjust CFO currently used by mixer
     mixer.adjust_phase_increment(cfo_fractional_left_rad);
 #endif
 
@@ -629,7 +621,6 @@ void rx_synced_t::run_stf_rms_estimation(sync_report_t& sync_report_) {
     dectnrp_assert(sync_report_.rms_array.has_any_larger(0.0f),
                    "not a single RMS value provided by sync");
 
-    // create an array with one value for each physical antenna
     common::ant_t rms_array(N_RX);
 
 #ifdef RX_SYNCED_PARAM_RMS_FILL_COMPLETELY_OR_KEEP_WHAT_SYNCHRONIZATION_PROVIDED
@@ -665,7 +656,6 @@ void rx_synced_t::run_stf_rms_estimation(sync_report_t& sync_report_) {
     }
 #endif
 
-    // overwrite all RMS values
     sync_report_.rms_array = rms_array;
 }
 
@@ -755,7 +745,6 @@ void rx_synced_t::run_mix_resample(const uint32_t N_samples_in_CP_os) {
 }
 
 void rx_synced_t::run_cp_fft_scale(const uint32_t N_samples_in_CP_os) {
-    // switch from time to frequency domain
     for (uint32_t ant_idx = 0; ant_idx < N_RX; ++ant_idx) {
         // transform onto FFT stage, implicitly skip CP
         dft::single_symbol_rx_ofdm_zero_copy(
@@ -889,7 +878,6 @@ void rx_synced_t::run_drs_channel_lut_pick() {
             }
         }
 
-        // set pointer to correct LUT
         channel_lut_effective = channel_luts[idx].get();
 
 #ifndef RX_SYNCED_PARAM_CHANNEL_LUT_LOOKUP_AFTER_EVERY_DRS_SYMBOL_OR_ONCE
@@ -1073,13 +1061,10 @@ void rx_synced_t::run_pdc_ps_in_chestim_mode_lr_t() {
 
         // continue at last absolute symbol index
         for (; ofdm_symb_idx <= final_idx; ++ofdm_symb_idx) {
-            // collect one OFDM symbol and ...
             run_mix_resample(N_b_CP_os);
 
-            // ... FFT directly onto processing stage
             run_cp_fft_scale(N_b_CP_os);
 
-            // check if current OFDM symbol contains DRS cells
             if (drs.is_symbol_index(ofdm_symb_idx)) {
                 run_drs_chestim_zf();
             }
@@ -1112,7 +1097,6 @@ void rx_synced_t::run_pdc_ps_in_chestim_mode_lr_t() {
                 run_drs_ch_interpolation();
             }
 
-            // collect PDC
             if (pdc.is_symbol_index(first_idx + ofdm_symb_ps_idx)) {
                 run_pdc();
             }
@@ -1153,19 +1137,15 @@ void rx_synced_t::run_pdc_ps_in_chestim_mode_lr_f() {
 
     // continue at latest absolute symbol index
     for (; ofdm_symb_idx <= packet_sizes->N_DF_symb; ++ofdm_symb_idx) {
-        // collect one OFDM symbol and ...
         run_mix_resample(N_b_CP_os);
 
-        // ... FFT directly onto processing stage
         run_cp_fft_scale(N_b_CP_os);
 
-        // check if current OFDM symbol contains DRS cells
         if (drs.is_symbol_index(ofdm_symb_idx)) {
             run_drs_chestim_zf();
             run_drs_ch_interpolation();
         }
 
-        // collect PDC cells
         if (pdc.is_symbol_index(ofdm_symb_idx)) {
             run_pdc();
         }
@@ -1357,7 +1337,6 @@ void rx_synced_t::run_pxx_mode_transmit_diversity(const std::vector<uint32_t>& k
     const common::vec2d<uint32_t>& index_mat_N_TS_x =
         Y_i->get_index_mat_N_TS_x(sync_report->N_eff_TX);
 
-    // modulo
     const uint32_t modulo = Y_i->get_modulo(sync_report->N_eff_TX);
 
     dectnrp_assert(k_i_one_symbol.size() % 2 == 0, "must be even");

@@ -300,7 +300,6 @@ void tx_t::generate_tx_packet(const tx_descriptor_t& tx_descriptor_,
     buffer_tx->set_transmittable(tx_descriptor->buffer_tx_meta);
 #endif
 
-    // run some check after packet processing
     dectnrp_assert(PCC_idx == constants::pcc_cells, "incorrect number of PCC subcarriers written");
     dectnrp_assert(DRS_idx == packet_sizes->N_DRS_subc,
                    "incorrect number of DRS subcarriers written");
@@ -442,7 +441,6 @@ void tx_t::run_packet_dimensions() {
     // how many subcarriers does the nominal, oversampled bandwidth contain?
     N_b_DFT_os = dect_samp_rate_oversampled_max / packet_sizes->numerology.delta_u_f;
 
-    // set IFFT size
     set_ofdm_vec_idx_effective(N_b_DFT_os);
 
     dectnrp_assert(packet_sizes->psdef.b <= maximum_packet_sizes.psdef.b, "Beta too large");
@@ -487,7 +485,6 @@ void tx_t::run_packet_dimensions() {
     dectnrp_assert(packet_sizes->psdef.mcs_index <= limits::dectnrp_max_mcs_index,
                    "unable to set modem table for MCS index");
 
-    // set symbol mapper
     switch (packet_sizes->psdef.mcs_index) {
         // BPSK
         case 0:
@@ -1090,7 +1087,6 @@ void tx_t::run_pdc() {
         // which transmit stream is used for two consecutive complex symbols?
         const common::vec2d<uint32_t>& index_mat_N_TS_x = Y_i->get_index_mat_N_TS_x(tm_mode.N_TS);
 
-        // modulo operator
         const uint32_t modulo = Y_i->get_modulo(tm_mode.N_TS);
 
         // copy into correct transmit stream at correct subcarrier

@@ -115,7 +115,7 @@ cd DECT-NR-Plus-SDR
 mkdir build
 cd build
 cmake ..
-make
+make -j
 ```
 The compiled code is kept local in [bin/](bin/) and not copied to any operating system directories such as `usr/local/`.
 

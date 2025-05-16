@@ -130,8 +130,8 @@ struct worker_pool_config_t {
         uint32_t chestim_mode_lr_t_stride_default;
 
         /**
-         * \brief If set to zero, no JSON are exported. If set to positive value, it defines the
-         * number of JSON that are collected before writing to disk.
+         * \brief If set to zero, no JSON files are exported. If set to positive value, it defines
+         * the number of JSON that are collected before writing to disk.
          */
         uint32_t json_export_length;
 

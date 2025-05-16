@@ -174,7 +174,7 @@ class watch_t {
         /**
          * \brief A busywait as an alternative to sleep. The internals of this busywait function are
          * hideous and hence only considered to be an experimental feature to test ultra low latency
-         * use cases. Whenever a busywait is used in this project, there is always a stable, classic
+         * use cases. Wherever a busywait is used in this project, there is always a stable, classic
          * solution with the usual synchronization primitives (mutex, condition variable etc.) right
          * next to it. Same goes for spinlocks.
          *

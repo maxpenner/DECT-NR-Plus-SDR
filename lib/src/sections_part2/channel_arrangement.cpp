@@ -141,7 +141,7 @@ center_frequency_t get_center_frequency(const absolute_channel_frequency_numberi
                                         const uint32_t n) {
     ASSERT_BAND_NUMBER(acfn.band_number);
 
-    dectnrp_assert(n < acfn.n_min || acfn.n_max < n, "incorrect center frequency index {}", n);
+    dectnrp_assert(acfn.n_min <= n && n <= acfn.n_max, "incorrect center frequency index {}", n);
 
     center_frequency_t center_frequency{.acfn = acfn, .n = n};
 
