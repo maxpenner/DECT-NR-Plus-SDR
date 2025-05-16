@@ -4,10 +4,10 @@
 *.mat
 
 # folders
+.cache
 bin/*
 !bin/README.md
 build
 docs/doxygen/html
 docs/doxygen/latex
 gnuradio/*.py
-.VSCodeCounter
