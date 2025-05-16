@@ -69,9 +69,10 @@ class tfw_chscanner_t final : public tpoint_t {
          * a multiple of measurement_period_ms.
          */
         const uint32_t measurement_duration_per_frequency_ms{500};
-
         /// time between two measurements
         const uint32_t measurement_period_ms{29};
+        /// additional between before the next measurement immediately after switching frequency
+        const uint32_t measurement_separation_between_frequencies_ms{100};
 
         /// number of measurements per frequency
         uint32_t N_measurement{0};

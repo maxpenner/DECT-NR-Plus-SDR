@@ -137,6 +137,9 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& ch
         // set new hardware frequency ASAP
         hw.set_command_time();
         hw.set_freq_tc(freqs[freqs_idx]);
+
+        next_measurement_time_64 += duration_lut.get_N_samples_from_duration(
+            section3::duration_ec_t::ms001, measurement_separation_between_frequencies_ms);
     }
 
     return phy::machigh_phy_tx_t();
