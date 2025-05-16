@@ -38,7 +38,7 @@ phy_t::phy_t(const phy_config_t& phy_config_, const radio::radio_t& radio_)
         // get hw associated with wp_id and ...
         radio::hw_t& hw = radio_.get_layer_unit(wp_id);
 
-        // ... add one instance of radio_ctrl to give all worker_pool_t instances some control
+        // ... add one instance of radio_ctrl to give all worker_pool_t instances same control
         phy_radio.radio_ctrl_vec.emplace_back(*hw.buffer_tx_pool.get());
     }
 
@@ -57,7 +57,6 @@ phy_t::phy_t(const phy_config_t& phy_config_, const radio::radio_t& radio_)
             worker_pool_config.radio_device_class.N_TX_min <= limits::dectnrp_max_nof_antennas,
             "number of antennas exceeds limit");
 
-        // set number of antennas of PHY on radio layer
         hw.set_nof_antennas(worker_pool_config.radio_device_class.N_TX_min);
 
         // let hardware pick one of its sample rates
@@ -85,7 +84,6 @@ phy_t::phy_t(const phy_config_t& phy_config_, const radio::radio_t& radio_)
                 section3::duration_t(hw.get_samp_rate(), section3::duration_ec_t::slot001)
                     .get_N_samples()));
 
-        // init worker pool
         layer_unit_vec.push_back(
             std::make_unique<worker_pool_t>(worker_pool_config, hw, phy_radio));
     }

@@ -72,7 +72,6 @@ void plcf_decoder_t::decode_and_rdc_check(const uint32_t PLCF_type, const uint8_
                 return;
             }
 
-            // unpack
             if (!array_plcf_type1.at(HeaderFormat_candidate)->unpack(plcf_front)) {
                 return;
             }
@@ -95,7 +94,6 @@ void plcf_decoder_t::decode_and_rdc_check(const uint32_t PLCF_type, const uint8_
                 return;
             }
 
-            // unpack
             if (!array_plcf_type2.at(HeaderFormat_candidate)->unpack(plcf_front)) {
                 return;
             }
