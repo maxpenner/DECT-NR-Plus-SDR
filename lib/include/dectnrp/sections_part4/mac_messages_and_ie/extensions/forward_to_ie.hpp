@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <cmath>
-
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
 namespace dectnrp::section4::extensions {

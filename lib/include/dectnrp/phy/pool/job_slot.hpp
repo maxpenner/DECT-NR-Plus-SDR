@@ -27,7 +27,7 @@ namespace dectnrp::phy {
 class job_slot_t {
     public:
         explicit job_slot_t(const uint32_t id_)
-            : id(id_) {};
+            : id(id_){};
 
         const uint32_t id;
         job_t job;

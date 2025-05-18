@@ -20,7 +20,6 @@
 
 #include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp"
 
-#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <ctime>

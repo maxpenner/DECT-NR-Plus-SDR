@@ -20,8 +20,6 @@
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 
-#include <cstdint>
-
 using namespace dectnrp;
 
 int test0() {

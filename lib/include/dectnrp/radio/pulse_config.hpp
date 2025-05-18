@@ -29,7 +29,7 @@ namespace dectnrp::radio {
 struct pulse_config_t {
         pulse_config_t(const int64_t rising_edge_64_, const int64_t falling_edge_64_)
             : rising_edge_64(rising_edge_64_),
-              falling_edge_64(falling_edge_64_) {};
+              falling_edge_64(falling_edge_64_){};
 
         int64_t rising_edge_64{common::adt::UNDEFINED_EARLY_64};
         int64_t falling_edge_64{common::adt::UNDEFINED_EARLY_64};

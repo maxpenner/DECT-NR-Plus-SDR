@@ -21,12 +21,11 @@
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_ft.hpp"
 //
 
-#include <span>
-#include <utility>
-
-#include "dectnrp/common/adt/decibels.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/cluster_beacon_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/extensions//time_announce_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 

@@ -22,14 +22,12 @@
 
 #include <netinet/in.h>
 
-#include <memory>
-
 namespace dectnrp::application::sockets {
 
 class udp_t {
     public:
         explicit udp_t(const uint32_t port_)
-            : port(port_) {};
+            : port(port_){};
         ~udp_t() = default;
 
         udp_t() = delete;

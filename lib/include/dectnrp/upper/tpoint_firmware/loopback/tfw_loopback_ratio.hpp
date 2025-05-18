@@ -22,7 +22,6 @@
 
 #include <vector>
 
-#include "dectnrp/common/multidim.hpp"
 #include "dectnrp/upper/tpoint_firmware/loopback/result.hpp"
 #include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp"
 

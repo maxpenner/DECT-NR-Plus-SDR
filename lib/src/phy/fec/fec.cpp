@@ -21,6 +21,7 @@
 #include "dectnrp/phy/fec/fec.hpp"
 
 #include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/sections_part3/fix/cbsegm.hpp"
 
 namespace dectnrp::phy {
 

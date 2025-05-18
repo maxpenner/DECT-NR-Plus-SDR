@@ -22,8 +22,6 @@
 
 #include <cmath>
 
-#include "dectnrp/common/prog/assert.hpp"
-
 namespace dectnrp::mac {
 
 feedback_plan_t::feedback_plan_t(const std::vector<uint32_t>&& feedback_format_vec_)

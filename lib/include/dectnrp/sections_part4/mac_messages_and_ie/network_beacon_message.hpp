@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <limits>
 #include <optional>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"

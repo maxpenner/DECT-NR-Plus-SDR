@@ -24,6 +24,7 @@
 #include <memory>
 
 #include "dectnrp/phy/harq/buffer_tx.hpp"
+#include "dectnrp/phy/harq/finalize.hpp"
 #include "dectnrp/phy/harq/process.hpp"
 #include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
 

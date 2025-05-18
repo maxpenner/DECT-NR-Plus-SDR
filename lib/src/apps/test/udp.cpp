@@ -21,7 +21,6 @@
 #include "dectnrp/apps/udp.hpp"
 
 #include <cstdlib>
-#include <memory>
 
 #include "dectnrp/common/prog/print.hpp"
 #include "dectnrp/common/thread/watch.hpp"

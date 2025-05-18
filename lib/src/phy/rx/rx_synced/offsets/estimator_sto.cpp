@@ -31,7 +31,6 @@ extern "C" {
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/phy/rx/rx_synced/rx_synced_param.hpp"
-#include "dectnrp/sections_part3/physical_resources.hpp"
 
 namespace dectnrp::phy {
 

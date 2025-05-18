@@ -189,16 +189,25 @@ void hw_simulator_t::toggle_gpio_tc() {
 #endif
 
 void hw_simulator_t::pps_wait_for_next() const {
-    // simulators have no PPS input, so instead the start of a new second is treated like a PPS
-    const auto A = common::watch_t::get_elapsed_since_epoch<int64_t, common::seconds>();
+    const auto A = common::watch_t::get_elapsed_since_epoch<int64_t, common::micro>();
+
+    // at what absolute time does the PPS occur in the current second?
+    const auto C = A - (A % 1000000) + hw_config.full_second_to_pps_us;
+
+    // what is the next witnessable PPS time?
+    const auto target_time_64 = A < C ? C : C + 1000000;
 
     do {
-        common::watch_t::sleep<common::milli>(20);
-    } while (common::watch_t::get_elapsed_since_epoch<int64_t, common::seconds>() <= A);
+        common::watch_t::sleep<common::milli>(1);
+    } while (common::watch_t::get_elapsed_since_epoch<int64_t, common::micro>() <= target_time_64);
 }
 
-void hw_simulator_t::pps_full_sec_at_next(const int64_t full_sec) const {
+void hw_simulator_t::pps_set_full_sec_at_next_pps_and_wait_until_it_passed() {
     dectnrp_assert(buffer_rx.get() != nullptr, "buffer not initialized");
+
+    pps_wait_for_next();
+
+    const int64_t full_sec = pps_time_base_sec_in_once_second();
 
     buffer_rx->time_as_sample_cnt_64 = full_sec * static_cast<int64_t>(samp_rate);
     buffer_rx->rx_time_passed_64.store(buffer_rx->time_as_sample_cnt_64, std::memory_order_release);
@@ -206,6 +215,15 @@ void hw_simulator_t::pps_full_sec_at_next(const int64_t full_sec) const {
     vspprx->meta.now_64 = buffer_rx->time_as_sample_cnt_64;
 
     pps_wait_for_next();
+
+    /* The PPS just happened. Immediately measure the operating system time and save the offset
+     * between the full second of the operating system and the PPS.
+     */
+    const int64_t A =
+        common::watch_t::get_elapsed_since_epoch<int64_t, common::nano>() % 1000000000;
+    full_second_to_pps_measured_samples = A * static_cast<int64_t>(samp_rate) / 1000000000;
+
+    dectnrp_assert(full_second_to_pps_measured_samples < samp_rate, "ill-defined");
 }
 
 void hw_simulator_t::set_trajectory(const simulation::topology::trajectory_t trajectory) {
@@ -617,7 +635,7 @@ void* hw_simulator_t::work_rx(void* hw_simulator) {
     vspace.wait_for_all_tx_registered_and_inits_done_nto();
 
     // TX are all registered and waiting for RX, so now we can adjust the time
-    calling_instance->pps_sync.sync_procedure(*calling_instance);
+    calling_instance->pps_set_full_sec_at_next_pps_and_wait_until_it_passed();
 
     vspace.hw_register_rx(vspprx);
 

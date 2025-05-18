@@ -1,5 +1,6 @@
 {
     "editor.formatOnSave": true,
+    "editor.defaultFormatter": "xaver.clang-format",
     "[json]": {
         "editor.formatOnSave": false
     },

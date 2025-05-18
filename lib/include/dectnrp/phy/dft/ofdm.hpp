@@ -21,7 +21,6 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 
 extern "C" {
 #include "srsran/config.h"

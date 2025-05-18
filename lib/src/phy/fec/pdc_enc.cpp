@@ -30,8 +30,6 @@ extern "C" {
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/phy/phy_config.hpp"
-#include "dectnrp/sections_part3/fix/cbsegm.hpp"
-#include "dectnrp/sections_part3/fix/mod.hpp"
 #include "dectnrp/sections_part3/fix/scrambling.hpp"
 
 static constexpr uint32_t SRSRAN_PDSCH_MIN_TDEC_ITERS = 2;

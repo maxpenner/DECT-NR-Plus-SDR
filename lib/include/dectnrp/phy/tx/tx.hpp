@@ -25,6 +25,7 @@ extern "C" {
 }
 
 #include "dectnrp/phy/mix/mixer.hpp"
+#include "dectnrp/phy/resample/resampler.hpp"
 #include "dectnrp/phy/tx/tx_descriptor.hpp"
 #include "dectnrp/phy/tx_rx.hpp"
 #include "dectnrp/radio/buffer_tx.hpp"

@@ -21,7 +21,6 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/measurement_report_ie.hpp"
 
-#include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/adt/enumeration.hpp"
 
 namespace dectnrp::section4 {

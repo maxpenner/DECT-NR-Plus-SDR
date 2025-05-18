@@ -21,7 +21,6 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/higher_layer_signalling.hpp"
 
-#include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::section4 {

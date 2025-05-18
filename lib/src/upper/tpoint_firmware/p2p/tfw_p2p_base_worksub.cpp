@@ -25,7 +25,7 @@
 
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/limits.hpp"
-#include "dectnrp/sections_part3/beamforming_and_antenna_port_mapping.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 

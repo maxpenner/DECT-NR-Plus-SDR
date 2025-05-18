@@ -26,9 +26,6 @@ extern "C" {
 #include "srsran/phy/utils/vector.h"
 }
 
-#include "dectnrp/common/adt/miscellaneous.hpp"
-#include "dectnrp/common/prog/assert.hpp"
-
 namespace dectnrp::phy {
 
 localbuffer_t::localbuffer_t(const uint32_t nof_antennas_limited_, const uint32_t nof_samples_)

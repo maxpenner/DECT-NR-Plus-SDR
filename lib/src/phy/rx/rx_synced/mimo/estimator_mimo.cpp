@@ -22,7 +22,6 @@
 
 #include <volk/volk.h>
 
-#include <bit>
 #include <cmath>
 
 extern "C" {

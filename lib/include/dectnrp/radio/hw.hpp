@@ -38,8 +38,6 @@
 #include "dectnrp/radio/buffer_tx_pool.hpp"
 #include "dectnrp/radio/gain_lut.hpp"
 #include "dectnrp/radio/hw_config.hpp"
-#include "dectnrp/radio/pps_sync.hpp"
-#include "dectnrp/radio/pulse_config.hpp"
 
 #define RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS 100
 
@@ -60,7 +58,6 @@ class hw_t : public common::layer_unit_t {
             : common::layer_unit_t(hw_config_.json_log_key, hw_config_.id),
               hw_config(hw_config_) {
             keep_running.store(false, std::memory_order_release);
-            pps_sync.expect_one_more_hw();
         };
         virtual ~hw_t() = default;
 
@@ -213,10 +210,10 @@ class hw_t : public common::layer_unit_t {
         virtual void pps_wait_for_next() const = 0;
 
         /**
-         * \brief Set internal time counter at next pps. Should be called as early as possible
-         * before the next PPS to give driver enough time to make all necessary changes.
+         * \brief Set internal time counter at next PPS. Internally waits to the PPS, sets the time
+         * and then waits for another PPS to avoid the undefined state of time between the two PPS.
          */
-        virtual void pps_full_sec_at_next(const int64_t full_sec) const = 0;
+        virtual void pps_set_full_sec_at_next_pps_and_wait_until_it_passed() = 0;
 
         /**
          * \brief The buffers for TX and RX use two (real, imag) 32-bit floats per sample per
@@ -246,6 +243,10 @@ class hw_t : public common::layer_unit_t {
 
         /// can be used to limit the CFO search range
         float get_ppm() const { return ppm; };
+
+        int64_t get_pps_to_full_second_measured_samples() const {
+            return samp_rate - full_second_to_pps_measured_samples;
+        };
 
         /// buffer's public interfaces used by hardware and PHY
         std::unique_ptr<buffer_tx_pool_t> buffer_tx_pool;
@@ -288,11 +289,16 @@ class hw_t : public common::layer_unit_t {
         float tx_power_ant_0dBFS{};
         common::ant_t rx_power_ant_0dBFS{};
 
-        static pps_sync_t pps_sync;
-
         antenna_array_t antenna_array{};
 
+        /// convert microseconds to a number of samples at the sample rate
         uint32_t get_samples_in_us(const uint32_t us) const;
+
+        /// get closest full second for the time base in hw_config
+        int64_t pps_time_base_sec_in_once_second() const;
+
+        /// measured offset between the start of a full second and the internal PPS
+        int64_t full_second_to_pps_measured_samples{};
 
         // ##################################################
         // threading

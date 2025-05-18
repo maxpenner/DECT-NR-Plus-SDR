@@ -20,12 +20,9 @@
 
 #pragma once
 
-#include <cstdint>
 #include <string>
-#include <vector>
 
 #include "dectnrp/common/layer/layer_config.hpp"
-#include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/upper/tpoint_config.hpp"
 
 namespace dectnrp::upper {

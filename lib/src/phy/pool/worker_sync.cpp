@@ -24,7 +24,6 @@
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/phy/rx/sync/time_report.hpp"
 

@@ -23,6 +23,10 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/limits.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/higher_layer_signalling.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/padding_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 
 namespace dectnrp::section4 {
 

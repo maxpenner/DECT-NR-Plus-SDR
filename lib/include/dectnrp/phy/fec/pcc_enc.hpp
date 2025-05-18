@@ -30,8 +30,6 @@ extern "C" {
 #include "srsran/phy/fec/turbo/turbodecoder.h"
 }
 
-#include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
-
 namespace dectnrp::section3 {
 
 struct pcc_enc_t {

@@ -20,7 +20,6 @@
 
 #include "dectnrp/phy/rx/rx_synced/channel_estimation/channel_lut.hpp"
 
-#include <algorithm>
 #include <cstring>
 #include <limits>
 

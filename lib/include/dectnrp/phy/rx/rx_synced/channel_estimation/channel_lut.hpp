@@ -195,7 +195,7 @@ class channel_lut_t {
         struct coord_t {
                 coord_t(const double f_, const double t_)
                     : f(f_),
-                      t(t_) {};
+                      t(t_){};
                 const double f, t;
 
                 static double get_dist(const coord_t A, const coord_t B) {

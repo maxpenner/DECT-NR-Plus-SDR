@@ -21,7 +21,6 @@
 #include "dectnrp/sections_part4/psdef_plcf_mac_pdu.hpp"
 
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/sections_part4/mac_pdu/mac_multiplexing_header.hpp"
 
 namespace dectnrp::section4 {
 

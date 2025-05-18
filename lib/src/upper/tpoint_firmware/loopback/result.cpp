@@ -22,15 +22,8 @@
 
 #include <algorithm>
 #include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <sstream>
 
-#include "dectnrp/common/adt/freq_shift.hpp"
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/prog/log.hpp"
-#include "dectnrp/constants.hpp"
-#include "header_only/nlohmann/json.hpp"
 
 namespace dectnrp::upper::tfw::loopback {
 

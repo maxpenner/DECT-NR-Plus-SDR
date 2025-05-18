@@ -20,13 +20,10 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-
 #include "dectnrp/common/layer/layer.hpp"
 #include "dectnrp/phy/interfaces/layers_downwards/phy_radio.hpp"
+#include "dectnrp/phy/phy_config.hpp"
 #include "dectnrp/phy/worker_pool.hpp"
-#include "dectnrp/phy/worker_pool_config.hpp"
 #include "dectnrp/radio/radio.hpp"
 
 namespace dectnrp::phy {

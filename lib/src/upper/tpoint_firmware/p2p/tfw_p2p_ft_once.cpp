@@ -30,9 +30,9 @@
 #endif
 
 #include "dectnrp/common/adt/decibels.hpp"
-#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/radio/hw_simulator.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/cluster_beacon_message.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 

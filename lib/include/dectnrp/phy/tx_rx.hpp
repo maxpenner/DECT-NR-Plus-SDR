@@ -27,8 +27,6 @@
 #include "dectnrp/common/complex.hpp"
 #include "dectnrp/phy/dft/ofdm.hpp"
 #include "dectnrp/phy/fec/fec.hpp"
-#include "dectnrp/phy/phy_config.hpp"
-#include "dectnrp/phy/resample/resampler.hpp"
 #include "dectnrp/phy/resample/resampler_param.hpp"
 #include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
 #include "dectnrp/sections_part3/drs.hpp"

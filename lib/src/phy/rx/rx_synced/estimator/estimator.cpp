@@ -20,8 +20,6 @@
 
 #include "dectnrp/phy/rx/rx_synced/estimator/estimator.hpp"
 
-#include <algorithm>
-
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/sections_part3/drs.hpp"

@@ -24,4 +24,7 @@ extern "C" {
 #include "srsran/config.h"
 }
 
+/// removes clangd include warning
+typedef cf_t cf_t;
+
 #define conjj(x) (cf_t{__real__(x), -__imag__(x)})

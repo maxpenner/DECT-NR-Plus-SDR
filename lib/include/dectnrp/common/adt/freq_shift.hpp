@@ -22,7 +22,6 @@
 
 #include <cmath>
 #include <concepts>
-#include <cstdint>
 #include <numbers>
 
 namespace dectnrp::common::adt {

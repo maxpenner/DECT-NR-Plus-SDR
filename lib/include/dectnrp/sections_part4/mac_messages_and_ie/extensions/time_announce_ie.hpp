@@ -20,9 +20,6 @@
 
 #pragma once
 
-#include <array>
-#include <utility>
-
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 

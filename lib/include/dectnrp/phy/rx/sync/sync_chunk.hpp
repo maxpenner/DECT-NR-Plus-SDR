@@ -24,13 +24,12 @@
 #include <memory>
 #include <optional>
 
-#include "dectnrp/phy/phy_config.hpp"
 #include "dectnrp/phy/rx/rx_pacer.hpp"
 #include "dectnrp/phy/rx/sync/autocorrelator_detection.hpp"
 #include "dectnrp/phy/rx/sync/autocorrelator_peak.hpp"
-#include "dectnrp/phy/rx/sync/correlator.hpp"
 #include "dectnrp/phy/rx/sync/crosscorrelator.hpp"
 #include "dectnrp/phy/rx/sync/sync_report.hpp"
+#include "dectnrp/phy/worker_pool_config.hpp"
 
 namespace dectnrp::phy {
 

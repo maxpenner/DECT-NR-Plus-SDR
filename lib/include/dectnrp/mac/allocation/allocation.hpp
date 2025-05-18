@@ -22,8 +22,6 @@
 
 #include <cstdint>
 
-#include "dectnrp/mac/allocation/direction.hpp"
-#include "dectnrp/mac/allocation/resource.hpp"
 #include "dectnrp/sections_part3/derivative/duration.hpp"
 #include "dectnrp/sections_part3/derivative/duration_lut.hpp"
 
@@ -42,7 +40,7 @@ class allocation_t {
         explicit allocation_t(const section3::duration_lut_t* duration_lut_,
                               const section3::duration_t beacon_period_)
             : duration_lut(duration_lut_),
-              beacon_period(beacon_period_) {};
+              beacon_period(beacon_period_){};
 
         const section3::duration_lut_t* duration_lut{nullptr};
 

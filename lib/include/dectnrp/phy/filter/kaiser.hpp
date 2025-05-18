@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <vector>
 
 namespace dectnrp::phy::filter {

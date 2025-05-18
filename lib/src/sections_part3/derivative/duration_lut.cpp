@@ -21,11 +21,9 @@
 #include "dectnrp/sections_part3/derivative/duration_lut.hpp"
 
 #include <cmath>
-#include <utility>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/constants.hpp"
 
 namespace dectnrp::section3 {
 

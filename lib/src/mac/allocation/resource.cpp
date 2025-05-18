@@ -20,12 +20,7 @@
 
 #include "dectnrp/mac/allocation/resource.hpp"
 
-#include <algorithm>
-#include <limits>
-
-#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/limits.hpp"
 
 namespace dectnrp::mac::allocation {
 

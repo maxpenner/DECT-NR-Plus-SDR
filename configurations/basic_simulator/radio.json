@@ -11,6 +11,7 @@
     "tx_thread_config": [-1, -1],
     "rx_thread_config": [-1, -1],
     "pps_time_base": "zero",
+    "full_second_to_pps_us": 0,
     "simulator_clip_and_quantize": false
   },
   "SIMULATION":

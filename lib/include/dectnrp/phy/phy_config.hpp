@@ -24,12 +24,8 @@
 #include <string>
 
 #include "dectnrp/common/layer/layer_config.hpp"
-#include "dectnrp/common/thread/threads.hpp"
-#include "dectnrp/constants.hpp"
 #include "dectnrp/phy/resample/resampler_param.hpp"
 #include "dectnrp/phy/worker_pool_config.hpp"
-#include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
-#include "dectnrp/sections_part3/radio_device_class.hpp"
 
 /* Default LLR bit width is 16 bit, which is also stable. To enable 8 bit processing, a function in
  * the srsRAN installation has to be changed.

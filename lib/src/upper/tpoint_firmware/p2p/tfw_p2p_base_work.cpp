@@ -21,8 +21,6 @@
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 //
 
-#include <utility>
-
 namespace dectnrp::upper::tfw::p2p {
 
 phy::maclow_phy_t tfw_p2p_base_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {

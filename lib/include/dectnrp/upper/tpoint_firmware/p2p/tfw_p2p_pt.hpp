@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/cluster_beacon_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/extensions//time_announce_ie.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 
 #define TFW_P2P_PT_AGC_ENABLED

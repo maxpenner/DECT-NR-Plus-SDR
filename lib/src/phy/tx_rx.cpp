@@ -30,6 +30,7 @@ extern "C" {
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/limits.hpp"
+#include "dectnrp/phy/resample/resampler.hpp"
 #include "dectnrp/sections_part3/physical_resources.hpp"
 
 namespace dectnrp::phy {

@@ -24,7 +24,6 @@
 #include <cmath>
 
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/constants.hpp"
 
 namespace dectnrp::phy {
 

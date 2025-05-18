@@ -43,6 +43,7 @@
 #include "dectnrp/phy/rx/rx_synced/snr/estimator_snr.hpp"
 #include "dectnrp/phy/rx/sync/sync_report.hpp"
 #include "dectnrp/phy/tx_rx.hpp"
+#include "dectnrp/phy/worker_pool_config.hpp"
 #include "dectnrp/sections_part4/mac_pdu/mac_pdu_decoder.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_decoder.hpp"
 

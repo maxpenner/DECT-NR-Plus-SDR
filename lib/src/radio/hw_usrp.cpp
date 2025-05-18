@@ -527,12 +527,30 @@ void hw_usrp_t::toggle_gpio_tc() {
 void hw_usrp_t::pps_wait_for_next() const {
     const auto last_pps = m_usrp->get_time_last_pps();
     while (last_pps == m_usrp->get_time_last_pps()) {
-        common::watch_t::sleep<common::milli>(10);
+        common::watch_t::sleep<common::milli>(1);
     }
 }
 
-void hw_usrp_t::pps_full_sec_at_next(const int64_t full_sec) const {
+void hw_usrp_t::pps_set_full_sec_at_next_pps_and_wait_until_it_passed() {
+    pps_wait_for_next();
+
+    const int64_t full_sec = pps_time_base_sec_in_once_second();
+
     m_usrp->set_time_next_pps(uhd::time_spec_t(full_sec));
+
+    // time is now undefined, sleep until next pps when time will be set
+    common::watch_t::sleep<common::milli>(1200);
+
+    pps_wait_for_next();
+
+    /* The PPS just happened. Immediately measure the operating system time and save the offset
+     * between the full second of the operating system and the PPS.
+     */
+    const int64_t A =
+        common::watch_t::get_elapsed_since_epoch<int64_t, common::nano>() % 1000000000;
+    full_second_to_pps_measured_samples = A * static_cast<int64_t>(samp_rate) / 1000000000;
+
+    dectnrp_assert(full_second_to_pps_measured_samples < samp_rate, "ill-defined");
 }
 
 std::vector<std::string> hw_usrp_t::start_threads() {
@@ -1008,7 +1026,7 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
     hw_usrp_t* calling_instance = reinterpret_cast<hw_usrp_t*>(hw_usrp);
 
     // synchronize PPS across all devices
-    calling_instance->pps_sync.sync_procedure(*calling_instance);
+    calling_instance->pps_set_full_sec_at_next_pps_and_wait_until_it_passed();
 
     // hw parameters for readability
     auto& buffer_rx = *calling_instance->buffer_rx;

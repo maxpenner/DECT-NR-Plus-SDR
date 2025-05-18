@@ -25,8 +25,6 @@
 
 #include "dectnrp/common/adt/bimap.hpp"
 #include "dectnrp/mac/contact.hpp"
-#include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
-#include "dectnrp/phy/rx/sync/sync_report.hpp"
 
 namespace dectnrp::mac {
 

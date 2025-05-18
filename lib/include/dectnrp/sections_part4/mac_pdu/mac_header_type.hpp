@@ -21,7 +21,6 @@
 #pragma once
 
 #include <cstdint>
-#include <limits>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/serdes/packing.hpp"

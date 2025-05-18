@@ -32,7 +32,7 @@ class correlator_t {
     public:
         explicit correlator_t(const std::vector<cf_t*> localbuffer_)
             : localbuffer(localbuffer_),
-              localbuffer_cnt_r(0) {};
+              localbuffer_cnt_r(0){};
         virtual ~correlator_t() = default;
 
         correlator_t() = delete;

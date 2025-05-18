@@ -27,9 +27,8 @@ namespace dectnrp::dlccl {
 
 class dlccl_t {
     public:
-    private:
-        // section5::dlc::dlc_entity_t dlc_entity;
-        // section5::cvg::cvg_entity_t cvg_entity;
+        section5::dlc::dlc_entity_t dlc_entity;
+        section5::cvg::cvg_entity_t cvg_entity;
 };
 
 }  // namespace dectnrp::dlccl

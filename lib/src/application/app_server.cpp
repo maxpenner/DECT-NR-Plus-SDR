@@ -20,9 +20,6 @@
 
 #include "dectnrp/application/app_server.hpp"
 
-#include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/prog/log.hpp"
-
 namespace dectnrp::application {
 
 app_server_t::app_server_t(const uint32_t id_,

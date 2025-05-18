@@ -20,15 +20,18 @@
 
 #include <cstdlib>
 #include <ctime>
-#include <iostream>
 #include <memory>
+
+extern "C" {
+#include "srsran/phy/utils/bit.h"
+#include "srsran/phy/utils/vector.h"
+}
 
 #include "dectnrp/phy/fec/fec.hpp"
 #include "dectnrp/phy/phy_config.hpp"
 #include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
 #include "dectnrp/sections_part3/physical_resources.hpp"
 #include "dectnrp/sections_part3/radio_device_class.hpp"
-#include "srsran/srsran.h"
 
 int run_test(std::string radio_device_class_string) {
     // define radio class

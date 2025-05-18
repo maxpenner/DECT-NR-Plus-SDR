@@ -26,8 +26,6 @@
 #include <cmath>
 
 extern "C" {
-#include "srsran/phy/modem/mod.h"
-#include "srsran/phy/utils/bit.h"
 #include "srsran/phy/utils/vector.h"
 #include "srsran/phy/utils/vector_simd.h"
 }
@@ -36,7 +34,6 @@ extern "C" {
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/limits.hpp"
-#include "dectnrp/phy/rx/rx_synced/rx_synced_param.hpp"
 #include "dectnrp/sections_part3/fix/mod.hpp"
 
 #ifdef PHY_TX_JSON_EXPORT

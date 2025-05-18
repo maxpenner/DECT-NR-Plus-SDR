@@ -27,6 +27,6 @@
 #ifdef __clang__
 #define CLANG_VERSION (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
 #ifdef GCC_VERSION
-#error ("GCC and Clang defined")
+#error("GCC and Clang defined")
 #endif
 #endif

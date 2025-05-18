@@ -21,6 +21,34 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie_pool_tx.hpp"
 
+#include "dectnrp/sections_part4/mac_messages_and_ie/association_release_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/association_request_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/association_response_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/broadcast_indication_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/cluster_beacon_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/configuration_request_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/group_assignment_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/higher_layer_signalling.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/load_info_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/mac_security_info_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/measurement_report_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/neighbouring_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/network_beacon_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/padding_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/radio_device_status_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/random_access_resource_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/rd_capability_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/reconfiguration_request_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/reconfiguration_response_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/resource_allocation_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/route_info_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
+
+// separated as not standard-compliant
+#include "dectnrp/sections_part4/mac_messages_and_ie/extensions/forward_to_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/extensions/power_target_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/extensions/time_announce_ie.hpp"
+
 namespace dectnrp::section4 {
 
 mmie_pool_tx_t::mmie_pool_tx_t() {

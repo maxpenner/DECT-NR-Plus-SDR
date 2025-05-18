@@ -31,7 +31,7 @@ class pcc_report_t {
         explicit pcc_report_t(const section4::plcf_decoder_t& plcf_decoder_,
                               const float snr_dB_ = 0.0f)
             : plcf_decoder(plcf_decoder_),
-              snr_dB(snr_dB_) {};
+              snr_dB(snr_dB_){};
 
         /// contains all information about the PCC (or PLCF) available
         const section4::plcf_decoder_t& plcf_decoder;

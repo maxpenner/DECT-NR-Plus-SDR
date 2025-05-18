@@ -22,7 +22,6 @@
 
 #include <array>
 #include <cstdint>
-#include <vector>
 
 #include "dectnrp/common/multidim.hpp"
 

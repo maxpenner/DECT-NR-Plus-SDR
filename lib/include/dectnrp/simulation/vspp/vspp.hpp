@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "dectnrp/common/complex.hpp"
-#include "dectnrp/simulation/topology/position.hpp"
 
 namespace dectnrp::simulation {
 

@@ -23,8 +23,8 @@
 #include <atomic>
 #include <cstdint>
 
-#include "dectnrp/phy/phy_config.hpp"
 #include "dectnrp/phy/pool/job_queue.hpp"
+#include "dectnrp/phy/worker_pool_config.hpp"
 #include "dectnrp/radio/hw.hpp"
 
 namespace dectnrp::phy {
