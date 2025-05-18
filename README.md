@@ -101,7 +101,7 @@ After all constructors have been called, start_threads() is called followed by w
 
 ## Installation
 
-The SDR has been tested on Ubuntu 22.04 and 24.04. It has four dependencies that must be installed:
+The SDR has been tested on Ubuntu 22.04 and 24.04 (Intel and AMD x86-64) and Raspberry Pi OS (Raspberry Pi 5). It has four dependencies that must be installed:
 - [UHD](https://github.com/EttusResearch/uhd): Radio Devices
 - [srsRAN 4G](https://github.com/srsran/srsRAN_4G): Turbo coding, PHY processing, SIMD
 - [VOLK](https://github.com/gnuradio/volk): SIMD
@@ -233,7 +233,7 @@ The key takeaways are:
 
 An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second in regular intervals.
 
-One drawback of a software AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
+One drawback of a slow AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
 
 | **$\mu$** | **GI length in $\mu s$** | **STF length in $\mu s$**  |
 |:---------:|:------------------------:|:--------------------------:|

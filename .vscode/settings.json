@@ -4,9 +4,16 @@
         "editor.formatOnSave": false
     },
     "output.smartScroll.enabled": false,
+    "workbench.tree.indent": 16,
     "C_Cpp.autoAddFileAssociations": false,
     "C_Cpp.dimInactiveRegions": true,
     "C_Cpp.errorSquiggles": "enabled",
+    "C_Cpp.intelliSenseCacheSize": 0,
+    "C_Cpp.intelliSenseMemoryLimit": 256,
+    "C_Cpp.maxSymbolSearchResults": 500,
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "cmake.options.statusBarVisibility": "visible",
+    "cSpell.enabled": true,
     "doxdocgen.generic.useGitUserName": true,
     "doxdocgen.generic.useGitUserEmail": true,
     "doxdocgen.generic.order": [
@@ -66,8 +73,5 @@
                 }
             ]
         }
-    ],
-    "cSpell.enabled": true,
-    "workbench.tree.indent": 16,
-    "cmake.options.statusBarVisibility": "visible"
+    ]
 }
