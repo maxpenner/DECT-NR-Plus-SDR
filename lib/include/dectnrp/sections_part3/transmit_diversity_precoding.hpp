@@ -20,9 +20,7 @@
 
 #pragma once
 
-#include <complex>
 #include <cstdint>
-#include <vector>
 
 #include "dectnrp/common/complex.hpp"
 #include "dectnrp/common/multidim.hpp"

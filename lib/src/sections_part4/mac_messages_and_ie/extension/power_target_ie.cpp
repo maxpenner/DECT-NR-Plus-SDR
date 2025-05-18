@@ -20,8 +20,6 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/extensions/power_target_ie.hpp"
 
-#include "dectnrp/common/adt/bitbyte.hpp"
-
 namespace dectnrp::section4::extensions {
 
 power_target_ie_t::power_target_ie_t() {

@@ -20,7 +20,6 @@
 
 #include "dectnrp/sections_part4/physical_header_field/feedback_info.hpp"
 
-#include <string>
 #include <utility>
 
 #include "dectnrp/common/adt/bitbyte.hpp"

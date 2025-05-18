@@ -20,13 +20,11 @@
 
 #pragma once
 
-#include <array>
 #include <cstdint>
 #include <limits>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/ant.hpp"
-#include "dectnrp/limits.hpp"
 
 namespace dectnrp::phy {
 
@@ -35,7 +33,7 @@ class sync_report_t {
         sync_report_t() = default;
         sync_report_t(const uint32_t nof_antennas_limited)
             : coarse_peak_array(common::ant_t(nof_antennas_limited)),
-              rms_array(common::ant_t(nof_antennas_limited)) {};
+              rms_array(common::ant_t(nof_antennas_limited)){};
 
         // ##################################################
         // detection

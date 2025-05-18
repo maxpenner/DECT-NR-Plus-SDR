@@ -22,8 +22,6 @@
 
 #include <cstdint>
 
-#include "dectnrp/common/adt/miscellaneous.hpp"
-
 namespace dectnrp::phy {
 
 class mimo_report_t {

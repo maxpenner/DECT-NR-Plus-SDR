@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "dectnrp/mac/allocation/allocation.hpp"
+#include "dectnrp/mac/allocation/direction.hpp"
 #include "dectnrp/mac/allocation/resource.hpp"
 #include "dectnrp/mac/allocation/tx_opportunity.hpp"
 

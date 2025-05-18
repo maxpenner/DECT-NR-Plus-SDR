@@ -34,7 +34,6 @@ extern "C" {
 #include "dectnrp/phy/harq/buffer_tx.hpp"
 #include "dectnrp/sections_part3/derivative/fec_cfg.hpp"
 #include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
-#include "dectnrp/sections_part3/fix/cbsegm.hpp"
 #include "dectnrp/sections_part3/scrambling_pdc.hpp"
 
 namespace dectnrp::phy {

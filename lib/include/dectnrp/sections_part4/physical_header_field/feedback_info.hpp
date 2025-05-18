@@ -23,9 +23,6 @@
 #include <array>
 #include <cstdint>
 #include <limits>
-#include <typeindex>
-#include <typeinfo>
-#include <unordered_map>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/serdes/packing.hpp"

@@ -20,8 +20,6 @@
 
 #include "dectnrp/sections_part3/derivative/duration.hpp"
 
-#include <numeric>
-
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 

@@ -23,7 +23,6 @@
 #include <concepts>
 #include <cstdint>
 
-#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/sections_part3/derivative/duration_ec.hpp"
 
 namespace dectnrp::section3 {

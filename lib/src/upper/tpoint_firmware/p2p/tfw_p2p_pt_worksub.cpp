@@ -21,12 +21,10 @@
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_pt.hpp"
 //
 
-#include <span>
-#include <utility>
-
-#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 

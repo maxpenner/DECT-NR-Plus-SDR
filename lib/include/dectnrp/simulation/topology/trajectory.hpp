@@ -33,7 +33,7 @@ class trajectory_t {
         // point with no movement
         trajectory_t(const position_t offset_)
             : trajectory_shape(trajectory_shape_t::point),
-              offset(offset_) {};
+              offset(offset_){};
 
         // circle
         trajectory_t(const position_t offset_, const float speed_, const float radius_);

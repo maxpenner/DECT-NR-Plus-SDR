@@ -28,7 +28,6 @@
 #include <limits>
 #include <optional>
 #include <type_traits>
-#include <utility>
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/limits.hpp"

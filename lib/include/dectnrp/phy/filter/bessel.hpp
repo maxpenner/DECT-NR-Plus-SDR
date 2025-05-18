@@ -20,9 +20,6 @@
 
 #pragma once
 
-#include <cstdint>
-#include <vector>
-
 namespace dectnrp::phy::filter {
 
 /// https://de.mathworks.com/help/matlab/ref/besselj.html

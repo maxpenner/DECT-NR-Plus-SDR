@@ -23,8 +23,6 @@
 
 #include <functional>
 
-#include "dectnrp/common/prog/assert.hpp"
-
 namespace dectnrp::upper::tfw::p2p {
 
 void tfw_p2p_pt_t::work_start_imminent(const int64_t start_time_64) {

@@ -24,7 +24,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <numeric>
 
 #include "dectnrp/common/prog/assert.hpp"
 

@@ -20,8 +20,6 @@
 
 #include "dectnrp/sections_part3/scrambling_pdc.hpp"
 
-#include <algorithm>
-
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/limits.hpp"

@@ -20,8 +20,6 @@
 
 #include "dectnrp/phy/rx/rx_synced/aoa/estimator_aoa.hpp"
 
-#include "dectnrp/common/prog/assert.hpp"
-
 namespace dectnrp::phy {
 
 estimator_aoa_t::estimator_aoa_t([[maybe_unused]] const uint32_t b_max,

@@ -31,7 +31,7 @@ class upper_report_t {
                                 const int64_t rx_time_opsys_64_)
             : conn_idx(conn_idx_),
               N_byte(N_byte_),
-              rx_time_opsys_64(rx_time_opsys_64_) {};
+              rx_time_opsys_64(rx_time_opsys_64_){};
 
         /**
          * \brief When data is passed from or to the application layer, this connection index is

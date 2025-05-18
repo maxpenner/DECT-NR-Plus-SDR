@@ -22,7 +22,6 @@
 
 #include <volk/volk.h>
 
-#include <cstddef>
 #include <cstdint>
 #include <vector>
 

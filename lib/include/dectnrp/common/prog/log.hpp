@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include "dectnrp/common/prog/defined.hpp"
-
 #define FMT_HEADER_ONLY
 #define FMTLOG_HEADER_ONLY
 #include "header_only/fmt/core.h"

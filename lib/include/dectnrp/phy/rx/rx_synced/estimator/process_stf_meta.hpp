@@ -22,8 +22,6 @@
 
 #include <cstdint>
 
-#include "dectnrp/phy/rx/rx_synced/channel_estimation/channel_antennas.hpp"
-
 namespace dectnrp::phy {
 
 /**

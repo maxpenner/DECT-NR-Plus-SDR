@@ -24,7 +24,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <numeric>
 #include <vector>
 
 namespace dectnrp::phy {

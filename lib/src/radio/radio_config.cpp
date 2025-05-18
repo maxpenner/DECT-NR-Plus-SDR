@@ -20,9 +20,6 @@
 
 #include "dectnrp/radio/radio_config.hpp"
 
-#include <iostream>
-#include <limits>
-
 #include "dectnrp/common/json/json_parse.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 

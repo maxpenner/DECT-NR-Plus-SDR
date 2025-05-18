@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <cstdint>
-
 namespace dectnrp::simulation::topology {
 
 class position_t {

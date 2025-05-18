@@ -25,7 +25,6 @@
 
 #include "dectnrp/common/ant.hpp"
 #include "dectnrp/common/complex.hpp"
-#include "dectnrp/simulation/topology/position.hpp"
 #include "dectnrp/simulation/vspp/vspp.hpp"
 
 namespace dectnrp::simulation {

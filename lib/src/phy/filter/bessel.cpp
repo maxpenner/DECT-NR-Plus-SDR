@@ -21,6 +21,7 @@
 #include "dectnrp/phy/filter/bessel.hpp"
 
 #include <cmath>
+#include <cstdint>
 
 namespace dectnrp::phy::filter {
 

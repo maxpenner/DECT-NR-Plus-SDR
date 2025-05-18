@@ -27,11 +27,8 @@ extern "C" {
 #include "srsran/phy/utils/vector.h"
 }
 
-#include "dectnrp/common/adt/decibels.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
-#include "dectnrp/phy/rx/sync/sync_param.hpp"
-#include "dectnrp/sections_part3/physical_resources.hpp"
 #include "dectnrp/sections_part3/transmission_packet_structure.hpp"
 
 namespace dectnrp::phy {

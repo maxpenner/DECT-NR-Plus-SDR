@@ -21,7 +21,6 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
 #include "dectnrp/common/layer/layer.hpp"
 #include "dectnrp/radio/hw.hpp"

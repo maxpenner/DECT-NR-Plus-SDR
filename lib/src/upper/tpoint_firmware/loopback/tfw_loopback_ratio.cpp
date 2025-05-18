@@ -25,7 +25,6 @@
 #include <sstream>
 
 #include "dectnrp/common/adt/decibels.hpp"
-#include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "header_only/nlohmann/json.hpp"
 

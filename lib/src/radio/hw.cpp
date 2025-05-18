@@ -21,9 +21,7 @@
 #include "dectnrp/radio/hw.hpp"
 
 #include <utility>
-#include <vector>
 
-#include "dectnrp/common/adt/decibels.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/limits.hpp"
 

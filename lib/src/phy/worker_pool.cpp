@@ -25,7 +25,6 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/common/thread/threads.hpp"
-#include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/phy/rx/sync/sync_param.hpp"
 #include "dectnrp/sections_part3/stf.hpp"

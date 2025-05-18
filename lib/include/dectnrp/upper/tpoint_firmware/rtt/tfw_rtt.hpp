@@ -25,7 +25,6 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
-#include "dectnrp/sections_part4/mac_pdu/mac_pdu_decoder.hpp"
 #include "dectnrp/upper/tpoint.hpp"
 
 namespace dectnrp::upper::tfw::rtt {

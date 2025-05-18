@@ -22,7 +22,6 @@
 
 #include <volk/volk.h>
 
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <complex>
@@ -34,6 +33,7 @@ extern "C" {
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/limits.hpp"
 #include "dectnrp/phy/mix/mixer.hpp"
+#include "dectnrp/phy/rx/sync/sync_param.hpp"
 #include "dectnrp/sections_part3/physical_resources.hpp"
 
 namespace dectnrp::phy {

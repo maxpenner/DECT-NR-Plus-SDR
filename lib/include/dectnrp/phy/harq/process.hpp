@@ -20,12 +20,9 @@
 
 #pragma once
 
-#include <array>
 #include <cstdint>
-#include <limits>
 
 #include "dectnrp/common/thread/lockable_outer_inner.hpp"
-#include "dectnrp/phy/harq/finalize.hpp"
 #include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
 
 namespace dectnrp::phy::harq {

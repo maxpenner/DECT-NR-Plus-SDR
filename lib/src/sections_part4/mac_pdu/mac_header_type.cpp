@@ -22,7 +22,6 @@
 
 #include <utility>
 
-#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::section4 {

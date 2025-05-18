@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "dectnrp/common/adt/ema.hpp"
-#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/sections_part3/derivative/duration.hpp"
 
 namespace dectnrp::mac {

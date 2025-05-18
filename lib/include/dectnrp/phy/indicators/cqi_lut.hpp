@@ -28,7 +28,7 @@ namespace dectnrp::phy::indicators {
 class cqi_lut_t {
     public:
         cqi_lut_t()
-            : cqi_lut_t(0, snr_required.size() - 1, 0.0f) {};
+            : cqi_lut_t(0, snr_required.size() - 1, 0.0f){};
         cqi_lut_t(const uint32_t mcs_min_, const uint32_t mcs_max_, const float snr_offset_);
         ~cqi_lut_t() = default;
 

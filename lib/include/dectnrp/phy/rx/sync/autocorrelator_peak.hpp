@@ -20,13 +20,11 @@
 
 #pragma once
 
-#include <complex>
 #include <cstdint>
 #include <memory>
 #include <vector>
 
 #include "dectnrp/common/complex.hpp"
-#include "dectnrp/common/multidim.hpp"
 #include "dectnrp/phy/rx/sync/coarse_peak_f_domain.hpp"
 #include "dectnrp/phy/rx/sync/correlator.hpp"
 #include "dectnrp/phy/rx/sync/movsum.hpp"

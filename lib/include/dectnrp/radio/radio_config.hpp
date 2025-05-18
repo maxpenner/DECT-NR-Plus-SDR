@@ -21,7 +21,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 #include "dectnrp/common/layer/layer_config.hpp"
 #include "dectnrp/radio/hw_config.hpp"

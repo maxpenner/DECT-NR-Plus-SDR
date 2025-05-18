@@ -27,7 +27,7 @@ namespace dectnrp::phy {
 class phy_mac_reg_t {
     public:
         explicit phy_mac_reg_t(const time_report_t& time_report_)
-            : time_report(time_report_) {};
+            : time_report(time_report_){};
 
         const time_report_t& time_report;
 };

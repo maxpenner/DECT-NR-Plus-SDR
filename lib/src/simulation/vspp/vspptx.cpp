@@ -21,7 +21,6 @@
 #include "dectnrp/simulation/vspp/vspptx.hpp"
 
 #include <cstring>
-#include <limits>
 
 extern "C" {
 #include "srsran/phy/utils/vector.h"

@@ -21,7 +21,6 @@
 #include "dectnrp/application/app_client.hpp"
 
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/prog/log.hpp"
 
 namespace dectnrp::application {
 

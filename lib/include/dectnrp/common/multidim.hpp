@@ -21,7 +21,6 @@
 #pragma once
 
 #include <array>
-#include <cstdint>
 #include <vector>
 
 namespace dectnrp::common {

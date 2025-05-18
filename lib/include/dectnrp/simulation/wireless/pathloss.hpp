@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <cstdint>
-
 namespace dectnrp::simulation::pathloss {
 
 float fspl(const float d_m, const float f_Hz);

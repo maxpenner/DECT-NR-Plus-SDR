@@ -22,8 +22,6 @@
 
 #include <cmath>
 
-#include "dectnrp/common/prog/assert.hpp"
-
 namespace dectnrp::simulation {
 
 noise_t::noise_t(const uint32_t seed_) { srsran_channel_awgn_init(&srsran_channel_awgn, seed_); }

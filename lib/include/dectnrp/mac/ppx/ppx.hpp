@@ -21,13 +21,10 @@
 #pragma once
 
 #include <cstdint>
-#include <optional>
-#include <utility>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/radio/pulse_config.hpp"
 #include "dectnrp/sections_part3/derivative/duration.hpp"
-#include "dectnrp/sections_part3/derivative/duration_lut.hpp"
 
 namespace dectnrp::mac {
 

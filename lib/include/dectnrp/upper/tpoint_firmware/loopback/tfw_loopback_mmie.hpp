@@ -22,7 +22,6 @@
 
 #include <vector>
 
-#include "dectnrp/common/multidim.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie_pool_tx.hpp"
 #include "dectnrp/upper/tpoint_firmware/loopback/result.hpp"
 #include "dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp"

@@ -24,7 +24,7 @@
 #include <limits>
 #include <vector>
 
-#include "dectnrp/sections_part3/derivative/duration.hpp"
+#include "dectnrp/sections_part3/derivative/duration_ec.hpp"
 
 namespace dectnrp::phy {
 

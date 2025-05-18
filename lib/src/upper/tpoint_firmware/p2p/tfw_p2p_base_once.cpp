@@ -21,8 +21,6 @@
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 //
 
-#include "dectnrp/constants.hpp"
-
 namespace dectnrp::upper::tfw::p2p {
 
 tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)

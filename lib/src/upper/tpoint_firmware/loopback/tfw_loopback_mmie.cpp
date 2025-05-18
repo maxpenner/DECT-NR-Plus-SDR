@@ -26,6 +26,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
+#include "dectnrp/common/serdes/testing.hpp"
 #include "header_only/nlohmann/json.hpp"
 
 namespace dectnrp::upper::tfw::loopback {

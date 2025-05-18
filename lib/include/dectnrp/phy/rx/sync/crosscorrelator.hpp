@@ -29,7 +29,6 @@
 #include "dectnrp/phy/resample/resampler_param.hpp"
 #include "dectnrp/phy/rx/sync/correlator.hpp"
 #include "dectnrp/phy/rx/sync/stf_template.hpp"
-#include "dectnrp/phy/rx/sync/sync_param.hpp"
 
 namespace dectnrp::phy {
 

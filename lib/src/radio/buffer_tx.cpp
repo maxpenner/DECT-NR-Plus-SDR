@@ -20,8 +20,6 @@
 
 #include "dectnrp/radio/buffer_tx.hpp"
 
-#include <complex>
-
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/complex.hpp"

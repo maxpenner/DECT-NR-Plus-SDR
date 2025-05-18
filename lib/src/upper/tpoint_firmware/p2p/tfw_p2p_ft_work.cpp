@@ -24,7 +24,6 @@
 #include <functional>
 
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/randomgen.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 

@@ -21,7 +21,6 @@
 #include "dectnrp/upper/tpoint.hpp"
 
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/sections_part3/tm_mode.hpp"
 
 // comment to disable AGC for TX and/or RX

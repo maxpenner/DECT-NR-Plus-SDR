@@ -39,7 +39,6 @@
 #include "dectnrp/radio/gain_lut.hpp"
 #include "dectnrp/radio/hw_config.hpp"
 #include "dectnrp/radio/pps_sync.hpp"
-#include "dectnrp/radio/pulse_config.hpp"
 
 #define RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS 100
 

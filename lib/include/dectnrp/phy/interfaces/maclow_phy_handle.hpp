@@ -41,7 +41,7 @@ struct maclow_phy_handle_t {
         maclow_phy_handle_t() = default;
         maclow_phy_handle_t(const handle_pcc2pdc_t handle_pcc2pdc_, const uint32_t lrdid_)
             : handle_pcc2pdc(handle_pcc2pdc_),
-              lrdid(lrdid_) {};
+              lrdid(lrdid_){};
 
         handle_pcc2pdc_t handle_pcc2pdc{handle_pcc2pdc_t::CARDINALITY};
         uint32_t lrdid{};

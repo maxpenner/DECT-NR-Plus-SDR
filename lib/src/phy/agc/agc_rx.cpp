@@ -25,7 +25,6 @@
 #include "dectnrp/common/adt/decibels.hpp"
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/phy/agc/agc_rx_param.hpp"
 
 namespace dectnrp::phy::agc {
 

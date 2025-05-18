@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <limits>
 
-#include "dectnrp/common/adt/decibels.hpp"
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/sections_part2/channel_arrangement.hpp"
