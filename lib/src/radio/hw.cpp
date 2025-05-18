@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/limits.hpp"
 
 namespace dectnrp::radio {
@@ -94,14 +95,31 @@ uint32_t hw_t::get_tmin_samples(const tmin_t tmin) const {
     return tmin_samples.at(std::to_underlying(tmin));
 }
 
-pps_sync_t hw_t::pps_sync;
-
 uint32_t hw_t::get_samples_in_us(const uint32_t us) const {
     dectnrp_assert(us <= 1000000, "should not be larger than one second");
     dectnrp_assert(0 < samp_rate, "samp_rate not initialized");
 
     return static_cast<uint32_t>(static_cast<int64_t>(samp_rate) * static_cast<int64_t>(us) /
                                  int64_t{1000000});
+}
+
+int64_t hw_t::pps_time_base_sec_in_once_second() const {
+    int64_t full_sec{};
+
+    switch (hw_config.pps_time_base) {
+        using enum hw_config_t::pps_time_base_t;
+        case zero:
+            full_sec = 0;
+            break;
+
+        case TAI:
+            full_sec = common::watch_t::
+                           get_elapsed_since_epoch<int64_t, common::seconds, common::tai_clock>() +
+                       1;
+            break;
+    }
+
+    return full_sec;
 }
 
 }  // namespace dectnrp::radio

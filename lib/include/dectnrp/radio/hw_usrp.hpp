@@ -58,7 +58,7 @@ class hw_usrp_t final : public hw_t {
 #endif
 
         void pps_wait_for_next() const override final;
-        void pps_full_sec_at_next(const int64_t full_sec) const override final;
+        void pps_set_full_sec_at_next_pps_and_wait_until_it_passed() override final;
 
     private:
         std::vector<std::string> start_threads() override final;

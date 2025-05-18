@@ -90,6 +90,9 @@ struct hw_config_t {
         // ##################################################
         // simulator specifics
 
+        /// how many microseconds after the OS's start of a full second does the internal PPS rise?
+        uint32_t full_second_to_pps_us{};
+
         /// clip TX and RX signals and quantize with bit width of hw_simulator_t
         bool simulator_clip_and_quantize{};
 

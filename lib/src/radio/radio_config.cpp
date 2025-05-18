@@ -75,6 +75,9 @@ radio_config_t::radio_config_t(const std::string directory)
 
             // simulator specifics
             if (hw_config.hw_name == "simulator") {
+                hw_config.full_second_to_pps_us =
+                    common::jsonparse::read_int(it, "full_second_to_pps_us", 0, 1000000);
+
                 hw_config.simulator_clip_and_quantize =
                     common::jsonparse::read_bool(it, "simulator_clip_and_quantize");
             } else if (hw_config.hw_name == "usrp") {
