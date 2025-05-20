@@ -534,7 +534,7 @@ void hw_usrp_t::pps_wait_for_next() const {
 void hw_usrp_t::pps_set_full_sec_at_next_pps_and_wait_until_it_passed() {
     pps_wait_for_next();
 
-    const int64_t full_sec = pps_time_base_sec_in_once_second();
+    const int64_t full_sec = pps_time_base_sec_in_one_second();
 
     m_usrp->set_time_next_pps(uhd::time_spec_t(full_sec));
 

@@ -207,7 +207,7 @@ void hw_simulator_t::pps_set_full_sec_at_next_pps_and_wait_until_it_passed() {
 
     pps_wait_for_next();
 
-    const int64_t full_sec = pps_time_base_sec_in_once_second();
+    const int64_t full_sec = pps_time_base_sec_in_one_second();
 
     buffer_rx->time_as_sample_cnt_64 = full_sec * static_cast<int64_t>(samp_rate);
     buffer_rx->rx_time_passed_64.store(buffer_rx->time_as_sample_cnt_64, std::memory_order_release);
