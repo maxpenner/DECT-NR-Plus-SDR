@@ -295,7 +295,7 @@ class hw_t : public common::layer_unit_t {
         uint32_t get_samples_in_us(const uint32_t us) const;
 
         /// get closest full second for the time base in hw_config
-        int64_t pps_time_base_sec_in_once_second() const;
+        int64_t pps_time_base_sec_in_one_second() const;
 
         /// measured offset between the start of a full second and the internal PPS
         int64_t full_second_to_pps_measured_samples{};

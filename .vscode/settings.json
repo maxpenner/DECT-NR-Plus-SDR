@@ -1,8 +1,8 @@
 {
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
     "[json]": {
-        "editor.formatOnSave": false
+        "editor.formatOnSave": true
     },
     "output.smartScroll.enabled": false,
     "workbench.tree.indent": 16,

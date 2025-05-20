@@ -103,7 +103,7 @@ uint32_t hw_t::get_samples_in_us(const uint32_t us) const {
                                  int64_t{1000000});
 }
 
-int64_t hw_t::pps_time_base_sec_in_once_second() const {
+int64_t hw_t::pps_time_base_sec_in_one_second() const {
     int64_t full_sec{};
 
     switch (hw_config.pps_time_base) {
