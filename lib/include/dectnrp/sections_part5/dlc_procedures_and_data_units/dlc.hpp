@@ -22,7 +22,7 @@
 
 namespace dectnrp::section5::dlc {
 
-class dlc_entity_t {
+class dlc_t {
     public:
     private:
 };

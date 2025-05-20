@@ -18,7 +18,13 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/sections_part5/cvg_procedures_and_data_units/cvg_entity.hpp"
+#pragma once
 
 namespace dectnrp::section5::cvg {
+
+class handle_t {
+    public:
+    private:
+};
+
 }  // namespace dectnrp::section5::cvg

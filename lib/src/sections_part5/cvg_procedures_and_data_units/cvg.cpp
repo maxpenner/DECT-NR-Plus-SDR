@@ -18,7 +18,16 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/sections_part5/dlc_procedures_and_data_units/dlc_entity.hpp"
+#include "dectnrp/sections_part5/cvg_procedures_and_data_units/cvg.hpp"
 
-namespace dectnrp::section5::dlc {
-}  // namespace dectnrp::section5::dlc
+namespace dectnrp::section5::cvg {
+
+cvg_t::cvg_t(const config_t config_)
+    : config(config_) {}
+
+common::adt::expected_t<handle_t, request_error_t> cvg_t::get_handle(
+    [[maybe_unused]] const request_t request) {
+    return handle_t();
+}
+
+}  // namespace dectnrp::section5::cvg

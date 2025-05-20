@@ -20,15 +20,23 @@
 
 #pragma once
 
-#include "dectnrp/sections_part5/cvg_procedures_and_data_units/cvg.hpp"
-#include "dectnrp/sections_part5/dlc_procedures_and_data_units/dlc.hpp"
+#include "dectnrp/common/adt/result.hpp"
+#include "dectnrp/sections_part5/cvg_procedures_and_data_units/config.hpp"
+#include "dectnrp/sections_part5/cvg_procedures_and_data_units/handle.hpp"
+#include "dectnrp/sections_part5/cvg_procedures_and_data_units/request.hpp"
+#include "dectnrp/sections_part5/cvg_procedures_and_data_units/request_error.hpp"
 
-namespace dectnrp::dlccl {
+namespace dectnrp::section5::cvg {
 
-class dlccl_t {
+class cvg_t {
     public:
-        section5::dlc::dlc_t dlc;
-        section5::cvg::cvg_t cvg;
+        cvg_t() = default;
+        cvg_t(const config_t config_);
+
+        common::adt::expected_t<handle_t, request_error_t> get_handle(const request_t request);
+
+    private:
+        [[maybe_unused]] config_t config;
 };
 
-}  // namespace dectnrp::dlccl
+}  // namespace dectnrp::section5::cvg

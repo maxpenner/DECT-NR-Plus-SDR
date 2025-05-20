@@ -20,15 +20,11 @@
 
 #pragma once
 
-#include "dectnrp/sections_part5/cvg_procedures_and_data_units/cvg.hpp"
-#include "dectnrp/sections_part5/dlc_procedures_and_data_units/dlc.hpp"
+namespace dectnrp::section5::cvg {
 
-namespace dectnrp::dlccl {
-
-class dlccl_t {
+class status_t {
     public:
-        section5::dlc::dlc_t dlc;
-        section5::cvg::cvg_t cvg;
+    private:
 };
 
-}  // namespace dectnrp::dlccl
+}  // namespace dectnrp::section5::cvg
