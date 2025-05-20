@@ -32,15 +32,19 @@ struct tpoint_config_t {
         /// identifier used in JSON and log file
         static const std::string json_log_key;
 
-        /// every termination point has a unique ID starting at 0
+        /// every termination point has a unique program ID starting at 0
         uint32_t id;
 
         /// which firmware should be loaded?
         std::string firmware_name;
 
+        /**
+         * \brief ID with scope limited to firmware. Can be used to load the same firmware but with
+         * slightly different behaviour depending on this ID.
+         */
         uint32_t firmware_id;
 
-        /// network IDs known to tpoint
+        /// network IDs required by tpoint (used to precalculate scrambling on PHY)
         std::vector<uint32_t> network_ids;
 
         /// configuration for server

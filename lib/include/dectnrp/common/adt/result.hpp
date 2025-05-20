@@ -27,4 +27,7 @@ namespace dectnrp::common::adt {
 template <typename T, typename errcode>
 using res_t = boost::outcome_v2::result<T, errcode, boost::outcome_v2::policy::terminate>;
 
+template <typename T, typename R>
+using expected_t = boost::outcome_v2::checked<T, R>;
+
 }  // namespace dectnrp::common::adt

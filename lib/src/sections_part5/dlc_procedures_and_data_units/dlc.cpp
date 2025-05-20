@@ -18,13 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#pragma once
+#include "dectnrp/sections_part5/dlc_procedures_and_data_units/dlc.hpp"
 
-namespace dectnrp::section5::cvg {
-
-class cvg_entity_t {
-    public:
-    private:
-};
-
-}  // namespace dectnrp::section5::cvg
+namespace dectnrp::section5::dlc {
+}  // namespace dectnrp::section5::dlc
