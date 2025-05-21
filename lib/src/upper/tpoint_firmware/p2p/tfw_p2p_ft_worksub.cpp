@@ -29,8 +29,22 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-std::optional<phy::maclow_phy_t> tfw_p2p_ft_t::worksub_pcc_10(
-    [[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
+std::optional<phy::maclow_phy_t> tfw_p2p_ft_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
+    // cast guaranteed to work
+    const auto* plcf_10 =
+        static_cast<const sp4::plcf_10_t*>(phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
+
+    dectnrp_assert(plcf_10 != nullptr, "cast ill-formed");
+
+    // check if this is a self-reception, if so save the total TX-RX processing delay
+    if (plcf_10->ShortNetworkID == identity_ft.ShortNetworkID &&
+        plcf_10->TransmitterIdentity == identity_ft.ShortRadioDeviceID) {
+        // when was the beacon transmitted?
+        const auto A = allocation_ft.get_beacon_time_transmitted();
+
+        worksub_self_reception(A, phy_maclow.sync_report);
+    }
+
     return std::nullopt;
 }
 
