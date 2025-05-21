@@ -172,7 +172,7 @@ Furthermore, most SDRs are general-purpose devices with limitations regarding ty
 
 ### Radio Layer
 
-- [ ] GPIO support for B210, currently only X410 supported
+- [X] GPIO support for B210, currently only X410 supported
 - [ ] B210 USB transfer stability and 
 - [ ] integrate [SoapySDR](https://github.com/pothosware/SoapySDR)
 

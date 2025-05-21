@@ -24,7 +24,7 @@
 #include "dectnrp/upper/tpoint_firmware/p2p/contact_p2p.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp"
 
-#define TFW_P2P_FT_ALIGN_BEACON_START_BY_MEASURED_OFFSET
+// #define TFW_P2P_FT_ALIGN_BEACON_START_TO_FULL_SECOND_OR_CORRECT_OFFSET
 
 namespace dectnrp::upper::tfw::p2p {
 

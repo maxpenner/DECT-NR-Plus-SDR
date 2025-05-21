@@ -31,7 +31,7 @@ namespace dectnrp::upper::tfw::p2p {
 
 #ifdef TFW_P2P_EXPORT_PPX
 void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
-                                          const size_t idx,
+                                          [[maybe_unused]] const size_t idx,
                                           int64_t& next_64) {
     const auto pulse_config = ppx.get_ppx_imminent();
 

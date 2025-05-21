@@ -261,7 +261,7 @@ void hw_usrp_t::initialize_device() {
         }
 
 #ifdef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
-        gpio_state.bank = "FP0A";
+        gpio_state.bank = "FP0";
 
         // set as not controlled by ATR
         m_usrp->set_gpio_attr(gpio_state.bank, "CTRL", 0x00, gpio_state.gpio_mask);

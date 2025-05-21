@@ -50,6 +50,10 @@
 // only refers to real hardware, simulator has no GPIOs
 // #define RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
 
+#ifdef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
+#include "dectnrp/radio/pulse_config.hpp"
+#endif
+
 namespace dectnrp::radio {
 
 class hw_t : public common::layer_unit_t {
