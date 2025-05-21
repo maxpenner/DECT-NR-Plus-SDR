@@ -35,12 +35,11 @@ extern "C" {
 
 int run_test(std::string radio_device_class_string) {
     // define radio class
-    const auto radio_device_class =
-        dectnrp::section3::get_radio_device_class(radio_device_class_string);
+    const auto radio_device_class = dectnrp::sp3::get_radio_device_class(radio_device_class_string);
 
     // to allocate memory we need to know maximum packet sizes in advance
     const auto packet_sizes_maximum =
-        dectnrp::section3::get_maximum_packet_sizes(radio_device_class_string);
+        dectnrp::sp3::get_maximum_packet_sizes(radio_device_class_string);
 
     // allocate TX buffer
     std::unique_ptr<dectnrp::phy::harq::buffer_tx_t> hb_tx =
@@ -77,14 +76,13 @@ int run_test(std::string radio_device_class_string) {
     bool any_error = false;
 
     for (uint32_t u = 1; u <= radio_device_class.u_min; u = u * 2) {
-        const uint32_t b_idx_max = dectnrp::section3::phyres::b2b_idx[radio_device_class.b_min];
+        const uint32_t b_idx_max = dectnrp::sp3::phyres::b2b_idx[radio_device_class.b_min];
 
         for (uint32_t b_idx = 0; b_idx <= b_idx_max; ++b_idx) {
-            const uint32_t b = dectnrp::section3::phyres::b_idx2b[b_idx];
+            const uint32_t b = dectnrp::sp3::phyres::b_idx2b[b_idx];
 
-            const uint32_t t_max =
-                dectnrp::section3::tmmode::get_max_tm_mode_index_depending_on_N_TX(
-                    radio_device_class.N_TX_min);
+            const uint32_t t_max = dectnrp::sp3::tmmode::get_max_tm_mode_index_depending_on_N_TX(
+                radio_device_class.N_TX_min);
 
             for (uint32_t t = 0; t <= t_max; ++t) {
                 for (uint32_t p_type = 0; p_type <= 1; ++p_type) {
@@ -102,7 +100,7 @@ int run_test(std::string radio_device_class_string) {
 
                                 for (uint32_t iter = 0; iter < iter_max; ++iter) {
                                     // define a transmission
-                                    const dectnrp::section3::packet_sizes_def_t psdef = {
+                                    const dectnrp::sp3::packet_sizes_def_t psdef = {
                                         .u = u,
                                         .b = b,
                                         .PacketLengthType = p_type,
@@ -112,8 +110,7 @@ int run_test(std::string radio_device_class_string) {
                                         .Z = radio_device_class.Z_min};
 
                                     // calculate sizes of this transmission
-                                    const auto packet_sizes =
-                                        dectnrp::section3::get_packet_sizes(psdef);
+                                    const auto packet_sizes = dectnrp::sp3::get_packet_sizes(psdef);
 
                                     // is packet configuration valid?
                                     if (!packet_sizes.has_value()) {
@@ -141,7 +138,7 @@ int run_test(std::string radio_device_class_string) {
                                     hb_rx->reset_a_cnt_and_softbuffer();
 
                                     // set TX and RX cfg parameters for this transmission
-                                    const dectnrp::section3::fec_cfg_t tx_cfg = {
+                                    const dectnrp::sp3::fec_cfg_t tx_cfg = {
                                         .PLCF_type = PLCF_type,
                                         .closed_loop = true,
                                         .beamforming = true,
@@ -154,7 +151,7 @@ int run_test(std::string radio_device_class_string) {
 
                                     // assume same data is known at receiver, usually extracted from
                                     // PLCF
-                                    const dectnrp::section3::fec_cfg_t rx_cfg = {
+                                    const dectnrp::sp3::fec_cfg_t rx_cfg = {
                                         .PLCF_type = tx_cfg.PLCF_type,
                                         .closed_loop = tx_cfg.closed_loop,
                                         .beamforming = tx_cfg.beamforming,

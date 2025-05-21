@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <string>
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 struct radio_device_class_t {
         std::string radio_device_class_string{};
@@ -48,4 +48,4 @@ struct radio_device_class_t {
 
 radio_device_class_t get_radio_device_class(const std::string& radio_device_class_string);
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

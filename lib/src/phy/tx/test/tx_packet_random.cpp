@@ -43,7 +43,7 @@ int generate_random_TX_packet_within_rdc_limits(std::string radio_device_class_s
 
     // to allocate memory we need to know maximum packet sizes in advance
     const auto packet_sizes_maximum =
-        dectnrp::section3::get_maximum_packet_sizes(radio_device_class_string);
+        dectnrp::sp3::get_maximum_packet_sizes(radio_device_class_string);
 
     // create HARQ buffer pool for TX and RX
     auto hpp = std::make_unique<dectnrp::phy::harq::process_pool_t>(packet_sizes_maximum, 1, 1);
@@ -96,7 +96,7 @@ int generate_random_TX_packet_within_rdc_limits(std::string radio_device_class_s
         hw->get_samp_rate(), dect_samp_rate_os, enforce_dectnrp_samp_rate_by_resampling);
 
     // init IQ sample buffers
-    hw->initialize_buffer_tx_pool(dectnrp::section3::get_N_samples_in_packet_length_max(
+    hw->initialize_buffer_tx_pool(dectnrp::sp3::get_N_samples_in_packet_length_max(
         packet_sizes_maximum, hw->get_samp_rate()));
 
     auto tx = std::make_unique<dectnrp::phy::tx_t>(packet_sizes_maximum, os_min, resampler_param);
@@ -116,7 +116,7 @@ int generate_random_TX_packet_within_rdc_limits(std::string radio_device_class_s
 
     // blocking call, will internally loop until valid packet size is found
     const auto packet_sizes_random =
-        dectnrp::section3::get_random_packet_sizes_within_rdc(radio_device_class_string, randomgen);
+        dectnrp::sp3::get_random_packet_sizes_within_rdc(radio_device_class_string, randomgen);
 
     // at this point, we now know that our packet can be generated
 
@@ -156,7 +156,7 @@ int generate_random_TX_packet_within_rdc_limits(std::string radio_device_class_s
 
     const uint32_t codebook_index =
         randomgen.randi(0,
-                        dectnrp::section3::W_t::get_codebook_index_max(
+                        dectnrp::sp3::W_t::get_codebook_index_max(
                             packet_sizes_random.tm_mode.N_TS, packet_sizes_random.tm_mode.N_TX));
 
     // define additional radio layer packet metadata

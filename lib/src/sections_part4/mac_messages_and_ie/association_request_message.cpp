@@ -27,7 +27,7 @@
 #include "dectnrp/common/adt/enumeration.hpp"
 #include "dectnrp/sections_part2/channel_arrangement.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 association_request_message_t::association_request_message_t() {
     mac_mux_header.zero();
@@ -88,13 +88,13 @@ bool association_request_message_t::is_valid() const {
             return false;
         }
 
-        if (!section2::is_absolute_channel_number_in_range(ft_config.next_cluster_channel)) {
+        if (!sp2::is_absolute_channel_number_in_range(ft_config.next_cluster_channel)) {
             return false;
         }
     }
 
     if (current_cluster_channel.has_value() &&
-        !section2::is_absolute_channel_number_in_range(current_cluster_channel.value())) {
+        !sp2::is_absolute_channel_number_in_range(current_cluster_channel.value())) {
         return false;
     }
 
@@ -280,4 +280,4 @@ mmie_packing_peeking_t::peek_result_t association_request_message_t::get_packed_
     return size;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

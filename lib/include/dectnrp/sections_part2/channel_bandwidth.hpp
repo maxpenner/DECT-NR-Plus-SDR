@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 struct channel_bandwidth_t {
         uint32_t operating_channel_bandwidth_index;
@@ -32,4 +32,4 @@ struct channel_bandwidth_t {
 
 channel_bandwidth_t get_channel_bandwidth(const uint32_t operating_channel_bandwidth_index);
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

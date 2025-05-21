@@ -91,17 +91,17 @@ class tfw_loopback_t : public tpoint_t {
 
         /// meta data used in generate_packet()
         struct packet_params_t {
-                section3::packet_sizes_def_t psdef;
+                sp3::packet_sizes_def_t psdef;
                 uint32_t N_samples_in_packet_length;
 
                 /// PLCF to test
                 uint32_t PLCF_type;
                 uint32_t PLCF_type_header_format;
 
-                section4::mac_architecture::identity_t identity;
-                section4::plcf_10_t plcf_10;
-                section4::plcf_20_t plcf_20;
-                section4::plcf_21_t plcf_21;
+                sp4::mac_architecture::identity_t identity;
+                sp4::plcf_10_t plcf_10;
+                sp4::plcf_20_t plcf_20;
+                sp4::plcf_21_t plcf_21;
 
                 void update_plcf_unpacked();
 

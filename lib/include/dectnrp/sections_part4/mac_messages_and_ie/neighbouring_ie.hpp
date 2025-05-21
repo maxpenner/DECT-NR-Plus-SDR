@@ -26,7 +26,7 @@
 #include "dectnrp/sections_part4/mac_messages_and_ie/network_beacon_message.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/rd_capability_ie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class neighbouring_ie_t final : public mmie_packing_peeking_t {
     public:
@@ -53,4 +53,4 @@ class neighbouring_ie_t final : public mmie_packing_peeking_t {
         peek_result_t get_packed_size_by_peeking(const uint8_t* mac_pdu_offset) const override;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

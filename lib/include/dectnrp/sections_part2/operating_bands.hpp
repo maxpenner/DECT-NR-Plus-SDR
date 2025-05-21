@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 struct operating_band_t {
         uint32_t band_number;
@@ -32,4 +32,4 @@ struct operating_band_t {
 
 operating_band_t get_operating_band(const uint32_t band_number);
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

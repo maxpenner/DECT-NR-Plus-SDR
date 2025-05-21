@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <cstdio>
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 struct numerologies_t {
         uint32_t u;
@@ -49,4 +49,4 @@ struct numerologies_t {
 
 numerologies_t get_numerologies(const uint32_t u, const uint32_t b);
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

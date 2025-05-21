@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 /**
  * From a higher layer we receive the PLCF and we create the PCC. From a higher layer we receive the
@@ -41,4 +41,4 @@ struct fec_cfg_t {
         uint32_t Z = 0;            // TB
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

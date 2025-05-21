@@ -24,7 +24,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 void mac_header_type_t::zero() {
     Version = version_ec::not_defined;
@@ -64,4 +64,4 @@ bool mac_header_type_t::unpack(const uint8_t* mac_pdu_front) {
     return is_valid();
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

@@ -24,7 +24,7 @@
 #include "dectnrp/common/adt/enumeration.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4::extensions {
+namespace dectnrp::sp4::extensions {
 
 time_announce_ie_t::time_announce_ie_t() {
     mac_mux_header.zero();
@@ -96,4 +96,4 @@ bool time_announce_ie_t::unpack(const uint8_t* mac_pdu_offset) {
     return is_valid();
 }
 
-}  // namespace dectnrp::section4::extensions
+}  // namespace dectnrp::sp4::extensions

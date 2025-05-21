@@ -25,7 +25,7 @@
 #include "dectnrp/common/adt/enumeration.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 broadcast_indication_ie_t::broadcast_indication_ie_t() {
     mac_mux_header.zero();
@@ -256,4 +256,4 @@ mmie_packing_peeking_t::peek_result_t broadcast_indication_ie_t::get_packed_size
     return packed_size;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

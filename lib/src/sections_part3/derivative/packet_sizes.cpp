@@ -34,7 +34,7 @@
 #include "dectnrp/sections_part3/transmission_packet_structure.hpp"
 #include "dectnrp/sections_part3/transport_block_size.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 static packet_sizes_t get_maximum_packet_sizes(const radio_device_class_t& radio_device_class) {
     // take maximum values from radio device class for maximum packet size
@@ -315,4 +315,4 @@ packet_sizes_t get_random_packet_sizes_within_rdc(const std::string& radio_devic
     return q.value();
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

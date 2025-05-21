@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 mcs_t get_mcs(const uint32_t index) {
     dectnrp_assert(index <= 11, "MCS out of bound");
@@ -106,4 +106,4 @@ mcs_t get_mcs(const uint32_t index) {
     return q;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

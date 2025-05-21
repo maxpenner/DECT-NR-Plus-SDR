@@ -26,7 +26,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 void plcf_base_t::zero() {
     HeaderFormat = 0;
@@ -80,4 +80,4 @@ void plcf_base_t::set_TransmitPower(const int32_t TransmitPower_dBm) {
         lower == tx_power_table.end() ? tx_power_table.size() - 1 : lower - tx_power_table.begin();
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

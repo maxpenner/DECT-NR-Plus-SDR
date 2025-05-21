@@ -25,7 +25,7 @@
 
 #include "dectnrp/common/multidim.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 class df_t {
     public:
@@ -76,4 +76,4 @@ class df_pxc_t : public df_t {
         common::vec4d<uint32_t> k_i_all_symbols;
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

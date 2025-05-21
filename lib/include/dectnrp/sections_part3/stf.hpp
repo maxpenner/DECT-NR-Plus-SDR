@@ -29,7 +29,7 @@
 #include "dectnrp/constants.hpp"
 #include "dectnrp/sections_part3/stf_param.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 class stf_t {
     public:
@@ -162,4 +162,4 @@ class stf_t {
                                                    const int N_b_OCC);
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

@@ -21,7 +21,7 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/configuration_request_ie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 configuration_request_ie_t::configuration_request_ie_t() {
     mac_mux_header.zero();
@@ -33,4 +33,4 @@ configuration_request_ie_t::configuration_request_ie_t() {
     dectnrp_assert(check_validity_at_runtime(this), "mmie invalid");
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

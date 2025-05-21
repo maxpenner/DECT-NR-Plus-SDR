@@ -27,7 +27,7 @@ extern "C" {
 #include "srsran/phy/common/sequence.h"
 }
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 class scrambling_pdc_t {
     public:
@@ -55,4 +55,4 @@ class scrambling_pdc_t {
         std::unordered_map<uint32_t, std::pair<srsran_sequence_t, srsran_sequence_t>> sequences;
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

@@ -26,7 +26,7 @@
 
 #define ASSERT_BAND_NUMBER(x) dectnrp_assert(1 <= x || x <= 19, "band number {} unknown", x)
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 absolute_channel_frequency_numbering_t get_absolute_channel_frequency_numbering(
     const uint32_t band_number) {
@@ -192,4 +192,4 @@ bool is_absolute_channel_number_in_range(const uint32_t channel_number) {
     return false;
 }
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

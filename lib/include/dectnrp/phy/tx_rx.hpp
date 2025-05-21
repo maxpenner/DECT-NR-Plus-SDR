@@ -59,7 +59,7 @@ class tx_rx_t {
          * \param os_min_
          * \param resampler_param_
          */
-        explicit tx_rx_t(const section3::packet_sizes_t maximum_packet_sizes_,
+        explicit tx_rx_t(const sp3::packet_sizes_t maximum_packet_sizes_,
                          const uint32_t os_min_,
                          const resampler_param_t resampler_param_);
 
@@ -71,20 +71,20 @@ class tx_rx_t {
         // ##################################################
         // TX/RX variables initialized once in the constructor
 
-        const section3::packet_sizes_t maximum_packet_sizes;
+        const sp3::packet_sizes_t maximum_packet_sizes;
         const uint32_t os_min;
         const uint32_t dect_samp_rate_oversampled_max;
 
         /// connection between DECT sample rate and hw sample rate
         const resampler_param_t resampler_param;
 
-        section3::stf_t stf;  // constructor creates LUTs, must be loaded for every STF
-        section3::pcc_t pcc;  // constructor creates LUTs, must be reconfigured for every packet
-        section3::drs_t drs;  // constructor creates LUTs, must be reconfigured for every packet
-        section3::pdc_t pdc;  // constructor creates LUTs, must be reconfigured for every packet
+        sp3::stf_t stf;  // constructor creates LUTs, must be loaded for every STF
+        sp3::pcc_t pcc;  // constructor creates LUTs, must be reconfigured for every packet
+        sp3::drs_t drs;  // constructor creates LUTs, must be reconfigured for every packet
+        sp3::pdc_t pdc;  // constructor creates LUTs, must be reconfigured for every packet
 
         /// transmit diversity coding, constructor creates LUTs, must be loaded for each symbol
-        std::unique_ptr<section3::Y_i_t> Y_i;
+        std::unique_ptr<sp3::Y_i_t> Y_i;
 
         /// initialized in constructor, must be reconfigured for every new packet
         std::unique_ptr<fec_t> fec;
@@ -117,7 +117,7 @@ class tx_rx_t {
         uint32_t N_b_CP_os;
 
         /// see Table 7.2-1 in part 3
-        section3::tmmode::tm_mode_t tm_mode;
+        sp3::tmmode::tm_mode_t tm_mode;
         bool transmit_diversity_mode;
 
         /// internal counters

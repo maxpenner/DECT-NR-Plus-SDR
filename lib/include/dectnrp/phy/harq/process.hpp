@@ -42,7 +42,7 @@ class process_t : public common::lockable_outer_inner_t {
         [[nodiscard]] uint32_t get_id() const;
         [[nodiscard]] uint32_t get_PLCF_type() const;
         [[nodiscard]] uint32_t get_network_id() const;
-        [[nodiscard]] const section3::packet_sizes_t& get_packet_sizes() const;
+        [[nodiscard]] const sp3::packet_sizes_t& get_packet_sizes() const;
         [[nodiscard]] uint32_t get_rv() const;
 
         friend class process_pool_t;
@@ -60,7 +60,7 @@ class process_t : public common::lockable_outer_inner_t {
          * which is part of PLCF header type 1 and 2.
          */
         uint32_t network_id{0};
-        section3::packet_sizes_t packet_sizes{};
+        sp3::packet_sizes_t packet_sizes{};
         uint32_t rv{0};
 
         /**

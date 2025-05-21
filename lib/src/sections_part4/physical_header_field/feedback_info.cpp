@@ -25,7 +25,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 uint32_t feedback_info_t::mcs_2_cqi(const int32_t mcs) {
     dectnrp_assert(0 <= mcs, "MCS undefined");
@@ -424,4 +424,4 @@ bool feedback_info_pool_t::unpack(const uint32_t feedback_format, const uint8_t*
     }
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

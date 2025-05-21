@@ -30,7 +30,7 @@ extern "C" {
 #include "srsran/phy/fec/turbo/turbodecoder.h"
 }
 
-namespace dectnrp::section3 {
+namespace dectnrp::phy {
 
 struct pcc_enc_t {
         /// encoding intermediary steps
@@ -72,4 +72,4 @@ bool pcc_enc_decode(pcc_enc_t* q,
                     bool& cl,
                     bool& bf);
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::phy

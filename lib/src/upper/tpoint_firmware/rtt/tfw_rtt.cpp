@@ -52,7 +52,7 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
              .mcs_index = 2,
              .Z = worker_pool_config.radio_device_class.Z_min};
 
-    identity_ft = section4::mac_architecture::identity_t(100, 444, 555);
+    identity_ft = sp4::mac_architecture::identity_t(100, 444, 555);
     identity_pt = identity_ft;
     ++identity_pt.LongRadioDeviceID;
     ++identity_pt.ShortRadioDeviceID;
@@ -112,8 +112,8 @@ phy::maclow_phy_t tfw_rtt_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     }
 
     // cast guaranteed to work
-    const auto* plcf_10_rx = static_cast<const section4::plcf_10_t*>(
-        phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
+    const auto* plcf_10_rx =
+        static_cast<const sp4::plcf_10_t*>(phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
 
     dectnrp_assert(plcf_10_rx != nullptr, "cast ill-formed");
 
@@ -286,7 +286,7 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     }
 
     // this is now a well-defined packet size
-    const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
+    const sp3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
     plcf_10.pack(hp_tx->get_a_plcf());
 
@@ -320,7 +320,7 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
             buffer_rx.get_rx_time_passed() + hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround))};
 
     ++tx_order_id;
-    tx_earliest_64 = buffer_tx_meta.tx_time_64 + section3::get_N_samples_in_packet_length(
+    tx_earliest_64 = buffer_tx_meta.tx_time_64 + sp3::get_N_samples_in_packet_length(
                                                      hp_tx->get_packet_sizes(), hw.get_samp_rate());
 
     machigh_phy.tx_descriptor_vec.push_back(

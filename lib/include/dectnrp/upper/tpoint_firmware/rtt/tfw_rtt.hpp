@@ -68,14 +68,14 @@ class tfw_rtt_t final : public tpoint_t {
         common::watch_t watch;
 
         /// packet dimensions
-        section3::packet_sizes_def_t psdef;
+        sp3::packet_sizes_def_t psdef;
 
         /// FT and PT must know both identities
-        section4::mac_architecture::identity_t identity_ft;
-        section4::mac_architecture::identity_t identity_pt;
+        sp4::mac_architecture::identity_t identity_ft;
+        sp4::mac_architecture::identity_t identity_pt;
 
         /// PLCF fixed to type 1 and header format 0
-        section4::plcf_10_t plcf_10;
+        sp4::plcf_10_t plcf_10;
 
         /// FT receives data from application layer, and forwards data to application layer
         std::unique_ptr<application::app_server_t> app_server;

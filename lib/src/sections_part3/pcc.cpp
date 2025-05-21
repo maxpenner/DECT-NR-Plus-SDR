@@ -32,7 +32,7 @@ static constexpr int32_t PCC_OCCUPIED_DC = -1;
 static constexpr int32_t PCC_OCCUPIED_GUARDS = -2;
 static constexpr int32_t PCC_OCCUPIED_DRS = -3;
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 pcc_t::pcc_t(const uint32_t b_max, const uint32_t N_TS_max) {
     k_i_all_symbols.clear();
@@ -314,4 +314,4 @@ common::vec2d<uint32_t> pcc_t::idx2sub_row(const std::vector<uint32_t> linear_id
     return linear_idx_per_column;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

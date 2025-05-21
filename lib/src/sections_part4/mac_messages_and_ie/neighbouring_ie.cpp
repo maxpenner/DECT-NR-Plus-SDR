@@ -27,7 +27,7 @@
 #include "dectnrp/common/adt/enumeration.hpp"
 #include "dectnrp/sections_part2/channel_arrangement.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 neighbouring_ie_t::neighbouring_ie_t() {
     mac_mux_header.zero();
@@ -85,7 +85,7 @@ bool neighbouring_ie_t::is_valid() const {
     }
 
     if (next_cluster_channel.has_value() &&
-        !section2::is_absolute_channel_number_in_range(next_cluster_channel.value())) {
+        !sp2::is_absolute_channel_number_in_range(next_cluster_channel.value())) {
         return false;
     }
 
@@ -237,4 +237,4 @@ mmie_packing_peeking_t::peek_result_t neighbouring_ie_t::get_packed_size_by_peek
     return packed_size;
 }
 
-};  // namespace dectnrp::section4
+};  // namespace dectnrp::sp4

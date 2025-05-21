@@ -18,11 +18,11 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-add_library(dectnrp_part4 STATIC)
-target_link_libraries(dectnrp_part4 dectnrp_common dectnrp_part2)
+add_library(dectnrp_sections_part_4 STATIC)
+target_link_libraries(dectnrp_sections_part_4 dectnrp_common dectnrp_sections_part_2)
 
-file(GLOB DECTNRP_PART4_SOURCES "*.cpp")
-target_sources(dectnrp_part4 PRIVATE ${DECTNRP_PART4_SOURCES})
+file(GLOB DECTNRP_SECTIONS_PART_4_SOURCES "*.cpp")
+target_sources(dectnrp_sections_part_4 PRIVATE ${DECTNRP_SECTIONS_PART_4_SOURCES})
 
 add_subdirectory(mac_architecture)
 add_subdirectory(mac_messages_and_ie)

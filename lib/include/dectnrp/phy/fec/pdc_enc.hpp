@@ -32,7 +32,7 @@ extern "C" {
 
 #include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::phy {
 
 struct pdc_enc_t {
         /// encoding intermediary steps
@@ -50,7 +50,7 @@ struct pdc_enc_t {
         uint32_t llr_bit_width;   // width of input
 };
 
-int pdc_enc_init(pdc_enc_t* q, const packet_sizes_t& packet_sizes_maximum);
+int pdc_enc_init(pdc_enc_t* q, const sp3::packet_sizes_t& packet_sizes_maximum);
 
 int pdc_enc_free(pdc_enc_t* q);
 
@@ -84,4 +84,4 @@ bool pdc_decode_codeblocks(pdc_enc_t* q,
                            uint32_t& wp,
                            const uint32_t nof_d_bits_maximum,
                            srsran_sequence_t* srsran_sequence);
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::phy

@@ -43,7 +43,7 @@ uint32_t process_t::get_network_id() const {
     return network_id;
 }
 
-const section3::packet_sizes_t& process_t::get_packet_sizes() const {
+const sp3::packet_sizes_t& process_t::get_packet_sizes() const {
     ASSERT_FULLY_LOCKED;
     return packet_sizes;
 };
@@ -58,7 +58,7 @@ void process_t::reset() {
     ASSERT_FULLY_LOCKED;
     PLCF_type = 0;
     network_id = 0;
-    packet_sizes = section3::packet_sizes_t();
+    packet_sizes = sp3::packet_sizes_t();
     rv = 0;
 }
 

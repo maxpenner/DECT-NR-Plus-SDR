@@ -33,7 +33,7 @@ chscanner_t::chscanner_t(const radio::buffer_rx_t& buffer_rx_)
     : buffer_rx(buffer_rx_),
       ant_streams(buffer_rx.get_ant_streams()),
       ant_streams_length_samples(buffer_rx.ant_streams_length_samples),
-      duration_lut(section3::duration_lut_t(buffer_rx.samp_rate)) {}
+      duration_lut(sp3::duration_lut_t(buffer_rx.samp_rate)) {}
 
 void chscanner_t::scan(chscan_t& ch_scan) {
     dectnrp_assert(ch_scan.end_64 <= buffer_rx.get_rx_time_passed(), "end time not reached yet");

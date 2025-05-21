@@ -34,10 +34,10 @@ class resource_t {
          * \param offset_
          * \param length_
          */
-        explicit resource_t(const section3::duration_t offset_, const section3::duration_t length_);
+        explicit resource_t(const sp3::duration_t offset_, const sp3::duration_t length_);
 
-        section3::duration_t offset;
-        section3::duration_t length;
+        sp3::duration_t offset;
+        sp3::duration_t length;
 
         uint32_t get_first_sample_index() const;
         uint32_t get_last_sample_index() const;

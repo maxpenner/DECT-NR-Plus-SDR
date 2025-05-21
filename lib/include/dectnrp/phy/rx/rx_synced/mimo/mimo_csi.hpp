@@ -43,7 +43,7 @@ class mimo_csi_t {
          * \param sync_report contains time of reception and number of RX antennas
          */
         void update_from_feedback(const uint32_t feedback_format,
-                                  const section4::feedback_info_pool_t& feedback_info_pool,
+                                  const sp4::feedback_info_pool_t& feedback_info_pool,
                                   const sync_report_t& sync_report);
 
         /**

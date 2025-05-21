@@ -233,7 +233,7 @@ class rx_synced_t final : public tx_rx_t, public rx_pacer_t {
          * correct CRC had. After that, we interpret the decoded PLCFs within the plcf_pool.
          */
         std::unique_ptr<harq::buffer_rx_plcf_t> hb_rx_plcf;
-        std::unique_ptr<section4::plcf_decoder_t> plcf_decoder;
+        std::unique_ptr<sp4::plcf_decoder_t> plcf_decoder;
 
         /**
          * \brief If the lower MAC has made the decision to continue with the PDC, the function
@@ -241,7 +241,7 @@ class rx_synced_t final : public tx_rx_t, public rx_pacer_t {
          * interpret the bits, i.e. the MAC messages and information elements. For this, we use this
          * mac_pdu_decoder.
          */
-        section4::mac_pdu_decoder_t mac_pdu_decoder;
+        sp4::mac_pdu_decoder_t mac_pdu_decoder;
 
         // ##################################################
         // RX synced specific variables updated for every new packet
@@ -277,11 +277,11 @@ class rx_synced_t final : public tx_rx_t, public rx_pacer_t {
         std::vector<cf_t*> ofdm_symbol_now;
 
         /// before decoding the PDC, we have to configure the FEC in this structure
-        section3::fec_cfg_t fec_cfg;
+        sp3::fec_cfg_t fec_cfg;
 
         /// readability pointer to elements on maclow_phy
         const maclow_phy_t* maclow_phy;
-        const section3::packet_sizes_t* packet_sizes;
+        const sp3::packet_sizes_t* packet_sizes;
         harq::buffer_rx_t* hb_tb;
 
         /// demapper type

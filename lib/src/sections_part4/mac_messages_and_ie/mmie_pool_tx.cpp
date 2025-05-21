@@ -49,7 +49,7 @@
 #include "dectnrp/sections_part4/mac_messages_and_ie/extensions/power_target_ie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/extensions/time_announce_ie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 mmie_pool_tx_t::mmie_pool_tx_t() {
     /* Each MMIE that is already implemented should be contained in the pool at least once. Same
@@ -118,4 +118,4 @@ void mmie_pool_tx_t::fill_with_padding_ies(uint8_t* mac_pdu_offset, uint32_t N_b
     }
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

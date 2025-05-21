@@ -28,7 +28,7 @@
 #include "dectnrp/common/adt/enumeration.hpp"
 #include "dectnrp/sections_part2/channel_arrangement.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 cluster_beacon_message_t::cluster_beacon_message_t() {
     mac_mux_header.zero();
@@ -99,7 +99,7 @@ bool cluster_beacon_message_t::is_valid() const {
     }
 
     if (next_cluster_channel.has_value() &&
-        !section2::is_absolute_channel_number_in_range(next_cluster_channel.value())) {
+        !sp2::is_absolute_channel_number_in_range(next_cluster_channel.value())) {
         return false;
     }
 
@@ -341,4 +341,4 @@ mmie_packing_peeking_t::peek_result_t cluster_beacon_message_t::get_packed_size_
     return length;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

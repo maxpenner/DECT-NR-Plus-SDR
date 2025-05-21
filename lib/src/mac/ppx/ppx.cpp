@@ -26,11 +26,11 @@
 
 namespace dectnrp::mac {
 
-ppx_t::ppx_t(const section3::duration_t ppx_period_,
-             const section3::duration_t ppx_length_,
-             const section3::duration_t ppx_time_advance_,
-             const section3::duration_t beacon_period_,
-             const section3::duration_t time_deviation_max_)
+ppx_t::ppx_t(const sp3::duration_t ppx_period_,
+             const sp3::duration_t ppx_length_,
+             const sp3::duration_t ppx_time_advance_,
+             const sp3::duration_t beacon_period_,
+             const sp3::duration_t time_deviation_max_)
     : ppx_period(ppx_period_),
       ppx_length(ppx_length_),
       ppx_time_advance(ppx_time_advance_),

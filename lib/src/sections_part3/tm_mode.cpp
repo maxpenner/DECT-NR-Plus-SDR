@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section3::tmmode {
+namespace dectnrp::sp3::tmmode {
 
 tm_mode_t get_tm_mode(const uint32_t index) {
     dectnrp_assert(index <= 11, "tm_mode_index undefined");
@@ -188,4 +188,4 @@ uint32_t get_equivalent_tm_mode(const uint32_t N_eff_TX, const uint32_t N_SS) {
     return N_SS == 1 ? 10 : 11;
 }
 
-}  // namespace dectnrp::section3::tmmode
+}  // namespace dectnrp::sp3::tmmode

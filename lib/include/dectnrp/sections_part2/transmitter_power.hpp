@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 struct maximum_output_power_t {
         uint32_t operating_channel_bandwidth;
@@ -42,4 +42,4 @@ maximum_output_power_t get_maximum_output_power(const uint32_t operating_channel
 
 minimum_output_power_t get_maximum_output_power(const uint32_t operating_channel_bandwidth);
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

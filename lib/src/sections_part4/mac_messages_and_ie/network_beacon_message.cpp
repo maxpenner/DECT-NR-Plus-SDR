@@ -28,7 +28,7 @@
 #include "dectnrp/common/adt/enumeration.hpp"
 #include "dectnrp/sections_part2/channel_arrangement.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 // transmit power as coded in Table 6.2.1-3b
 static constexpr std::array<int32_t, 13> tx_power_table = {
@@ -95,22 +95,22 @@ bool network_beacon_message_t::is_valid() const {
     }
 
     if (current_cluster_channel.has_value() &&
-        !section2::is_absolute_channel_number_in_range(current_cluster_channel.value())) {
+        !sp2::is_absolute_channel_number_in_range(current_cluster_channel.value())) {
         return false;
     }
 
     if (network_beacon_channel_0.has_value() &&
-        !section2::is_absolute_channel_number_in_range(network_beacon_channel_0.value())) {
+        !sp2::is_absolute_channel_number_in_range(network_beacon_channel_0.value())) {
         return false;
     }
 
     if (network_beacon_channel_1.has_value() &&
-        !section2::is_absolute_channel_number_in_range(network_beacon_channel_1.value())) {
+        !sp2::is_absolute_channel_number_in_range(network_beacon_channel_1.value())) {
         return false;
     }
 
     if (network_beacon_channel_2.has_value() &&
-        !section2::is_absolute_channel_number_in_range(network_beacon_channel_2.value())) {
+        !sp2::is_absolute_channel_number_in_range(network_beacon_channel_2.value())) {
         return false;
     }
 
@@ -122,7 +122,7 @@ bool network_beacon_message_t::is_valid() const {
         return false;
     }
 
-    if (!section2::is_absolute_channel_number_in_range(next_cluster_channel)) {
+    if (!sp2::is_absolute_channel_number_in_range(next_cluster_channel)) {
         return false;
     }
 
@@ -356,4 +356,4 @@ mmie_packing_peeking_t::peek_result_t network_beacon_message_t::get_packed_size_
     return length;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

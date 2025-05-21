@@ -24,7 +24,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 bool check_validity_at_runtime(const mmie_t* mmie) {
     if (dynamic_cast<const mmie_packing_t*>(mmie) != nullptr &&
@@ -100,4 +100,4 @@ uint8_t* mmie_flowing_t::get_data_ptr() const {
     return data_ptr;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

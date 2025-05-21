@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 struct packet_sizes_def_t {
         /// freely selected during operation (max values defined by radio device class)
@@ -44,4 +44,4 @@ struct packet_sizes_def_t {
         uint32_t Z{};
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

@@ -25,7 +25,7 @@
 #include "dectnrp/common/complex.hpp"
 #include "dectnrp/common/multidim.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 class Y_i_t {
     public:
@@ -59,4 +59,4 @@ class Y_i_t {
         static constexpr uint32_t N_TS248_idx_vec[9] = {0, 0, 0, 0, 1, 0, 0, 0, 2};
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

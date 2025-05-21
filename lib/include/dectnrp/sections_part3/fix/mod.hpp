@@ -27,11 +27,11 @@ extern "C" {
 #include "srsran/phy/modem/modem_table.h"
 }
 
-namespace dectnrp::section3::fix {
+namespace dectnrp::sp3::fix {
 
 int srsran_mod_modulate_bytes_FIX(const srsran_modem_table_t* q,
                                   const uint8_t* bits,
                                   cf_t* symbols,
                                   uint32_t nbits);
 
-}  // namespace dectnrp::section3::fix
+}  // namespace dectnrp::sp3::fix

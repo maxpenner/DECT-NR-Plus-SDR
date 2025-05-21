@@ -40,10 +40,9 @@ class contact_list_t {
             contacts_vec.reserve(N_entries);
         }
 
-        void add_new_contact_and_setup_indexing(
-            const section4::mac_architecture::identity_t& identity,
-            const uint32_t conn_idx_server,
-            const uint32_t conn_idx_client) noexcept {
+        void add_new_contact_and_setup_indexing(const sp4::mac_architecture::identity_t& identity,
+                                                const uint32_t conn_idx_server,
+                                                const uint32_t conn_idx_client) noexcept {
             srdid_bimap.insert(identity.LongRadioDeviceID, identity.ShortRadioDeviceID);
             conn_idx_server_bimap.insert(identity.LongRadioDeviceID, conn_idx_server);
             conn_idx_client_bimap.insert(identity.LongRadioDeviceID, conn_idx_client);

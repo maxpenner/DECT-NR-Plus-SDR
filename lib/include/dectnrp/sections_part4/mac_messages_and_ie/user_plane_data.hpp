@@ -23,7 +23,7 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class user_plane_data_t final : public mmie_flowing_t {
     public:
@@ -33,4 +33,4 @@ class user_plane_data_t final : public mmie_flowing_t {
         uint32_t get_flow_id() const override;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

@@ -44,11 +44,11 @@ void tfw_timesync_t::work_start_imminent(const int64_t start_time_64) {
     // time of first pulse generation
     sample_count_at_next_pps_change_64 =
         duration_lut.get_N_samples_at_next_full_second(start_time_64) +
-        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 950);
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 950);
 
     // time of first time offset measurement
     sample_count_at_next_measurement_64 =
-        start_time_64 + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001,
+        start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
                                                                  measurement_start_delay_s);
 
     dectnrp_log_inf(
@@ -67,7 +67,7 @@ phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::phy_mac_reg_t& phy_ma
 
         // time of next pulse generation
         sample_count_at_next_pps_change_64 +=
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
+            duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001);
     }
 
     // measurement
@@ -105,7 +105,7 @@ phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::phy_mac_reg_t& phy_ma
 
         // update time of next measurement
         sample_count_at_next_measurement_64 += duration_lut.get_N_samples_from_duration(
-            section3::duration_ec_t::ms001, measurement_interval_ms);
+            sp3::duration_ec_t::ms001, measurement_interval_ms);
     }
 
     return phy::machigh_phy_t();
@@ -209,7 +209,7 @@ void tfw_timesync_t::worksub_pps(const int64_t now_64, const size_t idx) {
     const radio::pulse_config_t pulse_config{
         .rising_edge_64 = A,
         .falling_edge_64 =
-            A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 250)};
+            A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 250)};
 
     hw.schedule_pulse_tc(pulse_config);
 }

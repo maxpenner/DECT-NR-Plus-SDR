@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section3::tmmode {
+namespace dectnrp::sp3::tmmode {
 
 struct tm_mode_t {
         uint32_t index{};
@@ -75,4 +75,4 @@ uint32_t get_single_antenna_mode(const uint32_t N_TX);
 /// Table 7.2-1: Transmission modes and transmission mode signalling
 uint32_t get_equivalent_tm_mode(const uint32_t N_eff_TX, const uint32_t N_SS);
 
-}  // namespace dectnrp::section3::tmmode
+}  // namespace dectnrp::sp3::tmmode

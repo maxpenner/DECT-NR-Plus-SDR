@@ -34,7 +34,7 @@
     dectnrp_assert(dec_name.get_N_mmie<std::remove_pointer<decltype(mmie_ptr_name)>::type>() == x, \
                    "incorrect number of MMIEs");
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class mac_pdu_decoder_t final : private mmie_pool_tx_t {
     public:
@@ -124,12 +124,12 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
          *
          * \return empty vector if decoding failed
          */
-        [[nodiscard]] const std::vector<section4::mmie_t*>& get_mmie_decoded_vec() const {
+        [[nodiscard]] const std::vector<sp4::mmie_t*>& get_mmie_decoded_vec() const {
             return mmie_decoded_vec;
         }
 
         /// number of specific MMIE, primarily used for asserts
-        template <std::derived_from<section4::mmie_t> T>
+        template <std::derived_from<sp4::mmie_t> T>
         [[nodiscard]] size_t get_N_mmie() const {
             return std::count_if(mmie_decoded_vec.begin(), mmie_decoded_vec.end(), [](auto elem) {
                 return dynamic_cast<T*>(elem) != nullptr;
@@ -195,7 +195,7 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
         std::unordered_map<std::type_index, std::size_t> index_next_ie;
 
         /// stores raw pointers to already decoded MMIEs
-        std::vector<section4::mmie_t*> mmie_decoded_vec;
+        std::vector<sp4::mmie_t*> mmie_decoded_vec;
 
         /**
          * \brief Gets a message IE from the pool that corresponds to a given type index and has not
@@ -208,4 +208,4 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
         [[nodiscard]] mmie_t* get_mmie_from_pool(const std::type_index& type_idx);
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

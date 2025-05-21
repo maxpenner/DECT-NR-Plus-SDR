@@ -26,7 +26,7 @@
 #include "dectnrp/sections_part3/pdc.hpp"
 #include "dectnrp/sections_part3/physical_resources.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 drs_t::drs_t(const uint32_t b_max, const uint32_t N_TS_max) {
     k_i_for_1_2.clear();
@@ -253,4 +253,4 @@ std::vector<cf_t> drs_t::get_Y_DRS_i_single(const uint32_t b_idx, const uint32_t
     return y_DRS_i;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

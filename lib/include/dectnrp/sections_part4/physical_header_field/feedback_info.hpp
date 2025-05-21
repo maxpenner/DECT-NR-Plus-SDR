@@ -27,7 +27,7 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/serdes/packing.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class feedback_info_t : public common::serdes::packing_t {
     public:
@@ -193,4 +193,4 @@ class feedback_info_pool_t {
         feedback_info_f6_t feedback_info_f6;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

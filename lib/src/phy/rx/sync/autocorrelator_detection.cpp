@@ -78,8 +78,8 @@ autocorrelator_detection_t::autocorrelator_detection_t(
 
     for (uint32_t ant_idx = 0; ant_idx < nof_antennas_limited; ++ant_idx) {
         movsums_correlation[ant_idx] =
-            movsum_uw_t(section3::stf_t::get_cover_sequence_pairwise_product(
-                            section3::stf_t::get_equivalent_u(stf_nof_pattern)),
+            movsum_uw_t(sp3::stf_t::get_cover_sequence_pairwise_product(
+                            sp3::stf_t::get_equivalent_u(stf_nof_pattern)),
                         RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_STEP_DIVIDER);
 
         movsums_power[ant_idx] =

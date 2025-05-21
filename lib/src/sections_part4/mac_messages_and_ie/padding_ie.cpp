@@ -23,7 +23,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 padding_ie_t::padding_ie_t() { dectnrp_assert(check_validity_at_runtime(this), "mmie invalid"); }
 
@@ -58,4 +58,4 @@ void padding_ie_t::set_nof_padding_bytes(const uint32_t N_bytes) {
     }
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

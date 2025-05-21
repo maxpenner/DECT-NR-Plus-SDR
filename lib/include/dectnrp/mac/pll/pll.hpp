@@ -31,7 +31,7 @@ namespace dectnrp::mac {
 class pll_t {
     public:
         pll_t() = default;
-        pll_t(const section3::duration_t beacon_period_);
+        pll_t(const sp3::duration_t beacon_period_);
 
         void provide_beacon_time(const int64_t beacon_time_64);
 
@@ -53,7 +53,7 @@ class pll_t {
         double convert_warp_factor_to_ppm() const;
 
     private:
-        section3::duration_t beacon_period;
+        sp3::duration_t beacon_period;
 
         /// minimum time distance between two beacons to accept the latter one
         int64_t dist_min_accept_64;

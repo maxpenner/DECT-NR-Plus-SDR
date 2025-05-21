@@ -35,7 +35,7 @@ extern "C" {
 
 namespace dectnrp::phy {
 
-tx_rx_t::tx_rx_t(const section3::packet_sizes_t maximum_packet_sizes_,
+tx_rx_t::tx_rx_t(const sp3::packet_sizes_t maximum_packet_sizes_,
                  const uint32_t os_min_,
                  const resampler_param_t resampler_param_)
     : maximum_packet_sizes(maximum_packet_sizes_),
@@ -63,16 +63,16 @@ tx_rx_t::tx_rx_t(const section3::packet_sizes_t maximum_packet_sizes_,
     }
 
     const uint32_t b_max = maximum_packet_sizes.psdef.b;
-    const uint32_t b_idx_max = section3::phyres::b2b_idx[b_max];
-    const uint32_t N_b_OCC_max = section3::phyres::N_b_OCC_lut[b_idx_max];
+    const uint32_t b_idx_max = sp3::phyres::b2b_idx[b_max];
+    const uint32_t N_b_OCC_max = sp3::phyres::N_b_OCC_lut[b_idx_max];
     const uint32_t N_TS_max = maximum_packet_sizes.tm_mode.N_TS;
 
     // N_eff_TX_max = N_TS_max
-    stf = section3::stf_t(b_max, N_TS_max, 1.0f);
-    pcc = section3::pcc_t(b_max, N_TS_max);
-    drs = section3::drs_t(b_max, N_TS_max);
-    pdc = section3::pdc_t(b_max, N_TS_max);
-    Y_i = std::make_unique<section3::Y_i_t>(N_b_OCC_max, N_TS_max);
+    stf = sp3::stf_t(b_max, N_TS_max, 1.0f);
+    pcc = sp3::pcc_t(b_max, N_TS_max);
+    drs = sp3::drs_t(b_max, N_TS_max);
+    pdc = sp3::pdc_t(b_max, N_TS_max);
+    Y_i = std::make_unique<sp3::Y_i_t>(N_b_OCC_max, N_TS_max);
 
     // fec uses a lot of RAM for large lookup tables
     fec = std::make_unique<fec_t>(maximum_packet_sizes);

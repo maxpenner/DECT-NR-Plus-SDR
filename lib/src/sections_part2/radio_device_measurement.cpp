@@ -22,7 +22,7 @@
 
 #include <cmath>
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 rssi_x_measurement_report_t get_rssi_x_measurement_report(const float measured_value_dBm) {
     rssi_x_measurement_report_t rssi_x_measurement_report;
@@ -62,4 +62,4 @@ snr_measurement_report_t get_snr_measurement_report_t(const float measured_value
     return snr_measurement_report;
 }
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

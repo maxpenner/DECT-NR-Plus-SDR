@@ -27,7 +27,7 @@
 #include "dectnrp/common/serdes/packing.hpp"
 #include "dectnrp/sections_part4/mac_pdu/mac_multiplexing_header.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class mmie_t {
     public:
@@ -119,4 +119,4 @@ class mu_depending_t {
         uint32_t mu;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

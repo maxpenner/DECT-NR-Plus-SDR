@@ -37,7 +37,7 @@ namespace dectnrp::phy {
 
 estimator_snr_t::estimator_snr_t(const uint32_t b_max)
     : estimator_t(),
-      subtraction_stage(srsran_vec_cf_malloc(section3::drs_t::get_nof_drs_subc(b_max) * 2)) {
+      subtraction_stage(srsran_vec_cf_malloc(sp3::drs_t::get_nof_drs_subc(b_max) * 2)) {
     dectnrp_assert(std::has_single_bit(RX_SYNCED_PARAM_SNR_BASED_ON_DRS_N_TS_MAX) &&
                        RX_SYNCED_PARAM_SNR_BASED_ON_DRS_N_TS_MAX <= 8,
                    "ill-defined");

@@ -19,7 +19,7 @@
 #
 
 add_library(dectnrp_mac STATIC)
-target_link_libraries(dectnrp_mac dectnrp_common dectnrp_part2 dectnrp_part4)
+target_link_libraries(dectnrp_mac dectnrp_common dectnrp_sections_part_2 dectnrp_sections_part_4)
 
 file(GLOB DECTNRP_MAC_SOURCES "*.cpp")
 target_sources(dectnrp_mac PRIVATE ${DECTNRP_MAC_SOURCES})

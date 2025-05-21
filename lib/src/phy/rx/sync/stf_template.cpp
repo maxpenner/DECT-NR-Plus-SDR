@@ -43,12 +43,12 @@ stf_template_t::stf_template_t(const uint32_t u_max_,
                                const uint32_t os_min_,
                                const uint32_t N_eff_TX_max_,
                                const resampler_param_t resampler_param_)
-    : stf_bos_length_samples(section3::stf_t::get_N_samples_stf(u_max_) * b_max_ * os_min_),
+    : stf_bos_length_samples(sp3::stf_t::get_N_samples_stf(u_max_) * b_max_ * os_min_),
       stf_bos_rs_length_samples(stf_bos_length_samples * resampler_param_.L / resampler_param_.M),
       stf_bos_rs_length_effective_samples(
           static_cast<uint32_t>(static_cast<double>(stf_bos_rs_length_samples) *
                                 RX_SYNC_PARAM_CROSSCORRELATOR_STF_LENGTH_EFFECTIVE_DP)),
-      stf(section3::stf_t(b_max_, N_eff_TX_max_, 1.0f)),
+      stf(sp3::stf_t(b_max_, N_eff_TX_max_, 1.0f)),
       stf_time_domain(generate_stf_time_domain(u_max_,
                                                b_max_,
                                                os_min_,
@@ -75,7 +75,7 @@ stf_template_t::~stf_template_t() {
 }
 
 const std::vector<cf_t*>& stf_template_t::get_stf_time_domain(const uint32_t b) const {
-    return stf_time_domain[section3::phyres::b2b_idx[b]];
+    return stf_time_domain[sp3::phyres::b2b_idx[b]];
 }
 
 common::vec2d<cf_t*> stf_template_t::generate_stf_time_domain(
@@ -107,7 +107,7 @@ common::vec2d<cf_t*> stf_template_t::generate_stf_time_domain(
                    "STF template length incorrect");
 
     // load all relevant STFs in frequency domain
-    section3::stf_t stf(b_max, N_eff_TX_max, 1.0f);
+    sp3::stf_t stf(b_max, N_eff_TX_max, 1.0f);
 
     // for translation from frequency to time domain
     dft::ofdm_t ofdm;
@@ -135,19 +135,19 @@ common::vec2d<cf_t*> stf_template_t::generate_stf_time_domain(
     std::vector<cf_t> stf_td_rs(N_sar);
 
     // init for each value of b ...
-    for (uint32_t b_idx = 0; b_idx <= section3::phyres::b2b_idx[b_max]; ++b_idx) {
+    for (uint32_t b_idx = 0; b_idx <= sp3::phyres::b2b_idx[b_max]; ++b_idx) {
         // new row
         ret.push_back(std::vector<cf_t*>());
 
-        const uint32_t b = section3::phyres::b_idx2b[b_idx];
-        const uint32_t N_b_DFT = section3::phyres::N_b_DFT_lut[b_idx];
+        const uint32_t b = sp3::phyres::b_idx2b[b_idx];
+        const uint32_t N_b_DFT = sp3::phyres::N_b_DFT_lut[b_idx];
 
         // offset includes guards and additional guards due to oversampling
         const uint32_t insert_offset =
-            (N_b_DFT_os - N_b_DFT) / 2 + section3::phyres::guards_bottom_lut[b_idx];
+            (N_b_DFT_os - N_b_DFT) / 2 + sp3::phyres::guards_bottom_lut[b_idx];
 
         // scaling factor to get average power of 1
-        const float scale = 1.0f / std::sqrt(float(section3::phyres::N_b_OCC_lut[b_idx] / 4));
+        const float scale = 1.0f / std::sqrt(float(sp3::phyres::N_b_OCC_lut[b_idx] / 4));
 
         // ... and each value of N_eff_TX_max_ of radio device class
         for (uint32_t N_eff_TX = 1; N_eff_TX <= N_eff_TX_max; N_eff_TX *= 2) {
@@ -172,7 +172,7 @@ common::vec2d<cf_t*> stf_template_t::generate_stf_time_domain(
                 constants::N_samples_stf_pattern * b * N_b_DFT_os / N_b_DFT;
 
             // apply STF cover sequence
-            section3::stf_t::apply_cover_sequence(
+            sp3::stf_t::apply_cover_sequence(
                 stf_td.data(), stf_td.data(), u_max, N_samples_STF_pattern_os);
 
             resampler->reset();

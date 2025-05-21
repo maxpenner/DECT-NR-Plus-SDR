@@ -25,7 +25,7 @@
 
 #include "dectnrp/common/adt/enumeration.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 association_release_message_t::association_release_message_t() {
     mac_mux_header.zero();
@@ -58,4 +58,4 @@ bool association_release_message_t::unpack(const uint8_t* mac_pdu_offset) {
     return is_valid();
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

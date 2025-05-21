@@ -32,8 +32,7 @@ namespace dectnrp::phy::harq {
 
 class process_tx_t final : public process_t {
     public:
-        explicit process_tx_t(const uint32_t id_,
-                              const section3::packet_sizes_t maximum_packet_sizes);
+        explicit process_tx_t(const uint32_t id_, const sp3::packet_sizes_t maximum_packet_sizes);
         ~process_tx_t() = default;
 
         process_tx_t() = delete;

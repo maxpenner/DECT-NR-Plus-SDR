@@ -30,7 +30,7 @@
 #include "dectnrp/sections_part3/numerologies.hpp"
 #include "dectnrp/sections_part3/tm_mode.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 struct packet_sizes_t {
         packet_sizes_def_t psdef{};
@@ -118,4 +118,4 @@ uint32_t get_N_samples_in_packet_length_max(const packet_sizes_t& packet_sizes,
 packet_sizes_t get_random_packet_sizes_within_rdc(const std::string& radio_device_class_string,
                                                   common::randomgen_t& randomgen);
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

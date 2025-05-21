@@ -42,8 +42,8 @@ coarse_peak_f_domain_t::coarse_peak_f_domain_t(const std::vector<cf_t*> localbuf
       b_max(b_max_),
       nof_antennas_limited(nof_antennas_limited_),
       N_samples_STF_CP_only_os(
-          section3::transmission_packet_structure::get_N_samples_STF_CP_only(u_max_, b_max) *
-          bos_fac_ / b_max) {
+          sp3::transmission_packet_structure::get_N_samples_STF_CP_only(u_max_, b_max) * bos_fac_ /
+          b_max) {
     dectnrp_assert(bos_fac_ / b_max >= 1, "oversampling must be at least 1");
 
     get_ofdm(ofdm, bos_fac_ * constants::N_b_DFT_min_u_b);
@@ -142,7 +142,7 @@ uint32_t coarse_peak_f_domain_t::estimate_beta() const {
      */
     for (uint32_t b_idx = 1; b_estim <= b_max; ++b_idx) {
         // next beta to best
-        const uint32_t b_estim_test = section3::phyres::b_idx2b[b_idx];
+        const uint32_t b_estim_test = sp3::phyres::b_idx2b[b_idx];
 
         dectnrp_assert(b_estim_test > b_estim, "tested beta out-of-order");
 

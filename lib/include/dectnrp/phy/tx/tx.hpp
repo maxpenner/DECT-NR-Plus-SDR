@@ -60,7 +60,7 @@ class tx_t final : public tx_rx_t {
          * \param os_min_ minimum oversampling for largest bandwidth
          * \param resampler_param_ resampler configuration
          */
-        explicit tx_t(const section3::packet_sizes_t maximum_packet_sizes_,
+        explicit tx_t(const sp3::packet_sizes_t maximum_packet_sizes_,
                       const uint32_t os_min_,
                       const resampler_param_t resampler_param_);
         ~tx_t();
@@ -92,7 +92,7 @@ class tx_t final : public tx_rx_t {
 #endif
 
         /// beamforming
-        section3::W_t W;
+        sp3::W_t W;
 
         /// resampler and resampling ratio do not change
         std::unique_ptr<resampler_t> resampler;
@@ -133,7 +133,7 @@ class tx_t final : public tx_rx_t {
 
         /// readability pointer to elements of tx_descriptor_t
         const tx_descriptor_t* tx_descriptor;
-        const section3::packet_sizes_t* packet_sizes;
+        const sp3::packet_sizes_t* packet_sizes;
         const tx_meta_t* tx_meta;
         harq::buffer_tx_t* hb_plcf;
         harq::buffer_tx_t* hb_tb;
@@ -153,7 +153,7 @@ class tx_t final : public tx_rx_t {
 #endif
 
         /// channel coding
-        section3::fec_cfg_t fec_cfg;
+        sp3::fec_cfg_t fec_cfg;
 
         /// depends on MCS
         srsran_modem_table_t* srsran_modem_table_effective;

@@ -41,12 +41,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
     // define our radio device
     std::string radio_device_class_string("1.1.1.A");
-    const auto radio_device_class =
-        dectnrp::section3::get_radio_device_class(radio_device_class_string);
+    const auto radio_device_class = dectnrp::sp3::get_radio_device_class(radio_device_class_string);
 
     // to allocate memory we need maximum packet sizes
     const auto packet_sizes_maximum =
-        dectnrp::section3::get_maximum_packet_sizes(radio_device_class_string);
+        dectnrp::sp3::get_maximum_packet_sizes(radio_device_class_string);
 
     // allocate TX buffer
     std::unique_ptr<dectnrp::phy::harq::buffer_tx_t> hb_tx =
@@ -83,7 +82,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
         }
 
         // set TX parameters for this transmission
-        dectnrp::section3::fec_cfg_t tx_cfg;
+        dectnrp::sp3::fec_cfg_t tx_cfg;
         if (iter % 8 == 0) {
             tx_cfg.PLCF_type = 1;
             tx_cfg.closed_loop = false;
@@ -129,7 +128,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
         }
 
         // decode data
-        dectnrp::section3::fec_cfg_t rx_cfg;
+        dectnrp::sp3::fec_cfg_t rx_cfg;
         fec->decode_plcf_test(rx_cfg, *hb_rx.get(), tx_cfg.PLCF_type);
 
         // compare bits

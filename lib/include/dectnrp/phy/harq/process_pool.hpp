@@ -32,7 +32,7 @@ namespace dectnrp::phy::harq {
 
 class process_pool_t {
     public:
-        explicit process_pool_t(const section3::packet_sizes_t maximum_packet_sizes,
+        explicit process_pool_t(const sp3::packet_sizes_t maximum_packet_sizes,
                                 const uint32_t nof_process_tx,
                                 const uint32_t nof_process_rx);
         ~process_pool_t() = default;
@@ -45,12 +45,12 @@ class process_pool_t {
 
         process_tx_t* get_process_tx(const uint32_t PLCF_type,
                                      const uint32_t network_id,
-                                     const section3::packet_sizes_def_t psdef,
+                                     const sp3::packet_sizes_def_t psdef,
                                      const finalize_tx_t ftx) const;
 
         process_rx_t* get_process_rx(const uint32_t PLCF_type,
                                      const uint32_t network_id,
-                                     const section3::packet_sizes_def_t psdef,
+                                     const sp3::packet_sizes_def_t psdef,
                                      uint32_t rv,
                                      const finalize_rx_t frx) const;
 

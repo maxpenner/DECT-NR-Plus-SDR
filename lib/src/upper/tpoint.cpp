@@ -54,7 +54,7 @@ phy::machigh_phy_t tpoint_t::work_pcc_crc_error(const phy::phy_maclow_t& phy_mac
 #endif
 
 void tpoint_t::worksub_agc(const phy::sync_report_t& sync_report,
-                           const section4::plcf_base_t& plcf_base,
+                           const sp4::plcf_base_t& plcf_base,
                            const int64_t t_agc_change_64,
                            const std::size_t hw_idx) {
     auto& hw_local = mac_lower.lower_ctrl_vec.at(hw_idx).hw;
@@ -133,20 +133,20 @@ phy::maclow_phy_t tpoint_t::worksub_pcc2pdc_running(const uint32_t process_id,
     return phy::maclow_phy_t(hp_rx, mph);
 }
 
-section3::packet_sizes_def_t tpoint_t::worksub_psdef(const phy::phy_maclow_t& phy_maclow,
-                                                     const uint32_t PLCF_type) const {
+sp3::packet_sizes_def_t tpoint_t::worksub_psdef(const phy::phy_maclow_t& phy_maclow,
+                                                const uint32_t PLCF_type) const {
     const auto* plcf_base = phy_maclow.pcc_report.plcf_decoder.get_plcf_base(PLCF_type);
 
     dectnrp_assert(plcf_base != nullptr, "chosen PLCF is undefined");
 
-    return section3::packet_sizes_def_t{.u = phy_maclow.sync_report.u,
-                                        .b = phy_maclow.sync_report.b,
-                                        .PacketLengthType = plcf_base->PacketLengthType,
-                                        .PacketLength = plcf_base->get_PacketLength(),
-                                        .tm_mode_index = section3::tmmode::get_equivalent_tm_mode(
-                                            phy_maclow.sync_report.N_eff_TX, plcf_base->get_N_SS()),
-                                        .mcs_index = plcf_base->DFMCS,
-                                        .Z = worker_pool_config.maximum_packet_sizes.psdef.Z};
+    return sp3::packet_sizes_def_t{.u = phy_maclow.sync_report.u,
+                                   .b = phy_maclow.sync_report.b,
+                                   .PacketLengthType = plcf_base->PacketLengthType,
+                                   .PacketLength = plcf_base->get_PacketLength(),
+                                   .tm_mode_index = sp3::tmmode::get_equivalent_tm_mode(
+                                       phy_maclow.sync_report.N_eff_TX, plcf_base->get_N_SS()),
+                                   .mcs_index = plcf_base->DFMCS,
+                                   .Z = worker_pool_config.maximum_packet_sizes.psdef.Z};
 }
 
 }  // namespace dectnrp::upper

@@ -25,7 +25,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 W_t::W_t() {
     // initialize 7 rows
@@ -318,4 +318,4 @@ float W_t::get_W_scaling_factor(const std::vector<int8_t> in) {
     return 1.0f / std::sqrt(scale_power);
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

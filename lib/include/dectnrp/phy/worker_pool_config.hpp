@@ -41,8 +41,8 @@ struct worker_pool_config_t {
 
         /// what is the maximum device class this thread pool supports?
         std::string radio_device_class_string;
-        section3::radio_device_class_t radio_device_class;
-        section3::packet_sizes_t maximum_packet_sizes;
+        sp3::radio_device_class_t radio_device_class;
+        sp3::packet_sizes_t maximum_packet_sizes;
 
         /**
          * \brief The PHY always provides the radio layer with signals of the same sample

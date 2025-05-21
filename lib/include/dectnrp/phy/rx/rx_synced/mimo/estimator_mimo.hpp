@@ -67,7 +67,7 @@ class estimator_mimo_t final : public estimator_t {
         const uint32_t N_TS_max;
 
         /// beamforming matrix LUT
-        section3::W_t W;
+        sp3::W_t W;
 
         /// working copy filled in process_stf() and process_drs()
         mimo_report_t mimo_report{};
@@ -85,7 +85,7 @@ class estimator_mimo_t final : public estimator_t {
                         const process_drs_meta_t& process_drs_meta);
 
         [[nodiscard]] static uint32_t mode_single_spatial_stream_3_7(
-            const section3::W_t& W,
+            const sp3::W_t& W,
             const uint32_t N_TX_virt,
             const uint32_t N_RX_virt,
             const std::vector<cf_t*>& stage,

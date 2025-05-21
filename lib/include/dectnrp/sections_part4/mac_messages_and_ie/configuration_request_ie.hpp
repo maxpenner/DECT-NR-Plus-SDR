@@ -23,11 +23,11 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class configuration_request_ie_t final : public mmie_t {
     public:
         configuration_request_ie_t();
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

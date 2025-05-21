@@ -26,7 +26,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/adt/enumeration.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 reconfiguration_response_message_t::reconfiguration_response_message_t() {
     mac_mux_header.zero();
@@ -228,4 +228,4 @@ reconfiguration_response_message_t::get_packed_size_by_peeking(
     return packed_size;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

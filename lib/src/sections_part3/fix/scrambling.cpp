@@ -25,7 +25,7 @@ extern "C" {
 #include "srsran/phy/utils/vector.h"
 }
 
-namespace dectnrp::section3::fix {
+namespace dectnrp::sp3::fix {
 
 // this function is also static in srsrRAN so it has to be added here
 static inline void scrambling_b(uint8_t* c, uint8_t* data, int len) {
@@ -60,4 +60,4 @@ void srsran_scrambling_bytes_with_sequence_offset_FIX(srsran_sequence_t* s,
     }
 }
 
-}  // namespace dectnrp::section3::fix
+}  // namespace dectnrp::sp3::fix

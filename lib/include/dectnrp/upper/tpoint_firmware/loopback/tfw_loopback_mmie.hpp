@@ -46,7 +46,7 @@ class tfw_loopback_mmie_t final : public tfw_loopback_t {
 
     private:
         /// MMIEs to test
-        section4::mmie_pool_tx_t mmie_pool_tx;
+        sp4::mmie_pool_tx_t mmie_pool_tx;
         std::vector<std::size_t> mmie_idx_vec;
 
         /// measured values

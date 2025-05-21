@@ -35,9 +35,9 @@ extern "C" {
 static constexpr uint32_t SRSRAN_PDSCH_MIN_TDEC_ITERS = 2;
 static constexpr uint32_t SRSRAN_PDSCH_MAX_TDEC_ITERS = 10;
 
-namespace dectnrp::section3 {
+namespace dectnrp::phy {
 
-int pdc_enc_init(pdc_enc_t* q, const section3::packet_sizes_t& packet_sizes_maximum) {
+int pdc_enc_init(pdc_enc_t* q, const sp3::packet_sizes_t& packet_sizes_maximum) {
     int ret = SRSRAN_ERROR;
 
     // we have up to Z = 2048 or 6144 bits per cb + 4 bit tail
@@ -217,7 +217,7 @@ void pdc_encode_codeblocks(pdc_enc_t* q,
         }
 
         // scrambling
-        section3::fix::srsran_scrambling_bytes_with_sequence_offset_FIX(
+        sp3::fix::srsran_scrambling_bytes_with_sequence_offset_FIX(
             srsran_sequence, e_bits, n_e, wp);
 
         /* Set read/write pointers */
@@ -491,4 +491,4 @@ bool pdc_decode_codeblocks(pdc_enc_t* q,
     return false;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::phy

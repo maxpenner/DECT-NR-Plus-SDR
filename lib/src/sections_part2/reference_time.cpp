@@ -21,7 +21,7 @@
 
 #include "dectnrp/sections_part2/reference_time.hpp"
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 reference_time_accuracy_t get_reference_time_accuracy(const bool extreme_condition) {
     reference_time_accuracy_t ret;
@@ -37,4 +37,4 @@ reference_time_accuracy_t get_reference_time_accuracy(const bool extreme_conditi
     return ret;
 }
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

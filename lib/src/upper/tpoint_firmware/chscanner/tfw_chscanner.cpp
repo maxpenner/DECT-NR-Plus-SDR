@@ -37,10 +37,10 @@ tfw_chscanner_t::tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
       next_measurement_time_64(std::numeric_limits<int64_t>::max()) {
     // init frequencies
     for (const auto band : bands) {
-        const auto acfn = section2::get_absolute_channel_frequency_numbering(band);
+        const auto acfn = sp2::get_absolute_channel_frequency_numbering(band);
 
         for (uint32_t n = acfn.n_min; n <= acfn.n_max; n += acfn.n_spacing) {
-            freqs.push_back(section2::get_center_frequency(acfn, n).FC);
+            freqs.push_back(sp2::get_center_frequency(acfn, n).FC);
         }
     }
 
@@ -57,8 +57,8 @@ tfw_chscanner_t::tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
 }
 
 void tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
-    next_measurement_time_64 = start_time_64 + duration_lut.get_N_samples_from_duration(
-                                                   section3::duration_ec_t::ms001, 50);
+    next_measurement_time_64 =
+        start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 50);
 }
 
 phy::machigh_phy_t tfw_chscanner_t::work_regular(
@@ -80,13 +80,12 @@ phy::machigh_phy_t tfw_chscanner_t::work_regular(
      * the hardware constantly keeps overwriting the oldest samples. A 5ms measurement will
      * certainly be finished before the hardware overrides the same range of samples.
      */
-    machigh_phy.chscan_opt =
-        std::optional(phy::chscan_t(now_64, section3::duration_ec_t::ms001, 5));
+    machigh_phy.chscan_opt = std::optional(phy::chscan_t(now_64, sp3::duration_ec_t::ms001, 5));
 
     // state machine is progressed in function work_chscan_async(), which gives us the result of the
     // channel measurement
-    next_measurement_time_64 += duration_lut.get_N_samples_from_duration(
-        section3::duration_ec_t::ms001, measurement_period_ms);
+    next_measurement_time_64 +=
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, measurement_period_ms);
 
     return machigh_phy;
 }
@@ -138,7 +137,7 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& ch
         hw.set_freq_tc(freqs[freqs_idx]);
 
         next_measurement_time_64 += duration_lut.get_N_samples_from_duration(
-            section3::duration_ec_t::ms001, measurement_separation_between_frequencies_ms);
+            sp3::duration_ec_t::ms001, measurement_separation_between_frequencies_ms);
     }
 
     return phy::machigh_phy_tx_t();

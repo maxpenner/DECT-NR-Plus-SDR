@@ -25,12 +25,12 @@
 
 namespace dectnrp::phy {
 
-fec_t::fec_t(const section3::packet_sizes_t& packet_sizes_maximum) {
-    if (section3::pcc_enc_init(&pcc_enc) == SRSRAN_ERROR) {
+fec_t::fec_t(const sp3::packet_sizes_t& packet_sizes_maximum) {
+    if (pcc_enc_init(&pcc_enc) == SRSRAN_ERROR) {
         dectnrp_assert_failure("Unable to init FEC for PCC.");
     }
 
-    if (section3::pdc_enc_init(&pdc_enc, packet_sizes_maximum) == SRSRAN_ERROR) {
+    if (pdc_enc_init(&pdc_enc, packet_sizes_maximum) == SRSRAN_ERROR) {
         dectnrp_assert_failure("Unable to init FEC for PDC.");
     }
 
@@ -38,23 +38,23 @@ fec_t::fec_t(const section3::packet_sizes_t& packet_sizes_maximum) {
 }
 
 fec_t::~fec_t() {
-    section3::pcc_enc_free(&pcc_enc);
-    section3::pdc_enc_free(&pdc_enc);
+    pcc_enc_free(&pcc_enc);
+    pdc_enc_free(&pdc_enc);
 }
 
 void fec_t::add_new_network_id(const uint32_t network_id) { scrambling_pdc.add(network_id); }
 
-void fec_t::encode_plcf(const section3::fec_cfg_t& tx_cfg, harq::buffer_tx_t& hb) {
-    section3::pcc_enc_encode(&pcc_enc,
-                             hb.get_a(),
-                             hb.get_d(),
-                             hb.get_softbuffer_d(),
-                             tx_cfg.PLCF_type,
-                             tx_cfg.closed_loop,
-                             tx_cfg.beamforming);
+void fec_t::encode_plcf(const sp3::fec_cfg_t& tx_cfg, harq::buffer_tx_t& hb) {
+    pcc_enc_encode(&pcc_enc,
+                   hb.get_a(),
+                   hb.get_d(),
+                   hb.get_softbuffer_d(),
+                   tx_cfg.PLCF_type,
+                   tx_cfg.closed_loop,
+                   tx_cfg.beamforming);
 }
 
-bool fec_t::decode_plcf_test(section3::fec_cfg_t& rx_cfg,
+bool fec_t::decode_plcf_test(sp3::fec_cfg_t& rx_cfg,
                              harq::buffer_rx_plcf_t& hb,
                              const uint32_t PLCF_type_test) {
     // regardless of the result, overwrite with tested PLCF type
@@ -70,19 +70,18 @@ bool fec_t::decode_plcf_test(section3::fec_cfg_t& rx_cfg,
         softbuffer_ptr = hb.get_softbuffer_d_type_2();
     }
 
-    return section3::pcc_enc_decode(&pcc_enc,
-                                    hb.get_a(),
-                                    hb.get_d(),
-                                    softbuffer_ptr,
-                                    PLCF_type_test,
-                                    rx_cfg.closed_loop,
-                                    rx_cfg.beamforming);
+    return pcc_enc_decode(&pcc_enc,
+                          hb.get_a(),
+                          hb.get_d(),
+                          softbuffer_ptr,
+                          PLCF_type_test,
+                          rx_cfg.closed_loop,
+                          rx_cfg.beamforming);
 }
 
-void fec_t::segmentate_and_pick_scrambling_sequence(const section3::fec_cfg_t& tx_cfg) {
+void fec_t::segmentate_and_pick_scrambling_sequence(const sp3::fec_cfg_t& tx_cfg) {
     // codeblock segmentation
-    if (section3::fix::srsran_cbsegm_FIX(&srsran_cbsegm, tx_cfg.N_TB_bits, tx_cfg.Z) ==
-        SRSRAN_ERROR) {
+    if (sp3::fix::srsran_cbsegm_FIX(&srsran_cbsegm, tx_cfg.N_TB_bits, tx_cfg.Z) == SRSRAN_ERROR) {
         dectnrp_assert_failure("Error computing codeblock segmentation");
     }
 
@@ -101,35 +100,35 @@ void fec_t::segmentate_and_pick_scrambling_sequence(const section3::fec_cfg_t& t
     wp = 0;
 }
 
-void fec_t::encode_tb(const section3::fec_cfg_t& tx_cfg, harq::buffer_tx_t& hb) {
+void fec_t::encode_tb(const sp3::fec_cfg_t& tx_cfg, harq::buffer_tx_t& hb) {
     encode_tb(tx_cfg, hb, UINT32_MAX);
 }
 
-void fec_t::encode_tb(const section3::fec_cfg_t& tx_cfg,
+void fec_t::encode_tb(const sp3::fec_cfg_t& tx_cfg,
                       harq::buffer_tx_t& hb,
                       const uint32_t nof_bits_minimum) {
     uint32_t nof_d_bits_minimum = std::min(nof_bits_minimum, tx_cfg.G);
 
-    section3::pdc_encode_codeblocks(&pdc_enc,
-                                    hb.get_softbuffer_d(),
-                                    &srsran_cbsegm,
-                                    tx_cfg.N_bps,
-                                    tx_cfg.rv,
-                                    tx_cfg.G,
-                                    hb.get_a(),
-                                    hb.get_d(),
-                                    cb_idx,
-                                    rp,
-                                    wp,
-                                    nof_d_bits_minimum,
-                                    srsran_sequence);
+    pdc_encode_codeblocks(&pdc_enc,
+                          hb.get_softbuffer_d(),
+                          &srsran_cbsegm,
+                          tx_cfg.N_bps,
+                          tx_cfg.rv,
+                          tx_cfg.G,
+                          hb.get_a(),
+                          hb.get_d(),
+                          cb_idx,
+                          rp,
+                          wp,
+                          nof_d_bits_minimum,
+                          srsran_sequence);
 }
 
-void fec_t::decode_tb(const section3::fec_cfg_t& rx_cfg, harq::buffer_rx_t& hb) {
+void fec_t::decode_tb(const sp3::fec_cfg_t& rx_cfg, harq::buffer_rx_t& hb) {
     decode_tb(rx_cfg, hb, UINT32_MAX);
 }
 
-void fec_t::decode_tb(const section3::fec_cfg_t& rx_cfg,
+void fec_t::decode_tb(const sp3::fec_cfg_t& rx_cfg,
                       harq::buffer_rx_t& hb,
                       const uint32_t nof_bits_maximum) {
     dectnrp_assert(nof_bits_maximum <= rx_cfg.G, "Nof bits fed larger G");

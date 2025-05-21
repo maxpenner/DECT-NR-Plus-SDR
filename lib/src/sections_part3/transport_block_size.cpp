@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 
-namespace dectnrp::section3::transport_block_size {
+namespace dectnrp::sp3::transport_block_size {
 
 uint32_t get_G(const uint32_t N_SS, const uint32_t N_PDC_subc, const uint32_t N_bps) {
     return N_SS * N_PDC_subc * N_bps;
@@ -79,4 +79,4 @@ uint32_t get_N_TB_bits(const uint32_t N_SS,
     return N_TB_bits;
 }
 
-}  // namespace dectnrp::section3::transport_block_size
+}  // namespace dectnrp::sp3::transport_block_size

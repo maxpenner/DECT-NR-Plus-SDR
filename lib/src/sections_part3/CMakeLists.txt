@@ -18,11 +18,11 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-add_library(dectnrp_part3 STATIC)
-target_link_libraries(dectnrp_part3 dectnrp_common srsran_phy)
+add_library(dectnrp_sections_part_3 STATIC)
+target_link_libraries(dectnrp_sections_part_3 dectnrp_common srsran_phy)
 
-file(GLOB DECTNRP_PART3_SOURCES "*.cpp")
-target_sources(dectnrp_part3 PRIVATE ${DECTNRP_PART3_SOURCES})
+file(GLOB DECTNRP_SECTIONS_PART_3_SOURCES "*.cpp")
+target_sources(dectnrp_sections_part_3 PRIVATE ${DECTNRP_SECTIONS_PART_3_SOURCES})
 
 add_subdirectory(derivative)
 add_subdirectory(fix)

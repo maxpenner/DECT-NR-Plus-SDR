@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 duration_ec_t get_duration_ec_depending_on_mu(const uint32_t u) {
     dectnrp_assert(std::has_single_bit(u) && u <= 8, "u undefined");
@@ -39,4 +39,4 @@ duration_ec_t get_duration_ec_depending_on_mu(const uint32_t u) {
     return duration_ec_t::subslot_u8_001;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

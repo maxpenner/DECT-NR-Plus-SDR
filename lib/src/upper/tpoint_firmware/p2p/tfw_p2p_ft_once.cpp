@@ -96,9 +96,9 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
 
     init_packet_beacon();
     init_packet_unicast(identity_ft.ShortRadioDeviceID,
-                        section4::mac_architecture::identity_t::ShortRadioDeviceID_reserved,
+                        sp4::mac_architecture::identity_t::ShortRadioDeviceID_reserved,
                         identity_ft.LongRadioDeviceID,
-                        section4::mac_architecture::identity_t::LongRadioDeviceID_reserved);
+                        sp4::mac_architecture::identity_t::LongRadioDeviceID_reserved);
 
     // ##################################################
     // DLC and Convergence Layer
@@ -171,13 +171,13 @@ void tfw_p2p_ft_t::init_simulation_if_detected() {
 
 void tfw_p2p_ft_t::init_packet_beacon() {
     // meta packet size
-    section3::packet_sizes_def_t& psdef = ppmp_beacon.psdef;
+    sp3::packet_sizes_def_t& psdef = ppmp_beacon.psdef;
     psdef.u = worker_pool_config.radio_device_class.u_min;
     psdef.b = worker_pool_config.radio_device_class.b_min;
     psdef.PacketLengthType = 1;
     psdef.PacketLength = 2;
 #ifdef TFW_P2P_MIMO
-    psdef.tm_mode_index = section3::tmmode::get_tx_div_mode(buffer_rx.nof_antennas);
+    psdef.tm_mode_index = sp3::tmmode::get_tx_div_mode(buffer_rx.nof_antennas);
 #else
     psdef.tm_mode_index = 0;
 #endif
@@ -185,7 +185,7 @@ void tfw_p2p_ft_t::init_packet_beacon() {
     psdef.Z = worker_pool_config.radio_device_class.Z_min;
 
     // define PLCFs
-    section4::plcf_10_t& plcf_10 = ppmp_beacon.plcf_10;
+    sp4::plcf_10_t& plcf_10 = ppmp_beacon.plcf_10;
     plcf_10.HeaderFormat = 0;
     plcf_10.PacketLengthType = psdef.PacketLengthType;
     plcf_10.set_PacketLength_m1(psdef.PacketLength);
@@ -199,11 +199,11 @@ void tfw_p2p_ft_t::init_packet_beacon() {
     ppmp_beacon.plcf_base_effective = &ppmp_beacon.plcf_10;
 
     // define MAC header type
-    ppmp_beacon.mac_header_type.Version = section4::mac_header_type_t::version_ec::v00;
+    ppmp_beacon.mac_header_type.Version = sp4::mac_header_type_t::version_ec::v00;
     ppmp_beacon.mac_header_type.MAC_security =
-        section4::mac_header_type_t::mac_security_ec::macsec_not_used;
+        sp4::mac_header_type_t::mac_security_ec::macsec_not_used;
     ppmp_beacon.mac_header_type.MAC_header_type =
-        section4::mac_header_type_t::mac_header_type_ec::Beacon;
+        sp4::mac_header_type_t::mac_header_type_ec::Beacon;
 
     // define MAC common header
     ppmp_beacon.beacon_header.set_Network_ID_3_lsb(identity_ft.NetworkID);
@@ -213,20 +213,18 @@ void tfw_p2p_ft_t::init_packet_beacon() {
     ppmp_beacon.mch_base_effective = &ppmp_beacon.beacon_header;
 
     // set values in cluster beacon IE
-    auto& cbm = mmie_pool_tx.get<section4::cluster_beacon_message_t>();
+    auto& cbm = mmie_pool_tx.get<sp4::cluster_beacon_message_t>();
     cbm.system_frame_number = 0;
-    cbm.clusters_max_tx_power =
-        section4::network_beacon_message_t::clusters_max_tx_power_t::_19_dBm;
+    cbm.clusters_max_tx_power = sp4::network_beacon_message_t::clusters_max_tx_power_t::_19_dBm;
     cbm.has_power_constraints = true;
     cbm.frame_offset.reset();
     cbm.next_cluster_channel.reset();
     cbm.time_to_next.reset();
-    cbm.network_beacon_period =
-        section4::network_beacon_message_t::network_beacon_period_t::_100_ms;
-    cbm.cluster_beacon_period = section4::network_beacon_message_t::cluster_beacon_period_t::_10_ms;
-    cbm.count_to_trigger = section4::cluster_beacon_message_t::count_to_trigger_t::_1_times;
-    cbm.rel_quality = section4::cluster_beacon_message_t::quality_threshold_t::_9_dB;
-    cbm.min_quality = section4::cluster_beacon_message_t::quality_threshold_t::_9_dB;
+    cbm.network_beacon_period = sp4::network_beacon_message_t::network_beacon_period_t::_100_ms;
+    cbm.cluster_beacon_period = sp4::network_beacon_message_t::cluster_beacon_period_t::_10_ms;
+    cbm.count_to_trigger = sp4::cluster_beacon_message_t::count_to_trigger_t::_1_times;
+    cbm.rel_quality = sp4::cluster_beacon_message_t::quality_threshold_t::_9_dB;
+    cbm.min_quality = sp4::cluster_beacon_message_t::quality_threshold_t::_9_dB;
 }
 
 void tfw_p2p_ft_t::init_appiface() {

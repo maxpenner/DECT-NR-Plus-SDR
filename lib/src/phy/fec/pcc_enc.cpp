@@ -45,7 +45,7 @@ static constexpr uint16_t mask_mimo_cl_bf = 0xFFFF;
 
 static constexpr uint32_t pcc_g_init = 0x44454354;
 
-namespace dectnrp::section3 {
+namespace dectnrp::phy {
 
 int pcc_enc_init(pcc_enc_t* q) {
     int ret = SRSRAN_ERROR;
@@ -184,7 +184,7 @@ void pcc_enc_encode(pcc_enc_t* q,
 
     // source: https://github.com/srsran/srsRAN/blob/master/lib/src/phy/fec/cbsegm.c
     // see at 6.1.4.2.3
-    const uint32_t cblen_idx = fix::srsran_cbsegm_cbindex_FIX(N_PLCF_bits + crc_bits);
+    const uint32_t cblen_idx = sp3::fix::srsran_cbsegm_cbindex_FIX(N_PLCF_bits + crc_bits);
 
     srsran_tcod_encode_lut(&q->encoder,
                            &q->crc_tb,  // last argument is false, so crc_tb is ignored internally
@@ -229,7 +229,8 @@ bool pcc_enc_decode(pcc_enc_t* q,
 
     // source: https://github.com/srsran/srsRAN/blob/master/lib/src/phy/fec/cbsegm.c
     // see at 6.1.4.2.3
-    const uint32_t cblen_idx = fix::srsran_cbsegm_cbindex_FIX(N_PLCF_bits_blind_test + crc_bits);
+    const uint32_t cblen_idx =
+        sp3::fix::srsran_cbsegm_cbindex_FIX(N_PLCF_bits_blind_test + crc_bits);
 
     if (q->llr_bit_width == 8) {
         // descramble
@@ -362,4 +363,4 @@ bool pcc_enc_decode(pcc_enc_t* q,
     return false;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::phy

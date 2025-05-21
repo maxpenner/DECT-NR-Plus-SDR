@@ -28,7 +28,7 @@
 #include "dectnrp/sections_part3/df.hpp"
 #include "dectnrp/sections_part3/physical_resources.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 class drs_t final : public df_t {
     public:
@@ -139,4 +139,4 @@ class drs_t final : public df_t {
         static std::vector<cf_t> get_Y_DRS_i_single(const uint32_t b_idx, const uint32_t t);
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

@@ -59,12 +59,11 @@ int run_test(std::string radio_device_class_string, const uint32_t packet_length
     randomgen.shuffle();
 
     // define radio class
-    const auto radio_device_class =
-        dectnrp::section3::get_radio_device_class(radio_device_class_string);
+    const auto radio_device_class = dectnrp::sp3::get_radio_device_class(radio_device_class_string);
 
     // to allocate memory we need to know maximum packet sizes in advance
     const auto packet_sizes_maximum =
-        dectnrp::section3::get_maximum_packet_sizes(radio_device_class_string);
+        dectnrp::sp3::get_maximum_packet_sizes(radio_device_class_string);
 
     // allocate largest conceivable TX buffer
     std::unique_ptr<dectnrp::phy::harq::buffer_tx_t> hb_tx =
@@ -110,7 +109,7 @@ int run_test(std::string radio_device_class_string, const uint32_t packet_length
          mcs <= std::min(radio_device_class.mcs_index_min, (uint32_t)MCS_MAX);
          ++mcs) {
         // define a transmission
-        const dectnrp::section3::packet_sizes_def_t psdef = {
+        const dectnrp::sp3::packet_sizes_def_t psdef = {
             .u = 1,
             .b = 1,
             .PacketLengthType = 1,
@@ -120,7 +119,7 @@ int run_test(std::string radio_device_class_string, const uint32_t packet_length
             .Z = radio_device_class.Z_min};
 
         // calculate sizes of this transmission
-        const auto packet_sizes = dectnrp::section3::get_packet_sizes(psdef);
+        const auto packet_sizes = dectnrp::sp3::get_packet_sizes(psdef);
 
         if (!packet_sizes.has_value()) {
             dectnrp_print_wrn("Impossible packet sizes configuration.");
@@ -134,27 +133,26 @@ int run_test(std::string radio_device_class_string, const uint32_t packet_length
         uint32_t G = packet_sizes->G;
 
         // set TX and RX cfg parameters for this transmission
-        dectnrp::section3::fec_cfg_t tx_cfg = {
-            .PLCF_type = randomgen.randi(1, 2),
-            .closed_loop = (randomgen.randi(0, 1) > 0) ? true : false,
-            .beamforming = (randomgen.randi(0, 1) > 0) ? true : false,
-            .N_TB_bits = N_TB_bits,
-            .N_bps = N_bps,
-            .rv = 0,
-            .G = G,
-            .network_id = network_id,
-            .Z = psdef.Z};
+        dectnrp::sp3::fec_cfg_t tx_cfg = {.PLCF_type = randomgen.randi(1, 2),
+                                          .closed_loop = (randomgen.randi(0, 1) > 0) ? true : false,
+                                          .beamforming = (randomgen.randi(0, 1) > 0) ? true : false,
+                                          .N_TB_bits = N_TB_bits,
+                                          .N_bps = N_bps,
+                                          .rv = 0,
+                                          .G = G,
+                                          .network_id = network_id,
+                                          .Z = psdef.Z};
 
         // assume same data is known at receiver, usually extracted from PLCF
-        dectnrp::section3::fec_cfg_t rx_cfg = {.PLCF_type = tx_cfg.PLCF_type,
-                                               .closed_loop = tx_cfg.closed_loop,
-                                               .beamforming = tx_cfg.beamforming,
-                                               .N_TB_bits = tx_cfg.N_TB_bits,
-                                               .N_bps = tx_cfg.N_bps,
-                                               .rv = tx_cfg.rv,
-                                               .G = tx_cfg.G,
-                                               .network_id = tx_cfg.network_id,
-                                               .Z = tx_cfg.Z};
+        dectnrp::sp3::fec_cfg_t rx_cfg = {.PLCF_type = tx_cfg.PLCF_type,
+                                          .closed_loop = tx_cfg.closed_loop,
+                                          .beamforming = tx_cfg.beamforming,
+                                          .N_TB_bits = tx_cfg.N_TB_bits,
+                                          .N_bps = tx_cfg.N_bps,
+                                          .rv = tx_cfg.rv,
+                                          .G = tx_cfg.G,
+                                          .network_id = tx_cfg.network_id,
+                                          .Z = tx_cfg.Z};
 
         // convert mcs to srsRAN terminology
         srsran_mod_t srsran_mod;

@@ -23,7 +23,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 higher_layer_signalling_t::higher_layer_signalling_t() {
     mac_mux_header.zero();
@@ -64,4 +64,4 @@ uint32_t higher_layer_signalling_t::get_flow_id() const {
     }
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

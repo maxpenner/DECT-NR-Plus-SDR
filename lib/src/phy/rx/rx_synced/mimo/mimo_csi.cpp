@@ -23,13 +23,13 @@
 namespace dectnrp::phy {
 
 void mimo_csi_t::update_from_feedback(const uint32_t feedback_format,
-                                      const section4::feedback_info_pool_t& feedback_info_pool,
+                                      const sp4::feedback_info_pool_t& feedback_info_pool,
                                       const sync_report_t& sync_report) {
     // extract at which time this update was received
     const int64_t time_64 = sync_report.fine_peak_time_64;
 
     switch (feedback_format) {
-        case section4::feedback_info_t::No_feedback:
+        case sp4::feedback_info_t::No_feedback:
             break;
         case 1:
             break;

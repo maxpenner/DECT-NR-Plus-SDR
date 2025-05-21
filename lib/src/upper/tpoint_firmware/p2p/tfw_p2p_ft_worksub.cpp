@@ -41,8 +41,8 @@ phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_20(
 
 phy::maclow_phy_t tfw_p2p_ft_t::worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) {
     // cast guaranteed to work
-    const auto* plcf_21 = static_cast<const section4::plcf_21_t*>(
-        phy_maclow.pcc_report.plcf_decoder.get_plcf_base(2));
+    const auto* plcf_21 =
+        static_cast<const sp4::plcf_21_t*>(phy_maclow.pcc_report.plcf_decoder.get_plcf_base(2));
 
     dectnrp_assert(plcf_21 != nullptr, "cast ill-formed");
 
@@ -98,12 +98,12 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
     uint32_t datagram_cnt = 0;
 
     for (auto mmie : mmie_decoded_vec) {
-        if (dynamic_cast<section4::user_plane_data_t*>(mmie) == nullptr) {
+        if (dynamic_cast<sp4::user_plane_data_t*>(mmie) == nullptr) {
             dectnrp_log_wrn("MMIE not user plane data");
             continue;
         }
 
-        const section4::user_plane_data_t* upd = static_cast<section4::user_plane_data_t*>(mmie);
+        const sp4::user_plane_data_t* upd = static_cast<sp4::user_plane_data_t*>(mmie);
 
         if (app_client->write_nto(
                 contact.conn_idx_client, upd->get_data_ptr(), upd->get_data_size()) > 0) {
@@ -137,7 +137,7 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     }
 
     // this is now a well-defined packet size
-    const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
+    const sp3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
     // OPTIONAL: change content of PLCF, MAC header type and MAC common header
     // -
@@ -145,15 +145,15 @@ bool tfw_p2p_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     uint32_t a_cnt_w = ppmp_beacon.pack_first_3_header(hp_tx->get_a_plcf(), hp_tx->get_a_tb());
 
     // change content of cluster_beacon_message_t
-    auto& cbm = mmie_pool_tx.get<section4::cluster_beacon_message_t>();
+    auto& cbm = mmie_pool_tx.get<sp4::cluster_beacon_message_t>();
     cbm.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
     a_cnt_w += cbm.get_packed_size_of_mmh_sdu();
 
     // one time_announce_ie_t per second
     if (stats.beacon_cnt % allocation_ft.get_N_beacons_per_second() == 0) {
         // set values in time_announce_ie_t
-        auto& taie = mmie_pool_tx.get<section4::extensions::time_announce_ie_t>();
-        taie.set_time(section4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
+        auto& taie = mmie_pool_tx.get<sp4::extensions::time_announce_ie_t>();
+        taie.set_time(sp4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
         taie.pack_mmh_sdu(hp_tx->get_a_tb() + a_cnt_w);
         a_cnt_w += taie.get_packed_size_of_mmh_sdu();
     }
@@ -210,7 +210,7 @@ void tfw_p2p_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
             ppmp_unicast.unicast_header.Receiver_Address = contact.identity.LongRadioDeviceID;
 
             // change feedback info in PLCF
-            ppmp_unicast.plcf_21.FeedbackFormat = section4::feedback_info_t::No_feedback;
+            ppmp_unicast.plcf_21.FeedbackFormat = sp4::feedback_info_t::No_feedback;
 
             // try to send a packet, may return false if no data of HARQ processes are available
             if (!worksub_tx_unicast(machigh_phy, contact, tx_opportunity)) {

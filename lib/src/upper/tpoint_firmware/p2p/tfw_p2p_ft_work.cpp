@@ -33,10 +33,10 @@ void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
 
 #ifdef TFW_P2P_FT_ALIGN_BEACON_START_TO_FULL_SECOND_OR_CORRECT_OFFSET
     // time first beacon is transmitted
-    const int64_t B = A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
+    const int64_t B = A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001);
 #else
     // time first beacon is transmitted
-    const int64_t B = A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001) +
+    const int64_t B = A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001) +
                       hw.get_pps_to_full_second_measured_samples();
 #endif
 
@@ -44,19 +44,18 @@ void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
     allocation_ft.set_beacon_time_scheduled(B);
 
 #ifdef TFW_P2P_EXPORT_PPX
-    dectnrp_assert(B - duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001) > 0,
+    dectnrp_assert(B - duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001) > 0,
                    "time out-of-order");
 
     // set virtual time of first rising edge, next edge is then aligned with the first beacon
-    ppx.set_ppx_rising_edge(
-        B - duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001));
+    ppx.set_ppx_rising_edge(B - duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001));
 #endif
 
     // initialize regular callback for logs
     callbacks.add_callback(
         std::bind(&tfw_p2p_ft_t::worksub_callback_log, this, std::placeholders::_1),
-        A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 500),
-        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001,
+        A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 500),
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
                                                  worksub_callback_log_period_sec));
 
 #ifdef TFW_P2P_EXPORT_PPX

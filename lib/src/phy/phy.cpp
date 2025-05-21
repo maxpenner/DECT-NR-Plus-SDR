@@ -75,14 +75,13 @@ phy_t::phy_t(const phy_config_t& phy_config_, const radio::radio_t& radio_)
 
         hw.initialize_device();
 
-        hw.initialize_buffer_tx_pool(section3::get_N_samples_in_packet_length_max(
+        hw.initialize_buffer_tx_pool(sp3::get_N_samples_in_packet_length_max(
             worker_pool_config.maximum_packet_sizes, hw.get_samp_rate()));
 
         hw.initialize_buffer_rx(
             worker_pool_config.rx_ant_streams_length_slots *
             static_cast<uint32_t>(
-                section3::duration_t(hw.get_samp_rate(), section3::duration_ec_t::slot001)
-                    .get_N_samples()));
+                sp3::duration_t(hw.get_samp_rate(), sp3::duration_ec_t::slot001).get_N_samples()));
 
         layer_unit_vec.push_back(
             std::make_unique<worker_pool_t>(worker_pool_config, hw, phy_radio));

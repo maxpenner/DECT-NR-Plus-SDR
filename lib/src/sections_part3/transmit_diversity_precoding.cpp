@@ -29,7 +29,7 @@ extern "C" {
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 Y_i_t::Y_i_t(const uint32_t N_b_OCC_max, const uint32_t N_SS_max) {
     const uint32_t min_len = std::max(constants::pcc_cells, N_b_OCC_max * N_SS_max);
@@ -92,4 +92,4 @@ const common::vec2d<uint32_t>& Y_i_t::get_index_mat_N_TS_x(const uint32_t N_TS) 
     return index_N_TS_x[N_TS248_idx_vec[N_TS]];
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

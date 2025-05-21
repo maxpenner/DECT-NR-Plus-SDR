@@ -53,7 +53,7 @@ class stf_template_t {
 
     private:
         /// frequency domain
-        const section3::stf_t stf;
+        const sp3::stf_t stf;
 
         /// time domain
         common::vec2d<cf_t*> stf_time_domain;

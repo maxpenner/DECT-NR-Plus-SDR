@@ -25,7 +25,7 @@
 
 #include "dectnrp/sections_part3/derivative/duration_ec.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 class duration_t {
     public:
@@ -69,4 +69,4 @@ class duration_t {
         uint32_t N_samples{};
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

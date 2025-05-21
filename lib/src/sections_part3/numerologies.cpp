@@ -25,7 +25,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 numerologies_t get_numerologies(const uint32_t u, const uint32_t b) {
     dectnrp_assert(std::has_single_bit(u) and u <= 8, "u undefined");
@@ -69,4 +69,4 @@ numerologies_t get_numerologies(const uint32_t u, const uint32_t b) {
     return q;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

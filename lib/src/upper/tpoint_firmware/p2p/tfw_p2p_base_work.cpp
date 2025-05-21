@@ -26,7 +26,7 @@ namespace dectnrp::upper::tfw::p2p {
 phy::maclow_phy_t tfw_p2p_base_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     ++stats.rx_pcc_success;
 
-    const section4::plcf_base_t* plcf_base = nullptr;
+    const sp4::plcf_base_t* plcf_base = nullptr;
 
     std::optional<phy::maclow_phy_t> optret;
 

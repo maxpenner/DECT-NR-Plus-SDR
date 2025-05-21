@@ -28,7 +28,7 @@
 #include "dectnrp/sections_part4/mac_messages_and_ie/padding_ie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 mac_pdu_decoder_t::mac_pdu_decoder_t() {
     // the RX pool has to contain some MAC messages/IEs more than once
@@ -346,4 +346,4 @@ mmie_t* mac_pdu_decoder_t::get_mmie_from_pool(const std::type_index& type_idx) {
     return i < vec.size() ? vec[i].get() : nullptr;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

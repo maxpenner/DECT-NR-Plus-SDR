@@ -24,7 +24,7 @@
 
 #include "dectnrp/sections_part3/numerologies.hpp"
 
-namespace dectnrp::section3::transmission_packet_structure {
+namespace dectnrp::sp3::transmission_packet_structure {
 
 /// N_SLOT_u_subslot actually not required since N_SLOT_u_symb/N_SLOT_u_subslot is always 5
 uint32_t get_N_PACKET_symb(const uint32_t PacketLengthType,
@@ -47,4 +47,4 @@ uint32_t get_N_samples_DF(const uint32_t u, const uint32_t b, const uint32_t N_P
 
 uint32_t get_N_samples_GI(const uint32_t u, const uint32_t b);
 
-}  // namespace dectnrp::section3::transmission_packet_structure
+}  // namespace dectnrp::sp3::transmission_packet_structure

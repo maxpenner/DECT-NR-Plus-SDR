@@ -33,7 +33,7 @@
 #include "header_only/nlohmann/json.hpp"
 #endif
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class plcf_decoder_t {
     public:
@@ -76,7 +76,7 @@ class plcf_decoder_t {
          * \param PLCF_type either 1 or 2
          * \return separate fec_cfg_t for either type 1 or type 2
          */
-        [[nodiscard]] section3::fec_cfg_t& get_fec_cfg(const uint32_t PLCF_type);
+        [[nodiscard]] sp3::fec_cfg_t& get_fec_cfg(const uint32_t PLCF_type);
 
         /**
          * \brief Called once with PLCF_type=1 and once with PLCF_type=2 for every packet.
@@ -118,12 +118,12 @@ class plcf_decoder_t {
         const uint32_t N_SS_max;
 
         // type 1
-        section3::fec_cfg_t fec_cfg_type1;
+        sp3::fec_cfg_t fec_cfg_type1;
         uint32_t HeaderFormat_type1;
         plcf_10_t plcf_10;
 
         // type 2
-        section3::fec_cfg_t fec_cfg_type2;
+        sp3::fec_cfg_t fec_cfg_type2;
         uint32_t HeaderFormat_type2;
         plcf_20_t plcf_20;
         plcf_21_t plcf_21;
@@ -135,4 +135,4 @@ class plcf_decoder_t {
         const std::array<plcf_base_t*, 2> array_plcf_type2{&plcf_20, &plcf_21};
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

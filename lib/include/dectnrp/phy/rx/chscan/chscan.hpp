@@ -39,7 +39,7 @@ class chscan_t {
          * \param N_ant_ maximum number of antennas to use for each partial scan
          */
         explicit chscan_t(const int64_t end_64_,
-                          const section3::duration_ec_t duration_ec_,
+                          const sp3::duration_ec_t duration_ec_,
                           const uint32_t N_partial_,
                           const uint32_t N_ant_ = std::numeric_limits<uint32_t>::max())
             : end_64(end_64_),
@@ -54,7 +54,7 @@ class chscan_t {
 
     private:
         int64_t end_64;
-        section3::duration_ec_t duration_ec;
+        sp3::duration_ec_t duration_ec;
         uint32_t N_partial;
         uint32_t N_ant;
 

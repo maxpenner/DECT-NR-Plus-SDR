@@ -23,7 +23,7 @@
 
 #include "dectnrp/common/adt/enumeration.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 radio_device_status_ie_t::radio_device_status_ie_t() {
     mac_mux_header.zero();
@@ -65,4 +65,4 @@ bool radio_device_status_ie_t::unpack(const uint8_t* mac_pdu_offset) {
     return is_valid();
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

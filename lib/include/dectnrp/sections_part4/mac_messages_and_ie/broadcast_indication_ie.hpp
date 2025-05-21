@@ -25,7 +25,7 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class broadcast_indication_ie_t final : public mmie_packing_peeking_t {
     public:
@@ -133,4 +133,4 @@ class broadcast_indication_ie_t final : public mmie_packing_peeking_t {
         static constexpr uint32_t CBI_MAX_4_ANTENNAS_FOUR_LAYERS{4};
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4
