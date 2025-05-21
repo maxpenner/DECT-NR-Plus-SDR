@@ -35,7 +35,7 @@ extern "C" {
 static constexpr uint32_t SRSRAN_PDSCH_MIN_TDEC_ITERS = 2;
 static constexpr uint32_t SRSRAN_PDSCH_MAX_TDEC_ITERS = 10;
 
-namespace dectnrp::section3 {
+namespace dectnrp::phy {
 
 int pdc_enc_init(pdc_enc_t* q, const section3::packet_sizes_t& packet_sizes_maximum) {
     int ret = SRSRAN_ERROR;
@@ -491,4 +491,4 @@ bool pdc_decode_codeblocks(pdc_enc_t* q,
     return false;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::phy

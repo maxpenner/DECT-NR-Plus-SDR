@@ -18,5 +18,5 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-file(GLOB DECTNRP_PART3_SOURCES "*.cpp")
-target_sources(dectnrp_part3 PRIVATE ${DECTNRP_PART3_SOURCES})
+file(GLOB DECTNRP_SECTIONS_PART_3_SOURCES "*.cpp")
+target_sources(dectnrp_sections_part_3 PRIVATE ${DECTNRP_SECTIONS_PART_3_SOURCES})

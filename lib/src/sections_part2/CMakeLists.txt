@@ -18,8 +18,8 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-add_library(dectnrp_part2 STATIC)
-target_link_libraries(dectnrp_part2 dectnrp_common)
+add_library(dectnrp_sections_part_2 STATIC)
+target_link_libraries(dectnrp_sections_part_2 dectnrp_common)
 
-file(GLOB DECTNRP_PART2_SOURCES "*.cpp")
-target_sources(dectnrp_part2 PRIVATE ${DECTNRP_PART2_SOURCES})
+file(GLOB DECTNRP_SECTIONS_PART_2_SOURCES "*.cpp")
+target_sources(dectnrp_sections_part_2 PRIVATE ${DECTNRP_SECTIONS_PART_2_SOURCES})

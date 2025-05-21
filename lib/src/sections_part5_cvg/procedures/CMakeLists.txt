@@ -18,5 +18,5 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-file(GLOB DECTNRP_PART5CVG_SOURCES "*.cpp")
-target_sources(dectnrp_part5cvg PRIVATE ${DECTNRP_PART5CVG_SOURCES})
+file(GLOB DECTNRP_SECTIONS_PART_5_CVG_SOURCES "*.cpp")
+target_sources(dectnrp_sections_part_5_cvg PRIVATE ${DECTNRP_SECTIONS_PART_5_CVG_SOURCES})

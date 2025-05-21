@@ -19,7 +19,7 @@
 #
 
 add_library(dectnrp_dlc STATIC)
-target_link_libraries(dectnrp_dlc dectnrp_common dectnrp_part5dlc)
+target_link_libraries(dectnrp_dlc dectnrp_common dectnrp_sections_part_5_dlc)
 
 file(GLOB DECTNRP_DLC_SOURCES "*.cpp")
 target_sources(dectnrp_dlc PRIVATE ${DECTNRP_DLC_SOURCES})

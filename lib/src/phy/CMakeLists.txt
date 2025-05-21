@@ -19,7 +19,7 @@
 #
 
 add_library(dectnrp_phy STATIC)
-target_link_libraries(dectnrp_phy dectnrp_common dectnrp_radio dectnrp_part3 ${FFT_LIBRARIES} ${VOLK_LIBRARIES} Eigen3::Eigen)
+target_link_libraries(dectnrp_phy dectnrp_common dectnrp_radio dectnrp_sections_part_3 ${FFT_LIBRARIES} ${VOLK_LIBRARIES} Eigen3::Eigen)
 
 file(GLOB DECTNRP_PHY_SOURCES "*.cpp")
 target_sources(dectnrp_phy PRIVATE ${DECTNRP_PHY_SOURCES})

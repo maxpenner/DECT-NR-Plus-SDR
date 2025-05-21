@@ -18,11 +18,11 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-add_library(dectnrp_part5cvg STATIC)
-target_link_libraries(dectnrp_part5cvg dectnrp_common)
+add_library(dectnrp_sections_part_5_cvg STATIC)
+target_link_libraries(dectnrp_sections_part_5_cvg dectnrp_common)
 
-file(GLOB DECTNRP_PART5CVG_SOURCES "*.cpp")
-target_sources(dectnrp_part5cvg PRIVATE ${DECTNRP_PART5CVG_SOURCES})
+file(GLOB DECTNRP_SECTIONS_PART_5_CVG_SOURCES "*.cpp")
+target_sources(dectnrp_sections_part_5_cvg PRIVATE ${DECTNRP_SECTIONS_PART_5_CVG_SOURCES})
 
 add_subdirectory(procedures)
 add_subdirectory(protocol_data_units)

@@ -176,8 +176,8 @@ class fec_t {
         uint32_t get_wp() const { return wp; };
 
     private:
-        section3::pcc_enc_t pcc_enc;
-        section3::pdc_enc_t pdc_enc;
+        pcc_enc_t pcc_enc;
+        pdc_enc_t pdc_enc;
 
         /// container for known scrambling sequences, depend on network IDs
         section3::scrambling_pdc_t scrambling_pdc;
