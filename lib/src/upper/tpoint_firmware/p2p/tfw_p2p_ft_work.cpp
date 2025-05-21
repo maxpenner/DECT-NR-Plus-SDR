@@ -28,24 +28,29 @@
 namespace dectnrp::upper::tfw::p2p {
 
 void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
-    // what is the next full second after PHY becomes operational?
+    // what is the next full second after start_time_64?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
 
-#ifdef TFW_P2P_EXPORT_PPX
-    // set virtual time of first rising edge
-    ppx.set_ppx_rising_edge(A);
-#endif
-
-#ifdef TFW_P2P_FT_ALIGN_BEACON_START_BY_MEASURED_OFFSET
-    // some headroom is required to set the PPX aligned with the first beacon
+#ifdef TFW_P2P_FT_ALIGN_BEACON_START_TO_FULL_SECOND_OR_CORRECT_OFFSET
+    // time first beacon is transmitted
+    const int64_t B = A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
+#else
+    // time first beacon is transmitted
     const int64_t B = A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001) +
                       hw.get_pps_to_full_second_measured_samples();
-#else
-    // some headroom is required to set the PPX aligned with the first beacon
-    const int64_t B = A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001);
 #endif
+
     // set first beacon transmission time, beacon is aligned with full second
     allocation_ft.set_beacon_time_scheduled(B);
+
+#ifdef TFW_P2P_EXPORT_PPX
+    dectnrp_assert(B - duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001) > 0,
+                   "time out-of-order");
+
+    // set virtual time of first rising edge, next edge is then aligned with the first beacon
+    ppx.set_ppx_rising_edge(
+        B - duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001));
+#endif
 
     // initialize regular callback for logs
     callbacks.add_callback(
