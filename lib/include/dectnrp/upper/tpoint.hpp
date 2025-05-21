@@ -206,7 +206,7 @@ class tpoint_t : public common::layer_unit_t {
         const radio::buffer_rx_t& buffer_rx;
         const phy::worker_pool_config_t& worker_pool_config;
         phy::job_queue_t& job_queue;
-        const section3::duration_lut_t& duration_lut;
+        const sp3::duration_lut_t& duration_lut;
         phy::agc::agc_tx_t& agc_tx;
         phy::agc::agc_rx_t& agc_rx;
         int64_t& tx_order_id;
@@ -239,7 +239,7 @@ class tpoint_t : public common::layer_unit_t {
          * \param hw_idx index of hardware in mac_lower
          */
         void worksub_agc(const phy::sync_report_t& sync_report,
-                         const section4::plcf_base_t& plcf_base,
+                         const sp4::plcf_base_t& plcf_base,
                          const int64_t t_agc_change_64,
                          const std::size_t hw_idx = 0);
 
@@ -309,8 +309,8 @@ class tpoint_t : public common::layer_unit_t {
          * \param PLCF_type PLCF type to decode
          * \return
          */
-        section3::packet_sizes_def_t worksub_psdef(const phy::phy_maclow_t& phy_maclow,
-                                                   const uint32_t PLCF_type) const;
+        sp3::packet_sizes_def_t worksub_psdef(const phy::phy_maclow_t& phy_maclow,
+                                              const uint32_t PLCF_type) const;
 };
 
 }  // namespace dectnrp::upper

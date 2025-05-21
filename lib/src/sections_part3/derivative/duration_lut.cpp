@@ -25,7 +25,7 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 duration_lut_t::duration_lut_t(const uint32_t samp_rate_)
     : samp_rate(static_cast<int64_t>(samp_rate_)) {
@@ -68,4 +68,4 @@ uint32_t duration_lut_t::get_N_duration_in_second(const duration_t duration) con
     return samp_rate / duration.get_N_samples();
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

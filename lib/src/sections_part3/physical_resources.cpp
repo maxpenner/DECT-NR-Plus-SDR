@@ -20,7 +20,7 @@
 
 #include "dectnrp/sections_part3/physical_resources.hpp"
 
-namespace dectnrp::section3::phyres {
+namespace dectnrp::sp3::phyres {
 
 void fill_subc(int* out, const int N_b_OCC) {
     uint32_t idx = 0;
@@ -68,4 +68,4 @@ k_b_OCC_vec_t get_k_b_OCC_vec() {
     return k_b_OCC_vec;
 }
 
-}  // namespace dectnrp::section3::phyres
+}  // namespace dectnrp::sp3::phyres

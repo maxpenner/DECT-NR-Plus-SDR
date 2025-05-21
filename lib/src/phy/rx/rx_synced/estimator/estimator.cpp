@@ -29,12 +29,12 @@ namespace dectnrp::phy {
 
 void estimator_t::reset(const uint32_t b, const uint32_t N_eff_TX_) {
     // convert beta to its index
-    const uint32_t b_idx = section3::phyres::b2b_idx[b];
+    const uint32_t b_idx = sp3::phyres::b2b_idx[b];
 
     // derive number of subcarrier from b and b_idx
-    N_b_OCC_plus_DC = section3::phyres::N_b_OCC_plus_DC_lut[b_idx];
+    N_b_OCC_plus_DC = sp3::phyres::N_b_OCC_plus_DC_lut[b_idx];
     N_STF_cells_b = b * constants::N_STF_cells_b_1;
-    N_DRS_cells_b = section3::drs_t::get_nof_drs_subc(b);
+    N_DRS_cells_b = sp3::drs_t::get_nof_drs_subc(b);
 
     N_eff_TX = N_eff_TX_;
 

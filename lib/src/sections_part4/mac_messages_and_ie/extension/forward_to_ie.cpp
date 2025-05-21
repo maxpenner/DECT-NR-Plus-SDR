@@ -23,7 +23,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 
-namespace dectnrp::section4::extensions {
+namespace dectnrp::sp4::extensions {
 
 forward_to_ie_t::forward_to_ie_t() {
     mac_mux_header.zero();
@@ -62,4 +62,4 @@ bool forward_to_ie_t::unpack(const uint8_t* mac_pdu_offset) {
     return is_valid();
 }
 
-}  // namespace dectnrp::section4::extensions
+}  // namespace dectnrp::sp4::extensions

@@ -24,7 +24,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 void plcf_21_t::zero() {
     plcf_base_t::zero();
@@ -126,4 +126,4 @@ uint32_t plcf_21_t::get_N_SS() const { return N_SS_coded_lut_rev.at(NumberOfSpat
 
 uint32_t plcf_21_t::get_DFRedundancyVersion() const { return 0; }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

@@ -23,7 +23,7 @@
 
 #include "dectnrp/common/adt/enumeration.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 measurement_report_ie_t::measurement_report_ie_t() {
     mac_mux_header.zero();
@@ -170,4 +170,4 @@ mmie_packing_peeking_t::peek_result_t measurement_report_ie_t::get_packed_size_b
     return packed_size;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

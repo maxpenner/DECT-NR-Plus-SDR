@@ -35,7 +35,7 @@ static constexpr int32_t PDC_OCCUPIED_PCC = -4;
 static constexpr uint32_t PDC_N_TS_1_2_4__8_OFDM_SYMBOL_INDEX_FULLY_OCCUPIED = 10;
 static constexpr uint32_t PDC_N_TS_1_2_4__8_OFDM_SYMBOL_INDEX_REPETITION_END = 21;
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 pdc_t::pdc_t(const uint32_t b_max, const uint32_t N_TS_max) {
     l_all_symbols.clear();
@@ -352,4 +352,4 @@ common::vec2d<uint32_t> pdc_t::idx2sub_row_zero_vec(const std::vector<uint32_t> 
     return linear_idx_per_column;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

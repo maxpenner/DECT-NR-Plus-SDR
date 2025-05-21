@@ -55,7 +55,7 @@ class tfw_loopback_ratio_t final : public tfw_loopback_t {
         std::vector<int32_t> ratio_vec;
 
         /// identity for first and second packet
-        section4::mac_architecture::identity_t identity_A, identity_B;
+        sp4::mac_architecture::identity_t identity_A, identity_B;
 
         /// measured values
         result_t result;

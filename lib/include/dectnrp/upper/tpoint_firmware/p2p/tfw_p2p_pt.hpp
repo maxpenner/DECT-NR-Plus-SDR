@@ -82,11 +82,11 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
 
         void worksub_mmie_cluster_beacon_message(
             const phy::phy_machigh_t& phy_machigh,
-            const section4::cluster_beacon_message_t& cluster_beacon_message);
+            const sp4::cluster_beacon_message_t& cluster_beacon_message);
 
         void worksub_mmie_time_announce(
             const phy::phy_machigh_t& phy_machigh,
-            const section4::extensions::time_announce_ie_t& time_announce_ie);
+            const sp4::extensions::time_announce_ie_t& time_announce_ie);
 
         // ##################################################
         // DLC and Convergence Layer

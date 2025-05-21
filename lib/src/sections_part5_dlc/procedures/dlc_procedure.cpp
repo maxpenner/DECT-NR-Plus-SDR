@@ -20,8 +20,8 @@
 
 #include "dectnrp/sections_part5_dlc/procedures/dlc_procedure.hpp"
 
-namespace dectnrp::section5dlc {
+namespace dectnrp::sp5dlc {
 
 dlc_prodedure_t::dlc_prodedure_t() {}
 
-}  // namespace dectnrp::section5dlc
+}  // namespace dectnrp::sp5dlc

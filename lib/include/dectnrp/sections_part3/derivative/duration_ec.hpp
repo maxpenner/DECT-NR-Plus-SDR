@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 enum class duration_ec_t : uint32_t {
     ms001,
@@ -37,4 +37,4 @@ enum class duration_ec_t : uint32_t {
 
 duration_ec_t get_duration_ec_depending_on_mu(const uint32_t u);
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

@@ -44,8 +44,8 @@ tfw_loopback_ratio_t::tfw_loopback_ratio_t(const tpoint_config_t& tpoint_config_
 
     ratio_vec = std::vector<int32_t>{30, 40, 50, 60, 70, 80};
 
-    identity_A = section4::mac_architecture::identity_t(100, 10000000, 1000);
-    identity_B = section4::mac_architecture::identity_t(123, 12345678, 1234);
+    identity_A = sp4::mac_architecture::identity_t(100, 10000000, 1000);
+    identity_B = sp4::mac_architecture::identity_t(123, 12345678, 1234);
 
     result = result_t(ratio_vec.size(), snr_vec.size());
 }
@@ -69,7 +69,7 @@ phy::maclow_phy_t tfw_loopback_ratio_t::work_pcc(const phy::phy_maclow_t& phy_ma
     // is this the correct short radio device ID?
     if (pp.PLCF_type == 1) {
         // cast guaranteed to work
-        const auto* plcf_10 = static_cast<const section4::plcf_10_t*>(plcf_base);
+        const auto* plcf_10 = static_cast<const sp4::plcf_10_t*>(plcf_base);
 
         if (plcf_10->TransmitterIdentity != pp.identity.ShortRadioDeviceID) {
             return phy::maclow_phy_t();
@@ -77,14 +77,14 @@ phy::maclow_phy_t tfw_loopback_ratio_t::work_pcc(const phy::phy_maclow_t& phy_ma
     } else {
         if (pp.PLCF_type_header_format == 0) {
             // cast guaranteed to work
-            const auto* plcf_20 = static_cast<const section4::plcf_20_t*>(plcf_base);
+            const auto* plcf_20 = static_cast<const sp4::plcf_20_t*>(plcf_base);
 
             if (plcf_20->TransmitterIdentity != identity_B.ShortRadioDeviceID) {
                 return phy::maclow_phy_t();
             }
         } else {
             // cast guaranteed to work
-            const auto* plcf_21 = static_cast<const section4::plcf_21_t*>(plcf_base);
+            const auto* plcf_21 = static_cast<const sp4::plcf_21_t*>(plcf_base);
 
             if (plcf_21->TransmitterIdentity != identity_B.ShortRadioDeviceID) {
                 return phy::maclow_phy_t();

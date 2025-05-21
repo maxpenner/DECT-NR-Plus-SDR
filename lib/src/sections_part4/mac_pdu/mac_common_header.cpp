@@ -24,7 +24,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 void data_mac_pdu_header_t::zero() {
     Reserved = 0;
@@ -199,4 +199,4 @@ bool rd_broadcasting_header_t::unpack(const uint8_t* mch_front) {
     return is_valid();
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

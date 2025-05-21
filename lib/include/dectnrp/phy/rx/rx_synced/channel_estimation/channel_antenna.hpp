@@ -82,7 +82,7 @@ class channel_antenna_t {
          * gained by zero-forcing pilots.
          *
          *  dimension:  N_eff_TX_max x (14 * b_max_)
-         *            = N_eff_TX_max x section3::drs_t::get_nof_drs_subc(b_max)
+         *            = N_eff_TX_max x sp3::drs_t::get_nof_drs_subc(b_max)
          */
         std::vector<cf_t*> chestim_drs_zf;
 
@@ -92,7 +92,7 @@ class channel_antenna_t {
          * are interlaced, see Figure 4.5-2 and Figure 4.5-3 in part 3. Note that N_eff_TX_max =
          * N_TS_max.
          *
-         *  dimension:  N_eff_TX_max x (2 * section3::drs_t::get_nof_drs_subc(b_max))
+         *  dimension:  N_eff_TX_max x (2 * sp3::drs_t::get_nof_drs_subc(b_max))
          */
         std::vector<cf_t*> chestim_drs_zf_interlaced;
 

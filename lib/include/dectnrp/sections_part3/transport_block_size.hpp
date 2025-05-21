@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section3::transport_block_size {
+namespace dectnrp::sp3::transport_block_size {
 
 /**
  * \brief ETSI TS 103 636-3, 7.6.6
@@ -69,4 +69,4 @@ uint32_t get_N_TB_bits(const uint32_t N_SS,
                        const uint32_t R_denominator,
                        const uint32_t Z);
 
-}  // namespace dectnrp::section3::transport_block_size
+}  // namespace dectnrp::sp3::transport_block_size

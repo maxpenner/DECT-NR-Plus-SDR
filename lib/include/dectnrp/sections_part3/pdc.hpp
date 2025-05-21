@@ -26,7 +26,7 @@
 #include "dectnrp/common/multidim.hpp"
 #include "dectnrp/sections_part3/df.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 class pdc_t final : public df_pxc_t {
     public:
@@ -73,4 +73,4 @@ class pdc_t final : public df_pxc_t {
                                                             const uint32_t offset);
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

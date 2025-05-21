@@ -25,7 +25,7 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/serdes/packing.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class mac_header_type_t final : public common::serdes::packing_t {
     public:
@@ -77,4 +77,4 @@ class mac_header_type_t final : public common::serdes::packing_t {
         }
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

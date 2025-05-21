@@ -46,7 +46,7 @@ static std::atomic<uint32_t> json_file_cnt{0};
 
 namespace dectnrp::phy {
 
-tx_t::tx_t(const section3::packet_sizes_t maximum_packet_sizes_,
+tx_t::tx_t(const sp3::packet_sizes_t maximum_packet_sizes_,
            const uint32_t os_min_,
            resampler_param_t resampler_param_)
     : tx_rx_t(maximum_packet_sizes_, os_min_, resampler_param_) {
@@ -80,8 +80,8 @@ tx_t::tx_t(const section3::packet_sizes_t maximum_packet_sizes_,
 
     const uint32_t u_max = maximum_packet_sizes.psdef.u;
     const uint32_t b_max = maximum_packet_sizes.psdef.b;
-    const uint32_t b_idx_max = section3::phyres::b2b_idx[b_max];
-    const uint32_t N_b_OCC_plus_DC_max = section3::phyres::N_b_OCC_plus_DC_lut[b_idx_max];
+    const uint32_t b_idx_max = sp3::phyres::b2b_idx[b_max];
+    const uint32_t N_b_OCC_plus_DC_max = sp3::phyres::N_b_OCC_plus_DC_lut[b_idx_max];
     const uint32_t N_b_DFT_os_max =
         dect_samp_rate_oversampled_max / constants::subcarrier_spacing_min_u_b;
     const uint32_t N_b_DFT_os_min =
@@ -226,7 +226,7 @@ void tx_t::generate_tx_packet(const tx_descriptor_t& tx_descriptor_,
     run_ifft_cp_scale(N_samples_STF_CP_only_os, final_scale_STF);
 
     // proposed in 2023 to improve performance in low SNR and high CFO regimes
-    section3::stf_t::apply_cover_sequence(
+    sp3::stf_t::apply_cover_sequence(
         ifft_cp_stage,
         ifft_cp_stage,
         tm_mode.N_TX,
@@ -571,7 +571,7 @@ void tx_t::run_meta_dependencies() {
     dectnrp_assert(tm_mode.N_TX <= buffer_tx->nof_antennas, "nof antennas larger than buffer_tx");
 
     dectnrp_assert(tx_descriptor->codebook_index <=
-                       section3::W_t::get_codebook_index_max(tm_mode.N_TS, tm_mode.N_TX),
+                       sp3::W_t::get_codebook_index_max(tm_mode.N_TS, tm_mode.N_TX),
                    "codebook index out of bound");
 
     dectnrp_assert((tx_descriptor->codebook_index > 0 && fec_cfg.beamforming) ||
@@ -602,7 +602,7 @@ void tx_t::run_meta_dependencies() {
 void tx_t::run_pcc_symbol_mapper_and_flipper() {
     // PCC always has 196 bits after channel coding, the number of complex QPSK symbols will always
     // be 196/2=98. This function returns the number of symbols written.
-    if (section3::fix::srsran_mod_modulate_bytes_FIX(
+    if (sp3::fix::srsran_mod_modulate_bytes_FIX(
             &srsran_modem_table[1], hb_plcf->get_d(), pcc_qpsk_symbols, constants::pcc_bits) !=
         constants::pcc_cells) {
         dectnrp_assert_failure("incorrect number of PCC symbols");
@@ -1035,11 +1035,11 @@ void tx_t::run_pdc() {
 #endif
 
     // map packed bytes to complex symbols
-    const uint32_t nof_new_complex_subc = section3::fix::srsran_mod_modulate_bytes_FIX(
-        srsran_modem_table_effective,
-        hb_tb->get_d(PDC_bits_idx / 8),
-        &pdc_cmplx_symbols[PDC_nof_cmplx_subc_residual],
-        nof_bits_processable);
+    const uint32_t nof_new_complex_subc =
+        sp3::fix::srsran_mod_modulate_bytes_FIX(srsran_modem_table_effective,
+                                                hb_tb->get_d(PDC_bits_idx / 8),
+                                                &pdc_cmplx_symbols[PDC_nof_cmplx_subc_residual],
+                                                nof_bits_processable);
 
     dectnrp_assert(nof_bits_processable / packet_sizes->mcs.N_bps == nof_new_complex_subc,
                    "nof generated complex symbols is not correct");

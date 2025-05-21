@@ -29,10 +29,10 @@
 
 namespace dectnrp::mac::allocation {
 
-allocation_pt_t::allocation_pt_t(const section3::duration_lut_t* duration_lut_,
-                                 const section3::duration_t beacon_period_,
-                                 const section3::duration_t allocation_validity_after_beacon_,
-                                 const section3::duration_t allocation_validity_after_now_,
+allocation_pt_t::allocation_pt_t(const sp3::duration_lut_t* duration_lut_,
+                                 const sp3::duration_t beacon_period_,
+                                 const sp3::duration_t allocation_validity_after_beacon_,
+                                 const sp3::duration_t allocation_validity_after_now_,
                                  const int64_t turnaround_time_)
     : allocation_t(duration_lut_, beacon_period_),
       allocation_validity_after_beacon(allocation_validity_after_beacon_),
@@ -44,8 +44,8 @@ allocation_pt_t::allocation_pt_t(const section3::duration_lut_t* duration_lut_,
 }
 
 void allocation_pt_t::add_resource(const direction_t direction,
-                                   const section3::duration_t offset,
-                                   const section3::duration_t length) {
+                                   const sp3::duration_t offset,
+                                   const sp3::duration_t length) {
     const auto resource = resource_t(offset, length);
 
     dectnrp_assert(is_within_beacon_period(resource), "outside of beacon period");
@@ -74,7 +74,7 @@ void allocation_pt_t::add_resource_regular(const direction_t direction,
                                            const uint32_t length,
                                            const uint32_t stride,
                                            const uint32_t N,
-                                           const section3::duration_ec_t base_duration_ec) {
+                                           const sp3::duration_ec_t base_duration_ec) {
     for (uint32_t i = 0; i < N; ++i) {
         add_resource(direction,
                      duration_lut->get_duration(base_duration_ec, offset + stride * i),

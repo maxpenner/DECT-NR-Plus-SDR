@@ -23,7 +23,7 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
-namespace dectnrp::section4::extensions {
+namespace dectnrp::sp4::extensions {
 
 class time_announce_ie_t final : public mmie_packing_t {
     public:
@@ -60,4 +60,4 @@ class time_announce_ie_t final : public mmie_packing_t {
         uint32_t tai_minus_utc_seconds{common::adt::UNDEFINED_NUMERIC_32};
 };
 
-}  // namespace dectnrp::section4::extensions
+}  // namespace dectnrp::sp4::extensions

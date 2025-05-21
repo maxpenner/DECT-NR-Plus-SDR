@@ -26,7 +26,7 @@ extern "C" {
 #include "srsran/phy/utils/vector.h"
 }
 
-namespace dectnrp::section3::fix {
+namespace dectnrp::sp3::fix {
 
 /**
  * TS 36.212 V8.8.0 Table 5.1.3-3: Turbo code internal interleaver parameters
@@ -152,4 +152,4 @@ bool srsran_cbsegm_cbsize_isvalid_FIX(uint32_t size) {
     return false;
 }
 
-}  // namespace dectnrp::section3::fix
+}  // namespace dectnrp::sp3::fix

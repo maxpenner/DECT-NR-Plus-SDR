@@ -159,7 +159,7 @@ void estimator_mimo_t::set_stages(const channel_antennas_t& channel_antennas,
     }
 }
 
-uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const section3::W_t& W,
+uint32_t estimator_mimo_t::mode_single_spatial_stream_3_7(const sp3::W_t& W,
                                                           const uint32_t N_TX_virt,
                                                           const uint32_t N_RX_virt,
                                                           const std::vector<cf_t*>& stage,

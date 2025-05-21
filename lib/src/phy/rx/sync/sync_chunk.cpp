@@ -52,10 +52,10 @@ sync_chunk_t::sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
       chunk_offset_samples(chunk_offset_samples_),
 
       u_max(worker_pool_config_.radio_device_class.u_min),
-      stf_nof_pattern(section3::stf_t::get_N_stf_pattern(u_max)),
+      stf_nof_pattern(sp3::stf_t::get_N_stf_pattern(u_max)),
 
       bos_fac(worker_pool_config_.radio_device_class.b_min * worker_pool_config_.os_min),
-      stf_bos_length_samples(section3::stf_t::get_N_samples_stf(u_max) * bos_fac),
+      stf_bos_length_samples(sp3::stf_t::get_N_samples_stf(u_max) * bos_fac),
       stf_bos_pattern_length_samples(stf_bos_length_samples / stf_nof_pattern),
 
       A(chunk_length_samples / worker_pool_config_.resampler_param.L *

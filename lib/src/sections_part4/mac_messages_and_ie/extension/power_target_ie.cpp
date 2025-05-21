@@ -20,7 +20,7 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/extensions/power_target_ie.hpp"
 
-namespace dectnrp::section4::extensions {
+namespace dectnrp::sp4::extensions {
 
 power_target_ie_t::power_target_ie_t() {
     mac_mux_header.zero();
@@ -51,4 +51,4 @@ bool power_target_ie_t::unpack(const uint8_t* mac_pdu_offset) {
     return is_valid();
 }
 
-}  // namespace dectnrp::section4::extensions
+}  // namespace dectnrp::sp4::extensions

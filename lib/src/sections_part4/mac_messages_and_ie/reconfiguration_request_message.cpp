@@ -26,7 +26,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/adt/enumeration.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 reconfiguration_request_message_t::reconfiguration_request_message_t() {
     mac_mux_header.zero();
@@ -202,4 +202,4 @@ mmie_packing_peeking_t::peek_result_t reconfiguration_request_message_t::get_pac
     return packed_size;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

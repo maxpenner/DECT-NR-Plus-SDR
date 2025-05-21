@@ -23,7 +23,7 @@
 #include "dectnrp/sections_part4/physical_header_field/feedback_info.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_base.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class plcf_21_t final : public plcf_base_t {
     public:
@@ -44,7 +44,7 @@ class plcf_21_t final : public plcf_base_t {
         uint32_t NumberOfSpatialStreams;
         uint32_t Reserved;
         uint32_t FeedbackFormat;
-        section4::feedback_info_pool_t feedback_info_pool;
+        sp4::feedback_info_pool_t feedback_info_pool;
 
         void set_NumberOfSpatialStreams(const int32_t N_SS);
 
@@ -54,4 +54,4 @@ class plcf_21_t final : public plcf_base_t {
         uint32_t get_DFRedundancyVersion() const override final;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

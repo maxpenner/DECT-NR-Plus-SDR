@@ -20,7 +20,7 @@
 
 #pragma once
 
-namespace dectnrp::section5dlc {
+namespace dectnrp::sp5dlc {
 
 class dlc_prodedure_t {
     public:
@@ -29,4 +29,4 @@ class dlc_prodedure_t {
     private:
 };
 
-}  // namespace dectnrp::section5dlc
+}  // namespace dectnrp::sp5dlc

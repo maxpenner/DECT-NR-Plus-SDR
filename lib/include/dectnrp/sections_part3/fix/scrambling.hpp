@@ -24,7 +24,7 @@ extern "C" {
 #include "srsran/phy/common/sequence.h"
 }
 
-namespace dectnrp::section3::fix {
+namespace dectnrp::sp3::fix {
 
 /**
  * \brief By default, srsRAN only supports scrambling starting at bit index 0 and ending at an
@@ -42,4 +42,4 @@ void srsran_scrambling_bytes_with_sequence_offset_FIX(srsran_sequence_t* s,
                                                       int len,
                                                       int offset);
 
-}  // namespace dectnrp::section3::fix
+}  // namespace dectnrp::sp3::fix

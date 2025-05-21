@@ -32,8 +32,8 @@ void tfw_p2p_pt_t::work_start_imminent(const int64_t start_time_64) {
     // initialize regular callback for prints
     callbacks.add_callback(
         std::bind(&tfw_p2p_pt_t::worksub_callback_log, this, std::placeholders::_1),
-        A + duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001),
-        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::s001,
+        A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001),
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
                                                  worksub_callback_log_period_sec));
 }
 

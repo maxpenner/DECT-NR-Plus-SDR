@@ -43,10 +43,10 @@ class chscanner_t {
         void scan(chscan_t& ch_scan);
 
     private:
-        const radio::buffer_rx_t& buffer_rx;          // required to poll time
-        const std::vector<const cf_t*> ant_streams;   // direct access to IQ samples
-        const uint32_t ant_streams_length_samples;    // number of buffered IQ samples
-        const section3::duration_lut_t duration_lut;  // used to determine length of partial scan
+        const radio::buffer_rx_t& buffer_rx;         // required to poll time
+        const std::vector<const cf_t*> ant_streams;  // direct access to IQ samples
+        const uint32_t ant_streams_length_samples;   // number of buffered IQ samples
+        const sp3::duration_lut_t duration_lut;      // used to determine length of partial scan
 
         /// number of antennas we use for each partial scan
         uint32_t N_ant;

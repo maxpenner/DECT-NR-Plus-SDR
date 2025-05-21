@@ -23,7 +23,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 struct absolute_channel_frequency_numbering_t {
         uint32_t band_number{};
@@ -62,4 +62,4 @@ center_frequency_t get_center_frequency(const uint32_t band_number, const uint32
 
 bool is_absolute_channel_number_in_range(const uint32_t channel_number);
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

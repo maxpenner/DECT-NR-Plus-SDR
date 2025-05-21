@@ -25,7 +25,7 @@
 
 #include "dectnrp/common/multidim.hpp"
 
-namespace dectnrp::section3::phyres {
+namespace dectnrp::sp3::phyres {
 
 // clang-format off
 static constexpr std::array<uint32_t, 17> b2b_idx{0, 0, 1, 0, 2, 0, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5};
@@ -69,4 +69,4 @@ struct k_b_OCC_vec_t {
 k_b_OCC_t get_k_b_OCC();
 k_b_OCC_vec_t get_k_b_OCC_vec();
 
-}  // namespace dectnrp::section3::phyres
+}  // namespace dectnrp::sp3::phyres

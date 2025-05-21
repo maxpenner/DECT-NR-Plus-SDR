@@ -26,7 +26,7 @@
 
 #include "dectnrp/common/serdes/packing.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class plcf_base_t : public common::serdes::packing_t {
     public:
@@ -71,4 +71,4 @@ class plcf_base_t : public common::serdes::packing_t {
         static constexpr std::array<uint32_t, 4> N_SS_coded_lut_rev = {1, 2, 4, 8};
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

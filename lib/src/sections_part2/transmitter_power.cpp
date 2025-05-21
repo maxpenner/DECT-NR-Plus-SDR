@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 maximum_output_power_t get_maximum_output_power(const uint32_t operating_channel_bandwidth,
                                                 const uint32_t RD_power_class) {
@@ -82,4 +82,4 @@ minimum_output_power_t get_maximum_output_power(const uint32_t operating_channel
     return minimum_output_power;
 }
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

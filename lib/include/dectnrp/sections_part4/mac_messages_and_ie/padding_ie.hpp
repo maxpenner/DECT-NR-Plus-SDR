@@ -24,7 +24,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class padding_ie_t final : public mmie_t {
     public:
@@ -48,4 +48,4 @@ class padding_ie_t final : public mmie_t {
         static constexpr uint32_t N_PADDING_BYTES_MAX = common::adt::bitmask_lsb<8>() + 2;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

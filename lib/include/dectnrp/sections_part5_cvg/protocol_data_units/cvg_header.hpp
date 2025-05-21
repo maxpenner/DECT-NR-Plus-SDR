@@ -20,7 +20,7 @@
 
 #pragma once
 
-namespace dectnrp::section5cvg {
+namespace dectnrp::sp5cvg {
 
 class cvg_header_t {
     public:
@@ -37,4 +37,4 @@ class cvg_header_format_2_t final : public cvg_header_t {
     private:
 };
 
-}  // namespace dectnrp::section5cvg
+}  // namespace dectnrp::sp5cvg

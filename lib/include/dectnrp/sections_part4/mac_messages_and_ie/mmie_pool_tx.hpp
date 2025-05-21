@@ -31,7 +31,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class mmie_pool_tx_t {
     public:
@@ -120,4 +120,4 @@ class mmie_pool_tx_t {
         std::unordered_map<std::type_index, std::vector<std::unique_ptr<mmie_t>>> pool;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

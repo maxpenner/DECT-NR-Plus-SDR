@@ -23,7 +23,7 @@
 #include "dectnrp/constants.hpp"
 #include "dectnrp/sections_part3/pdc.hpp"
 
-namespace dectnrp::section3::transmission_packet_structure {
+namespace dectnrp::sp3::transmission_packet_structure {
 
 uint32_t get_N_PACKET_symb(const uint32_t PacketLengthType,
                            const uint32_t PacketLength,
@@ -95,4 +95,4 @@ uint32_t get_N_samples_GI(const uint32_t u, const uint32_t b) {
     return N_samples_GI;
 }
 
-}  // namespace dectnrp::section3::transmission_packet_structure
+}  // namespace dectnrp::sp3::transmission_packet_structure

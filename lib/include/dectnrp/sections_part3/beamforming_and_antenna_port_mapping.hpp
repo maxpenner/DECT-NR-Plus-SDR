@@ -27,7 +27,7 @@
 #include "dectnrp/common/multidim.hpp"
 #include "dectnrp/sections_part3/tm_mode.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 class W_t {
     public:
@@ -123,4 +123,4 @@ class W_t {
         static float get_W_scaling_factor(const std::vector<int8_t> in);
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

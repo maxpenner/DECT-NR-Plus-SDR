@@ -158,7 +158,7 @@ void crosscorrelator_t::run_fine_search(sync_report_t& sync_report) {
     // load all STF templates
     const std::vector<cf_t*>& templates = stf_template->get_stf_time_domain(sync_report.b);
 
-    dectnrp_assert(templates.size() == section3::phyres::N_TS_2_nof_STF_templates_vec[nof_antennas],
+    dectnrp_assert(templates.size() == sp3::phyres::N_TS_2_nof_STF_templates_vec[nof_antennas],
                    "incorrect number of STF templates");
 
     // conduct fine search only for antennas that have a valid coarse peak
@@ -233,7 +233,7 @@ void crosscorrelator_t::run_fine_search(sync_report_t& sync_report) {
     }
 
     // convert index to actual value
-    sync_report.N_eff_TX = section3::phyres::N_TS_idx_2_N_TS_vec[N_eff_TX_idx_likely];
+    sync_report.N_eff_TX = sp3::phyres::N_TS_idx_2_N_TS_vec[N_eff_TX_idx_likely];
 
     // with N_eff_TX determined, we can now find the most likely peak index
     float metric_weighted_index = 0.0f;

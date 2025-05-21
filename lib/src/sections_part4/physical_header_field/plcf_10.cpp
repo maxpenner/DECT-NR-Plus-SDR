@@ -24,7 +24,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 void plcf_10_t::zero() {
     plcf_base_t::zero();
@@ -91,4 +91,4 @@ bool plcf_10_t::unpack(const uint8_t* plcf_front) {
     return is_valid();
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

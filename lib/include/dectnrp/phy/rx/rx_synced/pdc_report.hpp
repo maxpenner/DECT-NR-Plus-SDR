@@ -27,13 +27,13 @@ namespace dectnrp::phy {
 
 class pdc_report_t {
     public:
-        explicit pdc_report_t(const section4::mac_pdu_decoder_t& mac_pdu_decoder_)
+        explicit pdc_report_t(const sp4::mac_pdu_decoder_t& mac_pdu_decoder_)
             : crc_status(false),
               mac_pdu_decoder(mac_pdu_decoder_),
               snr_dB(0.0f),
               mimo_report(mimo_report_t()){};
 
-        explicit pdc_report_t(const section4::mac_pdu_decoder_t& mac_pdu_decoder_,
+        explicit pdc_report_t(const sp4::mac_pdu_decoder_t& mac_pdu_decoder_,
                               const float snr_dB_,
                               const mimo_report_t mimo_report_)
             : crc_status(true),
@@ -45,7 +45,7 @@ class pdc_report_t {
         const bool crc_status;
 
         /// contains all information about the PCC (or PLCF) available
-        const section4::mac_pdu_decoder_t& mac_pdu_decoder;
+        const sp4::mac_pdu_decoder_t& mac_pdu_decoder;
 
         /**
          * \brief SNR estimation is based on STF and DRS across all RX antennas a transmit streams.

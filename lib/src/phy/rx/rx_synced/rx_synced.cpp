@@ -78,7 +78,7 @@ rx_synced_t::rx_synced_t(const radio::buffer_rx_t& buffer_rx_,
        */
       localbuffer_resample(get_initialized_localbuffer(
           rx_pacer_t::localbuffer_choice_t::LOCALBUFFER_RESAMPLE,
-          section3::stf_t::get_N_samples_stf(worker_pool_config_.maximum_packet_sizes.psdef.u) *
+          sp3::stf_t::get_N_samples_stf(worker_pool_config_.maximum_packet_sizes.psdef.u) *
               worker_pool_config_.maximum_packet_sizes.psdef.b * os_min)),
 
       chestim_mode_lr_default(worker_pool_config_.chestim_mode_lr_default),
@@ -113,8 +113,8 @@ rx_synced_t::rx_synced_t(const radio::buffer_rx_t& buffer_rx_,
 
     const uint32_t u_max = worker_pool_config_.maximum_packet_sizes.psdef.u;
     const uint32_t b_max = worker_pool_config_.maximum_packet_sizes.psdef.b;
-    const uint32_t b_idx_max = section3::phyres::b2b_idx[b_max];
-    const uint32_t N_b_OCC_plus_DC_max = section3::phyres::N_b_OCC_plus_DC_lut[b_idx_max];
+    const uint32_t b_idx_max = sp3::phyres::b2b_idx[b_max];
+    const uint32_t N_b_OCC_plus_DC_max = sp3::phyres::N_b_OCC_plus_DC_lut[b_idx_max];
     const uint32_t processing_stage_len_max = N_eff_TX2processing_stage_len[N_eff_TX_max];
 
     // we demap upper and lower spectrum separately
@@ -132,7 +132,7 @@ rx_synced_t::rx_synced_t(const radio::buffer_rx_t& buffer_rx_,
         N_RX, worker_pool_config_.maximum_packet_sizes.tm_mode.N_TS);
     estimator_aoa = std::make_unique<estimator_aoa_t>(b_max, N_RX);
 
-    const auto numerologies = section3::get_numerologies(u_max, 1);
+    const auto numerologies = sp3::get_numerologies(u_max, 1);
 
     // initialize temporary vectors to init channel_luts
     const std::vector<double> V0 = RX_SYNCED_PARAM_NU_MAX_HZ_VEC;
@@ -156,7 +156,7 @@ rx_synced_t::rx_synced_t(const radio::buffer_rx_t& buffer_rx_,
 
     hb_rx_plcf = harq::buffer_rx_plcf_t::new_unique_instance();
 
-    plcf_decoder = std::make_unique<section4::plcf_decoder_t>(
+    plcf_decoder = std::make_unique<sp4::plcf_decoder_t>(
         worker_pool_config_.maximum_packet_sizes.psdef.PacketLength,
         worker_pool_config_.maximum_packet_sizes.psdef.mcs_index,
         worker_pool_config_.maximum_packet_sizes.tm_mode.N_SS);
@@ -481,20 +481,19 @@ nlohmann::ordered_json rx_synced_t::get_json() const {
 #endif
 
 void rx_synced_t::run_symbol_dimensions() {
-    const uint32_t b_idx = section3::phyres::b2b_idx[sync_report->b];
+    const uint32_t b_idx = sp3::phyres::b2b_idx[sync_report->b];
 
-    N_b_DFT = section3::phyres::N_b_DFT_lut[b_idx];
-    N_b_OCC = section3::phyres::N_b_OCC_lut[b_idx];
+    N_b_DFT = sp3::phyres::N_b_DFT_lut[b_idx];
+    N_b_OCC = sp3::phyres::N_b_OCC_lut[b_idx];
     N_b_OCC_plus_DC = N_b_OCC + 1;
 
-    set_N_subc_offset_lower_half_os(
-        N_b_DFT_os, N_b_DFT, section3::phyres::guards_bottom_lut[b_idx]);
+    set_N_subc_offset_lower_half_os(N_b_DFT_os, N_b_DFT, sp3::phyres::guards_bottom_lut[b_idx]);
 
     // cyclic prefix lengths without oversampling
-    N_samples_STF_CP_only_os = section3::transmission_packet_structure::get_N_samples_STF_CP_only(
+    N_samples_STF_CP_only_os = sp3::transmission_packet_structure::get_N_samples_STF_CP_only(
         sync_report->u, sync_report->b);
     N_b_CP_os =
-        section3::transmission_packet_structure::get_N_samples_OFDM_symbol_CP_only(sync_report->b);
+        sp3::transmission_packet_structure::get_N_samples_OFDM_symbol_CP_only(sync_report->b);
 
     // cyclic prefix lengths with oversampling
     N_samples_STF_CP_only_os *= N_b_DFT_os / N_b_DFT;
@@ -510,11 +509,11 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
     run_stf_rms_estimation(sync_report_);
 
     const uint32_t N_samples_STF_os = N_samples_STF_CP_only_os + N_b_DFT_os;
-    const uint32_t nof_pattern = section3::stf_t::get_N_stf_pattern(sync_report_.u);
+    const uint32_t nof_pattern = sp3::stf_t::get_N_stf_pattern(sync_report_.u);
     const uint32_t nof_samples_pattern = N_samples_STF_os / nof_pattern;
 
     // revert the cover sequence by reapplying it
-    section3::stf_t::apply_cover_sequence(
+    sp3::stf_t::apply_cover_sequence(
         mixer_stage, mixer_stage, N_RX, sync_report_.u, nof_samples_pattern);
 
     // Remove STF amplitude boost applied at TX. This is optional as most algorithms do not depend
@@ -887,7 +886,7 @@ void rx_synced_t::run_drs_channel_lut_pick() {
 #endif
 
     // configure parameters of channel estimation LUTs that are constant for the entire packet
-    channel_lut_effective->set_configuration_packet(section3::phyres::b2b_idx[sync_report->b],
+    channel_lut_effective->set_configuration_packet(sp3::phyres::b2b_idx[sync_report->b],
                                                     sync_report->N_eff_TX);
 }
 

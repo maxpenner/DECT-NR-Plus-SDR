@@ -22,7 +22,7 @@
 
 #include "dectnrp/sections_part4/physical_header_field/plcf_base.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class plcf_10_t final : public plcf_base_t {
     public:
@@ -47,4 +47,4 @@ class plcf_10_t final : public plcf_base_t {
         uint32_t get_DFRedundancyVersion() const override final { return 0; };
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

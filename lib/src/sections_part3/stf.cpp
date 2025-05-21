@@ -29,7 +29,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/sections_part3/physical_resources.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 stf_t::stf_t(const uint32_t b_max, const uint32_t N_eff_TX_max, const float scale_) {
     scale = scale_;
@@ -284,4 +284,4 @@ std::vector<cf_t> stf_t::fill_y_STF_filled(const cf_t* y_STF_i_b_x,
     return ret;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

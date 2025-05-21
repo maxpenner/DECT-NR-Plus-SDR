@@ -24,7 +24,7 @@
 
 namespace dectnrp::mac::allocation {
 
-resource_t::resource_t(const section3::duration_t offset_, const section3::duration_t length_)
+resource_t::resource_t(const sp3::duration_t offset_, const sp3::duration_t length_)
     : offset(offset_),
       length(length_) {
     dectnrp_assert(is_well_defined(), "not well defined");

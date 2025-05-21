@@ -27,7 +27,7 @@
 #include "dectnrp/common/adt/enumeration.hpp"
 #include "dectnrp/sections_part2/channel_arrangement.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 random_access_resource_ie_t::random_access_resource_ie_t() {
     mac_mux_header.zero();
@@ -77,13 +77,12 @@ bool random_access_resource_ie_t::is_valid() const {
     }
 
     // check validity of channel field (if included)
-    if (channel.has_value() && !section2::is_absolute_channel_number_in_range(channel.value())) {
+    if (channel.has_value() && !sp2::is_absolute_channel_number_in_range(channel.value())) {
         return false;
     }
 
     // check validity of separate channel field (if included)
-    if (channel_2.has_value() &&
-        !section2::is_absolute_channel_number_in_range(channel_2.value())) {
+    if (channel_2.has_value() && !sp2::is_absolute_channel_number_in_range(channel_2.value())) {
         return false;
     }
 
@@ -312,4 +311,4 @@ mmie_packing_peeking_t::peek_result_t random_access_resource_ie_t::get_packed_si
     return packed_size;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

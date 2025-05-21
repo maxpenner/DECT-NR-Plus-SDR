@@ -81,8 +81,8 @@ autocorrelator_peak_t::autocorrelator_peak_t(const std::vector<cf_t*> localbuffe
 
     for (uint32_t ant_idx = 0; ant_idx < nof_antennas_limited; ++ant_idx) {
         movsums_correlation[ant_idx] =
-            movsum_uw_t(section3::stf_t::get_cover_sequence_pairwise_product(
-                            section3::stf_t::get_equivalent_u(stf_nof_pattern)),
+            movsum_uw_t(sp3::stf_t::get_cover_sequence_pairwise_product(
+                            sp3::stf_t::get_equivalent_u(stf_nof_pattern)),
                         stf_bos_pattern_length_samples);
 
         movsums_power[ant_idx] = movsum_t<float>(stf_bos_length_samples);

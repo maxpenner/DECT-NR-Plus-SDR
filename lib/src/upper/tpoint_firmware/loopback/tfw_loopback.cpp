@@ -69,11 +69,11 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
 
     state = STATE_t::A_SET_CHANNEL_SNR;
 
-    stt.x_to_A_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 20);
-    stt.A_to_B_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 5);
-    stt.B_to_C_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 5);
-    stt.C_to_B_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 15);
-    stt.C_to_D_64 = duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 15);
+    stt.x_to_A_64 = duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 20);
+    stt.A_to_B_64 = duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 5);
+    stt.B_to_C_64 = duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 5);
+    stt.C_to_B_64 = duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 15);
+    stt.C_to_D_64 = duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 15);
 
     state_time_reference_64 = common::adt::UNDEFINED_EARLY_64;
 
@@ -102,16 +102,16 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
                 .mcs_index = 1,
                 .Z = worker_pool_config.radio_device_class.Z_min};
 
-    const auto packet_sizes_opt = section3::get_packet_sizes(pp.psdef);
+    const auto packet_sizes_opt = sp3::get_packet_sizes(pp.psdef);
 
     dectnrp_assert(packet_sizes_opt.has_value(), "undefined packet sizes");
 
     pp.N_samples_in_packet_length =
-        section3::get_N_samples_in_packet_length(packet_sizes_opt.value(), buffer_rx.samp_rate);
+        sp3::get_N_samples_in_packet_length(packet_sizes_opt.value(), buffer_rx.samp_rate);
 
     pp.PLCF_type = 1;
     pp.PLCF_type_header_format = 0;
-    pp.identity = section4::mac_architecture::identity_t(100, 10000000, 1000);
+    pp.identity = sp4::mac_architecture::identity_t(100, 10000000, 1000);
     pp.update_plcf_unpacked();
 
     pp.tx_time_multiple_64 = 1;
@@ -268,11 +268,11 @@ void tfw_loopback_t::packet_params_t::update_plcf_unpacked() {
     plcf_20.TransmitPower = plcf_10.TransmitPower;
     plcf_20.DFMCS = plcf_10.DFMCS;
     plcf_20.ReceiverIdentity = identity.ShortRadioDeviceID + 1;
-    plcf_20.set_NumberOfSpatialStreams(section3::tmmode::get_tm_mode(psdef.tm_mode_index).N_SS);
+    plcf_20.set_NumberOfSpatialStreams(sp3::tmmode::get_tm_mode(psdef.tm_mode_index).N_SS);
     plcf_20.DFRedundancyVersion = 0;
     plcf_20.DFNewDataIndication = 0;
     plcf_20.DFHARQProcessNumber = 0;
-    plcf_20.FeedbackFormat = section4::feedback_info_t::No_feedback;
+    plcf_20.FeedbackFormat = sp4::feedback_info_t::No_feedback;
 
     plcf_21.HeaderFormat = 1;
     plcf_21.PacketLengthType = plcf_10.PacketLengthType;
@@ -282,9 +282,9 @@ void tfw_loopback_t::packet_params_t::update_plcf_unpacked() {
     plcf_21.TransmitPower = plcf_10.TransmitPower;
     plcf_21.DFMCS = plcf_10.DFMCS;
     plcf_21.ReceiverIdentity = identity.ShortRadioDeviceID + 1;
-    plcf_21.set_NumberOfSpatialStreams(section3::tmmode::get_tm_mode(psdef.tm_mode_index).N_SS);
+    plcf_21.set_NumberOfSpatialStreams(sp3::tmmode::get_tm_mode(psdef.tm_mode_index).N_SS);
     plcf_21.Reserved = 0;
-    plcf_21.FeedbackFormat = section4::feedback_info_t::No_feedback;
+    plcf_21.FeedbackFormat = sp4::feedback_info_t::No_feedback;
 }
 
 void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
@@ -301,7 +301,7 @@ void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
     }
 
     // this is now a well-defined packet size
-    const section3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
+    const sp3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
     if (pp.PLCF_type == 1) {
         dectnrp_assert(hp_tx->get_rv() == pp.plcf_10.get_DFRedundancyVersion(), "incorrect rv");
@@ -355,7 +355,7 @@ int64_t tfw_loopback_t::get_random_tx_time(const int64_t now_64) {
     tx_time_64 += static_cast<int64_t>(randomgen.randi(
         0,
         static_cast<uint32_t>(
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::subslot_u1_001))));
+            duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::subslot_u1_001))));
 
     // force TX time to some multiple
     tx_time_64 = common::adt::multiple_geq(tx_time_64, pp.tx_time_multiple_64);

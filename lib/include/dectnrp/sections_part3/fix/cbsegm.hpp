@@ -27,7 +27,7 @@ extern "C" {
 #include "srsran/phy/fec/cbsegm.h"
 }
 
-namespace dectnrp::section3::fix {
+namespace dectnrp::sp3::fix {
 
 /// new argument Z
 int srsran_cbsegm_FIX(srsran_cbsegm_t* s, uint32_t tbs, uint32_t Z);
@@ -38,4 +38,4 @@ bool srsran_cbsegm_cbsize_isvalid_FIX(uint32_t size);
 
 int srsran_cbsegm_cbindex_FIX(uint32_t long_cb);
 
-}  // namespace dectnrp::section3::fix
+}  // namespace dectnrp::sp3::fix

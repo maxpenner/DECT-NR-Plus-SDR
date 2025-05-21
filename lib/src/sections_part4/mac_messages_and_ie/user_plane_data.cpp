@@ -23,7 +23,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 user_plane_data_t::user_plane_data_t() {
     mac_mux_header.zero();
@@ -78,4 +78,4 @@ uint32_t user_plane_data_t::get_flow_id() const {
     }
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

@@ -26,7 +26,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/adt/enumeration.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 rd_capability_ie_t::rd_capability_ie_t() {
     mac_mux_header.zero();
@@ -216,4 +216,4 @@ mmie_packing_peeking_t::peek_result_t rd_capability_ie_t::get_packed_size_by_pee
     return 7 + (mac_pdu_offset[0] >> 5) * 5;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

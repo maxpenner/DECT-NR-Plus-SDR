@@ -23,7 +23,7 @@
 
 #include "dectnrp/common/adt/bitbyte.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 route_info_ie_t::route_info_ie_t() {
     mac_mux_header.zero();
@@ -72,4 +72,4 @@ bool route_info_ie_t::unpack(const uint8_t* mac_pdu_offset) {
     return true;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

@@ -26,7 +26,7 @@
 
 #include "dectnrp/sections_part3/derivative/duration.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 class duration_lut_t {
     public:
@@ -73,4 +73,4 @@ class duration_lut_t {
         std::array<int64_t, std::to_underlying(duration_ec_t::CARDINALITY)> duration_vec;
 };
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

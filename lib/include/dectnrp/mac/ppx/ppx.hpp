@@ -31,11 +31,11 @@ namespace dectnrp::mac {
 class ppx_t {
     public:
         ppx_t() = default;
-        ppx_t(const section3::duration_t ppx_period_,
-              const section3::duration_t ppx_length_,
-              const section3::duration_t ppx_time_advance_,
-              const section3::duration_t beacon_period_,
-              const section3::duration_t time_deviation_max_);
+        ppx_t(const sp3::duration_t ppx_period_,
+              const sp3::duration_t ppx_length_,
+              const sp3::duration_t ppx_time_advance_,
+              const sp3::duration_t beacon_period_,
+              const sp3::duration_t time_deviation_max_);
 
         bool has_ppx_rising_edge() const { return 0 <= ppx_rising_edge_estimation_64; };
 
@@ -62,15 +62,15 @@ class ppx_t {
         };
 
     private:
-        section3::duration_t ppx_period;
-        section3::duration_t ppx_length;
-        section3::duration_t ppx_time_advance;
+        sp3::duration_t ppx_period;
+        sp3::duration_t ppx_length;
+        sp3::duration_t ppx_time_advance;
 
         /// time updates are given in a specific raster, for instance every 10ms
-        section3::duration_t beacon_period;
+        sp3::duration_t beacon_period;
 
         /// how much time deviation is acceptable before assuming synchronization is lost?
-        section3::duration_t time_deviation_max;
+        sp3::duration_t time_deviation_max;
 
         /// observed long term beacon period
         int64_t ppx_period_warped_64{common::adt::UNDEFINED_EARLY_64};

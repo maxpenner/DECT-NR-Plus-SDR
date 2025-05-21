@@ -78,7 +78,7 @@ phy::maclow_phy_t tfw_loopback_mmie_t::work_pcc(const phy::phy_maclow_t& phy_mac
     // is this the correct short radio device ID?
     if (pp.PLCF_type == 1) {
         // cast guaranteed to work
-        const auto* plcf_10 = static_cast<const section4::plcf_10_t*>(plcf_base);
+        const auto* plcf_10 = static_cast<const sp4::plcf_10_t*>(plcf_base);
 
         if (plcf_10->TransmitterIdentity != pp.identity.ShortRadioDeviceID) {
             return phy::maclow_phy_t();
@@ -86,14 +86,14 @@ phy::maclow_phy_t tfw_loopback_mmie_t::work_pcc(const phy::phy_maclow_t& phy_mac
     } else {
         if (pp.PLCF_type_header_format == 0) {
             // cast guaranteed to work
-            const auto* plcf_20 = static_cast<const section4::plcf_20_t*>(plcf_base);
+            const auto* plcf_20 = static_cast<const sp4::plcf_20_t*>(plcf_base);
 
             if (plcf_20->TransmitterIdentity != pp.identity.ShortRadioDeviceID) {
                 return phy::maclow_phy_t();
             }
         } else {
             // cast guaranteed to work
-            const auto* plcf_21 = static_cast<const section4::plcf_21_t*>(plcf_base);
+            const auto* plcf_21 = static_cast<const sp4::plcf_21_t*>(plcf_base);
 
             if (plcf_21->TransmitterIdentity != pp.identity.ShortRadioDeviceID) {
                 return phy::maclow_phy_t();

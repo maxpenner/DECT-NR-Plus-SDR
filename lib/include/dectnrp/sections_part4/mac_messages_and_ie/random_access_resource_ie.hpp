@@ -25,7 +25,7 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/resource_allocation_ie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class random_access_resource_ie_t final : public mmie_packing_peeking_t, public mu_depending_t {
     public:
@@ -100,4 +100,4 @@ class random_access_resource_ie_t final : public mmie_packing_peeking_t, public 
         peek_result_t get_packed_size_by_peeking(const uint8_t* mac_pdu_offset) const override;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

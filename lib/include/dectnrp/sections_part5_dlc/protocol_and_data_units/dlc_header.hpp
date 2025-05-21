@@ -20,7 +20,7 @@
 
 #pragma once
 
-namespace dectnrp::section5dlc {
+namespace dectnrp::sp5dlc {
 
 class dlc_header_t {
     public:
@@ -37,4 +37,4 @@ class dlc_header_format_2_t final : public dlc_header_t {
     private:
 };
 
-}  // namespace dectnrp::section5dlc
+}  // namespace dectnrp::sp5dlc

@@ -31,11 +31,11 @@ namespace dectnrp::phy {
 
 channel_antenna_t::channel_antenna_t(const uint32_t b_max_, const uint32_t N_eff_TX_max_) {
     // load physical dimensions
-    const uint32_t b_idx_max = section3::phyres::b2b_idx[b_max_];
-    const uint32_t N_b_OCC_plus_DC_max = section3::phyres::N_b_OCC_plus_DC_lut[b_idx_max];
+    const uint32_t b_idx_max = sp3::phyres::b2b_idx[b_max_];
+    const uint32_t N_b_OCC_plus_DC_max = sp3::phyres::N_b_OCC_plus_DC_lut[b_idx_max];
 
     // maixmum number of DRS cells per OFDM symbol and transmit stream
-    const uint32_t nof_drs_subc_max = section3::drs_t::get_nof_drs_subc(b_max_);
+    const uint32_t nof_drs_subc_max = sp3::drs_t::get_nof_drs_subc(b_max_);
 
     // init for every TS
     for (uint32_t ts_idx = 0; ts_idx < N_eff_TX_max_; ++ts_idx) {

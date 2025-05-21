@@ -26,7 +26,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/adt/enumeration.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 association_response_message_t::association_response_message_t() {
     mac_mux_header.zero();
@@ -291,4 +291,4 @@ mmie_packing_peeking_t::peek_result_t association_response_message_t::get_packed
     return packed_size;
 }
 
-};  // namespace dectnrp::section4
+};  // namespace dectnrp::sp4

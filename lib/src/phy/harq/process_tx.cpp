@@ -26,7 +26,7 @@
 #define ASSERT_FULLY_LOCKED dectnrp_assert(is_outer_locked_inner_locked(), "incorrect lock state")
 
 namespace dectnrp::phy::harq {
-process_tx_t::process_tx_t(const uint32_t id_, const section3::packet_sizes_t maximum_packet_sizes)
+process_tx_t::process_tx_t(const uint32_t id_, const sp3::packet_sizes_t maximum_packet_sizes)
     : process_t(id_) {
     hb_plcf = std::make_unique<buffer_tx_t>(buffer_tx_t::COMPONENT_T::PLCF);
 

@@ -24,7 +24,7 @@
 
 namespace dectnrp::phy::harq {
 
-process_pool_t::process_pool_t(const section3::packet_sizes_t maximum_packet_sizes,
+process_pool_t::process_pool_t(const sp3::packet_sizes_t maximum_packet_sizes,
                                const uint32_t nof_process_tx,
                                const uint32_t nof_process_rx) {
     for (uint32_t i = 0; i < nof_process_tx; ++i) {
@@ -38,11 +38,11 @@ process_pool_t::process_pool_t(const section3::packet_sizes_t maximum_packet_siz
 
 process_tx_t* process_pool_t::get_process_tx(const uint32_t PLCF_type,
                                              const uint32_t network_id,
-                                             const section3::packet_sizes_def_t psdef,
+                                             const sp3::packet_sizes_def_t psdef,
                                              const finalize_tx_t ftx) const {
     dectnrp_assert(PLCF_type == 1 || PLCF_type == 2, "unknown PLCF type");
 
-    const auto packet_sizes_opt = section3::get_packet_sizes(psdef);
+    const auto packet_sizes_opt = sp3::get_packet_sizes(psdef);
 
     dectnrp_assert(packet_sizes_opt.has_value(), "packets must be well-defined");
 
@@ -68,12 +68,12 @@ process_tx_t* process_pool_t::get_process_tx(const uint32_t PLCF_type,
 
 process_rx_t* process_pool_t::get_process_rx(const uint32_t PLCF_type,
                                              const uint32_t network_id,
-                                             const section3::packet_sizes_def_t psdef,
+                                             const sp3::packet_sizes_def_t psdef,
                                              uint32_t rv,
                                              const finalize_rx_t frx) const {
     dectnrp_assert(PLCF_type == 1 || PLCF_type == 2, "unknown PLCF type");
 
-    const auto packet_sizes_opt = section3::get_packet_sizes(psdef);
+    const auto packet_sizes_opt = sp3::get_packet_sizes(psdef);
 
     dectnrp_assert(packet_sizes_opt.has_value(), "packets must be well-defined");
 

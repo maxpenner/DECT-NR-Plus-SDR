@@ -30,8 +30,8 @@ namespace dectnrp::upper::tfw::p2p {
 
 std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
     // cast guaranteed to work
-    const auto* plcf_10 = static_cast<const section4::plcf_10_t*>(
-        phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
+    const auto* plcf_10 =
+        static_cast<const sp4::plcf_10_t*>(phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
 
     dectnrp_assert(plcf_10 != nullptr, "cast ill-formed");
 
@@ -89,8 +89,8 @@ phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_20(
 
 phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) {
     // cast guaranteed to work
-    const auto* plcf_21 = static_cast<const section4::plcf_21_t*>(
-        phy_maclow.pcc_report.plcf_decoder.get_plcf_base(2));
+    const auto* plcf_21 =
+        static_cast<const sp4::plcf_21_t*>(phy_maclow.pcc_report.plcf_decoder.get_plcf_base(2));
 
     dectnrp_assert(plcf_21 != nullptr, "cast ill-formed");
 
@@ -121,15 +121,14 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     const auto& mmie_decoded_vec = mac_pdu_decoder.get_mmie_decoded_vec();
 
     for (auto mmie : mmie_decoded_vec) {
-        if (const auto* mmie_child = dynamic_cast<const section4::cluster_beacon_message_t*>(mmie);
+        if (const auto* mmie_child = dynamic_cast<const sp4::cluster_beacon_message_t*>(mmie);
             mmie_child != nullptr) {
             ASSERT_MMIE_COUNT_EXACT(mac_pdu_decoder, mmie_child, 1);
             worksub_mmie_cluster_beacon_message(phy_machigh, *mmie_child);
             continue;
         }
 
-        if (const auto* mmie_child =
-                dynamic_cast<const section4::extensions::time_announce_ie_t*>(mmie);
+        if (const auto* mmie_child = dynamic_cast<const sp4::extensions::time_announce_ie_t*>(mmie);
             mmie_child != nullptr) {
             ASSERT_MMIE_COUNT_EXACT(mac_pdu_decoder, mmie_child, 1);
             worksub_mmie_time_announce(phy_machigh, *mmie_child);
@@ -168,7 +167,7 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
     uint32_t datagram_cnt = 0;
 
     for (auto mmie : mmie_decoded_vec) {
-        if (const auto* mmie_child = dynamic_cast<const section4::user_plane_data_t*>(mmie);
+        if (const auto* mmie_child = dynamic_cast<const sp4::user_plane_data_t*>(mmie);
             mmie_child != nullptr) {
             // submit to app_client
             if (app_client->write_nto(contact_pt.conn_idx_client,
@@ -215,13 +214,13 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
 
 void tfw_p2p_pt_t::worksub_mmie_cluster_beacon_message(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh,
-    [[maybe_unused]] const section4::cluster_beacon_message_t& cluster_beacon_message) {
+    [[maybe_unused]] const sp4::cluster_beacon_message_t& cluster_beacon_message) {
     // ToDo
 }
 
 void tfw_p2p_pt_t::worksub_mmie_time_announce(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh,
-    [[maybe_unused]] const section4::extensions::time_announce_ie_t& time_announce_ie) {
+    [[maybe_unused]] const sp4::extensions::time_announce_ie_t& time_announce_ie) {
 #ifdef TFW_P2P_EXPORT_PPX
     // is this the first time_announce_ie ever received?
     if (!ppx.has_ppx_rising_edge()) {

@@ -20,8 +20,8 @@
 
 #include "dectnrp/sections_part5_cvg/procedures/cvg_procedure.hpp"
 
-namespace dectnrp::section5cvg {
+namespace dectnrp::sp5cvg {
 
 cvg_prodedure_t::cvg_prodedure_t() {}
 
-}  // namespace dectnrp::section5cvg
+}  // namespace dectnrp::sp5cvg

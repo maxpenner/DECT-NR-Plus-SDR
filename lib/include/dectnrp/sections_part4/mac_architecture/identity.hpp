@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section4::mac_architecture {
+namespace dectnrp::sp4::mac_architecture {
 
 class identity_t {
     public:
@@ -56,4 +56,4 @@ class identity_t {
         static bool is_valid_ShortRadioDeviceID(const uint32_t ShortRadioDeviceID);
 };
 
-}  // namespace dectnrp::section4::mac_architecture
+}  // namespace dectnrp::sp4::mac_architecture

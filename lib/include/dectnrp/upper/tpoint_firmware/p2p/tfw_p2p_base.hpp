@@ -92,7 +92,7 @@ class tfw_p2p_base_t : public tpoint_t {
         common::adt::callbacks_t<void> callbacks;
 
         /// both FT and PT must know the FT's identity
-        section4::mac_architecture::identity_t identity_ft;
+        sp4::mac_architecture::identity_t identity_ft;
 
 #ifdef APPLICATION_INTERFACE_VNIC_OR_SOCKET
         /// when using a VNIC, only one PT is supported in this demo firmware
@@ -103,7 +103,7 @@ class tfw_p2p_base_t : public tpoint_t {
 #endif
 
         /// all PT identities have to be known at FT, individual PTs only need their own identity
-        section4::mac_architecture::identity_t init_identity_pt(const uint32_t firmware_id_);
+        sp4::mac_architecture::identity_t init_identity_pt(const uint32_t firmware_id_);
 
         /// the FT's allocation defines beacon periods, and thus has to be known at FT and PT
         mac::allocation::allocation_ft_t allocation_ft;
@@ -123,11 +123,11 @@ class tfw_p2p_base_t : public tpoint_t {
 #endif
 
         /// part 2 defines five MAC PDU types, these are generators for each type
-        section4::ppmp_data_t ppmp_data;
-        section4::ppmp_beacon_t ppmp_beacon;
-        section4::ppmp_unicast_t ppmp_unicast;
-        section4::ppmp_rd_broadcast_t ppmp_rd_broadcast;
-        section4::mmie_pool_tx_t mmie_pool_tx;
+        sp4::ppmp_data_t ppmp_data;
+        sp4::ppmp_beacon_t ppmp_beacon;
+        sp4::ppmp_unicast_t ppmp_unicast;
+        sp4::ppmp_rd_broadcast_t ppmp_rd_broadcast;
+        sp4::mmie_pool_tx_t mmie_pool_tx;
 
         /// FT and PT both generate unicast packets, however with different identities
         void init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
@@ -179,7 +179,7 @@ class tfw_p2p_base_t : public tpoint_t {
         /// fill buffer of HARQ process with MAC SDU
         bool worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p,
                                         const application::queue_level_t& queue_level,
-                                        const section3::packet_sizes_t& packet_sizes,
+                                        const sp3::packet_sizes_t& packet_sizes,
                                         phy::harq::process_tx_t& hp_tx);
 
         // ##################################################

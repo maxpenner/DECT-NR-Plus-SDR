@@ -27,7 +27,7 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class rd_capability_ie_t final : public mmie_packing_peeking_t {
     public:
@@ -238,4 +238,4 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
         peek_result_t get_packed_size_by_peeking(const uint8_t* mac_pdu_offset) const override;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

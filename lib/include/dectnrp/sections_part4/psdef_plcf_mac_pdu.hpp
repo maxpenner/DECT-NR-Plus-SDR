@@ -27,24 +27,24 @@
 #include "dectnrp/sections_part4/physical_header_field/plcf_20.hpp"
 #include "dectnrp/sections_part4/physical_header_field/plcf_21.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class psdef_plcf_mac_pdu_t {
     public:
         /// defines all sizes of the transmission (bits, bytes and IQ samples)
-        section3::packet_sizes_def_t psdef;
+        sp3::packet_sizes_def_t psdef;
 
         /// returns byte offset of MAC header type and MAC common header
         [[nodiscard]] uint32_t pack_first_3_header(uint8_t* a_plcf, uint8_t* a_mac_pdu) const;
 
         /// deriving classes add specific PLCFs, this pointers picks one
-        section4::plcf_base_t* plcf_base_effective{nullptr};
+        sp4::plcf_base_t* plcf_base_effective{nullptr};
 
         /// every packet type uses the same MAC header type
-        section4::mac_header_type_t mac_header_type;
+        sp4::mac_header_type_t mac_header_type;
 
         /// deriving classes add specific MAC common headers, this pointers picks one
-        section4::mac_common_header_t* mch_base_effective{nullptr};
+        sp4::mac_common_header_t* mch_base_effective{nullptr};
 
         uint32_t get_packed_size_mht_mch() const {
             return mac_header_type.get_packed_size() + mch_base_effective->get_packed_size();
@@ -54,12 +54,12 @@ class psdef_plcf_mac_pdu_t {
 /// ppmp = psdef_plcf_mac_pdu
 class ppmp_data_t final : public psdef_plcf_mac_pdu_t {
     public:
-        section4::plcf_20_t plcf_20;
-        section4::plcf_21_t plcf_21;
+        sp4::plcf_20_t plcf_20;
+        sp4::plcf_21_t plcf_21;
 
         /// base class contains MAC header type
 
-        section4::data_mac_pdu_header_t data_mac_pdu_header;
+        sp4::data_mac_pdu_header_t data_mac_pdu_header;
 
         // add restrictions as to which MMIEs can be attached
         // ToDo
@@ -68,11 +68,11 @@ class ppmp_data_t final : public psdef_plcf_mac_pdu_t {
 /// ppmp = psdef_plcf_mac_pdu
 class ppmp_beacon_t final : public psdef_plcf_mac_pdu_t {
     public:
-        section4::plcf_10_t plcf_10;
+        sp4::plcf_10_t plcf_10;
 
         /// base class contains MAC header type
 
-        section4::beacon_header_t beacon_header;
+        sp4::beacon_header_t beacon_header;
 
         // add restrictions as to which MMIEs can be attached
         // ToDo
@@ -81,13 +81,13 @@ class ppmp_beacon_t final : public psdef_plcf_mac_pdu_t {
 /// ppmp = psdef_plcf_mac_pdu
 class ppmp_unicast_t final : public psdef_plcf_mac_pdu_t {
     public:
-        section4::plcf_20_t plcf_20;
-        section4::plcf_21_t plcf_21;
+        sp4::plcf_20_t plcf_20;
+        sp4::plcf_21_t plcf_21;
 
         /// base class contains MAC header type
 
-        section4::mch_empty_t mch_empty;
-        section4::unicast_header_t unicast_header;
+        sp4::mch_empty_t mch_empty;
+        sp4::unicast_header_t unicast_header;
 
         // add restrictions as to which MMIEs can be attached
         // ToDo
@@ -96,14 +96,14 @@ class ppmp_unicast_t final : public psdef_plcf_mac_pdu_t {
 /// ppmp = psdef_plcf_mac_pdu
 class ppmp_rd_broadcast_t final : public psdef_plcf_mac_pdu_t {
     public:
-        section4::plcf_10_t plcf_10;
+        sp4::plcf_10_t plcf_10;
 
         /// base class contains MAC header type
 
-        section4::rd_broadcasting_header_t rd_broadcasting_header;
+        sp4::rd_broadcasting_header_t rd_broadcasting_header;
 
         // add restrictions as to which MMIEs can be attached
         // ToDo
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 uint32_t psdef_plcf_mac_pdu_t::pack_first_3_header(uint8_t* a_plcf, uint8_t* a_mac_pdu) const {
     dectnrp_assert(a_plcf != nullptr, "destination nullptr");
@@ -42,4 +42,4 @@ uint32_t psdef_plcf_mac_pdu_t::pack_first_3_header(uint8_t* a_plcf, uint8_t* a_m
     return mac_header_type.get_packed_size() + mch_base_effective->get_packed_size();
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

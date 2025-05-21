@@ -54,7 +54,7 @@ class fec_t {
          *
          * \param packet_sizes_maximum maximum packet sizes across the radio device class
          */
-        explicit fec_t(const section3::packet_sizes_t& packet_sizes_maximum);
+        explicit fec_t(const sp3::packet_sizes_t& packet_sizes_maximum);
         ~fec_t();
 
         fec_t() = delete;
@@ -81,7 +81,7 @@ class fec_t {
          * \param tx_cfg FEC configuration
          * \param hb HARQ buffer
          */
-        void encode_plcf(const section3::fec_cfg_t& tx_cfg, harq::buffer_tx_t& hb);
+        void encode_plcf(const sp3::fec_cfg_t& tx_cfg, harq::buffer_tx_t& hb);
 
         /**
          * \brief Quote form 7.5.1 in part 3: "The receiver shall blind decode both transport block
@@ -105,7 +105,7 @@ class fec_t {
          * \param PLCF_type_test either 1 or 2
          * \return
          */
-        bool decode_plcf_test(section3::fec_cfg_t& rx_cfg,
+        bool decode_plcf_test(sp3::fec_cfg_t& rx_cfg,
                               harq::buffer_rx_plcf_t& hb,
                               const uint32_t PLCF_type_test);
 
@@ -117,7 +117,7 @@ class fec_t {
          *
          * \param tx_cfg
          */
-        void segmentate_and_pick_scrambling_sequence(const section3::fec_cfg_t& tx_cfg);
+        void segmentate_and_pick_scrambling_sequence(const sp3::fec_cfg_t& tx_cfg);
 
         /**
          * \brief encode TB to PDC in a single step
@@ -126,7 +126,7 @@ class fec_t {
          * \param hb
          * \return
          */
-        void encode_tb(const section3::fec_cfg_t& tx_cfg, harq::buffer_tx_t& hb);
+        void encode_tb(const sp3::fec_cfg_t& tx_cfg, harq::buffer_tx_t& hb);
 
         /**
          * \brief Encode TB to PDC in multiple steps. Encode the minimum number of codeblocks
@@ -139,7 +139,7 @@ class fec_t {
          * \param nof_bits_minimum
          * \return
          */
-        void encode_tb(const section3::fec_cfg_t& tx_cfg,
+        void encode_tb(const sp3::fec_cfg_t& tx_cfg,
                        harq::buffer_tx_t& hb,
                        const uint32_t nof_bits_minimum);
 
@@ -149,7 +149,7 @@ class fec_t {
          * \param rx_cfg
          * \param hb
          */
-        void decode_tb(const section3::fec_cfg_t& rx_cfg, harq::buffer_rx_t& hb);
+        void decode_tb(const sp3::fec_cfg_t& rx_cfg, harq::buffer_rx_t& hb);
 
         /**
          * \brief Decode PDC to TB in multiple steps. Decode the maximum number of codeblocks
@@ -161,7 +161,7 @@ class fec_t {
          * \param hb
          * \param nof_bits_maximum
          */
-        void decode_tb(const section3::fec_cfg_t& rx_cfg,
+        void decode_tb(const sp3::fec_cfg_t& rx_cfg,
                        harq::buffer_rx_t& hb,
                        const uint32_t nof_bits_maximum);
 
@@ -180,7 +180,7 @@ class fec_t {
         pdc_enc_t pdc_enc;
 
         /// container for known scrambling sequences, depend on network IDs
-        section3::scrambling_pdc_t scrambling_pdc;
+        sp3::scrambling_pdc_t scrambling_pdc;
 
         // state machine variables
 

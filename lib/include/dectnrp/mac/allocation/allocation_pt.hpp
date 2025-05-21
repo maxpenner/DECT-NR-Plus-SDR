@@ -34,10 +34,10 @@ class allocation_pt_t final : public allocation_t {
     public:
         allocation_pt_t() = default;
 
-        explicit allocation_pt_t(const section3::duration_lut_t* duration_lut_,
-                                 const section3::duration_t beacon_period_,
-                                 const section3::duration_t allocation_validity_after_beacon_,
-                                 const section3::duration_t allocation_validity_after_now_,
+        explicit allocation_pt_t(const sp3::duration_lut_t* duration_lut_,
+                                 const sp3::duration_t beacon_period_,
+                                 const sp3::duration_t allocation_validity_after_beacon_,
+                                 const sp3::duration_t allocation_validity_after_now_,
                                  const int64_t turnaround_time_);
 
         typedef std::vector<resource_t> resource_vec_t;
@@ -48,15 +48,15 @@ class allocation_pt_t final : public allocation_t {
         };
 
         void add_resource(const direction_t direction,
-                          const section3::duration_t offset,
-                          const section3::duration_t length);
+                          const sp3::duration_t offset,
+                          const sp3::duration_t length);
 
         void add_resource_regular(const direction_t direction,
                                   const uint32_t offset,
                                   const uint32_t length,
                                   const uint32_t stride,
                                   const uint32_t N,
-                                  const section3::duration_ec_t base_duration_ec);
+                                  const sp3::duration_ec_t base_duration_ec);
 
         bool is_within_beacon_period(const resource_t& other) const;
 
@@ -76,10 +76,10 @@ class allocation_pt_t final : public allocation_t {
 
     private:
         /// duration after receiving a beacon in which we are allowed to transmit
-        section3::duration_t allocation_validity_after_beacon;
+        sp3::duration_t allocation_validity_after_beacon;
 
         /// duration after current time in which we are allowed to transmit
-        section3::duration_t allocation_validity_after_now;
+        sp3::duration_t allocation_validity_after_now;
 
         /// common SDR terminology
         int64_t turnaround_time;

@@ -48,7 +48,7 @@ void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
 
     dectnrp_assert(
         std::abs(pulse_config.rising_edge_64 - ppx.get_ppx_time_advance_samples() - next_64) <
-            duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 5),
+            duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 5),
         "callback adjustment time too large");
 
     // set time of next callback
@@ -71,7 +71,7 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     // define an expiration time for all instances of expiring_t
     const int64_t expiration_64 =
         tx_opportunity.tx_time_64 -
-        duration_lut.get_N_samples_from_duration(section3::duration_ec_t::ms001, 50);
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 50);
 
     worksub_tx_unicast_psdef(contact_p2p, expiration_64);
 
@@ -163,14 +163,14 @@ void tfw_p2p_base_t::worksub_tx_unicast_feedback(contact_p2p_t& contact_p2p,
 
 bool tfw_p2p_base_t::worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p,
                                                 const application::queue_level_t& queue_level,
-                                                const section3::packet_sizes_t& packet_sizes,
+                                                const sp3::packet_sizes_t& packet_sizes,
                                                 phy::harq::process_tx_t& hp_tx) {
     uint32_t a_cnt_w = ppmp_unicast.pack_first_3_header(hp_tx.get_a_plcf(), hp_tx.get_a_tb());
 
     // then attach as many user plane data MMIEs as possible
     for (uint32_t i = 0; i < queue_level.N_filled; ++i) {
         // request ...
-        auto& upd = mmie_pool_tx.get<section4::user_plane_data_t>();
+        auto& upd = mmie_pool_tx.get<sp4::user_plane_data_t>();
 
         // ... and configure user plane data MMIE
         upd.set_flow_id(1);

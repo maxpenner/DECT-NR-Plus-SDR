@@ -28,13 +28,12 @@ namespace dectnrp::phy {
 
 class pcc_report_t {
     public:
-        explicit pcc_report_t(const section4::plcf_decoder_t& plcf_decoder_,
-                              const float snr_dB_ = 0.0f)
+        explicit pcc_report_t(const sp4::plcf_decoder_t& plcf_decoder_, const float snr_dB_ = 0.0f)
             : plcf_decoder(plcf_decoder_),
               snr_dB(snr_dB_){};
 
         /// contains all information about the PCC (or PLCF) available
-        const section4::plcf_decoder_t& plcf_decoder;
+        const sp4::plcf_decoder_t& plcf_decoder;
 
         /**
          * \brief This SNR value is based on the STF and the first one or two OFDM symbols

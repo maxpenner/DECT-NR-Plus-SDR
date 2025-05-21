@@ -23,7 +23,7 @@
 
 #include <cstdint>
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 struct reference_time_accuracy_t {
         uint32_t accuracy_ppm;
@@ -32,4 +32,4 @@ struct reference_time_accuracy_t {
 
 reference_time_accuracy_t get_reference_time_accuracy(const bool extreme_condition);
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

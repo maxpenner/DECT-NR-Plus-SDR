@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <cstdio>
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 struct mcs_t {
         uint32_t index;
@@ -34,4 +34,4 @@ struct mcs_t {
 
 mcs_t get_mcs(const uint32_t index);
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

@@ -23,7 +23,7 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class radio_device_status_ie_t final : public mmie_packing_t {
     public:
@@ -67,4 +67,4 @@ class radio_device_status_ie_t final : public mmie_packing_t {
         bool unpack(const uint8_t* mac_pdu_offset) override;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

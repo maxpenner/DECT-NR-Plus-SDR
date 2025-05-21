@@ -24,7 +24,7 @@
 
 #include "dectnrp/common/serdes/packing.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class mac_common_header_t : public common::serdes::packing_t {
     public:
@@ -102,4 +102,4 @@ class mch_empty_t final : public mac_common_header_t {
         };
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

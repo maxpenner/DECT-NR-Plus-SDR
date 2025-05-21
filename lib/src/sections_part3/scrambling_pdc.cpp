@@ -24,7 +24,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/limits.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 scrambling_pdc_t::~scrambling_pdc_t() {
     for (auto& [k, v] : sequences) {
@@ -64,4 +64,4 @@ srsran_sequence_t* scrambling_pdc_t::get(const uint32_t network_id, const uint32
     return plcf_type == 1 ? &pair.first : &pair.second;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

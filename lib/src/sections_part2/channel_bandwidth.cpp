@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 channel_bandwidth_t get_channel_bandwidth(const uint32_t operating_channel_bandwidth_index) {
     channel_bandwidth_t channel_bandwidth;
@@ -59,4 +59,4 @@ channel_bandwidth_t get_channel_bandwidth(const uint32_t operating_channel_bandw
     return channel_bandwidth;
 }
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

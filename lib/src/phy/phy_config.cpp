@@ -124,9 +124,9 @@ phy_config_t::phy_config_t(const std::string directory)
         worker_pool_config.radio_device_class_string =
             common::jsonparse::read_string(it, "radio_device_class_string");
         worker_pool_config.radio_device_class =
-            section3::get_radio_device_class(worker_pool_config.radio_device_class_string);
+            sp3::get_radio_device_class(worker_pool_config.radio_device_class_string);
         worker_pool_config.maximum_packet_sizes =
-            section3::get_maximum_packet_sizes(worker_pool_config.radio_device_class_string);
+            sp3::get_maximum_packet_sizes(worker_pool_config.radio_device_class_string);
 
         worker_pool_config.os_min = common::jsonparse::read_int(it, "os_min", 1, 8);
 

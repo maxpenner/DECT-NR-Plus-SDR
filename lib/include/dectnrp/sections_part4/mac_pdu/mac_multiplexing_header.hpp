@@ -26,7 +26,7 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/serdes/packing.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 class mac_multiplexing_header_t final : public common::serdes::packing_t {
     public:
@@ -141,11 +141,11 @@ class mac_multiplexing_header_t final : public common::serdes::packing_t {
         const std::type_info* tinfo;
 };
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4
 
 namespace dectnrp::common::adt {
 
-template <std::same_as<section4::mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t> E>
+template <std::same_as<sp4::mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t> E>
 E from_coded_value(const std::underlying_type_t<E> value) {
     switch (value) {
         case std::to_underlying(E::Padding_IE):
@@ -188,7 +188,7 @@ E from_coded_value(const std::underlying_type_t<E> value) {
     }
 }
 
-template <std::same_as<section4::mac_multiplexing_header_t::ie_type_mac_ext_11_len_0_t> E>
+template <std::same_as<sp4::mac_multiplexing_header_t::ie_type_mac_ext_11_len_0_t> E>
 E from_coded_value(const std::underlying_type_t<E> value) {
     switch (value) {
         case std::to_underlying(E::Padding_IE):
@@ -202,7 +202,7 @@ E from_coded_value(const std::underlying_type_t<E> value) {
     }
 }
 
-template <std::same_as<section4::mac_multiplexing_header_t::ie_type_mac_ext_11_len_1_t> E>
+template <std::same_as<sp4::mac_multiplexing_header_t::ie_type_mac_ext_11_len_1_t> E>
 E from_coded_value(const std::underlying_type_t<E> value) {
     switch (value) {
         case std::to_underlying(E::Padding_IE):

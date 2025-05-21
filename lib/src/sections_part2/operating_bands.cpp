@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section2 {
+namespace dectnrp::sp2 {
 
 operating_band_t get_operating_band(const uint32_t band_number) {
     dectnrp_assert(1 <= band_number && band_number <= 17, "Band number must be between 1 and 17");
@@ -123,4 +123,4 @@ operating_band_t get_operating_band(const uint32_t band_number) {
     return operating_band;
 }
 
-}  // namespace dectnrp::section2
+}  // namespace dectnrp::sp2

@@ -30,9 +30,9 @@ class allocation_ft_t final : public allocation_t {
     public:
         allocation_ft_t() = default;
 
-        explicit allocation_ft_t(const section3::duration_lut_t* duration_lut_,
-                                 const section3::duration_t beacon_period_,
-                                 const section3::duration_t beacon_prepare_duration_);
+        explicit allocation_ft_t(const sp3::duration_lut_t* duration_lut_,
+                                 const sp3::duration_t beacon_period_,
+                                 const sp3::duration_t beacon_prepare_duration_);
 
         /// check if beacon has to be prepared for transmission
         bool check_beacon_prepare_duration(const int64_t now_64) const {
@@ -60,7 +60,7 @@ class allocation_ft_t final : public allocation_t {
         uint32_t get_N_beacons_per_second() const { return N_beacons_per_second; };
 
     private:
-        section3::duration_t beacon_prepare_duration{};
+        sp3::duration_t beacon_prepare_duration{};
 
         /// start time of last beacon transmitted
         int64_t beacon_time_transmitted_64{};

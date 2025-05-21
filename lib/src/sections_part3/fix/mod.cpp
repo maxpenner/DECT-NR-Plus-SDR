@@ -27,7 +27,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section3::fix {
+namespace dectnrp::sp3::fix {
 
 static void mod_bpsk_bytes(const srsran_modem_table_t* q,
                            const uint8_t* bits,
@@ -173,4 +173,4 @@ int srsran_mod_modulate_bytes_FIX(const srsran_modem_table_t* q,
     return nbits / q->nbits_x_symbol;
 }
 
-}  // namespace dectnrp::section3::fix
+}  // namespace dectnrp::sp3::fix

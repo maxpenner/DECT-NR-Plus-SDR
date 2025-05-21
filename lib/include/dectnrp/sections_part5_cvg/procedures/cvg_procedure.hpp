@@ -20,7 +20,7 @@
 
 #pragma once
 
-namespace dectnrp::section5cvg {
+namespace dectnrp::sp5cvg {
 
 class cvg_prodedure_t {
     public:
@@ -29,4 +29,4 @@ class cvg_prodedure_t {
     private:
 };
 
-}  // namespace dectnrp::section5cvg
+}  // namespace dectnrp::sp5cvg

@@ -22,7 +22,7 @@
 
 namespace dectnrp::phy::harq {
 
-process_rx_t::process_rx_t(const uint32_t id_, const section3::packet_sizes_t maximum_packet_sizes)
+process_rx_t::process_rx_t(const uint32_t id_, const sp3::packet_sizes_t maximum_packet_sizes)
     : process_t(id_) {
     hb_tb = std::make_unique<buffer_rx_t>(maximum_packet_sizes.N_TB_byte,
                                           maximum_packet_sizes.G,

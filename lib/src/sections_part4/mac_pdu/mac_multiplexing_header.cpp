@@ -35,7 +35,7 @@
  */
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie_activate.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 void mac_multiplexing_header_t::zero() {
     mac_ext = mac_ext_t::not_defined;
@@ -482,4 +482,4 @@ void mac_multiplexing_header_t::unpack_length(const uint8_t* mac_pdu_offset) {
     }
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

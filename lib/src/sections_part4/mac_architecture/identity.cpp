@@ -23,7 +23,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section4::mac_architecture {
+namespace dectnrp::sp4::mac_architecture {
 
 identity_t::identity_t(uint32_t NetworkID_,
                        const uint32_t LongRadioDeviceID_,
@@ -84,4 +84,4 @@ bool identity_t::is_valid_ShortRadioDeviceID(const uint32_t ShortRadioDeviceID) 
     return true;
 }
 
-}  // namespace dectnrp::section4::mac_architecture
+}  // namespace dectnrp::sp4::mac_architecture

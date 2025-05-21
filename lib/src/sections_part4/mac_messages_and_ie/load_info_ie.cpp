@@ -24,7 +24,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/adt/enumeration.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 load_info_ie_t::load_info_ie_t() {
     mac_mux_header.zero();
@@ -184,4 +184,4 @@ mmie_packing_peeking_t::peek_result_t load_info_ie_t::get_packed_size_by_peeking
     return packed_size;
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

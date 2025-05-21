@@ -40,7 +40,7 @@ struct agc_config_t {
         float gain_step_dB_min;
 
         /// minimum duration between two AGC gain changes
-        section3::duration_t protect_duration;
+        sp3::duration_t protect_duration;
 };
 
 }  // namespace dectnrp::phy::agc

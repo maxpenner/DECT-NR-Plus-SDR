@@ -24,7 +24,7 @@
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/adt/enumeration.hpp"
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 
 group_assignment_ie_t::group_assignment_ie_t() {
     mac_mux_header.zero();
@@ -111,4 +111,4 @@ bool group_assignment_ie_t::unpack(const uint8_t* mac_pdu_offset) {
     return is_valid();
 }
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

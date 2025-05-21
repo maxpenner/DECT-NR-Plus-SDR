@@ -40,7 +40,7 @@ class contact_t {
         // ##################################################
         // MAC Layer
 
-        section4::mac_architecture::identity_t identity;
+        sp4::mac_architecture::identity_t identity;
         mac::allocation::allocation_pt_t allocation_pt;
         phy::mimo_csi_t mimo_csi;
 

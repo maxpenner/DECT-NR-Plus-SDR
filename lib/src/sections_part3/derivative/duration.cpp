@@ -23,7 +23,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 duration_t::duration_t(const uint32_t samp_rate_,
                        const duration_ec_t duration_ec_,
@@ -81,4 +81,4 @@ duration_t::duration_t(const uint32_t samp_rate_,
     N_samples *= mult;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

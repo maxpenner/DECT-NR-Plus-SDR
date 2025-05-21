@@ -50,7 +50,7 @@ struct pdc_enc_t {
         uint32_t llr_bit_width;   // width of input
 };
 
-int pdc_enc_init(pdc_enc_t* q, const section3::packet_sizes_t& packet_sizes_maximum);
+int pdc_enc_init(pdc_enc_t* q, const sp3::packet_sizes_t& packet_sizes_maximum);
 
 int pdc_enc_free(pdc_enc_t* q);
 

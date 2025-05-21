@@ -22,7 +22,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 
-namespace dectnrp::section3 {
+namespace dectnrp::sp3 {
 
 radio_device_class_t get_radio_device_class(const std::string& radio_device_class_string) {
     radio_device_class_t q;
@@ -151,4 +151,4 @@ radio_device_class_t get_radio_device_class(const std::string& radio_device_clas
     return q;
 }
 
-}  // namespace dectnrp::section3
+}  // namespace dectnrp::sp3

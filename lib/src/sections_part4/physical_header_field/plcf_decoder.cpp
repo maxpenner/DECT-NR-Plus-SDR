@@ -26,7 +26,7 @@
 #define ASSERT_PLCF_TYPE \
     dectnrp_assert(PLCF_type == 1 || PLCF_type == 2, "unknown PLCF type {}", PLCF_type)
 
-namespace dectnrp::section4 {
+namespace dectnrp::sp4 {
 plcf_decoder_t::plcf_decoder_t(uint32_t PacketLength_max_,
                                uint32_t mcs_index_max_,
                                uint32_t N_SS_max_)
@@ -41,7 +41,7 @@ void plcf_decoder_t::set_configuration() {
     HeaderFormat_type2 = common::adt::UNDEFINED_NUMERIC_32;
 }
 
-section3::fec_cfg_t& plcf_decoder_t::get_fec_cfg(const uint32_t PLCF_type) {
+sp3::fec_cfg_t& plcf_decoder_t::get_fec_cfg(const uint32_t PLCF_type) {
     ASSERT_PLCF_TYPE;
 
     return PLCF_type == 1 ? fec_cfg_type1 : fec_cfg_type2;
@@ -164,4 +164,4 @@ nlohmann::ordered_json plcf_decoder_t::get_json(const uint32_t PLCF_type) const 
 }
 #endif
 
-}  // namespace dectnrp::section4
+}  // namespace dectnrp::sp4

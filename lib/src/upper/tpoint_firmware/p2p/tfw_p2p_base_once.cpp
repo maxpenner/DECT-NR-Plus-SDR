@@ -42,22 +42,22 @@ tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     tpoint_t::hpp =
         std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 8, 8);
 
-    identity_ft = section4::mac_architecture::identity_t(100, 10000000, 1000);
+    identity_ft = sp4::mac_architecture::identity_t(100, 10000000, 1000);
 
     // how often does the FT send beacons, how often does the PT expect beacons?
-    const auto beacon_period = duration_lut.get_duration(section3::duration_ec_t::ms001, 10);
+    const auto beacon_period = duration_lut.get_duration(sp3::duration_ec_t::ms001, 10);
 
     allocation_ft = mac::allocation::allocation_ft_t(
-        &duration_lut, beacon_period, duration_lut.get_duration(section3::duration_ec_t::ms001, 2));
+        &duration_lut, beacon_period, duration_lut.get_duration(sp3::duration_ec_t::ms001, 2));
 
     pll = mac::pll_t(beacon_period);
 
 #ifdef TFW_P2P_EXPORT_PPX
-    ppx = mac::ppx_t(duration_lut.get_duration(section3::duration_ec_t::s001),
-                     duration_lut.get_duration(section3::duration_ec_t::ms001, 250),
-                     duration_lut.get_duration(section3::duration_ec_t::ms001, 20),
+    ppx = mac::ppx_t(duration_lut.get_duration(sp3::duration_ec_t::s001),
+                     duration_lut.get_duration(sp3::duration_ec_t::ms001, 250),
+                     duration_lut.get_duration(sp3::duration_ec_t::ms001, 20),
                      beacon_period,
-                     duration_lut.get_duration(section3::duration_ec_t::ms001, 5));
+                     duration_lut.get_duration(sp3::duration_ec_t::ms001, 5));
 #endif
 
     // ##################################################
@@ -69,8 +69,7 @@ tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     // -
 };
 
-section4::mac_architecture::identity_t tfw_p2p_base_t::init_identity_pt(
-    const uint32_t firmware_id_) {
+sp4::mac_architecture::identity_t tfw_p2p_base_t::init_identity_pt(const uint32_t firmware_id_) {
     // load identity of FT ...
     auto identity = identity_ft;
 
@@ -82,12 +81,12 @@ section4::mac_architecture::identity_t tfw_p2p_base_t::init_identity_pt(
 }
 
 mac::allocation::allocation_pt_t tfw_p2p_base_t::init_allocation_pt(const uint32_t firmware_id_) {
-    mac::allocation::allocation_pt_t allocation_pt = mac::allocation::allocation_pt_t(
-        &duration_lut,
-        allocation_ft.get_beacon_period_as_duration(),
-        duration_lut.get_duration(section3::duration_ec_t::ms001, 16),
-        duration_lut.get_duration(section3::duration_ec_t::ms001, 11),
-        hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround));
+    mac::allocation::allocation_pt_t allocation_pt =
+        mac::allocation::allocation_pt_t(&duration_lut,
+                                         allocation_ft.get_beacon_period_as_duration(),
+                                         duration_lut.get_duration(sp3::duration_ec_t::ms001, 16),
+                                         duration_lut.get_duration(sp3::duration_ec_t::ms001, 11),
+                                         hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround));
 
     /* If firmware ID is larger than the number of PTs we want to support, we simply leave the
      * allocation empty. This way we can use the same code for different number of PTs, which is
@@ -125,14 +124,14 @@ mac::allocation::allocation_pt_t tfw_p2p_base_t::init_allocation_pt(const uint32
                                        ul,
                                        stride,
                                        N_resources,
-                                       section3::duration_ec_t::slot001);
+                                       sp3::duration_ec_t::slot001);
 
     allocation_pt.add_resource_regular(mac::allocation::direction_t::downlink,
                                        offset + ul_gap,
                                        dl,
                                        stride,
                                        N_resources,
-                                       section3::duration_ec_t::slot001);
+                                       sp3::duration_ec_t::slot001);
 
     return allocation_pt;
 }
@@ -142,13 +141,13 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
                                          const uint32_t LongRadioDeviceID_tx,
                                          const uint32_t LongRadioDeviceID_rx) {
     // meta packet size
-    section3::packet_sizes_def_t& psdef = ppmp_unicast.psdef;
+    sp3::packet_sizes_def_t& psdef = ppmp_unicast.psdef;
     psdef.u = worker_pool_config.radio_device_class.u_min;
     psdef.b = worker_pool_config.radio_device_class.b_min;
     psdef.PacketLengthType = 1;
     psdef.PacketLength = 2;
 #ifdef TFW_P2P_MIMO
-    psdef.tm_mode_index = section3::tmmode::get_single_antenna_mode(buffer_rx.nof_antennas);
+    psdef.tm_mode_index = sp3::tmmode::get_single_antenna_mode(buffer_rx.nof_antennas);
 #else
     psdef.tm_mode_index = 0;
 #endif
@@ -156,7 +155,7 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
     psdef.Z = worker_pool_config.radio_device_class.Z_min;
 
     // define PLCFs
-    section4::plcf_21_t& plcf_21 = ppmp_unicast.plcf_21;
+    sp4::plcf_21_t& plcf_21 = ppmp_unicast.plcf_21;
     plcf_21.HeaderFormat = 1;
     plcf_21.PacketLengthType = psdef.PacketLengthType;
     plcf_21.set_PacketLength_m1(psdef.PacketLength);
@@ -176,20 +175,20 @@ void tfw_p2p_base_t::init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
     // prepare feedback format 5
     plcf_21.feedback_info_pool.feedback_info_f5.HARQ_Process_number = 0;
     plcf_21.feedback_info_pool.feedback_info_f5.Transmission_feedback =
-        section4::feedback_info_f1_t::transmission_feedback_t::ACK;
+        sp4::feedback_info_f1_t::transmission_feedback_t::ACK;
     plcf_21.feedback_info_pool.feedback_info_f5.MIMO_feedback =
-        section4::feedback_info_f1_t::mimo_feedback_t::single_layer;
+        sp4::feedback_info_f1_t::mimo_feedback_t::single_layer;
     plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index = 0;
 
     // pick one PLCF
     ppmp_unicast.plcf_base_effective = &ppmp_unicast.plcf_21;
 
     // define MAC header type
-    ppmp_unicast.mac_header_type.Version = section4::mac_header_type_t::version_ec::v00;
+    ppmp_unicast.mac_header_type.Version = sp4::mac_header_type_t::version_ec::v00;
     ppmp_unicast.mac_header_type.MAC_security =
-        section4::mac_header_type_t::mac_security_ec::macsec_not_used;
+        sp4::mac_header_type_t::mac_security_ec::macsec_not_used;
     ppmp_unicast.mac_header_type.MAC_header_type =
-        section4::mac_header_type_t::mac_header_type_ec::mch_empty;
+        sp4::mac_header_type_t::mac_header_type_ec::mch_empty;
 
     // define MAC common header
     ppmp_unicast.unicast_header.Reserved = 0;

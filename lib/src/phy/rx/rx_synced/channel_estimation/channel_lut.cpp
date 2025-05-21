@@ -174,12 +174,12 @@ void channel_lut_t::init_lut_x_vec(const uint32_t N_step_virtual,
     const uint32_t ps_t_length = N_step_virtual + 1;
 
     // convert to maximum index of b
-    const uint32_t b_idx_max = section3::phyres::b2b_idx[b_max];
+    const uint32_t b_idx_max = sp3::phyres::b2b_idx[b_max];
 
     // first init sizes for every value of b
     for (uint32_t b_idx = 0; b_idx <= b_idx_max; ++b_idx) {
         lut_x_vec.push_back(
-            lut_t(section3::phyres::N_b_OCC_plus_DC_lut[b_idx], ps_t_length, N_EFF_TX_MAX_PRECALC));
+            lut_t(sp3::phyres::N_b_OCC_plus_DC_lut[b_idx], ps_t_length, N_EFF_TX_MAX_PRECALC));
     }
 
     /* When we create every weight vector for the maximum value of b, there is no need for new
@@ -194,7 +194,7 @@ void channel_lut_t::init_lut_x_vec(const uint32_t N_step_virtual,
         const uint32_t weight_vecs_tmp_size_before = weight_vecs_tmp.size();
 
         // current dimensions
-        const uint32_t b = section3::phyres::b_idx2b[b_idx];
+        const uint32_t b = sp3::phyres::b_idx2b[b_idx];
 
         // fill one element of init_lut_x_vec
         init_lut(N_step_virtual,
@@ -245,7 +245,7 @@ void channel_lut_t::init_lut(const uint32_t N_step_virtual,
     idx_weights.set_configuration(N_b_OCC_plus_DC, ps_t_length);
 
     // generate DRS symbols for all values of b and all TS
-    section3::drs_t drs(b, N_EFF_TX_MAX_PRECALC);
+    sp3::drs_t drs(b, N_EFF_TX_MAX_PRECALC);
 
     // set current DRS configuration
     drs.set_configuration(b, N_EFF_TX_MAX_PRECALC);
@@ -276,11 +276,11 @@ void channel_lut_t::init_lut(const uint32_t N_step_virtual,
         std::vector<coord_t> coord_drs_vec =
             s0_calc_drs_pilot_vec(k_i_l, k_i_r, ts_idx, N_step_virtual);
 
-        dectnrp_assert(!(N_step_virtual > 0 &&
-                         coord_drs_vec.size() != 2 * section3::drs_t::get_nof_drs_subc(b)),
-                       "Incorrect number of DRS symbols.");
         dectnrp_assert(
-            !(N_step_virtual == 0 && coord_drs_vec.size() != section3::drs_t::get_nof_drs_subc(b)),
+            !(N_step_virtual > 0 && coord_drs_vec.size() != 2 * sp3::drs_t::get_nof_drs_subc(b)),
+            "Incorrect number of DRS symbols.");
+        dectnrp_assert(
+            !(N_step_virtual == 0 && coord_drs_vec.size() != sp3::drs_t::get_nof_drs_subc(b)),
             "Incorrect number of DRS symbols.");
 
         /* We now have inserted the coordinates of DRS symbol consecutively into a vector. Next

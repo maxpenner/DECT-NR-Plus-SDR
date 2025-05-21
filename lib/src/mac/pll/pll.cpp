@@ -29,7 +29,7 @@
 
 namespace dectnrp::mac {
 
-pll_t::pll_t(const section3::duration_t beacon_period_)
+pll_t::pll_t(const sp3::duration_t beacon_period_)
     : beacon_period(beacon_period_),
       dist_min_accept_64(beacon_period.get_samp_rate<int64_t>() * PLL_PARAM_DIST_MIN_ACCEPT_MS /
                          1000),
@@ -40,7 +40,7 @@ pll_t::pll_t(const section3::duration_t beacon_period_)
     dectnrp_assert(dist_min_64 % dist_min_accept_64 == 0, "ill-defined");
     dectnrp_assert(dist_min_64 < dist_max_64, "ill-defined");
     dectnrp_assert(
-        dist_max_64 * section2::get_reference_time_accuracy(true).accuracy_ppm / int64_t{1000000} <
+        dist_max_64 * sp2::get_reference_time_accuracy(true).accuracy_ppm / int64_t{1000000} <
             beacon_period.get_N_samples<int64_t>() / PLL_PARAM_DIST_MAX_DEVIATION_SAFETY_FACTOR,
         "ill-defined");
 
