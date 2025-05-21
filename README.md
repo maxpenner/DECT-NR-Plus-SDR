@@ -27,14 +27,15 @@ DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](h
 Advanced Topics
 
 1. [Architecture](#architecture)
-2. [AGC](#agc)
-3. [Resampling](#resampling)
-4. [Synchronization](#synchronization)
-5. [Compatibility](#compatibility)
-6. [JSON Export](#json-export)
-7. [PPS Export and PTP](#pps-export-and-ptp)
-8. [Host and SDR Tuning](#host-and-sdr-tuning)
-9. [Firmware](#firmware)
+2. [TX/RX Delay Calibration](#txrx-delay-calibration)
+3. [AGC](#agc)
+4. [Resampling](#resampling)
+5. [Synchronization](#synchronization)
+6. [Compatibility](#compatibility)
+7. [JSON Export](#json-export)
+8. [PPS Export and PTP](#pps-export-and-ptp)
+9. [Host and SDR Tuning](#host-and-sdr-tuning)
+10. [Firmware](#firmware)
     1. [basic](#basic)
     2. [chscanner](#chscanner)
     3. [loopback](#loopback)
@@ -228,6 +229,12 @@ The key takeaways are:
 - The firmware of the SDR is not executed in an independent thread. Instead, the firmware is equivalent to a thread-safe state machine whose state changes are triggered by calls of the work_*() functions. The type of firmware executed is defined in `upper.json`.
 - Each firmware starts and controls its own application layer interface ([app_t](lib/include/dectnrp/application/app.hpp)). To allow immediate action for new application layer data, [app_t](lib/include/dectnrp/application/app.hpp) is given access to [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp). The job type created by [app_t](lib/include/dectnrp/application/app.hpp) contains an [upper_report_t](lib/include/dectnrp/upper/upper_report.hpp) with the number and size of datagrams available on the application layer.
 - The application layer interface is either a [set of UDP ports](lib/include/dectnrp/application/socket/) or a [virtual NIC](lib/include/dectnrp/application/vnic/).
+
+## TX/RX Delay Calibration
+
+If a packet is scheduled for transmission at a specific time in the future, the packet is effectively [sent several samples later](https://docs.srsran.com/projects/project/en/latest/user_manuals/source/troubleshooting.html#usrp-time-calibration), as various delay-afflicted processes (upsampling, filtering, etc.) are performed in the radio hardware. At low sample rates, a few samples add up to several microseconds.
+
+The exact delay depends on the sample rate, device, software version etc. and must be measured individually. This can be achieved by sending a packet that inevitably leaks into the RX path and then comparing TX and RX time. The measured delay can then be specified in `radio.json` as `tx_time_advance_samples`. Each packet is sent earlier to compensate for the delay.
 
 ## AGC
 

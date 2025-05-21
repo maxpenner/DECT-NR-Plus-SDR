@@ -56,6 +56,12 @@ void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
 }
 #endif
 
+void tfw_p2p_base_t::worksub_self_reception(const int64_t tx_time_expected_64,
+                                            const phy::sync_report_t& sync_report) {
+    hw.txrx_delay.set_delay(sync_report.fine_peak_time_corrected_by_sto_fractional_64 -
+                            tx_time_expected_64);
+}
+
 bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
                                         contact_p2p_t& contact_p2p,
                                         const mac::allocation::tx_opportunity_t& tx_opportunity) {

@@ -38,6 +38,7 @@
 #include "dectnrp/radio/buffer_tx_pool.hpp"
 #include "dectnrp/radio/gain_lut.hpp"
 #include "dectnrp/radio/hw_config.hpp"
+#include "dectnrp/radio/txrx_delay.hpp"
 
 #define RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS 100
 
@@ -251,6 +252,8 @@ class hw_t : public common::layer_unit_t {
         int64_t get_pps_to_full_second_measured_samples() const {
             return samp_rate - full_second_to_pps_measured_samples;
         };
+
+        txrx_delay_t txrx_delay;
 
         /// buffer's public interfaces used by hardware and PHY
         std::unique_ptr<buffer_tx_pool_t> buffer_tx_pool;
