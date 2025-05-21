@@ -18,10 +18,11 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-add_library(dectnrp_upper STATIC)
-target_link_libraries(dectnrp_upper dectnrp_common dectnrp_radio dectnrp_phy dectnrp_mac dectnrp_dlc dectnrp_cvg dectnrp_application)
+add_library(dectnrp_part5cvg STATIC)
+target_link_libraries(dectnrp_part5cvg dectnrp_common)
 
-file(GLOB DECTNRP_UPPER_SOURCES "*.cpp")
-target_sources(dectnrp_upper PRIVATE ${DECTNRP_UPPER_SOURCES})
+file(GLOB DECTNRP_PART5CVG_SOURCES "*.cpp")
+target_sources(dectnrp_part5cvg PRIVATE ${DECTNRP_PART5CVG_SOURCES})
 
-add_subdirectory(tpoint_firmware)
+add_subdirectory(procedures)
+add_subdirectory(protocol_data_units)

@@ -25,7 +25,8 @@
 #include "dectnrp/application/app_client.hpp"
 #include "dectnrp/application/app_server.hpp"
 #include "dectnrp/common/adt/callbacks.hpp"
-#include "dectnrp/dlccl/dlccl.hpp"
+#include "dectnrp/cvg/cvg.hpp"
+#include "dectnrp/dlc/dlc.hpp"
 #include "dectnrp/mac/allocation/allocation_ft.hpp"
 #include "dectnrp/mac/allocation/allocation_pt.hpp"
 #include "dectnrp/mac/allocation/tx_opportunity.hpp"
@@ -185,7 +186,8 @@ class tfw_p2p_base_t : public tpoint_t {
         // DLC and Convergence Layer
 
         /// not implemented, just a dummy
-        dlccl::dlccl_t dlccl;
+        cvg::cvg_t cvg;
+        dlc::dlc_t dlc;
 
         // ##################################################
         // Application Layer
