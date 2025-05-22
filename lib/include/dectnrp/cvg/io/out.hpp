@@ -20,11 +20,14 @@
 
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+
 namespace dectnrp::cvg {
 
-class config_t {
-    public:
-    private:
+struct out_t {
+        uint8_t* src;
+        std::size_t len;
 };
 
 }  // namespace dectnrp::cvg

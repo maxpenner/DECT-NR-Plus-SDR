@@ -18,11 +18,5 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-add_library(dectnrp_cvg STATIC)
-target_link_libraries(dectnrp_cvg dectnrp_common dectnrp_sections_part_5_cvg)
-
-file(GLOB DECTNRP_CVG_SOURCES "*.cpp")
-target_sources(dectnrp_cvg PRIVATE ${DECTNRP_CVG_SOURCES})
-
-add_subdirectory(io)
-add_subdirectory(test)
+file(GLOB DECTNRP_UPPER_SOURCES "*.cpp")
+target_sources(dectnrp_upper PRIVATE ${DECTNRP_UPPER_SOURCES})

@@ -190,8 +190,8 @@ class tfw_p2p_base_t : public tpoint_t {
         // DLC and Convergence Layer
 
         /// not implemented, just a dummy
-        cvg::cvg_t cvg;
-        dlc::dlc_t dlc;
+        std::unique_ptr<cvg::cvg_t> cvg;
+        std::unique_ptr<dlc::dlc_t> dlc;
 
         // ##################################################
         // Application Layer

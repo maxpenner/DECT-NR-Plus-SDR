@@ -875,7 +875,7 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                 uint32_t n_samples_of_packet = buffer_tx_vec[current_buffer_tx]->tx_length_samples;
 
                 dectnrp_assert(max_samps_per_packet < n_samples_of_packet,
-                               "n_samples_of_packet too small");
+                               "n_samples_of_packet too small. Reduce spp.");
 
                 // when does the current packet end on the global time axis?
                 const int64_t tx_time_in_samples_end =

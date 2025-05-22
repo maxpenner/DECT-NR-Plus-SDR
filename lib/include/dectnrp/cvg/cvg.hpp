@@ -21,22 +21,37 @@
 #pragma once
 
 #include "dectnrp/common/adt/result.hpp"
-#include "dectnrp/cvg/config.hpp"
-#include "dectnrp/cvg/handle.hpp"
+#include "dectnrp/common/layer/layer_unit.hpp"
+#include "dectnrp/cvg/cvg_config.hpp"
+#include "dectnrp/cvg/io/close_res.hpp"
+#include "dectnrp/cvg/io/handle.hpp"
+#include "dectnrp/cvg/io/inp.hpp"
+#include "dectnrp/cvg/io/inp_res.hpp"
+#include "dectnrp/cvg/io/out.hpp"
+#include "dectnrp/cvg/io/out_res.hpp"
 #include "dectnrp/cvg/request.hpp"
 #include "dectnrp/cvg/request_error.hpp"
 
 namespace dectnrp::cvg {
 
-class cvg_t {
+class cvg_t final : public common::layer_unit_t {
     public:
-        cvg_t() = default;
-        cvg_t(const config_t config_);
+        cvg_t(const size_t id_, const cvg_config_t cvg_config_);
 
-        common::adt::expected_t<handle_t, request_error_t> get_handle(const request_t request);
+        [[nodiscard]] common::adt::expected_t<handle_t, request_error_t> request_handle(
+            const request_t request);
+
+        [[nodiscard]] inp_res_t write(const handle_t& handle, const inp_t& inp);
+
+        [[nodiscard]] out_res_t read(const handle_t& handle, out_t& out);
+
+        [[nodiscard]] close_res_t close(const handle_t& handle);
 
     private:
-        [[maybe_unused]] config_t config;
+        virtual std::vector<std::string> start_threads() override final;
+        virtual std::vector<std::string> stop_threads() override final;
+
+        [[maybe_unused]] cvg_config_t cvg_config;
 };
 
 }  // namespace dectnrp::cvg

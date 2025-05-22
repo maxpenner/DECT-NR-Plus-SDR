@@ -234,7 +234,15 @@ The key takeaways are:
 
 If a packet is scheduled for transmission at a specific time in the future, the packet is effectively [sent several samples later](https://docs.srsran.com/projects/project/en/latest/user_manuals/source/troubleshooting.html#usrp-time-calibration), as various delay-afflicted processes (upsampling, filtering, etc.) are performed in the radio hardware. At low sample rates, a few samples add up to several microseconds.
 
-The exact delay depends on the sample rate, device, software version etc. and must be measured individually. This can be achieved by sending a packet that inevitably leaks into the RX path and then comparing TX and RX time. The measured delay can then be specified in `radio.json` as `tx_time_advance_samples`. Each packet is sent earlier to compensate for the delay.
+The exact delay depends on the sample rate, radio device, software version etc. and must be measured individually. This can be achieved with the firmware [txrxdelay](lib/include/dectnrp/upper/tpoint_firmware/txrxdelay/tfw_txrxdelay.hpp). It regularly sends packets which inevitably leak into the RX path and then compares TX and RX time. The measured delay can then be specified in `radio.json` as `tx_time_advance_samples`. Each packet will be transmitted earlier to compensate the delay.
+
+Exemplary delays:
+
+| Device | DECT NR+ BW in $MHz$ | Sample Rate in $MSs^{-1}$ | Delay in Samples | Delay in $\mu s$ |
+|:------:|:--------------------:|:-------------------------:|:----------------:|:----------------:|
+|  B210  |         1.728        |           1.728           |        47        |       27.20      |
+|  B210  |         1.728        |           3.456           |        53        |       15.34      |
+|  B210  |         1.728        |           6.912           |        68        |        9.84      |
 
 ## AGC
 
