@@ -20,11 +20,3 @@
 
 file(GLOB DECTNRP_UPPER_SOURCES "*.cpp")
 target_sources(dectnrp_upper PRIVATE ${DECTNRP_UPPER_SOURCES})
-
-add_subdirectory(basic)
-add_subdirectory(chscanner)
-add_subdirectory(loopback)
-add_subdirectory(p2p)
-add_subdirectory(rtt)
-add_subdirectory(timesync)
-add_subdirectory(txrxdelay)

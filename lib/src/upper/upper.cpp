@@ -33,6 +33,7 @@
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_pt.hpp"
 #include "dectnrp/upper/tpoint_firmware/rtt/tfw_rtt.hpp"
 #include "dectnrp/upper/tpoint_firmware/timesync/tfw_timesync.hpp"
+#include "dectnrp/upper/tpoint_firmware/txrxdelay/tfw_txrxdelay.hpp"
 
 // more readable
 #define TFW_NAME_STARTS_WITH(x) tpoint_config.firmware_name.starts_with(x)
@@ -184,6 +185,9 @@ void upper_t::add_tpoint(const tpoint_config_t& tpoint_config, phy::mac_lower_t&
 
     } else if (TFW_NAME_STARTS_WITH(tfw::timesync::tfw_timesync_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::timesync::tfw_timesync_t>(TFW_ARGS));
+
+    } else if (TFW_NAME_STARTS_WITH(tfw::txrxdelay::tfw_txrxdelay_t::firmware_name)) {
+        layer_unit_vec.push_back(std::make_unique<tfw::txrxdelay::tfw_txrxdelay_t>(TFW_ARGS));
 
     } else {
         dectnrp_assert_failure("unknown tpoint firmware name {}", tpoint_config.firmware_name);
