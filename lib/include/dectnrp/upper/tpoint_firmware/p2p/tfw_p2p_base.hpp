@@ -122,10 +122,6 @@ class tfw_p2p_base_t : public tpoint_t {
         void worksub_callback_ppx(const int64_t now_64, const size_t idx, int64_t& next_64);
 #endif
 
-        /// called for a packet which is verified to be self-reception (leakage or deliberate)
-        void worksub_self_reception(const int64_t tx_time_expected_64,
-                                    const phy::sync_report_t& sync_report);
-
         /// part 2 defines five MAC PDU types, these are generators for each type
         sp4::ppmp_data_t ppmp_data;
         sp4::ppmp_beacon_t ppmp_beacon;
