@@ -22,9 +22,6 @@
 
 namespace dectnrp::cvg {
 
-class status_t {
-    public:
-    private:
-};
+struct inp_res_t {};
 
 }  // namespace dectnrp::cvg
