@@ -11,7 +11,7 @@
     "tx_thread_config": [0, -1],
     "rx_thread_config": [0, -1],
     "pps_time_base": "zero",
-    "usrp_args": "type=b200",
+    "usrp_args": "type=b200,send_frame_size=2040,recv_frame_size=2040",
     "usrp_tx_async_helper_thread_config": [-1, -1]
   }
 }
