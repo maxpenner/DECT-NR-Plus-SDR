@@ -136,7 +136,7 @@ void tfw_p2p_pt_t::init_appiface() {
     application::vnic::vnic_server_t::vnic_config_t vnic_config;
 
     // if multiple radio devices started on the same computer, the name has to be unique
-    vnic_config.tun_name = "tundectnrp_pt_" + std::to_string(tpoint_config.firmware_id);
+    vnic_config.tun_name = "tun_pt_" + std::to_string(tpoint_config.firmware_id);
     vnic_config.MTU = 1500;
 
     // if not a simulation, we start on different computers and use unique IPs in the same network

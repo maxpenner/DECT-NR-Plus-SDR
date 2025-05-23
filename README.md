@@ -42,6 +42,7 @@ Advanced Topics
     4. [p2p](#p2p)
     5. [rtt](#rtt)
     6. [timesync](#timesync)
+11. [Interesting Links](#interesting-links)
 
 ## Core Idea
 
@@ -234,12 +235,15 @@ The key takeaways are:
 
 If a packet is scheduled for transmission at a specific time in the future, the packet is effectively [sent several samples later](https://docs.srsran.com/projects/project/en/latest/user_manuals/source/troubleshooting.html#usrp-time-calibration), as various delay-afflicted processes (upsampling, filtering, etc.) are performed in the radio hardware. At low sample rates, a few samples add up to several microseconds.
 
-The exact delay depends on the sample rate, radio device, software version etc. and must be measured individually. This can be achieved with the firmware [txrxdelay](lib/include/dectnrp/upper/tpoint_firmware/txrxdelay/tfw_txrxdelay.hpp). It regularly sends packets which inevitably leak into the RX path and then compares TX and RX time. The measured delay can then be specified in `radio.json` as `tx_time_advance_samples`. Each packet will be transmitted earlier to compensate the delay.
+The exact delay depends on the sample rate, radio device, software version etc. and must be measured individually. This can be achieved with the firmware [txrxdelay](lib/include/dectnrp/upper/tpoint_firmware/txrxdelay/tfw_txrxdelay.hpp). It regularly sends packets which inevitably leak into the RX path and then compares the TX and RX time. The measured delay can then be specified in `radio.json` as `tx_time_advance_samples`. Each packet will be transmitted earlier to compensate for the delay.
 
-Exemplary delays:
+Exemplary measurements:
 
 | Device | DECT NR+ BW in $MHz$ | Sample Rate in $MSs^{-1}$ | Delay in Samples | Delay in $\mu s$ |
 |:------:|:--------------------:|:-------------------------:|:----------------:|:----------------:|
+|  X410  |        13.824        |           15.36           |        68        |        4.43      |
+|  X410  |        13.824        |           30.72           |        79        |        2.57      |
+|  X410  |        13.824        |           61.44           |       105        |        1.71      |
 |  B210  |         1.728        |           1.728           |        47        |       27.20      |
 |  B210  |         1.728        |           3.456           |        53        |       15.34      |
 |  B210  |         1.728        |           6.912           |        68        |        9.84      |
@@ -393,7 +397,7 @@ sudo ./dectnrp "../configurations/p2p_usrpX410/"
 Once the SDR is running, a TUN interface is instantiated which can be verified with `ifconfig`. To access the internet through that TUN interface, is it made the default gateway:
 
 ```shell
-sudo ./defaultgateway_dns.sh -a 172.23.180.101 -i tuntap_pt
+sudo ./defaultgateway_dns.sh -a 172.99.180.100 -i tun_pt_0
 ```
 
 On the PT, internet access should now happen through the DECT NR+ connection. This can be verified by running a speed test and observing the spectrum with a spectrum analyzer, or by checking the packet count in the log file in [bin/](bin/).
@@ -417,3 +421,8 @@ In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310
 ### [timesync](lib/include/dectnrp/upper/tpoint_firmware/timesync/tfw_timesync.hpp)
 
 This firmware measures the synchronization between the host system and the radio hardware if they are synchronized as described in [PPS Export and PTP](#pps-export-and-ptp). Synchronization must be established with an external device such as a Raspberry Pi.
+
+## Interesting Links
+
+- [OAI continuous transmission](https://gitlab.eurecom.fr/oai/openairinterface5g/-/merge_requests/1439)
+- [srsRAN continuous transmission](https://github.com/srsran/srsRAN_Project/discussions/367)

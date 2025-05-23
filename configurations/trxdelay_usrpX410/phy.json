@@ -1,8 +1,8 @@
 {
   "WORKERPOOL0":
   {
-    "radio_device_class_string": "1.1.1.A",
-    "os_min": 1,
+    "radio_device_class_string": "1.8.1.A",
+    "os_min": 2,
     "enforce_dectnrp_samp_rate_by_resampling": true,
     "nof_jobs": 64,
     "tx_gap_samples": 40,
