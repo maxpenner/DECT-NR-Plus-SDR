@@ -42,6 +42,7 @@ Advanced Topics
     4. [p2p](#p2p)
     5. [rtt](#rtt)
     6. [timesync](#timesync)
+    7. [txrxdelay](#txrxdelay)
 11. [Interesting Links](#interesting-links)
 
 ## Core Idea
@@ -421,6 +422,10 @@ In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310
 ### [timesync](lib/include/dectnrp/upper/tpoint_firmware/timesync/tfw_timesync.hpp)
 
 This firmware measures the synchronization between the host system and the radio hardware if they are synchronized as described in [PPS Export and PTP](#pps-export-and-ptp). Synchronization must be established with an external device such as a Raspberry Pi.
+
+### [txrxdelay](lib/include/dectnrp/upper/tpoint_firmware/txrxdelay/tfw_txrxdelay.hpp)
+
+See [TX/RX Delay Calibration](#txrx-delay-calibration).
 
 ## Interesting Links
 
