@@ -49,7 +49,7 @@ class baton_t {
         baton_t(baton_t&&) = delete;
         baton_t& operator=(baton_t&&) = delete;
 
-        static constexpr uint32_t BATON_WAIT_TIMEOUT_MS = 100;
+        static constexpr uint32_t BATON_WAIT_TIMEOUT_MS{100};
 
         /**
          * \brief Called by worker_pool_t with its associated tpoint and token. This class with use
