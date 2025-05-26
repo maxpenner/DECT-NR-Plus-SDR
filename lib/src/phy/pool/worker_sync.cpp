@@ -25,8 +25,8 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
+#include "dectnrp/phy/rx/sync/regular_report.hpp"
 #include "dectnrp/phy/rx/sync/sync_param.hpp"
-#include "dectnrp/phy/rx/sync/time_report.hpp"
 
 namespace dectnrp::phy {
 
@@ -185,11 +185,11 @@ void worker_sync_t::work() {
              * before it. This is either the end of the chunk without the overlap area, or the
              * latest unique packet time.
              */
-            const time_report_t time_report(sync_chunk->get_chunk_time_end(),
-                                            baton.get_sync_time_last());
+            const regular_report_t regular_report(sync_chunk->get_chunk_time_end(),
+                                                  baton.get_sync_time_last());
 
             // put job into the queue
-            job_queue.enqueue_nto(job_t(std::move(time_report)));
+            job_queue.enqueue_nto(job_t(std::move(regular_report)));
 
             ++stats.job_regular;
         }

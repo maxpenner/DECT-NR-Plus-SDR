@@ -79,9 +79,9 @@ void worker_tx_rx_t::work() {
             }
 
             // different actions for different jobs
-            if (std::holds_alternative<time_report_t>(job.content)) {
+            if (std::holds_alternative<regular_report_t>(job.content)) {
                 // compile all reports
-                const phy_mac_reg_t phy_mac_reg(std::get<time_report_t>(job.content));
+                const phy_mac_reg_t phy_mac_reg(std::get<regular_report_t>(job.content));
 
                 TOKEN_LOCK_FIFO_OR_RETURN
                 auto machigh_phy = tpoint->work_regular(phy_mac_reg);

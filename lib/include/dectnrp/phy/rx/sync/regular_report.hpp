@@ -25,9 +25,10 @@
 
 namespace dectnrp::phy {
 
-class time_report_t {
+class regular_report_t {
     public:
-        explicit time_report_t(const int64_t chunk_time_end_64_, const int64_t sync_time_last_64_)
+        explicit regular_report_t(const int64_t chunk_time_end_64_,
+                                  const int64_t sync_time_last_64_)
             : chunk_time_end_64(chunk_time_end_64_),
               sync_time_last_64(sync_time_last_64_),
               barrier_time_64(std::max(chunk_time_end_64, sync_time_last_64)){};
@@ -35,7 +36,7 @@ class time_report_t {
         /**
          * \brief Synchronization is processed in chunks by instances of worker_sync_t, typically
          * one to four instances. These instances are also responsible for creating instances of
-         * time_report_t and putting them into the job queue. They do so after completely
+         * regular_report_t and putting them into the job queue. They do so after completely
          * processing their respective chunk, which then have ended at chunk_time_end_64 (ignoring
          * the overlap in between chunks).
          */

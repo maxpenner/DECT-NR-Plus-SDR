@@ -20,16 +20,16 @@
 
 #pragma once
 
-#include "dectnrp/phy/rx/sync/time_report.hpp"
+#include "dectnrp/phy/rx/sync/regular_report.hpp"
 
 namespace dectnrp::phy {
 
 class phy_mac_reg_t {
     public:
-        explicit phy_mac_reg_t(const time_report_t& time_report_)
-            : time_report(time_report_){};
+        explicit phy_mac_reg_t(const regular_report_t& regular_report_)
+            : regular_report(regular_report_){};
 
-        const time_report_t& time_report;
+        const regular_report_t& regular_report;
 };
 
 }  // namespace dectnrp::phy

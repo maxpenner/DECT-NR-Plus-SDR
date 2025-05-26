@@ -71,7 +71,7 @@ void tfw_txrxdelay_t::work_start_imminent(const int64_t start_time_64) {
 }
 
 phy::machigh_phy_t tfw_txrxdelay_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
-    if (phy_mac_reg.time_report.barrier_time_64 < next_measurement_time_64) {
+    if (phy_mac_reg.regular_report.barrier_time_64 < next_measurement_time_64) {
         return phy::machigh_phy_t();
     }
 

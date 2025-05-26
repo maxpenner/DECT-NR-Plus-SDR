@@ -59,7 +59,7 @@ void tfw_timesync_t::work_start_imminent(const int64_t start_time_64) {
 
 phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
     // PPS
-    if (sample_count_at_next_pps_change_64 < phy_mac_reg.time_report.chunk_time_end_64) {
+    if (sample_count_at_next_pps_change_64 < phy_mac_reg.regular_report.chunk_time_end_64) {
 #ifdef TFW_TIMESYNC_EXPORT_1PPS
         // generate one pulse
         worksub_pps(buffer_rx.get_rx_time_passed(), 0);
@@ -71,7 +71,7 @@ phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::phy_mac_reg_t& phy_ma
     }
 
     // measurement
-    if (sample_count_at_next_measurement_64 < phy_mac_reg.time_report.chunk_time_end_64) {
+    if (sample_count_at_next_measurement_64 < phy_mac_reg.regular_report.chunk_time_end_64) {
         // first measurement
         if (N_measurements_cnt == 0) {
             start_ns_64 = watch.get_elapsed();
