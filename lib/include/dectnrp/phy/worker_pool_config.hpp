@@ -116,7 +116,8 @@ struct worker_pool_config_t {
          * The chunk length is defined by rx_chunk_length_u8subslot. If rx_chunk_length_u8subslot=32
          * and rx_job_regular_period=1, a regular job is created every two slots. If
          * rx_job_regular_period=2, a regular job is created every 4 slots. For the maximum number
-         * of regular jobs, rx_job_regular_period must be set to 1.
+         * of regular jobs, rx_job_regular_period must be set to 1. If set to zero, no regular jobs
+         * are created.
          */
         uint32_t rx_job_regular_period;
 

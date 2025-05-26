@@ -164,6 +164,10 @@ bool baton_t::is_sync_time_unique(const int64_t sync_time_candidate_64) {
 }
 
 bool baton_t::is_job_regular_due() {
+    if (rx_job_regular_period == 0) {
+        return false;
+    }
+
     ++rx_job_regular_period_cnt;
 
     if (rx_job_regular_period_cnt == rx_job_regular_period) {
