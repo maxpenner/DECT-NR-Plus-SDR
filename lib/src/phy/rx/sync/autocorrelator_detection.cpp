@@ -27,6 +27,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
+#include "dectnrp/phy/rx/sync/sync_param.hpp"
 #include "dectnrp/sections_part3/stf.hpp"
 
 namespace dectnrp::phy {

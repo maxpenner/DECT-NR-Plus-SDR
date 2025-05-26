@@ -103,7 +103,8 @@ class layer_t {
          */
         layer_unit_t& get_layer_unit_base(const size_t idx) const { return *layer_unit_vec[idx]; };
 
-        void log_lines(const std::string identifier, const std::vector<std::string> lines) {
+        void log_lines([[maybe_unused]] const std::string identifier,
+                       const std::vector<std::string> lines) {
             for (auto elem : lines) {
                 dectnrp_log_inf("{}", std::string(identifier + elem));
             }

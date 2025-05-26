@@ -24,6 +24,7 @@
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/phy/resample/resampler_param.hpp"
+#include "dectnrp/phy/rx/sync/sync_param.hpp"
 #include "dectnrp/sections_part3/stf.hpp"
 
 namespace dectnrp::phy {

@@ -115,13 +115,11 @@ phy::maclow_phy_t tfw_txrxdelay_t::work_pcc(const phy::phy_maclow_t& phy_maclow)
         return phy::maclow_phy_t();
     }
 
-    const int64_t tx2rx_diff =
-        phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64 - tx_time_last_64;
-
-    dectnrp_log_inf("TX={}   RX={}   tx2rx_diff={}",
-                    tx_time_last_64,
-                    phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64,
-                    tx2rx_diff);
+    dectnrp_log_inf(
+        "TX={}   RX={}   tx2rx_diff={}",
+        tx_time_last_64,
+        phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64,
+        phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64 - tx_time_last_64);
 
     return phy::maclow_phy_t();
 }

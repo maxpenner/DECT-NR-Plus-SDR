@@ -29,7 +29,6 @@
 #include "dectnrp/phy/rx/sync/correlator.hpp"
 #include "dectnrp/phy/rx/sync/movsum.hpp"
 #include "dectnrp/phy/rx/sync/movsum_uw.hpp"
-#include "dectnrp/phy/rx/sync/sync_param.hpp"
 
 // #define PHY_RX_AUTOCORRELATOR_PEAK_JSON_EXPORT
 
@@ -98,10 +97,8 @@ class autocorrelator_peak_t final : public correlator_t {
         const uint32_t metric_smoother_bos_offset_to_center_samples;
         std::vector<movsum_t<float>> metric_smoother;
 
-#ifdef RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_RESUM_PERIODICITY_IN_STEPS
-        uint32_t resum_cnt;
+        [[maybe_unused]] uint32_t resum_cnt;
         void resum_for_numerical_stability();
-#endif
 
         /// fill moving sums at detection point
         void set_initial_movsums(const uint32_t start_time_local);
