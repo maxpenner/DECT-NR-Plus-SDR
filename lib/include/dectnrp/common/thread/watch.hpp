@@ -42,9 +42,9 @@ using utc_clock = std::chrono::utc_clock;
 using tai_clock = std::chrono::tai_clock;
 using gps_clock = std::chrono::gps_clock;
 #else
-using utc_clock = std::chrono::steady_clock;
-using tai_clock = std::chrono::steady_clock;
-using gps_clock = std::chrono::steady_clock;
+using utc_clock = system_clock;
+using tai_clock = system_clock;
+using gps_clock = system_clock;
 #endif
 #endif
 
@@ -54,9 +54,9 @@ using utc_clock = std::chrono::utc_clock;
 using tai_clock = std::chrono::tai_clock;
 using gps_clock = std::chrono::gps_clock;
 #else
-using utc_clock = std::chrono::steady_clock;
-using tai_clock = std::chrono::steady_clock;
-using gps_clock = std::chrono::steady_clock;
+using utc_clock = system_clock;
+using tai_clock = system_clock;
+using gps_clock = system_clock;
 #endif
 #endif
 
