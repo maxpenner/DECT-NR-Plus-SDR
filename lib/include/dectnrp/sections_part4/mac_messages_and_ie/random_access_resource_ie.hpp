@@ -81,7 +81,7 @@ class random_access_resource_ie_t final : public mmie_packing_peeking_t, public 
         cw_max_t cw_max;
 
     private:
-        // Table 6.4.3.4-1, Repeat field
+        /// Table 6.4.3.4-1, Repeat field
         enum class repeat_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             single_allocation = 0,

@@ -30,7 +30,7 @@ namespace dectnrp::sp4 {
 
 class association_response_message_t final : public mmie_packing_peeking_t {
     public:
-        // Table 6.4.2.5-2, field Reject Cause
+        /// Table 6.4.2.5-2, field Reject Cause
         enum class reject_cause_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             radio_capacity_not_sufficient = 0,
@@ -41,7 +41,7 @@ class association_response_message_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.2.5-2, field Reject Time
+        /// Table 6.4.2.5-2, field Reject Time
         enum class reject_time_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _0_s = 0,

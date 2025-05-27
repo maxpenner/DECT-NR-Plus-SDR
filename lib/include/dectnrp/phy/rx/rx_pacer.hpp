@@ -123,7 +123,7 @@ class rx_pacer_t {
         // ##################################################
         // LOCALBUFFER_FILTER
 
-        // nto = no timeout
+        /// nto = no timeout
         uint32_t filter_until_nto(const uint32_t cnt_w_min);
 
         // ##################################################

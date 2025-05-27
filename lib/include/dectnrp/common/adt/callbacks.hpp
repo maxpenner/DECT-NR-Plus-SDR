@@ -40,7 +40,7 @@ class callbacks_t {
         callbacks_t() = default;
 
         /// signature every callback must adhere to, however, callbacks may not use all arguments
-        // https://stackoverflow.com/questions/29609866/stdbind-makes-no-sense-to-me-whatsoever
+        /// https://stackoverflow.com/questions/29609866/stdbind-makes-no-sense-to-me-whatsoever
         typedef std::function<R(
             const int64_t now_64, const size_t idx, int64_t& next_64, int64_t& period_64, Args...)>
             cb_t;
@@ -166,7 +166,7 @@ class callbacks_t {
         /// index of next callback, so we don't have to search the array with every call of run()
         decltype(callbacks.begin()) it_next{nullptr};
 
-        // update time and index of next callback to call
+        /// update time and index of next callback to call
         void set_it_next() {
             it_next =
                 std::min_element(callbacks.begin(), callbacks.end(), [](auto& lhs, auto& rhs) {

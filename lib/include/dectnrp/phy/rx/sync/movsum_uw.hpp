@@ -55,7 +55,7 @@ class movsum_uw_t final : public movsum_t<lv_32fc_t> {
         void pop_push(const lv_32fc_t val) override final;
 
     private:
-        // unit weights
+        /// unit weights
         std::vector<float> uw;
 
         /// how often are cover sequence values repeated?

@@ -27,7 +27,7 @@ namespace dectnrp::sp4 {
 
 class radio_device_status_ie_t final : public mmie_packing_t {
     public:
-        // Table 6.4.3.13-1, field STATUS FLAG
+        /// Table 6.4.3.13-1, field STATUS FLAG
         enum class status_flag_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             lower = 0,
@@ -36,7 +36,7 @@ class radio_device_status_ie_t final : public mmie_packing_t {
             upper
         };
 
-        // Table 6.4.3.13-1, field DURATION
+        /// Table 6.4.3.13-1, field DURATION
         enum class duration_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _50_ms = 0,

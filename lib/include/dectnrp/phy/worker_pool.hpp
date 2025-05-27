@@ -122,7 +122,7 @@ class worker_pool_t final : public common::layer_unit_t {
 
         std::vector<std::unique_ptr<worker_sync_t>> worker_sync_vec;
 
-        // check whether sync parameters are set correctly
+        /// check whether sync parameters are set correctly
         void check_sync_param() const;
 
         /// check whether timing of synchronization is possible

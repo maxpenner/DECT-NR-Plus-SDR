@@ -71,7 +71,7 @@ class link_t {
         const float fD_Hz;
 
     private:
-        // we have two directions, each has its own history
+        /// each direction has its own history
         std::array<cf_t*, 2> history_stage_arr;
         cf_t* sinusoid_stage;
         cf_t* superposition_stage;

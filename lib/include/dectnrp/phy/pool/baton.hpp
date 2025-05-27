@@ -92,13 +92,11 @@ class baton_t {
         const int64_t sync_time_unique_limit_64;
         const uint32_t rx_job_regular_period;
 
-        // registration
         std::mutex register_mtx;
         std::condition_variable register_cv;
         uint32_t register_cnt;
         int64_t register_now_64;
 
-        // post-registration
         upper::tpoint_t* tpoint;
         std::shared_ptr<token_t> token;
 

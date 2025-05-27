@@ -27,7 +27,7 @@ namespace dectnrp::sp4 {
 
 class group_assignment_ie_t final : public mmie_packing_t {
     public:
-        // Table 6.4.3.9-1, field SINGLE
+        /// Table 6.4.3.9-1, field SINGLE
         enum class nof_resource_assignments_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             multiple_assignments = 0,
@@ -35,7 +35,7 @@ class group_assignment_ie_t final : public mmie_packing_t {
             upper
         };
 
-        // Table 6.4.3.9-1, field DIRECT
+        /// Table 6.4.3.9-1, field DIRECT
         enum class resource_direction_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             as_preassigned = 0,

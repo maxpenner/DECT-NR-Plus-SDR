@@ -81,7 +81,7 @@ class app_t {
         pthread_t work_thread;
         std::atomic<bool> keep_running;
 
-        // continuous time since call of start_sc()
+        /// continuous time since call of start_sc()
         common::watch_t watch_since_start;
 
         /// local buffer which inheriting classes can use to temporarily buffer write

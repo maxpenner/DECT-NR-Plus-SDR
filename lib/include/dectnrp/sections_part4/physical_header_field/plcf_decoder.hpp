@@ -117,12 +117,12 @@ class plcf_decoder_t {
         const uint32_t mcs_index_max;
         const uint32_t N_SS_max;
 
-        // type 1
+        /// type 1
         sp3::fec_cfg_t fec_cfg_type1;
         uint32_t HeaderFormat_type1;
         plcf_10_t plcf_10;
 
-        // type 2
+        /// type 2
         sp3::fec_cfg_t fec_cfg_type2;
         uint32_t HeaderFormat_type2;
         plcf_20_t plcf_20;

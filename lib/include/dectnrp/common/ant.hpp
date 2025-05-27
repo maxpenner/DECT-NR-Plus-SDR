@@ -40,15 +40,15 @@ class ant_t {
 
         [[nodiscard]] std::size_t get_nof_antennas() const;
 
-        // convenience wrapper to same-name functions of ary
+        /// convenience wrapper to same-name functions of ary
         [[nodiscard]] float& at(const std::size_t idx);
         [[nodiscard]] float at(const std::size_t idx) const;
         void fill(const float val);
 
-        // getter for read-only version of array
+        /// getter for read-only version of array
         [[nodiscard]] const ary_t& get_ary() const;
 
-        // convenience functions to extract specific values
+        /// convenience functions to extract specific values
         [[nodiscard]] bool has_any_larger(const float threshold) const;
         [[nodiscard]] std::size_t get_nof_larger(const float threshold) const;
         [[nodiscard]] float get_sum() const;
@@ -60,10 +60,10 @@ class ant_t {
         [[nodiscard]] std::string get_readable_list() const;
 
     private:
-        // used number of antennas
+        /// used number of antennas
         std::size_t nof_antennas{};
 
-        // array with float property of each antenna
+        /// array with float property of each antenna
         ary_t ary{};
 };
 

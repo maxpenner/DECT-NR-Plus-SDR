@@ -47,7 +47,7 @@ class agc_t {
         };
 
     protected:
-        // common AGC parameters for TX and RX
+        /// common AGC parameters for TX and RX
         agc_config_t agc_config;
 
         /// time of last AGC changes

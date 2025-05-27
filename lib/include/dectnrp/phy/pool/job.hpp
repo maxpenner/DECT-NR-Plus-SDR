@@ -46,7 +46,7 @@ class job_t {
         explicit job_t(const upper::upper_report_t&& upper_report_)
             : content(upper_report_) {}
 
-        // regular_report_t is not DefaultConstructible
+        /// regular_report_t is not DefaultConstructible
         std::variant<std::monostate,
                      regular_report_t,
                      irregular_report_t,
@@ -54,7 +54,7 @@ class job_t {
                      upper::upper_report_t>
             content;
 
-        // assigned in job_queue_t
+        /// assigned in job_queue_t
         int64_t fifo_cnt{0};
 };
 

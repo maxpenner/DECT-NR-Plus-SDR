@@ -111,7 +111,7 @@ class tfw_loopback_t : public tpoint_t {
                 /// force transmission time to multiple of this value
                 int64_t tx_time_multiple_64;
 
-                // actual transmission time to use
+                /// actual transmission time to use
                 int64_t tx_time_64;
 
                 /// amplitude scaling

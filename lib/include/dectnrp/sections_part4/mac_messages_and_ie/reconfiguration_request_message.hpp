@@ -29,7 +29,7 @@ namespace dectnrp::sp4 {
 
 class reconfiguration_request_message_t final : public mmie_packing_peeking_t {
     public:
-        // Table 6.4.2.7-1, field Radio Resource
+        /// Table 6.4.2.7-1, field Radio Resource
         enum class radio_resource_change_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             no_change = 0,

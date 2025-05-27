@@ -76,7 +76,7 @@ class worker_tx_rx_t final : public worker_t {
 
         phy_radio_t& phy_radio;
 
-        // JSON export of information available to worker_tx_rx
+        /// JSON export of information available to worker_tx_rx
         common::json_export_t* json_export;
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY

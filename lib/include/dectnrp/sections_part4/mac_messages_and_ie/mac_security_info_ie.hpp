@@ -27,14 +27,14 @@ namespace dectnrp::sp4 {
 
 class mac_security_info_ie_t final : public mmie_packing_t {
     public:
-        // Table 6.4.3.1-1
+        /// Table 6.4.3.1-1
         enum class version_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             mode_1 = 0,
             upper
         };
 
-        // Table 6.4.3.1-2
+        /// Table 6.4.3.1-2
         enum class security_iv_type_mode_1_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             one_time_hpc = 0,

@@ -30,7 +30,7 @@ namespace dectnrp::sp4 {
 
 class network_beacon_message_t final : public mmie_packing_peeking_t {
     public:
-        // Table 6.4.2.2-1, field Clusters Max TX Power
+        /// Table 6.4.2.2-1, field Clusters Max TX Power
         enum class clusters_max_tx_power_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             lower = 2,
@@ -50,7 +50,7 @@ class network_beacon_message_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.2.2-1, field Network Beacon Period
+        /// Table 6.4.2.2-1, field Network Beacon Period
         enum class network_beacon_period_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _50_ms = 0,
@@ -63,7 +63,7 @@ class network_beacon_message_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.2.2-1, field Cluster Beacon Period
+        /// Table 6.4.2.2-1, field Cluster Beacon Period
         enum class cluster_beacon_period_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _10_ms = 0,

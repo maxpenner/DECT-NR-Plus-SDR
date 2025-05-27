@@ -47,6 +47,7 @@ class irregular_t {
         irregular_t& operator=(irregular_t&&) = delete;
 
         void push(const irregular_report_t&& irregular_report);
+
         [[nodiscard]] irregular_report_t pop();
 
         [[nodiscard]] int64_t get_next_time() const;
