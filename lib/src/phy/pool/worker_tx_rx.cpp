@@ -30,6 +30,7 @@
 #include "dectnrp/phy/interfaces/maclow_phy.hpp"
 #include "dectnrp/phy/interfaces/phy_machigh.hpp"
 #include "dectnrp/phy/interfaces/phy_maclow.hpp"
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 
 #define TOKEN_LOCK_FIFO_OR_RETURN                               \
     while (!token->lock_fifo_to(token_call_id, job.fifo_cnt)) { \
@@ -41,9 +42,11 @@
 namespace dectnrp::phy {
 
 worker_tx_rx_t::worker_tx_rx_t(worker_config_t& worker_config,
+                               irregular_t& irregular_,
                                phy_radio_t& phy_radio_,
                                common::json_export_t* json_export_)
     : worker_t(worker_config),
+      irregular(irregular_),
       phy_radio(phy_radio_),
       json_export(json_export_) {
     tx = std::make_unique<tx_t>(worker_pool_config.maximum_packet_sizes,
@@ -80,16 +83,27 @@ void worker_tx_rx_t::work() {
 
             // different actions for different jobs
             if (std::holds_alternative<regular_report_t>(job.content)) {
-                // compile all reports
-                const phy_mac_reg_t phy_mac_reg(std::get<regular_report_t>(job.content));
-
                 TOKEN_LOCK_FIFO_OR_RETURN
-                auto machigh_phy = tpoint->work_regular(phy_mac_reg);
+                auto machigh_phy = tpoint->work_regular(std::get<regular_report_t>(job.content));
                 token->unlock_fifo();
 
-                run_tx_chscan(machigh_phy.tx_descriptor_vec, machigh_phy.chscan_opt);
+                run_tx_chscan(machigh_phy.tx_descriptor_vec,
+                              machigh_phy.irregular_report,
+                              machigh_phy.chscan_opt);
 
                 ++stats.tpoint_work_regular;
+
+            } else if (std::holds_alternative<irregular_report_t>(job.content)) {
+                TOKEN_LOCK_FIFO_OR_RETURN
+                auto machigh_phy =
+                    tpoint->work_irregular(std::get<irregular_report_t>(job.content));
+                token->unlock_fifo();
+
+                run_tx_chscan(machigh_phy.tx_descriptor_vec,
+                              machigh_phy.irregular_report,
+                              machigh_phy.chscan_opt);
+
+                ++stats.tpoint_work_irregular;
 
             } else if (std::holds_alternative<sync_report_t>(job.content)) {
                 /* Internally tries to determine correct PLCF type 1 or 2.
@@ -106,7 +120,7 @@ void worker_tx_rx_t::work() {
                  * 2) A packet MUST stay within the packet limits set by the radio device class.
                  * Otherwise, decoding might fail, potentially with an exception.
                  */
-                const pcc_report_t pcc_report =
+                const auto pcc_report =
                     rx_synced->demoddecod_rx_pcc(std::get<sync_report_t>(job.content));
 
                 // any PLCF found?
@@ -119,7 +133,9 @@ void worker_tx_rx_t::work() {
                     auto machigh_phy = tpoint->work_pcc_crc_error(phy_maclow);
                     token->unlock_fifo();
 
-                    run_tx_chscan(machigh_phy.tx_descriptor_vec, machigh_phy.chscan_opt);
+                    run_tx_chscan(machigh_phy.tx_descriptor_vec,
+                                  machigh_phy.irregular_report,
+                                  machigh_phy.chscan_opt);
 #else
                     TOKEN_LOCK_FIFO_OR_RETURN
                     // nothing to do here, but we have to increment the token's internal fifo_cnt
@@ -163,7 +179,7 @@ void worker_tx_rx_t::work() {
                 }
 
                 // demodulate and decode PDC for the PCC choice made by lower MAC
-                const pdc_report_t pdc_report = rx_synced->demoddecod_rx_pdc(maclow_phy);
+                const auto pdc_report = rx_synced->demoddecod_rx_pdc(maclow_phy);
 
                 // save stats
                 if (pdc_report.crc_status) {
@@ -180,7 +196,9 @@ void worker_tx_rx_t::work() {
                 auto machigh_phy = tpoint->work_pdc_async(phy_machigh);
                 token->unlock();
 
-                run_tx_chscan(machigh_phy.tx_descriptor_vec, machigh_phy.chscan_opt);
+                run_tx_chscan(machigh_phy.tx_descriptor_vec,
+                              machigh_phy.irregular_report,
+                              machigh_phy.chscan_opt);
 
                 /* Resetting for next RX must be done AFTER transmitting and running channel
                  * measurement, as resetting buffers can be quite time consuming. For instance, a
@@ -210,7 +228,9 @@ void worker_tx_rx_t::work() {
                 auto machigh_phy = tpoint->work_upper(std::get<upper::upper_report_t>(job.content));
                 token->unlock_fifo();
 
-                run_tx_chscan(machigh_phy.tx_descriptor_vec, machigh_phy.chscan_opt);
+                run_tx_chscan(machigh_phy.tx_descriptor_vec,
+                              machigh_phy.irregular_report,
+                              machigh_phy.chscan_opt);
 
                 ++stats.tpoint_work_upper;
 
@@ -255,6 +275,7 @@ std::vector<std::string> worker_tx_rx_t::report_stop() const {
     str.append(" rx_pdc_success " + std::to_string(stats.rx_pdc_success));
     str.append(" rx_pdc_fail " + std::to_string(stats.rx_pdc_fail));
     str.append(" tpoint_work_regular " + std::to_string(stats.tpoint_work_regular));
+    str.append(" tpoint_work_irregular " + std::to_string(stats.tpoint_work_irregular));
     str.append(" tpoint_work_upper " + std::to_string(stats.tpoint_work_upper));
 
     // components
@@ -267,6 +288,7 @@ std::vector<std::string> worker_tx_rx_t::report_stop() const {
 }
 
 void worker_tx_rx_t::run_tx_chscan(const tx_descriptor_vec_t& tx_descriptor_vec,
+                                   const irregular_report_t& irregular_report,
                                    chscan_opt_t& chscan_opt) {
     // generate packets and pass data to radio layer for transmission
     for (auto& tx_descriptor : tx_descriptor_vec) {
@@ -305,19 +327,22 @@ void worker_tx_rx_t::run_tx_chscan(const tx_descriptor_vec_t& tx_descriptor_vec,
         tx_descriptor.hp_tx.finalize();
     }
 
+    if (irregular_report.has_finite_time()) {
+        irregular.push(std::move(irregular_report));
+    }
+
     // run channel measurement
     if (chscan_opt.has_value()) {
         chscanner->scan(chscan_opt.value());
 
         token->lock(token_call_id);
-        auto machigh_phy = tpoint->work_chscan_async(chscan_opt.value());
+        const auto machigh_phy = tpoint->work_chscan_async(chscan_opt.value());
         token->unlock();
 
-        // create an empty optional
         chscan_opt_t chscan_opt_empty = chscan_opt_t{std::nullopt};
 
-        // recursively call this function
-        run_tx_chscan(machigh_phy.tx_descriptor_vec, chscan_opt_empty);
+        // recursive call
+        run_tx_chscan(machigh_phy.tx_descriptor_vec, irregular_report_t(), chscan_opt_empty);
     }
 }
 

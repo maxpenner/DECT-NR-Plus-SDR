@@ -30,24 +30,31 @@ const std::string tfw_basic_t::firmware_name("basic");
 tfw_basic_t::tfw_basic_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {}
 
-void tfw_basic_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_basic_t::work_start_imminent(const int64_t start_time_64) {
     dectnrp_assert(0 <= start_time_64, "start_time_64 too small");
 
     // value has no other function than being used in dectnrp_assert()
     barrier_time_64 = start_time_64;
+
+    return phy::irregular_report_t();
 }
 
-phy::machigh_phy_t tfw_basic_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
-    dectnrp_assert(barrier_time_64 < phy_mac_reg.regular_report.chunk_time_end_64,
+phy::machigh_phy_t tfw_basic_t::work_regular(const phy::regular_report_t& regular_report) {
+    dectnrp_assert(barrier_time_64 < regular_report.chunk_time_end_64,
                    "chunk_time_end_64 not strictly increasing");
 
-    dectnrp_assert(barrier_time_64 < phy_mac_reg.regular_report.barrier_time_64,
+    dectnrp_assert(barrier_time_64 < regular_report.barrier_time_64,
                    "barrier_time_64 not strictly increasing");
 
     // values have no other function than being used in dectnrp_assert()
-    barrier_time_64 = phy_mac_reg.regular_report.barrier_time_64;
-    sync_time_last_64 = phy_mac_reg.regular_report.sync_time_last_64;
+    barrier_time_64 = regular_report.barrier_time_64;
+    sync_time_last_64 = regular_report.sync_time_last_64;
 
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_basic_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     return phy::machigh_phy_t();
 }
 

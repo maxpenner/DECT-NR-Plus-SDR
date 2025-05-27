@@ -30,6 +30,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/constants.hpp"
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 #include "dectnrp/phy/rx/sync/sync_param.hpp"
 
 namespace dectnrp::upper::tfw::loopback {
@@ -40,9 +41,8 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
         1e3 <= RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_THRESHOLD_MAX_SP,
         "Loopback firmware requires large RMS limit. Set RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_THRESHOLD_MAX_SP to 1e3 and recompile.");
 
-    dectnrp_assert(
-        hw.hw_config.simulator_clip_and_quantize,
-        "Loopback firmware requires large RMS limit. Clipping and quantization must not be applied.");
+    dectnrp_assert(!hw.hw_config.simulator_clip_and_quantize,
+                   "For loopback firmware, clipping and quantization must not be applied.");
 
     // set frequency, TX and RX power
     hw.set_command_time();
@@ -120,22 +120,26 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     pp.cfo_symmetric_range_subc_multiple = 1.75f;
 }
 
-void tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
     // start some time in the near future
     state_time_reference_64 = start_time_64 + stt.x_to_A_64;
 
     A_reset_result_counter_for_next_snr();
+
+    return phy::irregular_report_t(state_time_reference_64, 0);
 }
 
 phy::machigh_phy_t tfw_loopback_t::work_regular(
-    [[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
+    [[maybe_unused]] const phy::regular_report_t& regular_report) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_loopback_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     // get current time
     const int64_t now_64 = buffer_rx.get_rx_time_passed();
 
-    // should we process the state machine?
-    if (now_64 <= state_time_reference_64) {
-        return phy::machigh_phy_t();
-    }
+    dectnrp_assert(state_time_reference_64 <= now_64, "time of irregular call has not passed");
 
     phy::machigh_phy_t machigh_phy;
 
@@ -225,6 +229,11 @@ phy::machigh_phy_t tfw_loopback_t::work_regular(
                 state_time_reference_64 = std::numeric_limits<int64_t>::max();
                 break;
             }
+    }
+
+    // schedule next callback
+    if (state != STATE_t::DEAD_END) {
+        machigh_phy.irregular_report = phy::irregular_report_t(state_time_reference_64, 0);
     }
 
     return machigh_phy;

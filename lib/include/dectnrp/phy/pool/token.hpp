@@ -48,7 +48,6 @@ class token_t {
         token_t(token_t&&) = delete;
         token_t& operator=(token_t&&) = delete;
 
-        /// fabric
         [[nodiscard]] static std::shared_ptr<token_t> create(const uint32_t n_pools) {
             return std::make_shared<token_t>(n_pools);
         }

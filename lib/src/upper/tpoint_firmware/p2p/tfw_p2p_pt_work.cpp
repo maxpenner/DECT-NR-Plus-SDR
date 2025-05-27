@@ -25,7 +25,7 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-void tfw_p2p_pt_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_p2p_pt_t::work_start_imminent(const int64_t start_time_64) {
     // what is the next full second after PHY becomes operational?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
 
@@ -35,13 +35,20 @@ void tfw_p2p_pt_t::work_start_imminent(const int64_t start_time_64) {
         A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001),
         duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
                                                  worksub_callback_log_period_sec));
+
+    return phy::irregular_report_t();
 }
 
 phy::machigh_phy_t tfw_p2p_pt_t::work_regular(
-    [[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
+    [[maybe_unused]] const phy::regular_report_t& regular_report) {
     // update time of callbacks
     callbacks.run(buffer_rx.get_rx_time_passed());
 
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_p2p_pt_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     return phy::machigh_phy_t();
 }
 

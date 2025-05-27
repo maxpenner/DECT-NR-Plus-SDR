@@ -56,13 +56,15 @@ tfw_chscanner_t::tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
     hw.set_freq_tc(freqs[freqs_idx]);
 }
 
-void tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
     next_measurement_time_64 =
         start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 50);
+
+    return phy::irregular_report_t();
 }
 
 phy::machigh_phy_t tfw_chscanner_t::work_regular(
-    [[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
+    [[maybe_unused]] const phy::regular_report_t& regular_report) {
     // get current time
     const int64_t now_64 = buffer_rx.get_rx_time_passed();
 
@@ -88,6 +90,11 @@ phy::machigh_phy_t tfw_chscanner_t::work_regular(
         duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, measurement_period_ms);
 
     return machigh_phy;
+}
+
+phy::machigh_phy_t tfw_chscanner_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
+    return phy::machigh_phy_t();
 }
 
 phy::maclow_phy_t tfw_chscanner_t::work_pcc([[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {

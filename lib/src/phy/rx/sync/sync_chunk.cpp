@@ -34,7 +34,8 @@ sync_chunk_t::sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
                            const uint32_t chunk_length_samples_,
                            const uint32_t chunk_stride_samples_,
                            const uint32_t chunk_offset_samples_,
-                           const uint32_t ant_streams_unit_length_samples_)
+                           const uint32_t ant_streams_unit_length_samples_,
+                           irregular_callable_t irregular_callable_)
     // clang-format off
     : rx_pacer_t(std::min(buffer_rx_.nof_antennas, RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT),
                  buffer_rx_,
@@ -65,7 +66,9 @@ sync_chunk_t::sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
                               static_cast<double>(stf_bos_length_samples))),
       C(stf_bos_pattern_length_samples),
       D(static_cast<uint32_t>(RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_MAX_SEARCH_LENGTH_IN_STFS_DP *
-                              static_cast<double>(stf_bos_length_samples))) {
+                              static_cast<double>(stf_bos_length_samples))),
+
+      irregular_callable(irregular_callable_) {
     // initialize buffer where samples after resampling will be written to
     const std::vector<cf_t*> localbuffer_resample = get_initialized_localbuffer(
         rx_pacer_t::localbuffer_choice_t::LOCALBUFFER_RESAMPLE, A + B + C + D);
@@ -257,7 +260,15 @@ std::optional<sync_report_t> sync_chunk_t::search() {
             } else {
                 // reset all values of sync_report
                 sync_report = sync_report_t(nof_antennas_limited);
+
+                irregular_callable(
+                    chunk_time_start_64 +
+                    static_cast<int64_t>(autocorrelator_detection->get_localbuffer_cnt_r()));
             }
+        } else {
+            irregular_callable(
+                chunk_time_start_64 +
+                static_cast<int64_t>(autocorrelator_detection->get_localbuffer_cnt_r()));
         }
     }
 

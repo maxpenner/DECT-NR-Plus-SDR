@@ -59,10 +59,10 @@ class tfw_p2p_base_t : public tpoint_t {
         tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
         virtual ~tfw_p2p_base_t() = default;
 
-        // same dispatcher for FT and PT, calls worksub_* functions
+        /// same dispatcher for FT and PT, calls worksub_* functions
         phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override final;
 
-        // same dispatcher for FT and PT, calls worksub_* functions
+        /// same dispatcher for FT and PT, calls worksub_* functions
         phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override final;
 
     protected:

@@ -40,7 +40,7 @@ tfw_timesync_t::tfw_timesync_t(const tpoint_config_t& tpoint_config_, phy::mac_l
         measurements_ns_vec.begin(), measurements_ns_vec.end(), common::adt::UNDEFINED_EARLY_64);
 }
 
-void tfw_timesync_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_timesync_t::work_start_imminent(const int64_t start_time_64) {
     // time of first pulse generation
     sample_count_at_next_pps_change_64 =
         duration_lut.get_N_samples_at_next_full_second(start_time_64) +
@@ -55,11 +55,13 @@ void tfw_timesync_t::work_start_imminent(const int64_t start_time_64) {
         "Time is {}. Starting PPS export. Time offset measurements will start in {} seconds.",
         common::watch_t::get_date_and_time(),
         measurement_start_delay_s);
+
+    return phy::irregular_report_t();
 }
 
-phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
+phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::regular_report_t& regular_report) {
     // PPS
-    if (sample_count_at_next_pps_change_64 < phy_mac_reg.regular_report.chunk_time_end_64) {
+    if (sample_count_at_next_pps_change_64 < regular_report.chunk_time_end_64) {
 #ifdef TFW_TIMESYNC_EXPORT_1PPS
         // generate one pulse
         worksub_pps(buffer_rx.get_rx_time_passed(), 0);
@@ -71,7 +73,7 @@ phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::phy_mac_reg_t& phy_ma
     }
 
     // measurement
-    if (sample_count_at_next_measurement_64 < phy_mac_reg.regular_report.chunk_time_end_64) {
+    if (sample_count_at_next_measurement_64 < regular_report.chunk_time_end_64) {
         // first measurement
         if (N_measurements_cnt == 0) {
             start_ns_64 = watch.get_elapsed();
@@ -108,6 +110,11 @@ phy::machigh_phy_t tfw_timesync_t::work_regular(const phy::phy_mac_reg_t& phy_ma
             sp3::duration_ec_t::ms001, measurement_interval_ms);
     }
 
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_timesync_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     return phy::machigh_phy_t();
 }
 

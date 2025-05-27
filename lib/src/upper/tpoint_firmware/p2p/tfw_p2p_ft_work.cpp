@@ -27,7 +27,7 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
     // what is the next full second after start_time_64?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
 
@@ -67,21 +67,33 @@ void tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
                            B - ppx.get_ppx_time_advance_samples(),
                            ppx.get_ppx_period_warped());
 #endif
+
+    return phy::irregular_report_t(allocation_ft.get_beacon_time_scheduled_minus_prepare_duration(),
+                                   0);
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_regular(
-    [[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
+    [[maybe_unused]] const phy::regular_report_t& regular_report) {
     const int64_t now_64 = buffer_rx.get_rx_time_passed();
 
     // update time of callbacks
     callbacks.run(now_64);
 
-    // do we have to generate the next beacon?
-    if (!allocation_ft.check_beacon_prepare_duration(now_64)) {
-        return phy::machigh_phy_t();
-    }
+    return phy::machigh_phy_t();
+}
 
+phy::machigh_phy_t tfw_p2p_ft_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     phy::machigh_phy_t machigh_phy;
+
+    dectnrp_assert(irregular_report.call_asap_after_this_time_has_passed_64 <
+                       allocation_ft.get_beacon_time_scheduled(),
+                   "too late");
+
+    dectnrp_assert((allocation_ft.get_beacon_time_scheduled() -
+                    irregular_report.call_asap_after_this_time_has_passed_64) >
+                       duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::slot001, 1),
+                   "too late");
 
     // try defining beacon transmission
     if (!worksub_tx_beacon(machigh_phy)) {
@@ -89,6 +101,9 @@ phy::machigh_phy_t tfw_p2p_ft_t::work_regular(
     }
 
     worksub_tx_unicast_consecutive(machigh_phy);
+
+    machigh_phy.irregular_report = phy::irregular_report_t(
+        allocation_ft.get_beacon_time_scheduled_minus_prepare_duration(), 0);
 
     return machigh_phy;
 }

@@ -25,6 +25,7 @@
 
 #include "dectnrp/limits.hpp"
 #include "dectnrp/phy/rx/chscan/chscan.hpp"
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 #include "dectnrp/phy/tx/tx_descriptor.hpp"
 
 namespace dectnrp::phy {
@@ -40,6 +41,12 @@ class machigh_phy_tx_t {
          * generating the packet defined by the first elements, then the second etc.
          */
         tx_descriptor_vec_t tx_descriptor_vec;
+
+        /**
+         * \brief If the irregular report contains a finite time, the PHY will call work_irregular()
+         * as soon as the time has passed.
+         */
+        irregular_report_t irregular_report{};
 };
 
 class machigh_phy_t final : public machigh_phy_tx_t {

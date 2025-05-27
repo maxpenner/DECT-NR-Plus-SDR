@@ -64,14 +64,16 @@ tfw_txrxdelay_t::tfw_txrxdelay_t(const tpoint_config_t& tpoint_config_,
     plcf_10.DFMCS = psdef.mcs_index;
 }
 
-void tfw_txrxdelay_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_txrxdelay_t::work_start_imminent(const int64_t start_time_64) {
     next_measurement_time_64 =
         start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
                                                                  measurement_separation_ms);
+
+    return phy::irregular_report_t();
 }
 
-phy::machigh_phy_t tfw_txrxdelay_t::work_regular(const phy::phy_mac_reg_t& phy_mac_reg) {
-    if (phy_mac_reg.regular_report.barrier_time_64 < next_measurement_time_64) {
+phy::machigh_phy_t tfw_txrxdelay_t::work_regular(const phy::regular_report_t& regular_report) {
+    if (regular_report.barrier_time_64 < next_measurement_time_64) {
         return phy::machigh_phy_t();
     }
 
@@ -83,6 +85,11 @@ phy::machigh_phy_t tfw_txrxdelay_t::work_regular(const phy::phy_mac_reg_t& phy_m
     tx_time_last_64 = generate_packet_asap(ret);
 
     return ret;
+}
+
+phy::machigh_phy_t tfw_txrxdelay_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
+    return phy::machigh_phy_t();
 }
 
 phy::maclow_phy_t tfw_txrxdelay_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {

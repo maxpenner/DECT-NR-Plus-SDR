@@ -24,6 +24,9 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <utility>
+
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 
 #define PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
 #ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
@@ -65,9 +68,10 @@ class baton_t {
          * thread-safe with no timeout (nto).
          *
          * \param now_64 suggestion of each worker_sync_t instance
-         * \return
+         * \return time workers agreed upon, returned value of work_start_imminent()
          */
-        int64_t register_and_wait_for_others_nto(const int64_t now_64);
+        std::pair<int64_t, phy::irregular_report_t> register_and_wait_for_others_nto(
+            const int64_t now_64);
 
         /// thread-safe
         bool is_id_holder_the_same(const uint32_t id_caller) const;
