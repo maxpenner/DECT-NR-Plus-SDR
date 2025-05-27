@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.5 Chrome/134.0.6998.205 Electron/35.3.0 Safari/537.36" version="27.0.5">
   <diagram id="aQhpeuAyKN3efvRNQwSn" name="Draft 0">
-    <mxGraphModel dx="946" dy="624" grid="0" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+    <mxGraphModel dx="1720" dy="1135" grid="0" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -280,9 +280,9 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="A43RT7BLHncz933INCX8-46" value="work_start_imminent()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_regular()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_pcc()&lt;div&gt;work_pcc_crc_error()&lt;br&gt;work_pdc_async()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_upper()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_chscan_async()&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=default;rounded=1;" parent="A43RT7BLHncz933INCX8-5" vertex="1" connectable="0">
+        <mxCell id="A43RT7BLHncz933INCX8-46" value="&amp;nbsp; work_start_imminent()&amp;nbsp;&amp;nbsp;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_regular()&lt;div&gt;work_irregular()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_pcc()&lt;div&gt;work_pcc_crc_error()&lt;br&gt;work_pdc_async()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_upper()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_chscan_async()&lt;/div&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=default;rounded=1;spacingTop=0;" parent="A43RT7BLHncz933INCX8-5" vertex="1" connectable="0">
           <mxGeometry x="0.2081" relative="1" as="geometry">
-            <mxPoint x="7" y="16" as="offset" />
+            <mxPoint x="37" y="-36" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="A43RT7BLHncz933INCX8-7" value="queue of datagrams" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#FF6666;strokeWidth=1;" parent="1" vertex="1">
