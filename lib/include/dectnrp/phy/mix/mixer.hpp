@@ -32,7 +32,7 @@ namespace dectnrp::phy {
 class mixer_t {
     public:
         mixer_t()
-            : mixer_t(0.0f, 0.0f){};
+            : mixer_t(0.0f, 0.0f) {};
 
         explicit mixer_t(const float phase_rad_, const float phase_increment_rad_) {
             set_phase(phase_rad_);

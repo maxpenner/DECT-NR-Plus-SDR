@@ -50,6 +50,8 @@
 #include "dectnrp/mac/ppx/ppx.hpp"
 #endif
 
+// #define TFW_P2P_VARIABLE_MCS
+
 // #define TFW_P2P_MIMO
 
 namespace dectnrp::upper::tfw::p2p {

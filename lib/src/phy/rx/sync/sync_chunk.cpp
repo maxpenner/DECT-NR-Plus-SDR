@@ -234,7 +234,7 @@ std::optional<sync_report_t> sync_chunk_t::search() {
                 // reset crosscorrelator
                 crosscorrelator->set_initial_state();
 
-                // reset and rewind, tell pacer when to start copying samples from
+                // reset and rewind, tell pacer where to start copying samples from
                 reset_localbuffer(rx_pacer_t::localbuffer_choice_t::LOCALBUFFER_FILTER,
                                   sync_report.coarse_peak_time_64 -
                                       static_cast<int64_t>(crosscorrelator->search_length_l));

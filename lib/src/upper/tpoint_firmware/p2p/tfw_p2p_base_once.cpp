@@ -31,8 +31,14 @@ tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     // ##################################################
     // Radio Layer + PHY
 
-    cqi_lut =
-        phy::indicators::cqi_lut_t(4, worker_pool_config.radio_device_class.mcs_index_min, 8.0f);
+    const uint32_t minimum_mcs_allowed = 4;
+
+#ifdef TFW_P2P_VARIABLE_MCS
+    cqi_lut = phy::indicators::cqi_lut_t(
+        minimum_mcs_allowed, worker_pool_config.radio_device_class.mcs_index_min, 8.0f);
+#else
+    cqi_lut = phy::indicators::cqi_lut_t(minimum_mcs_allowed, minimum_mcs_allowed, 8.0f);
+#endif
 
     hw_simulator = dynamic_cast<radio::hw_simulator_t*>(&hw);
 
@@ -55,7 +61,7 @@ tfw_p2p_base_t::tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_l
 #ifdef TFW_P2P_EXPORT_PPX
     ppx = mac::ppx_t(duration_lut.get_duration(sp3::duration_ec_t::s001),
                      duration_lut.get_duration(sp3::duration_ec_t::ms001, 250),
-                     duration_lut.get_duration(sp3::duration_ec_t::ms001, 20),
+                     duration_lut.get_duration(sp3::duration_ec_t::ms001, 30),
                      beacon_period,
                      duration_lut.get_duration(sp3::duration_ec_t::ms001, 5));
 #endif

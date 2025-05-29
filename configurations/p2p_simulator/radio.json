@@ -47,7 +47,7 @@
   "SIMULATION":
   {
     "sim_samp_rate_lte": true,
-    "sim_spp_us": 200,
+    "sim_spp_us": 50,
     "sim_samp_rate_speed": 0,
     "sim_channel_name_inter": "awgn",
     "sim_channel_name_intra": "awgn",

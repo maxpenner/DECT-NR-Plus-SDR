@@ -40,7 +40,7 @@ class machigh_phy_tx_t {
          * \brief Vector of TX packets to generate. An instance of worker_tx_rx always starts
          * generating the packet defined by the first elements, then the second etc.
          */
-        tx_descriptor_vec_t tx_descriptor_vec;
+        tx_descriptor_vec_t tx_descriptor_vec{};
 
         /**
          * \brief If the irregular report contains a finite time, the PHY will call work_irregular()

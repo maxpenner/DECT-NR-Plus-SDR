@@ -68,44 +68,42 @@ phy::irregular_report_t tfw_p2p_ft_t::work_start_imminent(const int64_t start_ti
                            ppx.get_ppx_period_warped());
 #endif
 
-    return phy::irregular_report_t(allocation_ft.get_beacon_time_scheduled_minus_prepare_duration(),
-                                   0);
+    return phy::irregular_report_t(
+        allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
-    const int64_t now_64 = buffer_rx.get_rx_time_passed();
-
-    // update time of callbacks
-    callbacks.run(now_64);
-
     return phy::machigh_phy_t();
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_irregular(
     [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
-    phy::machigh_phy_t machigh_phy;
+    phy::machigh_phy_t ret;
 
     dectnrp_assert(irregular_report.call_asap_after_this_time_has_passed_64 <
                        allocation_ft.get_beacon_time_scheduled(),
                    "too late");
 
-    dectnrp_assert((allocation_ft.get_beacon_time_scheduled() -
-                    irregular_report.call_asap_after_this_time_has_passed_64) >
+    dectnrp_assert(0 < irregular_report.get_recognition_delay(), "time out-of-order");
+
+    dectnrp_assert(irregular_report.get_recognition_delay() <
                        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::slot001, 1),
                    "too late");
 
     // try defining beacon transmission
-    if (!worksub_tx_beacon(machigh_phy)) {
+    if (!worksub_tx_beacon(ret)) {
         dectnrp_assert_failure("beacon not transmitted");
     }
 
-    worksub_tx_unicast_consecutive(machigh_phy);
+    worksub_tx_unicast_consecutive(ret);
 
-    machigh_phy.irregular_report = phy::irregular_report_t(
-        allocation_ft.get_beacon_time_scheduled_minus_prepare_duration(), 0);
+    ret.irregular_report =
+        phy::irregular_report_t(allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
 
-    return machigh_phy;
+    callbacks.run(buffer_rx.get_rx_time_passed());
+
+    return ret;
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_upper(

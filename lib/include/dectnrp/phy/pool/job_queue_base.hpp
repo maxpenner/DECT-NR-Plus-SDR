@@ -47,7 +47,7 @@ class job_queue_base_t : public common::reporting_t {
     public:
         explicit job_queue_base_t(const uint32_t id_, const uint32_t capacity_)
             : id(id_),
-              capacity(capacity_){};
+              capacity(capacity_) {};
         ~job_queue_base_t() = default;
 
         job_queue_base_t() = delete;

@@ -31,7 +31,7 @@ class regular_report_t {
                                   const int64_t sync_time_last_64_)
             : chunk_time_end_64(chunk_time_end_64_),
               sync_time_last_64(sync_time_last_64_),
-              barrier_time_64(std::max(chunk_time_end_64, sync_time_last_64)){};
+              barrier_time_64(std::max(chunk_time_end_64, sync_time_last_64)) {};
 
         /**
          * \brief Synchronization is processed in chunks by instances of worker_sync_t, typically

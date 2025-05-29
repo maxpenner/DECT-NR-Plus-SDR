@@ -55,7 +55,7 @@ class layer_t {
          * \param type_ name of layer
          */
         explicit layer_t(const std::string type_)
-            : type(type_){};
+            : type(type_) {};
         virtual ~layer_t() = default;
 
         layer_t() = delete;

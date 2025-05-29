@@ -36,20 +36,25 @@ phy::irregular_report_t tfw_p2p_pt_t::work_start_imminent(const int64_t start_ti
         duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
                                                  worksub_callback_log_period_sec));
 
-    return phy::irregular_report_t();
+    return phy::irregular_report_t(start_time_64 + allocation_ft.get_beacon_period());
 }
 
 phy::machigh_phy_t tfw_p2p_pt_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
-    // update time of callbacks
-    callbacks.run(buffer_rx.get_rx_time_passed());
-
     return phy::machigh_phy_t();
 }
 
 phy::machigh_phy_t tfw_p2p_pt_t::work_irregular(
     [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
-    return phy::machigh_phy_t();
+    // update time of callbacks
+    callbacks.run(buffer_rx.get_rx_time_passed());
+
+    phy::machigh_phy_t ret;
+
+    ret.irregular_report =
+        irregular_report.get_with_time_increment(allocation_ft.get_beacon_period());
+
+    return ret;
 }
 
 phy::machigh_phy_t tfw_p2p_pt_t::work_upper(

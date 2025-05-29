@@ -65,7 +65,7 @@ class job_queue_naive_t final : public job_queue_base_t {
 
         struct job_slot_t {
                 explicit job_slot_t(const uint32_t id_)
-                    : id(id_){};
+                    : id(id_) {};
 
                 const uint32_t id;
                 job_t job;

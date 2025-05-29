@@ -29,7 +29,7 @@ class phy_maclow_t {
     public:
         explicit phy_maclow_t(const sync_report_t& sync_report_, const pcc_report_t& pcc_report_)
             : sync_report(sync_report_),
-              pcc_report(pcc_report_){};
+              pcc_report(pcc_report_) {};
 
         const sync_report_t& sync_report;
         const pcc_report_t& pcc_report;

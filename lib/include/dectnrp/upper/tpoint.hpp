@@ -105,9 +105,9 @@ class tpoint_t : public common::layer_unit_t {
 
         /**
          * \brief Function being called irregularly. A firmware can request an irregular callback to
-         * be called as soon as the specified time has passed for synchronization, i.e. once not
-         * more packets can be found before the specified time. The callback than happens through
-         * this function.
+         * be called as soon as the specified time has passed for synchronization, i.e. once no more
+         * packets can be found before the specified time. The callback than happens through this
+         * function.
          *
          * 1. Only called if firmware requested it beforehand.
          * 2. Called in the same FIFO order as put into the job_queue.

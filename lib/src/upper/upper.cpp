@@ -32,7 +32,6 @@
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_ft.hpp"
 #include "dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_pt.hpp"
 #include "dectnrp/upper/tpoint_firmware/rtt/tfw_rtt.hpp"
-#include "dectnrp/upper/tpoint_firmware/timesync/tfw_timesync.hpp"
 #include "dectnrp/upper/tpoint_firmware/txrxdelay/tfw_txrxdelay.hpp"
 
 // more readable
@@ -96,7 +95,7 @@ upper_t::upper_t(const upper_config_t& upper_config_,
         // give necessary data to worker_pool_t instances
         for (uint32_t id = 0; id < phy_.get_nof_layer_unit(); ++id) {
             /* We give every worker pool a pointer to the same, single tpoint we have. They also all
-             * get a shared pointer to the same token. However, they have to call the token will
+             * get a shared pointer to the same token. However, they have to call the token with
              * different IDs.
              */
             auto& worker_pool = phy_.get_layer_unit(id);
@@ -182,9 +181,6 @@ void upper_t::add_tpoint(const tpoint_config_t& tpoint_config, phy::mac_lower_t&
 
     } else if (TFW_NAME_STARTS_WITH(tfw::rtt::tfw_rtt_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::rtt::tfw_rtt_t>(TFW_ARGS));
-
-    } else if (TFW_NAME_STARTS_WITH(tfw::timesync::tfw_timesync_t::firmware_name)) {
-        layer_unit_vec.push_back(std::make_unique<tfw::timesync::tfw_timesync_t>(TFW_ARGS));
 
     } else if (TFW_NAME_STARTS_WITH(tfw::txrxdelay::tfw_txrxdelay_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::txrxdelay::tfw_txrxdelay_t>(TFW_ARGS));

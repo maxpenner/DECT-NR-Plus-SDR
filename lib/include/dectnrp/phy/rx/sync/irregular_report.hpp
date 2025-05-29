@@ -23,17 +23,32 @@
 #include <cstdint>
 #include <limits>
 
+#include "dectnrp/common/adt/miscellaneous.hpp"
+
 namespace dectnrp::phy {
 
 class irregular_report_t {
     public:
         irregular_report_t() = default;
         explicit irregular_report_t(const int64_t call_asap_after_this_time_has_passed_64_,
-                                    const uint32_t handle_)
+                                    const uint32_t handle_ = 0)
             : call_asap_after_this_time_has_passed_64(call_asap_after_this_time_has_passed_64_),
-              handle(handle_){};
+              handle(handle_) {};
 
         static constexpr int64_t undefined_late{std::numeric_limits<int64_t>::max()};
+
+        bool has_finite_time() const {
+            return call_asap_after_this_time_has_passed_64 < undefined_late;
+        }
+
+        irregular_report_t get_with_time_increment(const int64_t time_increment_64) const;
+
+        /// when did synchronization recognize this job was due to be put into the job queue?
+        int64_t time_of_recognition{common::adt::UNDEFINED_EARLY_64};
+
+        int64_t get_recognition_delay() const {
+            return time_of_recognition - call_asap_after_this_time_has_passed_64;
+        };
 
         /**
          * \brief The irregular report will be create as soon as possible after this time has passed
@@ -46,10 +61,6 @@ class irregular_report_t {
          * to the firmware to make sure the handle is unique.
          */
         uint32_t handle{};
-
-        bool has_finite_time() const {
-            return call_asap_after_this_time_has_passed_64 < undefined_late;
-        }
 };
 
 }  // namespace dectnrp::phy

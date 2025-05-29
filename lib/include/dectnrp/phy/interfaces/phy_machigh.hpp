@@ -33,7 +33,7 @@ class phy_machigh_t {
                                const pdc_report_t& pdc_report_)
             : phy_maclow(phy_maclow_),
               maclow_phy(maclow_phy_),
-              pdc_report(pdc_report_){};
+              pdc_report(pdc_report_) {};
 
         const phy_maclow_t& phy_maclow;
         const maclow_phy_t& maclow_phy;

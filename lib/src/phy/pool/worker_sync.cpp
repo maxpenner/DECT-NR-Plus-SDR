@@ -308,7 +308,14 @@ void worker_sync_t::irregular_callback(const int64_t now_64) {
         return;
     }
 
-    job_queue.enqueue_nto(job_t(irregular.pop()));
+    auto irregular_report = irregular.pop();
+
+    irregular_report.time_of_recognition = now_64;
+
+    dectnrp_assert(0 < irregular_report.get_recognition_delay(),
+                   "irregular job recognized before due time");
+
+    job_queue.enqueue_nto(job_t(std::move(irregular_report)));
 }
 
 void worker_sync_t::enqueue_job_nto(const sync_report_t& sync_report) {

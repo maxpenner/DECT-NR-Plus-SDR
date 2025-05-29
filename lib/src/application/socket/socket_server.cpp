@@ -96,7 +96,7 @@ ssize_t socket_server_t::read_datagram(const uint32_t conn_idx) {
 }
 
 bool socket_server_t::filter_ingress_datagram([[maybe_unused]] const uint32_t conn_idx) {
-    // nothing to here so far
+    // nothing to do here so far
 
     return true;
 }

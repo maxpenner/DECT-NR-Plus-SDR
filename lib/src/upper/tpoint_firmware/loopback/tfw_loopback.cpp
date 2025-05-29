@@ -39,7 +39,7 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     : tpoint_t(tpoint_config_, mac_lower_) {
     dectnrp_assert(
         1e3 <= RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_THRESHOLD_MAX_SP,
-        "Loopback firmware requires large RMS limit. Set RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_THRESHOLD_MAX_SP to 1e3 and recompile.");
+        "This is an intentional error. Loopback firmware requires large RMS limit. Set RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RMS_THRESHOLD_MAX_SP to 1e3 and recompile.");
 
     dectnrp_assert(!hw.hw_config.simulator_clip_and_quantize,
                    "For loopback firmware, clipping and quantization must not be applied.");
@@ -126,7 +126,7 @@ phy::irregular_report_t tfw_loopback_t::work_start_imminent(const int64_t start_
 
     A_reset_result_counter_for_next_snr();
 
-    return phy::irregular_report_t(state_time_reference_64, 0);
+    return phy::irregular_report_t(state_time_reference_64);
 }
 
 phy::machigh_phy_t tfw_loopback_t::work_regular(
@@ -233,7 +233,7 @@ phy::machigh_phy_t tfw_loopback_t::work_irregular(
 
     // schedule next callback
     if (state != STATE_t::DEAD_END) {
-        machigh_phy.irregular_report = phy::irregular_report_t(state_time_reference_64, 0);
+        machigh_phy.irregular_report = phy::irregular_report_t(state_time_reference_64);
     }
 
     return machigh_phy;

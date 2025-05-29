@@ -27,6 +27,8 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/phy/agc/agc_tx.hpp"
+#include "dectnrp/phy/interfaces/machigh_phy.hpp"
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 #include "dectnrp/sections_part3/derivative/duration_ec.hpp"
 
 namespace dectnrp::upper::tfw::txrxdelay {
@@ -69,13 +71,17 @@ phy::irregular_report_t tfw_txrxdelay_t::work_start_imminent(const int64_t start
         start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
                                                                  measurement_separation_ms);
 
-    return phy::irregular_report_t();
+    return phy::irregular_report_t(next_measurement_time_64);
 }
 
-phy::machigh_phy_t tfw_txrxdelay_t::work_regular(const phy::regular_report_t& regular_report) {
-    if (regular_report.barrier_time_64 < next_measurement_time_64) {
-        return phy::machigh_phy_t();
-    }
+phy::machigh_phy_t tfw_txrxdelay_t::work_regular(
+    [[maybe_unused]] const phy::regular_report_t& regular_report) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_txrxdelay_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
+    dectnrp_assert(next_measurement_time_64 < buffer_rx.get_rx_time_passed(), "time out-of-order");
 
     phy::machigh_phy_t ret;
 
@@ -84,12 +90,9 @@ phy::machigh_phy_t tfw_txrxdelay_t::work_regular(const phy::regular_report_t& re
 
     tx_time_last_64 = generate_packet_asap(ret);
 
-    return ret;
-}
+    ret.irregular_report = phy::irregular_report_t(next_measurement_time_64);
 
-phy::machigh_phy_t tfw_txrxdelay_t::work_irregular(
-    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
-    return phy::machigh_phy_t();
+    return ret;
 }
 
 phy::maclow_phy_t tfw_txrxdelay_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {

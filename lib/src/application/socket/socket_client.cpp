@@ -82,7 +82,7 @@ uint32_t socket_client_t::write_try(const uint32_t conn_idx, const uint8_t* inp,
 }
 
 bool socket_client_t::filter_egress_datagram([[maybe_unused]] const uint32_t conn_idx) {
-    // nothing to here so far
+    // nothing to do here so far
 
     return true;
 }

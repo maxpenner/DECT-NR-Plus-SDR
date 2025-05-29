@@ -18,25 +18,17 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/phy/harq/buffer.hpp"
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 
-#include <cstring>
+#include "dectnrp/common/prog/assert.hpp"
 
-extern "C" {
-#include "srsran/phy/utils/vector.h"
-}
+namespace dectnrp::phy {
 
-namespace dectnrp::phy::harq {
+irregular_report_t irregular_report_t::get_with_time_increment(
+    const int64_t time_increment_64) const {
+    dectnrp_assert(has_finite_time(), "replicating undefined");
 
-buffer_t::buffer_t(const uint32_t a_len_, const uint32_t d_len_)
-    : a_len(a_len_),
-      d_len(d_len_),
-      a(srsran_vec_u8_malloc(a_len)),
-      d(srsran_vec_u8_malloc(d_len)) {};
+    return irregular_report_t(call_asap_after_this_time_has_passed_64 + time_increment_64, handle);
+};
 
-buffer_t::~buffer_t() {
-    free(a);
-    free(d);
-}
-
-}  // namespace dectnrp::phy::harq
+}  // namespace dectnrp::phy

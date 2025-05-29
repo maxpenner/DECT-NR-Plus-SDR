@@ -32,7 +32,7 @@ class resampler_param_t {
                                    const uint32_t M_)
             : hw_samp_rate(hw_samp_rate_),
               L(L_),
-              M(M_){};
+              M(M_) {};
 
         /// Kaiser window is defined through stopband attenuation
         static constexpr float PASSBAND_RIPPLE_DONT_CARE = 100.0f;

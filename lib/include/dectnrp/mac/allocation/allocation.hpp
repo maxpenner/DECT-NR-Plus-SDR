@@ -40,7 +40,7 @@ class allocation_t {
         explicit allocation_t(const sp3::duration_lut_t* duration_lut_,
                               const sp3::duration_t beacon_period_)
             : duration_lut(duration_lut_),
-              beacon_period(beacon_period_){};
+              beacon_period(beacon_period_) {};
 
         const sp3::duration_lut_t* duration_lut{nullptr};
 

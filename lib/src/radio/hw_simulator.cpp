@@ -103,7 +103,7 @@ void hw_simulator_t::set_samp_rate(const uint32_t samp_rate_in) {
 }
 
 void hw_simulator_t::initialize_device() {
-    dectnrp_assert(50 < hw_config.sim_spp_us, "spp too small");
+    dectnrp_assert(50 <= hw_config.sim_spp_us, "spp too small");
     dectnrp_assert(hw_config.sim_spp_us <= 500, "spp too large");
 
     // maximum number of samples per spp

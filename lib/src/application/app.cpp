@@ -50,7 +50,6 @@ void app_t::start_sc() {
     // give thread permission to run
     keep_running.store(true, std::memory_order_release);
 
-    // reset before starting thread
     watch_since_start.reset();
 
     // start thread that internally executes work function of "this"

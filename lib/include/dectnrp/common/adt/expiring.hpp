@@ -32,7 +32,7 @@ class expiring_t {
         expiring_t() = default;
         expiring_t(const T val_, const int64_t time_64_) noexcept
             : val(val_),
-              time_64(time_64_){};
+              time_64(time_64_) {};
 
         bool is_valid(const int64_t latest_64) const noexcept { return latest_64 <= time_64; };
         bool is_expired(const int64_t latest_64) const noexcept { return time_64 < latest_64; };

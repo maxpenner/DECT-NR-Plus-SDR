@@ -22,6 +22,6 @@
 
 namespace dectnrp::dlc {
 
-dlc_t::dlc_t(){};
+dlc_t::dlc_t() {};
 
 }  // namespace dectnrp::dlc
