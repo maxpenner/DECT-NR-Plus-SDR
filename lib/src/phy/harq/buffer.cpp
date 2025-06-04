@@ -32,7 +32,7 @@ buffer_t::buffer_t(const uint32_t a_len_, const uint32_t d_len_)
     : a_len(a_len_),
       d_len(d_len_),
       a(srsran_vec_u8_malloc(a_len)),
-      d(srsran_vec_u8_malloc(d_len)){};
+      d(srsran_vec_u8_malloc(d_len)) {};
 
 buffer_t::~buffer_t() {
     free(a);

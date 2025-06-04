@@ -18,24 +18,17 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/phy/pool/job_queue.hpp"
+#include "dectnrp/phy/pool/job_queue_naive.hpp"
 
-// ######################################################################### NAIVE
-// ######################################################################### NAIVE
-// ######################################################################### NAIVE
-#ifdef PHY_POOL_JOB_QUEUE_NAIVE_OR_MOODYCAMEL
-
-#ifdef PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_JOB_QUEUE_NAIVE_CONDITION_VARIABLE_OR_BUSY_WAITING
 #else
 #include "dectnrp/common/thread/watch.hpp"
 #endif
 
 namespace dectnrp::phy {
 
-job_queue_t::job_queue_t(const uint32_t id_, const uint32_t capacity_)
-    : id(id_),
-      capacity(capacity_),
-      fifo_cnt(0),
+job_queue_naive_t::job_queue_naive_t(const uint32_t id_, const uint32_t capacity_)
+    : job_queue_base_t(id_, capacity_),
       enqueue_ptr(0),
       dequeue_ptr(0) {
     for (uint32_t job_slot_id = 0; job_slot_id < capacity; ++job_slot_id) {
@@ -46,7 +39,7 @@ job_queue_t::job_queue_t(const uint32_t id_, const uint32_t capacity_)
     job_slot_vec_cnt.store(0, std::memory_order_release);
 }
 
-bool job_queue_t::enqueue_nto(job_t&& job) {
+bool job_queue_naive_t::enqueue_nto(job_t&& job) {
     if (!permeable.load(std::memory_order_acquire)) {
         return true;
     }
@@ -57,7 +50,7 @@ bool job_queue_t::enqueue_nto(job_t&& job) {
     ret = enqueue_under_lock(std::move(job));
     lockv.unlock();
 
-#ifdef PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_JOB_QUEUE_NAIVE_CONDITION_VARIABLE_OR_BUSY_WAITING
     if (ret) {
         cv.notify_all();
     }
@@ -66,7 +59,7 @@ bool job_queue_t::enqueue_nto(job_t&& job) {
     return ret;
 }
 
-std::vector<std::string> job_queue_t::report_start() const {
+std::vector<std::string> job_queue_naive_t::report_start() const {
     std::vector<std::string> lines;
 
     std::string str("Job Queue " + std::to_string(id));
@@ -77,7 +70,7 @@ std::vector<std::string> job_queue_t::report_start() const {
     return lines;
 }
 
-std::vector<std::string> job_queue_t::report_stop() const {
+std::vector<std::string> job_queue_naive_t::report_stop() const {
     std::vector<std::string> lines;
 
     // indicate how many jobs are unprocessed
@@ -98,36 +91,10 @@ std::vector<std::string> job_queue_t::report_stop() const {
     return lines;
 }
 
-bool job_queue_t::enqueue_under_lock(job_t&& job) {
-    // is there a free slot?
-    if (get_free() == 0) {
-#ifdef PHY_POOL_JOB_QUEUE_JOB_SLOT_UNAVAILABILITY_FATAL_OR_DISCARD
-        dectnrp_assert_failure("no free job slot");
-#endif
-        return false;
-    }
-
-    job.fifo_cnt = fifo_cnt++;
-
-    // copy job
-    job_slot_vec[enqueue_ptr].job = job;
-
-    // increase global job count
-    job_slot_vec_cnt.fetch_add(1, std::memory_order_release);
-
-    // advance pointer
-    enqueue_ptr = (enqueue_ptr + 1) % capacity;
-
-    // slot stats
-    ++job_slot_vec[enqueue_ptr].stats.filled;
-
-    return true;
-}
-
-bool job_queue_t::wait_for_new_job_to(job_t& job) {
+bool job_queue_naive_t::wait_for_new_job_to(job_t& job) {
     bool ret = false;
 
-#ifdef PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_JOB_QUEUE_NAIVE_CONDITION_VARIABLE_OR_BUSY_WAITING
     // upon entering function, get the lock on the mutex
     std::unique_lock<std::mutex> lk(lockv);
 
@@ -185,28 +152,46 @@ bool job_queue_t::wait_for_new_job_to(job_t& job) {
     return ret;
 }
 
-bool job_queue_t::dequeue_under_lock(job_t& job) {
+bool job_queue_naive_t::enqueue_under_lock(job_t&& job) {
+    // is there a free slot?
+    if (get_free() == 0) {
+#ifdef PHY_POOL_JOB_QUEUE_JOB_SLOT_UNAVAILABILITY_FATAL_OR_DISCARD
+        dectnrp_assert_failure("no free job slot");
+#endif
+        return false;
+    }
+
+    job.fifo_cnt = fifo_cnt++;
+
+    job_slot_vec[enqueue_ptr].job = job;
+
+    job_slot_vec_cnt.fetch_add(1, std::memory_order_release);
+
+    enqueue_ptr = (enqueue_ptr + 1) % capacity;
+
+    ++job_slot_vec[enqueue_ptr].stats.filled;
+
+    return true;
+}
+
+bool job_queue_naive_t::dequeue_under_lock(job_t& job) {
     // queue can be empty
     if (get_used() == 0) {
         return false;
     }
 
-    // copy content and make fillable again
     job = job_slot_vec[dequeue_ptr].job;
 
-    // decrease global count
     job_slot_vec_cnt.fetch_add(-1, std::memory_order_release);
 
-    // advance pointer
     dequeue_ptr = (dequeue_ptr + 1) % capacity;
 
-    // slot stats
     ++job_slot_vec[dequeue_ptr].stats.processed;
 
     return true;
 }
 
-uint32_t job_queue_t::get_free() const {
+uint32_t job_queue_naive_t::get_free() const {
     if (dequeue_ptr > enqueue_ptr) {
         // w_idx should never reach r_idx
         return dequeue_ptr - enqueue_ptr - 1;
@@ -216,7 +201,7 @@ uint32_t job_queue_t::get_free() const {
     return dequeue_ptr + capacity - enqueue_ptr - 1;
 }
 
-uint32_t job_queue_t::get_used() const {
+uint32_t job_queue_naive_t::get_used() const {
     if (enqueue_ptr >= dequeue_ptr) {
         return enqueue_ptr - dequeue_ptr;
     }
@@ -225,87 +210,3 @@ uint32_t job_queue_t::get_used() const {
 }
 
 }  // namespace dectnrp::phy
-
-// ######################################################################### NAIVE
-// ######################################################################### NAIVE
-// ######################################################################### NAIVE
-#else
-// ######################################################################### MOODYCAMEL
-// ######################################################################### MOODYCAMEL
-// ######################################################################### MOODYCAMEL
-
-#include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/phy/pool/job_queue.hpp"
-
-namespace dectnrp::phy {
-
-job_queue_t::job_queue_t(const uint32_t id_, const uint32_t capacity_)
-    : id(id_),
-      capacity(capacity_) {
-    dectnrp_assert(capacity >= 32, "moodycamel capacity must be at least 32");
-
-    // https://github.com/cameron314/concurrentqueue/blob/master/blockingconcurrentqueue.h#L58
-    job_vec = moodycamel::BlockingConcurrentQueue<job_t>(capacity * 6);
-
-    ptok = std::make_unique<moodycamel::ProducerToken>(job_vec);
-}
-
-bool job_queue_t::enqueue_nto(job_t&& job) {
-    if (!permeable.load(std::memory_order_acquire)) {
-        return true;
-    }
-
-    // producer token must be thread-safe
-    lockv.lock();
-
-    job.fifo_cnt = fifo_cnt;
-
-    if (job_vec.try_enqueue(*ptok, job)) {
-        // increment only if job made it into the queue
-        ++fifo_cnt;
-
-        lockv.unlock();
-
-        return true;
-    }
-
-#ifdef PHY_POOL_JOB_QUEUE_JOB_SLOT_UNAVAILABILITY_FATAL_OR_DISCARD
-    dectnrp_assert_failure("no free job slot");
-#endif
-
-    lockv.unlock();
-
-    return false;
-}
-
-std::vector<std::string> job_queue_t::report_start() const {
-    std::vector<std::string> lines;
-
-    std::string str("Job Queue " + std::to_string(id));
-    str.append(" #Jobs " + std::to_string(capacity));
-
-    lines.push_back(str);
-
-    return lines;
-}
-
-std::vector<std::string> job_queue_t::report_stop() const {
-    std::vector<std::string> lines;
-
-    // indicate how many jobs are unprocessed
-    std::string str_residual("Job Queue " + std::to_string(id));
-    lines.push_back(str_residual);
-
-    return lines;
-}
-
-bool job_queue_t::wait_for_new_job_to(job_t& job) {
-    return job_vec.wait_dequeue_timed(job, std::chrono::milliseconds(JOB_QUEUE_WAIT_TIMEOUT_MS));
-}
-
-}  // namespace dectnrp::phy
-
-#endif
-// ######################################################################### MOODYCAMEL
-// ######################################################################### MOODYCAMEL
-// ######################################################################### MOODYCAMEL

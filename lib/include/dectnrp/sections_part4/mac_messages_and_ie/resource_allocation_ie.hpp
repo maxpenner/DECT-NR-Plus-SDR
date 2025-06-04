@@ -29,7 +29,7 @@ namespace dectnrp::sp4 {
 
 class resource_allocation_ie_t final : public mmie_packing_peeking_t, public mu_depending_t {
     public:
-        // Table 6.4.3.3-2
+        /// Table 6.4.3.3-2
         enum class dect_scheduled_resource_failure_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             lower = 1,
@@ -81,7 +81,7 @@ class resource_allocation_ie_t final : public mmie_packing_peeking_t, public mu_
         std::optional<dect_scheduled_resource_failure_t> dect_scheduled_resource_failure;
 
     private:
-        // Table 6.4.3.3-1, field Allocation Type
+        /// Table 6.4.3.3-1, field Allocation Type
         enum class allocation_type_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             release_all_scheduled_resources = 0,
@@ -91,7 +91,7 @@ class resource_allocation_ie_t final : public mmie_packing_peeking_t, public mu_
             upper
         };
 
-        // Table 6.4.3.3-1, field Repeat
+        /// Table 6.4.3.3-1, field Repeat
         enum class repeat_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             single_allocation = 0,

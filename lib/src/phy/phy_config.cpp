@@ -152,7 +152,7 @@ phy_config_t::phy_config_t(const std::string directory)
             common::jsonparse::read_int(it, "rx_chunk_unit_length_u8subslot", 1, 64);
 
         worker_pool_config.rx_job_regular_period =
-            common::jsonparse::read_int(it, "rx_job_regular_period", 1, 48);
+            common::jsonparse::read_int(it, "rx_job_regular_period", 0, 48);
 
         const auto threads_core_prio_config_sync_vec_array =
             common::jsonparse::read_int_array(it, "threads_core_prio_config_sync_vec", 2, 8, 2);

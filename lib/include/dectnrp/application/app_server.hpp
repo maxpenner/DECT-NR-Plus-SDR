@@ -100,8 +100,10 @@ class app_server_t : public app_t {
          */
         int64_t job_queue_access_protection_ns_64{0};
 
-        // used to monitor job_queue_access_protection_ns, so we use the operating systems clock,
-        // not the SDR's
+        /**
+         * \brief used to monitor job_queue_access_protection_ns, so we use the operating systems
+         * clock, not the SDR's
+         */
         common::watch_t watch_job_queue_access_protection;
 
         /// put job in job queue

@@ -18,27 +18,17 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#pragma once
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 
-#include "dectnrp/phy/pool/job.hpp"
+#include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::phy {
 
-class job_slot_t {
-    public:
-        explicit job_slot_t(const uint32_t id_)
-            : id(id_){};
+irregular_report_t irregular_report_t::get_with_time_increment(
+    const int64_t time_increment_64) const {
+    dectnrp_assert(has_finite_time(), "replicating undefined");
 
-        const uint32_t id;
-        job_t job;
-
-        /// statistics of the slot
-        struct stats_t {
-                int64_t filled{0};
-                int64_t processed{0};
-        };
-
-        stats_t stats;
+    return irregular_report_t(call_asap_after_this_time_has_passed_64 + time_increment_64, handle);
 };
 
 }  // namespace dectnrp::phy

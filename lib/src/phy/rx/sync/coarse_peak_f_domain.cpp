@@ -29,7 +29,13 @@ extern "C" {
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
+#include "dectnrp/phy/rx/sync/sync_param.hpp"
 #include "dectnrp/sections_part3/transmission_packet_structure.hpp"
+
+#ifdef RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_FIND_BETA_THRESHOLD_DB_OR_ASSUME_MAX_OF_RDC
+#include "dectnrp/common/adt/decibels.hpp"
+#include "dectnrp/sections_part3/physical_resources.hpp"
+#endif
 
 namespace dectnrp::phy {
 
@@ -134,7 +140,7 @@ uint32_t coarse_peak_f_domain_t::estimate_beta() const {
     float central_power = calc_power_sidebands();
 
     // convert threshold from dB
-    const float threshold = dectnrp::common::adt::db2mag(
+    const float threshold = common::adt::db2mag(
         RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_FIND_BETA_THRESHOLD_DB_OR_ASSUME_MAX_OF_RDC);
 
     /* Our current best guess for beta is b_estim. We will now keep testing the next larger beta

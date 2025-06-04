@@ -24,9 +24,12 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <utility>
 
-#define PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
+
+#define PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
 #else
 #include <atomic>
 #endif
@@ -49,7 +52,7 @@ class baton_t {
         baton_t(baton_t&&) = delete;
         baton_t& operator=(baton_t&&) = delete;
 
-        static constexpr uint32_t BATON_WAIT_TIMEOUT_MS = 100;
+        static constexpr uint32_t BATON_WAIT_TIMEOUT_MS{100};
 
         /**
          * \brief Called by worker_pool_t with its associated tpoint and token. This class with use
@@ -65,9 +68,10 @@ class baton_t {
          * thread-safe with no timeout (nto).
          *
          * \param now_64 suggestion of each worker_sync_t instance
-         * \return
+         * \return time workers agreed upon, returned value of work_start_imminent()
          */
-        int64_t register_and_wait_for_others_nto(const int64_t now_64);
+        std::pair<int64_t, phy::irregular_report_t> register_and_wait_for_others_nto(
+            const int64_t now_64);
 
         /// thread-safe
         bool is_id_holder_the_same(const uint32_t id_caller) const;
@@ -88,17 +92,15 @@ class baton_t {
         const int64_t sync_time_unique_limit_64;
         const uint32_t rx_job_regular_period;
 
-        // registration
         std::mutex register_mtx;
         std::condition_variable register_cv;
         uint32_t register_cnt;
         int64_t register_now_64;
 
-        // post-registration
         upper::tpoint_t* tpoint;
         std::shared_ptr<token_t> token;
 
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
         mutable std::mutex mtx;
         std::condition_variable cv;
         uint32_t id_holder;

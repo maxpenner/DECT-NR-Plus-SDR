@@ -271,7 +271,6 @@ void hw_usrp_t::initialize_device() {
 
         // set to low by default
         m_usrp->set_gpio_attr(gpio_state.bank, "OUT", 0x00, gpio_state.gpio_mask);
-
 #endif
 
     } else if (device_addrs.at(0).get("product", "") == "x410") {
@@ -830,7 +829,6 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
             const int64_t tx_burst_start_time =
                 buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64;
 #endif
-
             // construct the stream command for a burst transmission
             uhd::tx_metadata_t tx_md;
             tx_md.start_of_burst = true;
@@ -848,7 +846,6 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                 tx_md.has_time_spec = false;
             }
 #endif
-
             /* At this point we know that we have at least one packet to transmit. However, there
              * might be multiple packets with small or no gaps between them. These packets get
              * transmitted consecutively in a single UHD burst. Between the packets, we send zeros.
@@ -953,7 +950,6 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                     buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -=
                         tx_time_advance_samples;
 #endif
-
                     // transmission time of potential consecutive transmission
                     const int64_t next_buffer_tx_time =
                         buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64;

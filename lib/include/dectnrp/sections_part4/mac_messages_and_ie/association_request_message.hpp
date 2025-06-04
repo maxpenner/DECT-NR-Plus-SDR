@@ -30,7 +30,7 @@ namespace dectnrp::sp4 {
 
 class association_request_message_t final : public mmie_packing_peeking_t {
     public:
-        // Table 6.4.2.4-2
+        /// Table 6.4.2.4-2
         enum class setup_cause_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             initial = 0,
@@ -43,7 +43,7 @@ class association_request_message_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.2.4-1, fields MAX HARQ RE-TX and MAX HARQ RE-RX
+        /// Table 6.4.2.4-1, fields MAX HARQ RE-TX and MAX HARQ RE-RX
         enum class max_harq_retransmission_delay_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _105_us = 0,
@@ -80,7 +80,7 @@ class association_request_message_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.3.4-2
+        /// Table 6.3.4-2
         enum class flow_id_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             lower = 0,

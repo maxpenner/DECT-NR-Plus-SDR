@@ -31,5 +31,4 @@ find . -type d \( -path ./bin -o \
                   -path ./scripts \
                \) -prune \
     -o -iname *.hpp -o -iname *.cpp \
-    | xargs clang-format -style=file -i -fallback-style=none --verbose
-    
+    | xargs clang-format-19 -style=file -i -fallback-style=none --verbose

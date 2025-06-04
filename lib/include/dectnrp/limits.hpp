@@ -52,6 +52,8 @@ static constexpr uint32_t max_nof_network_id_for_scrambling{20};
  */
 static constexpr uint32_t max_nof_radio_phy_pairs_one_tpoint{4};
 
+static constexpr uint32_t max_irregular_callback_pending{8};
+
 // ##################################################
 // MAC
 

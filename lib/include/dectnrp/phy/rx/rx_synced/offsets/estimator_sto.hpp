@@ -54,20 +54,14 @@ class estimator_sto_t final : public estimator_t {
     private:
         virtual void reset_internal() override final;
 
-        // for SIMD
         cf_t* stage;
 
-        // derotation values
         float phase_increment_rad;
 
-        // phasors for Volk
         lv_32fc_t phase_increment;
         lv_32fc_t phase_start;
 
-        // helpers for fractional STO based on STF
         [[nodiscard]] float process_stf_phase_rotation(const cf_t* chestim_drs_zf);
-
-        // helpers for residual STO based on DRS
         [[nodiscard]] float process_drs_phase_rotation(const cf_t* chestim_drs_zf);
 
         void convert_to_phasors();

@@ -31,7 +31,7 @@ class pdc_report_t {
             : crc_status(false),
               mac_pdu_decoder(mac_pdu_decoder_),
               snr_dB(0.0f),
-              mimo_report(mimo_report_t()){};
+              mimo_report(mimo_report_t()) {};
 
         explicit pdc_report_t(const sp4::mac_pdu_decoder_t& mac_pdu_decoder_,
                               const float snr_dB_,
@@ -39,7 +39,7 @@ class pdc_report_t {
             : crc_status(true),
               mac_pdu_decoder(mac_pdu_decoder_),
               snr_dB(snr_dB_),
-              mimo_report(mimo_report_){};
+              mimo_report(mimo_report_) {};
 
         /// 24 bit CRC attached to transport block
         const bool crc_status;

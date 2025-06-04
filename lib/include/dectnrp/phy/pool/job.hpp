@@ -23,8 +23,9 @@
 #include <cstdint>
 #include <variant>
 
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
+#include "dectnrp/phy/rx/sync/regular_report.hpp"
 #include "dectnrp/phy/rx/sync/sync_report.hpp"
-#include "dectnrp/phy/rx/sync/time_report.hpp"
 #include "dectnrp/upper/upper_report.hpp"
 
 namespace dectnrp::phy {
@@ -33,17 +34,27 @@ class job_t {
     public:
         job_t() = default;
 
-        explicit job_t(const time_report_t&& time_report_)
-            : content(time_report_) {}
+        explicit job_t(const regular_report_t&& regular_report_)
+            : content(regular_report_) {}
+
+        explicit job_t(const irregular_report_t&& irregular_report_)
+            : content(irregular_report_) {}
+
         explicit job_t(const sync_report_t& sync_report_)
             : content(sync_report_) {}
+
         explicit job_t(const upper::upper_report_t&& upper_report_)
             : content(upper_report_) {}
 
-        // time_report_t is not DefaultConstructible
-        std::variant<std::monostate, time_report_t, sync_report_t, upper::upper_report_t> content;
+        /// regular_report_t is not DefaultConstructible
+        std::variant<std::monostate,
+                     regular_report_t,
+                     irregular_report_t,
+                     sync_report_t,
+                     upper::upper_report_t>
+            content;
 
-        // assigned in job_queue_t
+        /// assigned in job_queue_t
         int64_t fifo_cnt{0};
 };
 

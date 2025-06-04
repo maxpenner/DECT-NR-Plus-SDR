@@ -33,7 +33,7 @@ class cluster_beacon_message_t final : public mmie_packing_peeking_t,
                                        public mu_depending_t,
                                        public common::serdes::testing_t {
     public:
-        // Table 6.4.2.3-1, field CountToTrigger
+        /// Table 6.4.2.3-1, field CountToTrigger
         enum class count_to_trigger_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _1_times = 0,
@@ -55,7 +55,7 @@ class cluster_beacon_message_t final : public mmie_packing_peeking_t,
             upper
         };
 
-        // Table 6.4.2.3-1, fields RelQuality and MinQuality
+        /// Table 6.4.2.3-1, fields RelQuality and MinQuality
         enum class quality_threshold_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _0_dB = 0,

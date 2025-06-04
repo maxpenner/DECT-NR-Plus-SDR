@@ -33,7 +33,7 @@ class sync_report_t {
         sync_report_t() = default;
         sync_report_t(const uint32_t nof_antennas_limited)
             : coarse_peak_array(common::ant_t(nof_antennas_limited)),
-              rms_array(common::ant_t(nof_antennas_limited)){};
+              rms_array(common::ant_t(nof_antennas_limited)) {};
 
         // ##################################################
         // detection
@@ -90,7 +90,7 @@ class sync_report_t {
         // ##################################################
         // determined and overwritten post FFT
 
-        // based on STF and DRS phase rotation in frequency domain
+        /// based on STF and DRS phase rotation in frequency domain
         float sto_fractional{};
 
         /// may deviate a few samples from fine_peak_time_64

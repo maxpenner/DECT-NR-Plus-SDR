@@ -21,17 +21,23 @@
 #include "dectnrp/phy/pool/worker_sync.hpp"
 
 #include <array>
+#include <functional>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
-#include "dectnrp/phy/rx/sync/time_report.hpp"
+#include "dectnrp/phy/pool/irregular.hpp"
+#include "dectnrp/phy/rx/sync/regular_report.hpp"
+#include "dectnrp/phy/rx/sync/sync_param.hpp"
 
 namespace dectnrp::phy {
 
-worker_sync_t::worker_sync_t(worker_config_t& worker_config, baton_t& baton_)
+worker_sync_t::worker_sync_t(worker_config_t& worker_config,
+                             baton_t& baton_,
+                             irregular_t& irregular_)
     : worker_t(worker_config),
-      baton(baton_) {
+      baton(baton_),
+      irregular(irregular_) {
     /* The length of a chunk is the same for every worker_sync_t instance, but their chunks are
      * interleaved by fixed offsets.
      */
@@ -46,7 +52,8 @@ worker_sync_t::worker_sync_t(worker_config_t& worker_config, baton_t& baton_)
         chunk_length_samples,
         chunk_length_samples * worker_pool_config.threads_core_prio_config_sync_vec.size(),
         chunk_length_samples * id,
-        u8subslot_length_samples * worker_pool_config.rx_chunk_unit_length_u8subslot);
+        u8subslot_length_samples * worker_pool_config.rx_chunk_unit_length_u8subslot,
+        std::bind(&worker_sync_t::irregular_callback, this, std::placeholders::_1));
 }
 
 void worker_sync_t::work() {
@@ -88,7 +95,14 @@ void worker_sync_t::work() {
      * termination point and its function work_start_imminent() to tell the firmware at what exact
      * time synchronization is about to start.
      */
-    const int64_t start_time_64 = baton.register_and_wait_for_others_nto(now_64);
+    const auto [start_time_64, irregular_report] = baton.register_and_wait_for_others_nto(now_64);
+
+    if (irregular_report.has_finite_time()) {
+        dectnrp_assert(start_time_64 <= irregular_report.call_asap_after_this_time_has_passed_64,
+                       "first irregular callback must not occur before IQ sampling begins");
+
+        irregular.push(std::move(irregular_report));
+    }
 
     dectnrp_assert(start_time_64 % static_cast<int64_t>(buffer_rx.ant_streams_length_samples) == 0,
                    "invalid synchronization start time");
@@ -184,11 +198,11 @@ void worker_sync_t::work() {
              * before it. This is either the end of the chunk without the overlap area, or the
              * latest unique packet time.
              */
-            const time_report_t time_report(sync_chunk->get_chunk_time_end(),
-                                            baton.get_sync_time_last());
+            const regular_report_t regular_report(sync_chunk->get_chunk_time_end(),
+                                                  baton.get_sync_time_last());
 
             // put job into the queue
-            job_queue.enqueue_nto(job_t(std::move(time_report)));
+            job_queue.enqueue_nto(job_t(std::move(regular_report)));
 
             ++stats.job_regular;
         }
@@ -276,6 +290,32 @@ void worker_sync_t::warmup() {
 
         now_64 += static_cast<int64_t>(buffer_rx.ant_streams_length_samples);
     }
+}
+
+void worker_sync_t::irregular_callback(const int64_t now_64) {
+    // baton must be held to enqueue jobs
+    if (!baton.is_id_holder_the_same(id)) {
+        return;
+    }
+
+    const auto next_time_64 = irregular.get_next_time();
+
+    if (next_time_64 == irregular_report_t::undefined_late) {
+        return;
+    }
+
+    if (now_64 < next_time_64) {
+        return;
+    }
+
+    auto irregular_report = irregular.pop();
+
+    irregular_report.time_of_recognition = now_64;
+
+    dectnrp_assert(0 < irregular_report.get_recognition_delay(),
+                   "irregular job recognized before due time");
+
+    job_queue.enqueue_nto(job_t(std::move(irregular_report)));
 }
 
 void worker_sync_t::enqueue_job_nto(const sync_report_t& sync_report) {

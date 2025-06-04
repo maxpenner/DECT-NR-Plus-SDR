@@ -41,7 +41,7 @@ class channel_statistics_t {
               snr_db(snr_db_),
               sigma(1.0 / std::pow(10.0, snr_db / 10.0)),
               nof_drs_interp_lr(nof_drs_interp_lr_),
-              nof_drs_interp_l(nof_drs_interp_l_){};
+              nof_drs_interp_l(nof_drs_interp_l_) {};
 
         /// subcarrier spacing in Hz
         const double delta_u_f;

@@ -24,7 +24,10 @@
 #include <limits>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
+#include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
+#include "dectnrp/phy/interfaces/machigh_phy.hpp"
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 #include "dectnrp/sections_part2/channel_arrangement.hpp"
 
 namespace dectnrp::upper::tfw::chscanner {
@@ -56,22 +59,26 @@ tfw_chscanner_t::tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
     hw.set_freq_tc(freqs[freqs_idx]);
 }
 
-void tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
     next_measurement_time_64 =
         start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 50);
+
+    return phy::irregular_report_t(next_measurement_time_64);
 }
 
 phy::machigh_phy_t tfw_chscanner_t::work_regular(
-    [[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
+    [[maybe_unused]] const phy::regular_report_t& regular_report) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_chscanner_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     // get current time
     const int64_t now_64 = buffer_rx.get_rx_time_passed();
 
-    // should we initiate a new measurement?
-    if (now_64 < next_measurement_time_64) {
-        return phy::machigh_phy_t();
-    }
+    dectnrp_assert(next_measurement_time_64 < now_64, "time out-of-order");
 
-    phy::machigh_phy_t machigh_phy;
+    phy::machigh_phy_t ret;
 
     /**
      * \brief Define channel measurement over the past 5ms. We must always measure in the past,
@@ -80,14 +87,9 @@ phy::machigh_phy_t tfw_chscanner_t::work_regular(
      * the hardware constantly keeps overwriting the oldest samples. A 5ms measurement will
      * certainly be finished before the hardware overrides the same range of samples.
      */
-    machigh_phy.chscan_opt = std::optional(phy::chscan_t(now_64, sp3::duration_ec_t::ms001, 5));
+    ret.chscan_opt = std::optional(phy::chscan_t(now_64, sp3::duration_ec_t::ms001, 5));
 
-    // state machine is progressed in function work_chscan_async(), which gives us the result of the
-    // channel measurement
-    next_measurement_time_64 +=
-        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, measurement_period_ms);
-
-    return machigh_phy;
+    return ret;
 }
 
 phy::maclow_phy_t tfw_chscanner_t::work_pcc([[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
@@ -138,9 +140,17 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& ch
 
         next_measurement_time_64 += duration_lut.get_N_samples_from_duration(
             sp3::duration_ec_t::ms001, measurement_separation_between_frequencies_ms);
+    } else {
+        next_measurement_time_64 += duration_lut.get_N_samples_from_duration(
+            sp3::duration_ec_t::ms001, measurement_period_ms);
     }
 
-    return phy::machigh_phy_tx_t();
+    phy::machigh_phy_tx_t ret;
+
+    // schedule next irregular callback
+    ret.irregular_report = phy::irregular_report_t(next_measurement_time_64);
+
+    return ret;
 }
 
 std::vector<std::string> tfw_chscanner_t::start_threads() {

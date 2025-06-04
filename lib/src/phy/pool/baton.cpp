@@ -21,11 +21,13 @@
 #include "dectnrp/phy/pool/baton.hpp"
 
 #include <limits>
+#include <utility>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
 #else
 #include "dectnrp/common/thread/watch.hpp"
 #endif
@@ -57,7 +59,8 @@ void baton_t::set_tpoint_to_notify(upper::tpoint_t* tpoint_, std::shared_ptr<tok
     token = token_;
 };
 
-int64_t baton_t::register_and_wait_for_others_nto(const int64_t now_64) {
+std::pair<int64_t, phy::irregular_report_t> baton_t::register_and_wait_for_others_nto(
+    const int64_t now_64) {
     std::unique_lock<std::mutex> lk(register_mtx);
 
     ++register_cnt;
@@ -67,13 +70,15 @@ int64_t baton_t::register_and_wait_for_others_nto(const int64_t now_64) {
         register_now_64 = now_64;
     }
 
+    irregular_report_t irregular_report;
+
     // last one?
     if (register_cnt == nof_worker_sync) {
         // lock with id_caller=0, always valid
         if (!token->try_lock(0)) {
             dectnrp_assert_failure("unable to lock token");
         }
-        tpoint->work_start_imminent(register_now_64);
+        irregular_report = tpoint->work_start_imminent(register_now_64);
         token->unlock();
 
         register_cv.notify_all();
@@ -88,11 +93,11 @@ int64_t baton_t::register_and_wait_for_others_nto(const int64_t now_64) {
 
     dectnrp_assert(register_cnt == nof_worker_sync, "not all registrations");
 
-    return register_now_64;
+    return std::make_pair(register_now_64, irregular_report);
 }
 
 bool baton_t::is_id_holder_the_same(const uint32_t id_caller) const {
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
     std::unique_lock<std::mutex> lk(mtx);
     return id_caller == id_holder;
 #else
@@ -101,7 +106,7 @@ bool baton_t::is_id_holder_the_same(const uint32_t id_caller) const {
 }
 
 bool baton_t::wait_to(const uint32_t id_target) {
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
     std::unique_lock<std::mutex> lk(mtx);
 
     while (id_holder != id_target) {
@@ -135,7 +140,7 @@ void baton_t::pass_on(const uint32_t id_caller) {
     dectnrp_assert(is_id_holder_the_same(id_caller),
                    "caller does not hold baton, yet checking sync time");
 
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
     {
         std::unique_lock<std::mutex> lk(mtx);
 
@@ -164,6 +169,10 @@ bool baton_t::is_sync_time_unique(const int64_t sync_time_candidate_64) {
 }
 
 bool baton_t::is_job_regular_due() {
+    if (rx_job_regular_period == 0) {
+        return false;
+    }
+
     ++rx_job_regular_period_cnt;
 
     if (rx_job_regular_period_cnt == rx_job_regular_period) {

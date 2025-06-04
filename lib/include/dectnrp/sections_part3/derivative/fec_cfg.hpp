@@ -25,9 +25,9 @@
 namespace dectnrp::sp3 {
 
 /**
- * From a higher layer we receive the PLCF and we create the PCC. From a higher layer we receive the
- * TB and we create the PDC. These configuration variables are required for fec, and they can be
- * reused across multiple packets.
+ * \brief From a higher layer we receive the PLCF and we create the PCC. From a higher layer we
+ * receive the TB and we create the PDC. These configuration variables are required for fec, and
+ * they can be reused across multiple packets.
  */
 struct fec_cfg_t {
         uint32_t PLCF_type = 0;    // PLCF, 1 for Type 1 and 2 for Type 2

@@ -30,6 +30,7 @@ extern "C" {
 }
 
 #include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/phy/rx/sync/sync_param.hpp"
 #include "dectnrp/sections_part3/stf.hpp"
 
 #ifdef PHY_RX_AUTOCORRELATOR_PEAK_JSON_EXPORT

@@ -27,7 +27,7 @@
 namespace dectnrp::phy::agc {
 
 struct agc_config_t {
-        // number of antennas AGC has to manage
+        /// number of antennas AGC has to manage
         uint32_t nof_antennas;
 
         /// each AGC gain change must be a multiple of this number

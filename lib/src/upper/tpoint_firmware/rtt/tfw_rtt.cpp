@@ -91,9 +91,18 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     stage_a.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
 }
 
-void tfw_rtt_t::work_start_imminent([[maybe_unused]] const int64_t start_time_64) {}
+phy::irregular_report_t tfw_rtt_t::work_start_imminent(
+    [[maybe_unused]] const int64_t start_time_64) {
+    return phy::irregular_report_t();
+}
 
-phy::machigh_phy_t tfw_rtt_t::work_regular([[maybe_unused]] const phy::phy_mac_reg_t& phy_mac_reg) {
+phy::machigh_phy_t tfw_rtt_t::work_regular(
+    [[maybe_unused]] const phy::regular_report_t& regular_report) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_rtt_t::work_irregular(
+    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     return phy::machigh_phy_t();
 }
 

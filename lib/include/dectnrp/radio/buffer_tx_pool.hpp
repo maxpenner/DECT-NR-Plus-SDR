@@ -101,7 +101,7 @@ class buffer_tx_pool_t {
         /// vector of pointers to allocated buffer_tx, ownership is not shared
         std::vector<buffer_tx_t*> get_buffer_tx_vec() const;
 
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
         mutable std::mutex tx_new_packet_mutex;
         mutable std::condition_variable tx_new_packet_cv;
         uint32_t tx_new_packet_cnt;

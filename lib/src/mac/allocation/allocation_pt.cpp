@@ -195,8 +195,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity_generic(const int64_t tx_ea
         return tx_opportunity_t();
     };
 
-    /**
-     * \brief The following condition can be true if we get data from the upper layers and start
+    /* The following condition can be true if we get data from the upper layers and start
      * searching for a TX opportunity, but haven't received any beacons at all or at least for a
      * very long time.
      */

@@ -31,7 +31,7 @@ namespace dectnrp::sp4 {
 
 class rd_capability_ie_t final : public mmie_packing_peeking_t {
     public:
-        // Table 6.4.3.5-1, field RELEASE
+        /// Table 6.4.3.5-1, field RELEASE
         enum class release_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             lower = 0,
@@ -42,7 +42,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field OPERATING MODES
+        /// Table 6.4.3.5-1, field OPERATING MODES
         enum class operating_mode_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             pt_operation = 0,
@@ -51,7 +51,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field MAC SECURITY
+        /// Table 6.4.3.5-1, field MAC SECURITY
         enum class mac_security_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             not_supported = 0,
@@ -59,7 +59,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field DLC SERVICE TYPE
+        /// Table 6.4.3.5-1, field DLC SERVICE TYPE
         enum class dlc_service_type_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             type_0 = 0,
@@ -70,7 +70,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field RD POWER CLASS
+        /// Table 6.4.3.5-1, field RD POWER CLASS
         enum class rd_power_class_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             class_1 = 0,
@@ -79,7 +79,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field MAX NSS FOR RX (see also Annex B.2 of ETSI TS 103 636-3)
+        /// Table 6.4.3.5-1, field MAX NSS FOR RX (see also Annex B.2 of ETSI TS 103 636-3)
         enum class max_nof_spatial_streams_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _1_spatial_streams = 0,
@@ -89,7 +89,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field RX FOR TX DIVERSITY (see also Annex B.2 of ETSI TS 103 636-3)
+        /// Table 6.4.3.5-1, field RX FOR TX DIVERSITY (see also Annex B.2 of ETSI TS 103 636-3)
         enum class max_nof_tx_antennas_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _1_antennas = 0,
@@ -99,7 +99,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field MAX MCS (see also Annex B.2 of ETSI TS 103 636-3)
+        /// Table 6.4.3.5-1, field MAX MCS (see also Annex B.2 of ETSI TS 103 636-3)
         enum class max_mcs_index_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _2 = 0,
@@ -115,7 +115,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field SOFT-BUFFER SIZE (see also Annex B.2 of ETSI TS 103 636-3)
+        /// Table 6.4.3.5-1, field SOFT-BUFFER SIZE (see also Annex B.2 of ETSI TS 103 636-3)
         enum class soft_buffer_size_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _16000_bytes = 0,
@@ -130,7 +130,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field NUM. OF HARQ PROCESSES (see also Annex B.2 of ETSI TS 103 636-3)
+        /// Table 6.4.3.5-1, field NUM. OF HARQ PROCESSES (see also Annex B.2 of ETSI TS 103 636-3)
         enum class nof_harq_processes_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _1_processes = 0,
@@ -140,7 +140,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field HARQ FEEDBACK DELAY
+        /// Table 6.4.3.5-1, field HARQ FEEDBACK DELAY
         enum class harq_feedback_delay_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _0_subslots = 0,
@@ -153,7 +153,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field MU (see also Annex B.2 of ETSI TS 103 636-3)
+        /// Table 6.4.3.5-1, field MU (see also Annex B.2 of ETSI TS 103 636-3)
         enum class subcarrier_width_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _27_kHz = 0,
@@ -163,7 +163,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.5-1, field BETA (see also Annex B.2 of ETSI TS 103 636-3)
+        /// Table 6.4.3.5-1, field BETA (see also Annex B.2 of ETSI TS 103 636-3)
         enum class dft_size_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _64 = 0,

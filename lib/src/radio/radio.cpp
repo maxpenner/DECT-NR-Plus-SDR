@@ -34,7 +34,7 @@ radio_t::radio_t(const radio_config_t& radio_config_)
 
     dectnrp_assert(nof_radio_hardware > 0, "config vector of radio layer is empty");
 
-    vspace_check_validity_and_init();
+    is_vspace_valid_if_so_init();
 
     for (uint32_t hw_id = 0; hw_id < nof_radio_hardware; ++hw_id) {
         const auto& hw_config = radio_config.get_layer_unit_config(hw_id);
@@ -51,7 +51,7 @@ radio_t::radio_t(const radio_config_t& radio_config_)
     }
 }
 
-void radio_t::vspace_check_validity_and_init() {
+void radio_t::is_vspace_valid_if_so_init() {
     // number of devices (multi-devices hidden behind driver count as one device)
     const uint32_t nof_radio_hardware = radio_config.get_nof_layer_unit_config();
 

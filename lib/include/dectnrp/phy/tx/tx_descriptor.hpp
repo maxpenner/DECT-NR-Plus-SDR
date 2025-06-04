@@ -49,7 +49,7 @@ class tx_descriptor_t {
               codebook_index(codebook_index_),
               tx_meta(tx_meta_),
               buffer_tx_meta(buffer_tx_meta_),
-              hw_id(hw_id_){};
+              hw_id(hw_id_) {};
 
         /**
          * \brief Input buffer from MAC layer. This buffer also contains the packet sizes. This

@@ -66,10 +66,10 @@ class channel_antenna_t {
             return ofdm_symb_ps_idx <= 1 ? template_11001100 : template_00110011;
         };
 
-        // read-only access
+        /// read-only access
         const cf_t* get_chestim_drs_zf(const std::size_t idx) const { return chestim_drs_zf[idx]; };
 
-        // we perform the channel estimation directly in rx_synced_t
+        /// we perform the channel estimation directly in rx_synced_t
         friend class rx_synced_t;
 
     private:

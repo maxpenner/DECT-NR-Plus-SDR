@@ -107,7 +107,7 @@ class drs_t final : public df_t {
         common::vec3d<cf_t> y_DRS_i_TS_0_to_3;
         common::vec3d<cf_t> y_DRS_i_TS_4_to_7;
 
-        // these variables are set for each packet
+        /// these variables are set for each packet
         uint32_t config_b_idx;
         uint32_t config_N_TS;
 

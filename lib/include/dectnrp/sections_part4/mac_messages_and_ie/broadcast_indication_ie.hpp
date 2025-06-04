@@ -29,7 +29,7 @@ namespace dectnrp::sp4 {
 
 class broadcast_indication_ie_t final : public mmie_packing_peeking_t {
     public:
-        // Table 6.4.3.7-1, field INDICATION TYPE
+        /// Table 6.4.3.7-1, field INDICATION TYPE
         enum class indication_type_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             paging = 0,
@@ -37,7 +37,7 @@ class broadcast_indication_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.7-1, field ID TYPE
+        /// Table 6.4.3.7-1, field ID TYPE
         enum class rd_id_type_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             short_rd_id = 0,
@@ -45,7 +45,7 @@ class broadcast_indication_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.7-1, field ACK/NACK
+        /// Table 6.4.3.7-1, field ACK/NACK
         enum class transmission_feedback_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             nack = 0,
@@ -53,7 +53,7 @@ class broadcast_indication_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.7-1, field FEEDBACK
+        /// Table 6.4.3.7-1, field FEEDBACK
         enum class feedback_type_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             no_feedback = 0,
@@ -63,7 +63,7 @@ class broadcast_indication_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.2.2-3
+        /// Table 6.2.2-3
         enum class channel_quality_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             lower = 0,
@@ -82,7 +82,7 @@ class broadcast_indication_ie_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        // Table 6.4.3.7-1, field MCS OR MIMO FEEDBACK
+        /// Table 6.4.3.7-1, field MCS OR MIMO FEEDBACK
         enum class nof_layers_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             single_layer = 0,
@@ -117,19 +117,19 @@ class broadcast_indication_ie_t final : public mmie_packing_peeking_t {
         virtual peek_result_t get_packed_size_by_peeking(
             const uint8_t* mac_pdu_offset) const override;
 
-        // Table 6.3.4-1 (ETSI TS 103 636-3)
+        /// Table 6.3.4-1 (ETSI TS 103 636-3)
         static constexpr uint32_t CBI_MAX_2_ANTENNAS_SINGLE_LAYER{5};
 
-        // Table 6.3.4-3 (ETSI TS 103 636-3)
+        /// Table 6.3.4-3 (ETSI TS 103 636-3)
         static constexpr uint32_t CBI_MAX_2_ANTENNAS_DUAL_LAYER{2};
 
-        // Table 6.3.4-2 (ETSI TS 103 636-3)
+        /// Table 6.3.4-2 (ETSI TS 103 636-3)
         static constexpr uint32_t CBI_MAX_4_ANTENNAS_SINGLE_LAYER{27};
 
-        // Table 6.3.4-4 (ETSI TS 103 636-3)
+        /// Table 6.3.4-4 (ETSI TS 103 636-3)
         static constexpr uint32_t CBI_MAX_4_ANTENNAS_DUAL_LAYER{21};
 
-        // Table 6.3.4-5 (ETSI TS 103 636-3)
+        /// Table 6.3.4-5 (ETSI TS 103 636-3)
         static constexpr uint32_t CBI_MAX_4_ANTENNAS_FOUR_LAYERS{4};
 };
 

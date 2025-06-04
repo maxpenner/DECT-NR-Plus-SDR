@@ -56,7 +56,7 @@ static void* udp_thread_routine([[maybe_unused]] void* ptr) {
     const int64_t start_sec_64 =
         dectnrp::common::watch_t::get_elapsed_since_epoch<int64_t,
                                                           dectnrp::common::seconds,
-                                                          dectnrp::common::steady_clock>() +
+                                                          dectnrp::common::tai_clock>() +
         offset_sec_64;
 
     const int64_t start_us_64 = start_sec_64 * dectnrp::apps::stream_t::mega;
@@ -79,24 +79,22 @@ static void* udp_thread_routine([[maybe_unused]] void* ptr) {
         // target time for stream
         const int64_t next_slowdown_64 = (next_64 - start_us_64) * slowdown_factor_64 + start_us_64;
 
-        const int64_t now_64 =
-            dectnrp::common::watch_t::get_elapsed_since_epoch<int64_t,
-                                                              dectnrp::common::micro,
-                                                              dectnrp::common::steady_clock>();
+        const int64_t now_64 = dectnrp::common::watch_t::
+            get_elapsed_since_epoch<int64_t, dectnrp::common::micro, dectnrp::common::tai_clock>();
 
         dectnrp_assert(now_64 < next_slowdown_64, "time out-of-order");
 
         // do we have to sleep?
         if (now_64 < next_slowdown_64 - timeadvance_us_64) {
             dectnrp::common::watch_t::sleep_until<dectnrp::common::micro,
-                                                  dectnrp::common::steady_clock>(next_slowdown_64 -
-                                                                                 timeadvance_us_64);
+                                                  dectnrp::common::tai_clock>(next_slowdown_64 -
+                                                                              timeadvance_us_64);
         }
 
         dectnrp_assert(
             (dectnrp::common::watch_t::get_elapsed_since_epoch<int64_t,
                                                                dectnrp::common::micro,
-                                                               dectnrp::common::steady_clock>()) <
+                                                               dectnrp::common::tai_clock>()) <
                 next_slowdown_64,
             "time out-of-order");
 

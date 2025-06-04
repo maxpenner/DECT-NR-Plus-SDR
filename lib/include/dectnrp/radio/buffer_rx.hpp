@@ -29,17 +29,17 @@
 
 // options
 // https://en.cppreference.com/w/cpp/atomic/atomic/wait
-#define RADIO_BUFFER_RX_NOTIFY_ATOMIC_WAIT 0
+#define RADIO_BUFFER_RX_ATOMIC_WAIT 0
 // https://en.cppreference.com/w/cpp/thread/condition_variable
-#define RADIO_BUFFER_RX_NOTIFY_CV 1
+#define RADIO_BUFFER_RX_CONDITION_VARIABLE 1
 // https://rigtorp.se/spinlock/
-#define RADIO_BUFFER_RX_NOTIFY_ATOMIC_BUSYWAIT 2
+#define RADIO_BUFFER_RX_BUSY_WAITING 2
 
 // choice
-#define RADIO_BUFFER_RX_NOTIFY RADIO_BUFFER_RX_NOTIFY_ATOMIC_WAIT
+#define RADIO_BUFFER_RX_NOTIFICATION_MECHANISM RADIO_BUFFER_RX_ATOMIC_WAIT
 
 // consequences
-#if RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_CV
+#if RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_CONDITION_VARIABLE
 #include <condition_variable>
 #include <mutex>
 #endif
@@ -121,14 +121,14 @@ class buffer_rx_t {
         /// global system time
         std::atomic<int64_t> rx_time_passed_64;
 
-#if RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_ATOMIC_WAIT || \
-    RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_CV
+#if RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_ATOMIC_WAIT || \
+    RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_CONDITION_VARIABLE
         /// period of notification of waiting threads
         const int64_t notification_period_samples;
         int64_t notification_next;
 #endif
 
-#if RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_CV
+#if RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_CONDITION_VARIABLE
         mutable std::mutex rx_new_samples_mutex;
         mutable std::condition_variable rx_new_samples_cv;
 #endif

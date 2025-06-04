@@ -99,7 +99,7 @@ class channel_lut_t {
         RX_SYNCED_PARAM_WEIGHTS_TYPE* lut_x_weight_vecs_effective;
         uint32_t nof_drs_subc_interp;
 
-        // preallocated vectors returned as reference, avoids allocating many small vectors
+        /// preallocated vectors returned as reference, avoids allocating many small vectors
         std::vector<RX_SYNCED_PARAM_LUT_IDX_TYPE*> idx_pilot_symb;
         std::vector<RX_SYNCED_PARAM_LUT_IDX_TYPE*> idx_weights_symb;
 
@@ -195,7 +195,7 @@ class channel_lut_t {
         struct coord_t {
                 coord_t(const double f_, const double t_)
                     : f(f_),
-                      t(t_){};
+                      t(t_) {};
                 const double f, t;
 
                 static double get_dist(const coord_t A, const coord_t B) {

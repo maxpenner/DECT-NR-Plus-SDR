@@ -29,8 +29,8 @@
 #include "dectnrp/common/reporting.hpp"
 #include "header_only/nlohmann/json.hpp"
 
-#define COMMON_JSON_EXPORT_USES_MUTEX_OR_SPINLOCK
-#ifdef COMMON_JSON_EXPORT_USES_MUTEX_OR_SPINLOCK
+#define COMMON_JSON_JSON_EXPORT_MUTEX_OR_SPINLOCK
+#ifdef COMMON_JSON_JSON_EXPORT_MUTEX_OR_SPINLOCK
 #include <mutex>
 #else
 #include "dectnrp/common/thread/spinlock.hpp"
@@ -138,7 +138,7 @@ class json_export_t final : public common::reporting_t {
         std::array<nlohmann::ordered_json, 2> json_arr;
         uint32_t json_arr_write{0};
 
-#ifdef COMMON_JSON_EXPORT_USES_MUTEX_OR_SPINLOCK
+#ifdef COMMON_JSON_JSON_EXPORT_MUTEX_OR_SPINLOCK
         std::mutex lockv_json, lockv_disk;
 #else
         common::spinlock_t lockv_json, lockv_disk;

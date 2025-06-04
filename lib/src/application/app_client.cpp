@@ -33,14 +33,14 @@ app_client_t::app_client_t(const uint32_t id_,
       indicator_cnt{0} {}
 
 void app_client_t::trigger_forward_nto(const uint32_t datagram_cnt) {
-#ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
     lockv.lock();
 #else
 #endif
 
     inc_indicator_cnt_under_lock(datagram_cnt);
 
-#ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
     lockv.unlock();
     cv.notify_all();
 #endif
@@ -49,7 +49,7 @@ void app_client_t::trigger_forward_nto(const uint32_t datagram_cnt) {
 void app_client_t::work_sc() {
     // external exit condition
     while (keep_running.load(std::memory_order_acquire)) {
-#ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
 
         // get the lock on the mutex
         std::unique_lock<std::mutex> lk(lockv);

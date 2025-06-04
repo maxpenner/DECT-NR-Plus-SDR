@@ -30,15 +30,15 @@ class trajectory_t {
     public:
         trajectory_t() = default;
 
-        // point with no movement
+        /// point with no movement
         trajectory_t(const position_t offset_)
             : trajectory_shape(trajectory_shape_t::point),
-              offset(offset_){};
+              offset(offset_) {};
 
-        // circle
+        /// circle
         trajectory_t(const position_t offset_, const float speed_, const float radius_);
 
-        // line segment
+        /// line segment
         trajectory_t(const position_t offset_,
                      const float speed_,
                      const float line_length_,

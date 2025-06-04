@@ -34,7 +34,7 @@ class maclow_phy_t {
         /// we ARE interested in the PDC, but the handle in irrelevant
         explicit maclow_phy_t(harq::process_rx_t* hp_rx_)
             : continue_with_pdc(true),
-              hp_rx(hp_rx_){};
+              hp_rx(hp_rx_) {};
 
         /// we ARE interested in the PDC
         explicit maclow_phy_t(harq::process_rx_t* hp_rx_,

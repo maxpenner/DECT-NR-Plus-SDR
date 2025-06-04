@@ -36,7 +36,7 @@ class layer_unit_t {
          */
         explicit layer_unit_t(const std::string unit_type_, const size_t id_)
             : id(id_),
-              identifier(unit_type_ + " " + std::to_string(id)){};
+              identifier(unit_type_ + " " + std::to_string(id)) {};
         virtual ~layer_unit_t() = default;
 
         layer_unit_t() = delete;

@@ -27,7 +27,7 @@ namespace dectnrp::sp4 {
 
 class association_release_message_t final : public mmie_packing_t {
     public:
-        // Table 6.4.2.6-1
+        /// Table 6.4.2.6-1
         enum class release_cause_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             connection_termination = 0,

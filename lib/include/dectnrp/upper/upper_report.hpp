@@ -31,7 +31,7 @@ class upper_report_t {
                                 const int64_t rx_time_opsys_64_)
             : conn_idx(conn_idx_),
               N_byte(N_byte_),
-              rx_time_opsys_64(rx_time_opsys_64_){};
+              rx_time_opsys_64(rx_time_opsys_64_) {};
 
         /**
          * \brief When data is passed from or to the application layer, this connection index is
@@ -49,10 +49,10 @@ class upper_report_t {
          */
         int32_t conn_idx{-1};
 
-        // number of new bytes received at the interface represented by the connection index
+        /// number of new bytes received at the interface represented by the connection index
         uint32_t N_byte{0};
 
-        // operation system time at reception in ns since when application layer was started
+        /// operation system time at reception in ns since when application layer was started
         int64_t rx_time_opsys_64;
 };
 

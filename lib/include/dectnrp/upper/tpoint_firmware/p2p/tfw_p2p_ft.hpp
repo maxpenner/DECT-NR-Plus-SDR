@@ -41,10 +41,13 @@ class tfw_p2p_ft_t final : public tfw_p2p_base_t {
 
         static const std::string firmware_name;
 
-        void work_start_imminent(const int64_t start_time_64) override final;
-        phy::machigh_phy_t work_regular(const phy::phy_mac_reg_t& phy_mac_reg) override final;
-        // phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override;
-        // phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
+        phy::irregular_report_t work_start_imminent(const int64_t start_time_64) override final;
+        phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
+        phy::machigh_phy_t work_irregular(
+            const phy::irregular_report_t& irregular_report) override final;
+
+        // work_pcc() and work_pdc_async() are implemented in deriving classes
+
         phy::machigh_phy_t work_upper(const upper::upper_report_t& upper_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
 

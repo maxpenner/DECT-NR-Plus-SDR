@@ -26,7 +26,6 @@
 #include "dectnrp/phy/rx/sync/correlator.hpp"
 #include "dectnrp/phy/rx/sync/movsum.hpp"
 #include "dectnrp/phy/rx/sync/movsum_uw.hpp"
-#include "dectnrp/phy/rx/sync/sync_param.hpp"
 
 namespace dectnrp::phy {
 
@@ -78,10 +77,8 @@ class autocorrelator_detection_t final : public correlator_t {
         std::vector<movsum_uw_t> movsums_correlation;
         std::vector<movsum_t<float>> movsums_power;
 
-#ifdef RX_SYNC_PARAM_AUTOCORRELATOR_DETECTION_RESUM_PERIODICITY_IN_STEPS
-        uint32_t resum_cnt;
+        [[maybe_unused]] uint32_t resum_cnt;
         void resum_for_numerical_stability();
-#endif
 
         // ##################################################
         // coarse metric threshold checking

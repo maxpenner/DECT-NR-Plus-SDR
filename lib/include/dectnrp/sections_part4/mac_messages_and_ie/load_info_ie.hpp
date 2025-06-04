@@ -29,7 +29,7 @@ namespace dectnrp::sp4 {
 
 class load_info_ie_t final : public mmie_packing_peeking_t {
     public:
-        // Table 6.4.3.10-1, field MAX ASSOC
+        /// Table 6.4.3.10-1, field MAX ASSOC
         enum class max_assoc_size_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
             _8_bit = 0,

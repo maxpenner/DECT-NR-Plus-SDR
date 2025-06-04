@@ -32,10 +32,10 @@
 #include "dectnrp/phy/interfaces/layers_downwards/mac_lower.hpp"
 #include "dectnrp/phy/interfaces/machigh_phy.hpp"
 #include "dectnrp/phy/interfaces/maclow_phy.hpp"
-#include "dectnrp/phy/interfaces/phy_mac_reg.hpp"
 #include "dectnrp/phy/interfaces/phy_machigh.hpp"
 #include "dectnrp/phy/interfaces/phy_maclow.hpp"
 #include "dectnrp/phy/rx/chscan/chscan.hpp"
+#include "dectnrp/phy/rx/sync/irregular_report.hpp"
 #include "dectnrp/sections_part3/derivative/packet_sizes_def.hpp"
 #include "dectnrp/upper/tpoint_config.hpp"
 #include "dectnrp/upper/tpoint_stats.hpp"
@@ -80,8 +80,10 @@ class tpoint_t : public common::layer_unit_t {
          *
          * \param start_time_64 time at which PHY starts synchronization, given as sample
          * count at the hardware sample rate
+         * \return first opportunity to schedule an irregular callback
          */
-        virtual void work_start_imminent(const int64_t start_time_64) = 0;
+        [[nodiscard]] virtual phy::irregular_report_t work_start_imminent(
+            const int64_t start_time_64) = 0;
 
         /**
          * \brief Function being called regularly. It contains two important pieces of information.
@@ -91,13 +93,30 @@ class tpoint_t : public common::layer_unit_t {
          * time stamp if no STF has been found yet.
          *
          * 1. Call rate depends on the synchronization's chunk size, e.g. every two slots.
-         * 2. Contains information mentioned above.
-         * 3. Called in the same FIFO order as put into the job_queue.
+         * 2. Call rate can be set to zero in phy.json.
+         * 3. Contains information mentioned above.
+         * 4. Called in the same FIFO order as put into the job_queue.
          *
-         * \param phy_mac_reg contains current time stamp
+         * \param regular_report contains current time stamp
          * \return
          */
-        virtual phy::machigh_phy_t work_regular(const phy::phy_mac_reg_t& phy_mac_reg) = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_regular(
+            const phy::regular_report_t& regular_report) = 0;
+
+        /**
+         * \brief Function being called irregularly. A firmware can request an irregular callback to
+         * be called as soon as the specified time has passed for synchronization, i.e. once no more
+         * packets can be found before the specified time. The callback than happens through this
+         * function.
+         *
+         * 1. Only called if firmware requested it beforehand.
+         * 2. Called in the same FIFO order as put into the job_queue.
+         *
+         * \param irregular_report contains a handle to identify the request
+         * \return
+         */
+        [[nodiscard]] virtual phy::machigh_phy_t work_irregular(
+            const phy::irregular_report_t& irregular_report) = 0;
 
         /**
          * \brief Function called after decoding a PCC.
@@ -108,7 +127,7 @@ class tpoint_t : public common::layer_unit_t {
          * \param phy_maclow information provided by PHY about synchronization and PCC
          * \return
          */
-        virtual phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) = 0;
+        [[nodiscard]] virtual phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) = 0;
 
 #ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
         /**
@@ -124,7 +143,8 @@ class tpoint_t : public common::layer_unit_t {
          * \param phy_maclow information provided by PHY about synchronization and PCC
          * \return
          */
-        virtual phy::machigh_phy_t work_pcc_crc_error(const phy::phy_maclow_t& phy_maclow);
+        [[nodiscard]] virtual phy::machigh_phy_t work_pcc_crc_error(
+            const phy::phy_maclow_t& phy_maclow);
 #endif
 
         /**
@@ -137,7 +157,8 @@ class tpoint_t : public common::layer_unit_t {
          * \param phy_machigh information provided by PHY about synchronization, PCC and PDC
          * \return
          */
-        virtual phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_pdc_async(
+            const phy::phy_machigh_t& phy_machigh) = 0;
 
         /**
          * \brief Function called to notify lower layers of new data being available on the
@@ -149,7 +170,7 @@ class tpoint_t : public common::layer_unit_t {
          * \param upper_report information about available data on upper layers
          * \return
          */
-        virtual phy::machigh_phy_t work_upper(const upper_report_t& upper_report) = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_upper(const upper_report_t& upper_report) = 0;
 
         /**
          * \brief Function called when a channel measurement has finished.
@@ -158,8 +179,10 @@ class tpoint_t : public common::layer_unit_t {
          * 2. Called ASAP, but not in any specific order relative to other work-functions (async).
          *
          * \param chscan result of channel measurement instruction
+         * \return
          */
-        virtual phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) = 0;
+        [[nodiscard]] virtual phy::machigh_phy_tx_t work_chscan_async(
+            const phy::chscan_t& chscan) = 0;
 
     protected:
         /// configuration received during construction
@@ -173,7 +196,7 @@ class tpoint_t : public common::layer_unit_t {
          *
          * \return lines to log
          */
-        virtual std::vector<std::string> start_threads() override = 0;
+        [[nodiscard]] virtual std::vector<std::string> start_threads() override = 0;
 
         /**
          * \brief Function will be called by the main thread when the SDR is supposed to shut down
@@ -184,7 +207,7 @@ class tpoint_t : public common::layer_unit_t {
          *
          * \return lines to log
          */
-        virtual std::vector<std::string> stop_threads() override = 0;
+        [[nodiscard]] virtual std::vector<std::string> stop_threads() override = 0;
 
         // ##################################################
         // Radio Layer + PHY
@@ -265,13 +288,13 @@ class tpoint_t : public common::layer_unit_t {
          * \param process_id id of HARQ process created, must not be nullptr if kept running
          * \return
          */
-        phy::maclow_phy_t worksub_pcc2pdc(const phy::phy_maclow_t& phy_maclow,
-                                          const uint32_t PLCF_type,
-                                          const uint32_t network_id,
-                                          const uint32_t rv,
-                                          const phy::harq::finalize_rx_t frx,
-                                          const phy::maclow_phy_handle_t mph,
-                                          uint32_t* process_id = nullptr);
+        [[nodiscard]] phy::maclow_phy_t worksub_pcc2pdc(const phy::phy_maclow_t& phy_maclow,
+                                                        const uint32_t PLCF_type,
+                                                        const uint32_t network_id,
+                                                        const uint32_t rv,
+                                                        const phy::harq::finalize_rx_t frx,
+                                                        const phy::maclow_phy_handle_t mph,
+                                                        uint32_t* process_id = nullptr);
 
         /**
          * \brief same as worksub_pcc2pdc(), but for an already running HARQ process
@@ -282,10 +305,10 @@ class tpoint_t : public common::layer_unit_t {
          * \param mph handle to identify PCC when PHY calls with decoded PDC
          * \return
          */
-        phy::maclow_phy_t worksub_pcc2pdc_running(const uint32_t process_id,
-                                                  const uint32_t rv,
-                                                  const phy::harq::finalize_rx_t frx,
-                                                  const phy::maclow_phy_handle_t mph);
+        [[nodiscard]] phy::maclow_phy_t worksub_pcc2pdc_running(const uint32_t process_id,
+                                                                const uint32_t rv,
+                                                                const phy::harq::finalize_rx_t frx,
+                                                                const phy::maclow_phy_handle_t mph);
 
         // ##################################################
         // DLC and Convergence Layer
@@ -309,8 +332,8 @@ class tpoint_t : public common::layer_unit_t {
          * \param PLCF_type PLCF type to decode
          * \return
          */
-        sp3::packet_sizes_def_t worksub_psdef(const phy::phy_maclow_t& phy_maclow,
-                                              const uint32_t PLCF_type) const;
+        [[nodiscard]] sp3::packet_sizes_def_t worksub_psdef(const phy::phy_maclow_t& phy_maclow,
+                                                            const uint32_t PLCF_type) const;
 };
 
 }  // namespace dectnrp::upper

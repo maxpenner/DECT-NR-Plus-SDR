@@ -39,7 +39,7 @@ class power_target_ie_t final : public mmie_packing_t {
             return -static_cast<float>(power_target_dBm_coded);
         }
 
-        // power target is negative value encoded as positive
+        /// power target is negative value encoded as positive
         uint32_t power_target_dBm_coded;
 
     private:

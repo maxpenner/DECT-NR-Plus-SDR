@@ -40,7 +40,7 @@ class worker_t : public common::reporting_t {
               job_queue(worker_config.job_queue),
               worker_pool_config(worker_config.worker_pool_config),
               buffer_tx_pool(*hw.buffer_tx_pool.get()),
-              buffer_rx(*hw.buffer_rx.get()){};
+              buffer_rx(*hw.buffer_rx.get()) {};
         virtual ~worker_t() = default;
 
         worker_t() = delete;

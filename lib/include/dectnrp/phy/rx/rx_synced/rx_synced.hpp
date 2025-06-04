@@ -366,7 +366,7 @@ class rx_synced_t final : public tx_rx_t, public rx_pacer_t {
         void run_pdc_mode_transmit_diversity();
         void run_pdc_mode_AxA_MIMO();
 
-        // same function can be reused for PCC and PDC
+        /// same function can be reused for PCC and PDC
         void run_pxx_mode_transmit_diversity(const std::vector<uint32_t>& k_i_one_symbol,
                                              const uint32_t PXX_idx);
 

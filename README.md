@@ -56,17 +56,18 @@ The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware
 
 Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for [termination point](https://www.dect.org/dect-nrplus-standard-upper-layers-technology-faq-blog) which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/) with a brief description of each available under [Firmware](#firmware). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
-|   | **Virtual Function**  | **Properties**                                                            |
-|---|-----------------------|---------------------------------------------------------------------------|
-| 1 | work_start_imminent() | called once immediately before IQ sample processing begins                |
-| 2 | work_regular()        | called regularly (polling)                                                |
-| 3 | work_pcc()            | called upon PCC reception with correct CRC (event-driven)                 |
-| 4 | work_pcc_crc_error()  | called upon PCC reception with incorrect CRC (event-driven, optional)     |
-| 5 | work_pdc_async()      | called upon PDC reception (event-driven)                                  |
-| 6 | work_upper()          | called upon availability of new data on application layer (event-driven)  |
-| 7 | work_chscan_async()   | called upon finished channel measurement (event-driven)                   |
-| 8 | start_threads()       | called once during SDR startup to start application layer threads         |
-| 9 | stop_threads()        | called once during SDR shutdown to stop application layer threads         |
+|    | **Virtual Function**  | **Properties**                                                            |
+|:--:|-----------------------|---------------------------------------------------------------------------|
+|  1 | work_start_imminent() | called once immediately before IQ sample processing begins                |
+|  2 | work_regular()        | called regularly (polling)                                                |
+|  3 | work_irregular()      | called irregularly based on requests of the firmware (event-driven)       |
+|  4 | work_pcc()            | called upon PCC reception with correct CRC (event-driven)                 |
+|  5 | work_pcc_crc_error()  | called upon PCC reception with incorrect CRC (event-driven, optional)     |
+|  6 | work_pdc_async()      | called upon PDC reception (event-driven)                                  |
+|  7 | work_upper()          | called upon availability of new data on application layer (event-driven)  |
+|  8 | work_chscan_async()   | called upon finished channel measurement (event-driven)                   |
+|  9 | start_threads()       | called once during SDR startup to start application layer threads         |
+| 10 | stop_threads()        | called once during SDR shutdown to stop application layer threads         |
 
 For any firmware, constructors are always called first. When the constructors are called, the underlying radio devices have already been initialized and hardware properties such as center frequency and gains may be changed. However, the radio devices are not streaming IQ samples yet.
 
@@ -74,33 +75,35 @@ After all constructors have been called, start_threads() is called followed by w
 
 ## Directories
 
-    ├─ .devcontainer/           docker container setup in VSCode
-    ├─ .vscode/                 VS Code settings
-    ├─ apps/                    apps sources
-    ├─ bin/                     apps post-compilation binaries
-    ├─ cmake/                   CMake modules
-    ├─ configurations/          configuration files required to start the SDR
-    ├─ docs/                    documentation (doxygen, graphics etc.)
-    ├─ external/                external libraries
-    ├─ gnuradio/                flow graphs (SDR oscilloscope, USRP calibration etc.)
-    ├─ json/                    submodule to analyze exported JSON files in Matlab
-    ├─ lib/                     library code used by applications
+    ├─ .devcontainer/             docker container setup in VSCode
+    ├─ .vscode/                   VS Code settings
+    ├─ apps/                      apps sources
+    ├─ bin/                       apps post-compilation binaries
+    ├─ cmake/                     CMake modules
+    ├─ configurations/            configuration files required to start the SDR
+    ├─ docs/                      documentation (doxygen, graphics etc.)
+    ├─ external/                  external libraries
+    ├─ gnuradio/                  flow graphs (SDR oscilloscope, USRP calibration etc.)
+    ├─ json/                      submodule to analyze exported JSON files in Matlab
+    ├─ lib/                       library code used by applications
     │  ├─ include/dectnrp/
-    │  |  ├─ application/       application layer interfaces
-    │  |  ├─ apps/              utilities for apps in directory apps/
-    │  |  ├─ common/            common functionality across all layers/directories
-    │  |  ├─ dlccl/             DLC and convergence layer
-    │  |  ├─ mac/               MAC layer
-    │  |  ├─ phy/               physical layer
-    │  |  ├─ radio/             radio layer
-    │  |  ├─ sections_part2/    sections of ETSI TS 103 636-2
-    │  |  ├─ sections_part3/    sections of ETSI TS 103 636-3
-    │  |  ├─ sections_part4/    sections of ETSI TS 103 636-4
-    │  |  ├─ sections_part5/    sections of ETSI TS 103 636-5
-    │  |  ├─ simulation/        wireless simulation
-    │  |  ├─ upper/             upper layers, i.e. layers between PHY and application layer
-    │  ├─ src/                  source code (same directories as in include/dectnrp/)
-    └─ scripts/                 shell scripts
+    │  |  ├─ application/         application layer interfaces
+    │  |  ├─ apps/                utilities for apps in directory apps/
+    │  |  ├─ common/              common functionality across all layers/directories
+    │  |  ├─ cvg/                 convergence layer
+    │  |  ├─ dlc/                 DLC layer
+    │  |  ├─ mac/                 MAC layer
+    │  |  ├─ phy/                 physical layer
+    │  |  ├─ radio/               radio layer
+    │  |  ├─ sections_part2/      sections of ETSI TS 103 636-2
+    │  |  ├─ sections_part3/      sections of ETSI TS 103 636-3
+    │  |  ├─ sections_part4/      sections of ETSI TS 103 636-4
+    │  |  ├─ sections_part5_cvg/  sections of ETSI TS 103 636-5
+    │  |  ├─ sections_part5_dlc/  sections of ETSI TS 103 636-5
+    │  |  ├─ simulation/          wireless simulation
+    │  |  ├─ upper/               upper layers, i.e. layers between PHY and application layer
+    │  ├─ src/                    source code (same directories as in include/dectnrp/)
+    └─ scripts/                   shell scripts
 
 ## Installation
 
@@ -227,7 +230,7 @@ The key takeaways are:
 - The radio layer uses a single RX ring buffer of type [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) to distribute IQ samples to all workers. For TX, it uses multiple independent [buffer_tx_t](lib/include/dectnrp/radio/buffer_tx.hpp) instances from a [buffer_tx_pool_t](lib/include/dectnrp/radio/buffer_tx_pool.hpp). The number of buffers is defined in `radio.json`, and their size by the radio device class and the oversampling in `phy.json`.
 - The PHY has workers for synchronization ([worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp)) and workers for packet encoding/decoding and modulation/demodulation ([worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp)). The number of workers, their CPU affinity and priority are set in `phy.json`. Both worker types communicate through a MPMC [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp).
 - When synchronization detects a DECT NR+ packet, it creates a job with a [sync_report_t](lib/include/dectnrp/phy/rx/sync/sync_report.hpp), which is then processed by instances of [worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp). During packet processing, these workers call the firmware through the virtual work_*() functions mentioned in [Core Idea](#core-idea). Access to the firmware is thread-safe as each worker has to acquire a [token_t](lib/include/dectnrp/phy/pool/token.hpp). All jobs are processed in the same order as they are inserted into the queue.
-- Synchronization also creates regular jobs with a [time_report_t](lib/include/dectnrp/phy/rx/sync/time_report.hpp). Each of these jobs contains a time update for the firmware, and the starting time of the last known packet. The rate of regular jobs depends on how processing of [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) is split up between instances of [worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp) in `phy.json`. A typical rate is one job for each 2 slots, equivalent to 1200 jobs per second. 
+- Synchronization also creates regular jobs with a [regular_report_t](lib/include/dectnrp/phy/rx/sync/regular_report.hpp). Each of these jobs contains a time update for the firmware, and the starting time of the last known packet. The rate of regular jobs depends on how processing of [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) is split up between instances of [worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp) in `phy.json`. A possible rate is one job each two slots, equivalent to 1200 jobs per second. 
 - The firmware of the SDR is not executed in an independent thread. Instead, the firmware is equivalent to a thread-safe state machine whose state changes are triggered by calls of the work_*() functions. The type of firmware executed is defined in `upper.json`.
 - Each firmware starts and controls its own application layer interface ([app_t](lib/include/dectnrp/application/app.hpp)). To allow immediate action for new application layer data, [app_t](lib/include/dectnrp/application/app.hpp) is given access to [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp). The job type created by [app_t](lib/include/dectnrp/application/app.hpp) contains an [upper_report_t](lib/include/dectnrp/upper/upper_report.hpp) with the number and size of datagrams available on the application layer.
 - The application layer interface is either a [set of UDP ports](lib/include/dectnrp/application/socket/) or a [virtual NIC](lib/include/dectnrp/application/vnic/).
@@ -418,10 +421,6 @@ In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310
 ```JSON
 "firmware_id": 1
 ```
-
-### [timesync](lib/include/dectnrp/upper/tpoint_firmware/timesync/tfw_timesync.hpp)
-
-This firmware measures the synchronization between the host system and the radio hardware if they are synchronized as described in [PPS Export and PTP](#pps-export-and-ptp). Synchronization must be established with an external device such as a Raspberry Pi.
 
 ### [txrxdelay](lib/include/dectnrp/upper/tpoint_firmware/txrxdelay/tfw_txrxdelay.hpp)
 

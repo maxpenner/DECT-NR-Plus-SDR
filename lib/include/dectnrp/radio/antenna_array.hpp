@@ -48,7 +48,7 @@ class antenna_array_t {
     private:
         arrangement_t arrangement{arrangement_t::linear};
 
-        // antenna separation in meters
+        /// antenna separation in meters
         std::vector<float> separation{0.05};
 };
 

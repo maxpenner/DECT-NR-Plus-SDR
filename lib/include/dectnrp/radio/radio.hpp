@@ -53,7 +53,7 @@ class radio_t final : public common::layer_t<hw_t> {
          * all hw is virtual, we run a simulation in a virtual space which connects all virtual
          * devices with each other. Only in this case is the vspace initialized.
          */
-        void vspace_check_validity_and_init();
+        void is_vspace_valid_if_so_init();
         std::unique_ptr<simulation::vspace_t> vspace;
 };
 

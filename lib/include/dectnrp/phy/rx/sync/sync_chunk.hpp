@@ -21,6 +21,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -35,12 +36,15 @@ namespace dectnrp::phy {
 
 class sync_chunk_t final : public rx_pacer_t {
     public:
+        typedef std::function<void(int64_t)> irregular_callable_t;
+
         explicit sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
                               const worker_pool_config_t& worker_pool_config_,
                               const uint32_t chunk_length_samples_,
                               const uint32_t chunk_stride_samples_,
                               const uint32_t chunk_offset_samples_,
-                              const uint32_t ant_streams_unit_length_samples_);
+                              const uint32_t ant_streams_unit_length_samples_,
+                              irregular_callable_t irregular_callable_);
         ~sync_chunk_t() = default;
 
         sync_chunk_t() = delete;
@@ -118,6 +122,8 @@ class sync_chunk_t final : public rx_pacer_t {
          *                         coarse peaks can be found up to this point
          */
         const uint32_t A, B, C, D;
+
+        irregular_callable_t irregular_callable;
 
         /// internal time keeping
         int64_t chunk_time_start_64;

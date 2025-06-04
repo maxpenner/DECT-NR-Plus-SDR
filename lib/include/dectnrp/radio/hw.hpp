@@ -139,7 +139,7 @@ class hw_t : public common::layer_unit_t {
          */
         virtual double set_freq_tc(const double freq_Hz) = 0;
 
-        // get current TX power at 0dBFS per antenna (value is the same for all antennas)
+        /// get current TX power at 0dBFS per antenna (value is the same for all antennas)
         float get_tx_power_ant_0dBFS_tc() const { return tx_power_ant_0dBFS; };
 
         /**
@@ -166,7 +166,7 @@ class hw_t : public common::layer_unit_t {
          */
         float adjust_tx_power_ant_0dBFS_tc(const float adj_dB);
 
-        // get current RX power at 0dBFS per antenna (value is not the same for all antennas)
+        /// get current RX power at 0dBFS per antenna (value is not the same for all antennas)
         const common::ant_t& get_rx_power_ant_0dBFS_tc() const { return rx_power_ant_0dBFS; };
 
         /**
@@ -183,7 +183,7 @@ class hw_t : public common::layer_unit_t {
          */
         virtual float set_rx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) = 0;
 
-        // set same value for all antennas
+        /// set same value for all antennas
         const common::ant_t& set_rx_power_ant_0dBFS_uniform_tc(const float power_dBm);
 
         /**

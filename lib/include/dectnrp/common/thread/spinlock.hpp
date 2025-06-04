@@ -31,7 +31,7 @@
  */
 #define COMMON_THREADS_SPINLOCK_USES_PTHREAD_SPINLOCK_OR_ATOMIC
 #ifdef COMMON_THREADS_SPINLOCK_USES_PTHREAD_SPINLOCK_OR_ATOMIC
-#include "pthread.h"
+#include <pthread.h>
 #else
 #include <atomic>
 #endif

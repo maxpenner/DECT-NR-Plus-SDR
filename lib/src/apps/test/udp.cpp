@@ -44,10 +44,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     }
 
     const int64_t tx_time_64 =
-        common::watch_t::get_elapsed_since_epoch<int64_t, common::micro, common::steady_clock>();
+        common::watch_t::get_elapsed_since_epoch<int64_t, common::micro, common::tai_clock>();
 
     const auto tx =
-        udp.tx_timed<common::micro, common::steady_clock>(0, buffer_tx, 234, tx_time_64 + 5);
+        udp.tx_timed<common::micro, common::tai_clock>(0, buffer_tx, 234, tx_time_64 + 5);
 
     dectnrp_print_inf("tx {}", tx);
 

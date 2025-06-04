@@ -53,7 +53,6 @@ class mimo_report_t {
          * a single spatial stream.
          */
 
-        // same terminology as in LTE
         uint32_t RI{};   // rank indicator
         uint32_t CQI{};  // channel quality indicator
         uint32_t PMI{};  // pre coding matrix indicator
