@@ -41,8 +41,7 @@ Advanced Topics
     3. [loopback](#loopback)
     4. [p2p](#p2p)
     5. [rtt](#rtt)
-    6. [timesync](#timesync)
-    7. [txrxdelay](#txrxdelay)
+    6. [txrxdelay](#txrxdelay)
 11. [Interesting Links](#interesting-links)
 
 ## Core Idea
