@@ -22,8 +22,8 @@
 
 #include "dectnrp/application/app.hpp"
 
-#define APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
-#ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#define APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
+#ifdef APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
 #include <condition_variable>
 #include <mutex>
 #else
@@ -63,7 +63,7 @@ class app_client_t : public app_t {
     protected:
         void work_sc() override final;
 
-#ifdef APP_CLIENT_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
         std::mutex lockv;
         std::condition_variable cv;
         int32_t indicator_cnt;

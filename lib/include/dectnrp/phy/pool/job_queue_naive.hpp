@@ -27,8 +27,8 @@
 #include "dectnrp/phy/pool/job.hpp"
 #include "dectnrp/phy/pool/job_queue_base.hpp"
 
-#define PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
-#ifdef PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#define PHY_POOL_JOB_QUEUE_NAIVE_CONDITION_VARIABLE_OR_BUSY_WAITING
+#ifdef PHY_POOL_JOB_QUEUE_NAIVE_CONDITION_VARIABLE_OR_BUSY_WAITING
 #include <condition_variable>
 #include <mutex>
 #else
@@ -94,7 +94,7 @@ class job_queue_naive_t final : public job_queue_base_t {
         uint32_t get_free() const;
         uint32_t get_used() const;
 
-#ifdef PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_JOB_QUEUE_NAIVE_CONDITION_VARIABLE_OR_BUSY_WAITING
         std::mutex lockv;
         std::condition_variable cv;
 #else

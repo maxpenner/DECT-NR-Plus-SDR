@@ -23,8 +23,8 @@
 #include <cstdint>
 #include <vector>
 
-#define APPLICATION_QUEUE_MUTEX_OR_SPINLOCK
-#ifdef APPLICATION_QUEUE_MUTEX_OR_SPINLOCK
+#define APPLICATION_QUEUE_QUEUE_MUTEX_OR_SPINLOCK
+#ifdef APPLICATION_QUEUE_QUEUE_MUTEX_OR_SPINLOCK
 #include <mutex>
 #else
 #include "dectnrp/common/thread/spinlock.hpp"
@@ -94,7 +94,7 @@ class queue_t {
         uint32_t w_idx{0};
         uint32_t r_idx{0};
 
-#ifdef APPLICATION_QUEUE_MUTEX_OR_SPINLOCK
+#ifdef APPLICATION_QUEUE_QUEUE_MUTEX_OR_SPINLOCK
         mutable std::mutex lockv;
 #else
         mutable common::spinlock_t lockv;

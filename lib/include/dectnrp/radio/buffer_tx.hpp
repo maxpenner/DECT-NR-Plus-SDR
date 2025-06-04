@@ -30,8 +30,8 @@
 #include "dectnrp/radio/complex.hpp"
 #include "dectnrp/radio/hw_friends.hpp"
 
-#define PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#define RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
 #include <condition_variable>
 #include <mutex>
 #endif
@@ -43,7 +43,7 @@ class buffer_tx_t final : public common::lockable_outer_inner_t, public common::
         explicit buffer_tx_t(const uint32_t id_,
                              const uint32_t nof_antennas_,
                              const uint32_t ant_streams_length_samples_
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
                              ,
                              std::mutex& tx_new_packet_mutex_,
                              std::condition_variable& tx_new_packet_cv_,
@@ -113,7 +113,7 @@ class buffer_tx_t final : public common::lockable_outer_inner_t, public common::
 
         buffer_tx_meta_t buffer_tx_meta{};
 
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
         std::mutex& tx_new_packet_mutex;
         std::condition_variable& tx_new_packet_cv;
         uint32_t& tx_new_packet_cnt;

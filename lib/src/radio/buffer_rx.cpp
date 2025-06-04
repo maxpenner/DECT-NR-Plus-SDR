@@ -22,7 +22,7 @@
 
 #include "dectnrp/radio/complex.hpp"
 
-#if RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_ATOMIC_BUSYWAIT
+#if RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_BUSY_WAITING
 #include "dectnrp/common/thread/watch.hpp"
 #endif
 
@@ -36,7 +36,11 @@ buffer_rx_t::buffer_rx_t(const uint32_t id_,
                          const uint32_t samp_rate_,
                          const uint32_t nof_new_samples_max_,
                          const uint32_t rx_prestream_ms_,
+#if RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_BUSY_WAITING
+                         [[maybe_unused]] const uint32_t rx_notification_period_us_)
+#else
                          const uint32_t rx_notification_period_us_)
+#endif
     : id(id_),
       nof_antennas(nof_antennas_),
       ant_streams_length_samples(ant_streams_length_samples_),
@@ -46,8 +50,8 @@ buffer_rx_t::buffer_rx_t(const uint32_t id_,
       acceptable_jitter_range_64(1),
       rx_prestream_64(static_cast<int64_t>(samp_rate) * static_cast<int64_t>(rx_prestream_ms_) /
                       int64_t{1000})
-#if RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_ATOMIC_WAIT || \
-    RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_CV
+#if RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_ATOMIC_WAIT || \
+    RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_CONDITION_VARIABLE
       ,
       notification_period_samples(static_cast<int64_t>(samp_rate) *
                                   static_cast<int64_t>(rx_notification_period_us_) /
@@ -99,12 +103,12 @@ int64_t buffer_rx_t::wait_until_nto(const int64_t target_time_64) const {
 
     // target time not reached yet, so we have to wait
     do {
-#if RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_ATOMIC_WAIT
+#if RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_ATOMIC_WAIT
         rx_time_passed_64.wait(now_64, std::memory_order_acquire);
-#elif RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_CV
+#elif RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_CONDITION_VARIABLE
         std::unique_lock<std::mutex> lk(rx_new_samples_mutex);
         rx_new_samples_cv.wait(lk);
-#elif RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_ATOMIC_BUSYWAIT
+#elif RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_BUSY_WAITING
         // limit calls to atomic
         common::watch_t::busywait_us();
 #endif
@@ -200,13 +204,13 @@ void buffer_rx_t::get_ant_streams_next(std::vector<void*>& ant_streams_next,
     // save latest time in atomic
     rx_time_passed_64.store(time_as_sample_cnt_64, std::memory_order_release);
 
-#if RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_ATOMIC_WAIT
+#if RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_ATOMIC_WAIT
     if (time_as_sample_cnt_64 >= notification_next) {
         // wake up any threads waiting for new samples
         rx_time_passed_64.notify_all();
         notification_next = time_as_sample_cnt_64 + notification_period_samples;
     }
-#elif RADIO_BUFFER_RX_NOTIFY == RADIO_BUFFER_RX_NOTIFY_CV
+#elif RADIO_BUFFER_RX_NOTIFICATION_MECHANISM == RADIO_BUFFER_RX_CONDITION_VARIABLE
     if (time_as_sample_cnt_64 >= notification_next) {
         /* This thread is not allowed to get blocked under any circumstances. Therefore, only try to
          * get a lock. If not possible, we will publish at a later point in time. Other threads

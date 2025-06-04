@@ -24,8 +24,8 @@
 #include <cstdint>
 #include <memory>
 
-#define PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
-#ifdef PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#define PHY_POOL_TOKEN_CONDITION_VARIABLE_OR_BUSY_WAITING
+#ifdef PHY_POOL_TOKEN_CONDITION_VARIABLE_OR_BUSY_WAITING
 #include <condition_variable>
 #include <mutex>
 #else
@@ -73,7 +73,7 @@ class token_t {
     private:
         static constexpr uint32_t TOKEN_WAIT_TIMEOUT_MS = 100;
 
-#ifdef PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_TOKEN_CONDITION_VARIABLE_OR_BUSY_WAITING
         std::mutex lockv;
         std::condition_variable cv;
         std::array<int64_t, limits::max_nof_radio_phy_pairs_one_tpoint> fifo_cnt;

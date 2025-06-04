@@ -38,7 +38,7 @@ buffer_tx_pool_t::buffer_tx_pool_t(const uint32_t id_,
         buffer_tx_vec.push_back(std::make_unique<buffer_tx_t>(buffer_id,
                                                               nof_antennas,
                                                               ant_streams_length_samples
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
                                                               ,
                                                               tx_new_packet_mutex,
                                                               tx_new_packet_cv,
@@ -47,7 +47,7 @@ buffer_tx_pool_t::buffer_tx_pool_t(const uint32_t id_,
                                                               ));
     }
 
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
     tx_new_packet_cnt = 0;
 #endif
 };
@@ -86,7 +86,7 @@ int32_t buffer_tx_pool_t::get_specific_tx_order_id_if_available(
 
 int32_t buffer_tx_pool_t::wait_for_specific_tx_order_id_to(const int64_t tx_order_id_target,
                                                            const uint32_t timeout_ms) const {
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
     // initial search
     int32_t ret = get_specific_tx_order_id_if_available(tx_order_id_target);
 

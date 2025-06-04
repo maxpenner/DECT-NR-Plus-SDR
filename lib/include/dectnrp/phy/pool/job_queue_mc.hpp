@@ -26,8 +26,8 @@
 #include "dectnrp/phy/pool/job_queue_base.hpp"
 #include "header_only/cameron314/blockingconcurrentqueue.h"
 
-#define PHY_POOL_JOB_QUEUE_MOODYCAMEL_USES_MUTEX_OR_SPINLOCK
-#ifdef PHY_POOL_JOB_QUEUE_MOODYCAMEL_USES_MUTEX_OR_SPINLOCK
+#define PHY_POOL_JOB_QUEUE_MC_MUTEX_OR_SPINLOCK
+#ifdef PHY_POOL_JOB_QUEUE_MC_MUTEX_OR_SPINLOCK
 #include <mutex>
 #else
 #include "dectnrp/common/thread/spinlock.hpp"
@@ -79,7 +79,7 @@ class job_queue_mc_t final : public job_queue_base_t {
         moodycamel::BlockingConcurrentQueue<job_t> job_vec;
         std::unique_ptr<moodycamel::ProducerToken> ptok;
 
-#ifdef PHY_POOL_JOB_QUEUE_MOODYCAMEL_USES_MUTEX_OR_SPINLOCK
+#ifdef PHY_POOL_JOB_QUEUE_MC_MUTEX_OR_SPINLOCK
         std::mutex lockv;
 #else
         common::spinlock_t lockv;

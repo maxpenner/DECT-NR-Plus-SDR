@@ -27,7 +27,7 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/phy/rx/sync/irregular_report.hpp"
 
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
 #else
 #include "dectnrp/common/thread/watch.hpp"
 #endif
@@ -97,7 +97,7 @@ std::pair<int64_t, phy::irregular_report_t> baton_t::register_and_wait_for_other
 }
 
 bool baton_t::is_id_holder_the_same(const uint32_t id_caller) const {
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
     std::unique_lock<std::mutex> lk(mtx);
     return id_caller == id_holder;
 #else
@@ -106,7 +106,7 @@ bool baton_t::is_id_holder_the_same(const uint32_t id_caller) const {
 }
 
 bool baton_t::wait_to(const uint32_t id_target) {
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
     std::unique_lock<std::mutex> lk(mtx);
 
     while (id_holder != id_target) {
@@ -140,7 +140,7 @@ void baton_t::pass_on(const uint32_t id_caller) {
     dectnrp_assert(is_id_holder_the_same(id_caller),
                    "caller does not hold baton, yet checking sync time");
 
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
     {
         std::unique_lock<std::mutex> lk(mtx);
 

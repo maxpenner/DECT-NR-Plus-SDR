@@ -29,7 +29,7 @@ namespace dectnrp::radio {
 buffer_tx_t::buffer_tx_t(const uint32_t id_,
                          const uint32_t nof_antennas_,
                          const uint32_t ant_streams_length_samples_
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
                          ,
                          std::mutex& tx_new_packet_mutex_,
                          std::condition_variable& tx_new_packet_cv_,
@@ -39,7 +39,7 @@ buffer_tx_t::buffer_tx_t(const uint32_t id_,
     : id(id_),
       nof_antennas(nof_antennas_),
       ant_streams_length_samples(ant_streams_length_samples_)
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
       ,
       tx_new_packet_mutex(tx_new_packet_mutex_),
       tx_new_packet_cv(tx_new_packet_cv_),
@@ -89,7 +89,7 @@ void buffer_tx_t::set_transmittable(const struct buffer_tx_meta_t buffer_tx_meta
 
     lock_inner();
 
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
     // make sure TX thread is notified of this new packet and woken up at least once
     {
         std::unique_lock<std::mutex> lk(tx_new_packet_mutex);
@@ -159,7 +159,7 @@ void buffer_tx_t::set_transmitted_or_abort() {
     unlock_inner();
     unlock_outer();
 
-#ifdef PHY_BUFFER_TX_NOTIFIES_CONDITION_VARIABLE_OF_BUFFER_TX_POOL
+#ifdef RADIO_BUFFER_TX_CONDITION_VARIABLE_OR_BUSY_WAITING
     {
         std::unique_lock<std::mutex> lk(tx_new_packet_mutex);
         tx_new_packet_cnt--;

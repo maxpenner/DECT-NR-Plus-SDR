@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <limits>
 
-#ifdef PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_TOKEN_CONDITION_VARIABLE_OR_BUSY_WAITING
 #else
 #include "dectnrp/common/thread/watch.hpp"
 #endif
@@ -44,7 +44,7 @@ token_t::token_t(const uint32_t n_pools_) {
 };
 
 bool token_t::lock_fifo_to(const uint32_t id_caller, const int64_t fifo_cnt_) {
-#ifdef PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_TOKEN_CONDITION_VARIABLE_OR_BUSY_WAITING
     {
         std::unique_lock<std::mutex> lk(lockv);
 
@@ -86,7 +86,7 @@ bool token_t::lock_fifo_to(const uint32_t id_caller, const int64_t fifo_cnt_) {
 void token_t::unlock_fifo() {
     dectnrp_assert(id_holder < limits::max_nof_radio_phy_pairs_one_tpoint, "holder ID invalid");
 
-#ifdef PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_TOKEN_CONDITION_VARIABLE_OR_BUSY_WAITING
     ++fifo_cnt[id_holder];
 #else
     fifo_cnt[id_holder].fetch_add(1);
@@ -94,7 +94,7 @@ void token_t::unlock_fifo() {
 
     unlock();
 
-#ifdef PHY_POOL_TOKEN_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_TOKEN_CONDITION_VARIABLE_OR_BUSY_WAITING
     cv.notify_all();
 #else
 #endif

@@ -24,9 +24,9 @@
 #include <atomic>
 #include <cstdint>
 
-#define PHY_POOL_IRREGULAR_USES_MUTEX_OR_SPINLOCK
+#define PHY_POOL_IRREGULAR_MUTEX_OR_SPINLOCK
+#ifdef PHY_POOL_IRREGULAR_MUTEX_OR_SPINLOCK
 #include <mutex>
-#ifdef PHY_POOL_IRREGULAR_USES_MUTEX_OR_SPINLOCK
 #else
 #include "dectnrp/common/thread/spinlock.hpp"
 #endif
@@ -59,7 +59,7 @@ class irregular_t {
 
         decltype(irregular_report_arr.begin()) it_next{nullptr};
 
-#ifdef PHY_POOL_IRREGULAR_USES_MUTEX_OR_SPINLOCK
+#ifdef PHY_POOL_IRREGULAR_MUTEX_OR_SPINLOCK
         mutable std::mutex lockv;
 #else
         mutable common::spinlock_t lockv;

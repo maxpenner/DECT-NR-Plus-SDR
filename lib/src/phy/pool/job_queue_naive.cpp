@@ -20,7 +20,7 @@
 
 #include "dectnrp/phy/pool/job_queue_naive.hpp"
 
-#ifdef PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_JOB_QUEUE_NAIVE_CONDITION_VARIABLE_OR_BUSY_WAITING
 #else
 #include "dectnrp/common/thread/watch.hpp"
 #endif
@@ -50,7 +50,7 @@ bool job_queue_naive_t::enqueue_nto(job_t&& job) {
     ret = enqueue_under_lock(std::move(job));
     lockv.unlock();
 
-#ifdef PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_JOB_QUEUE_NAIVE_CONDITION_VARIABLE_OR_BUSY_WAITING
     if (ret) {
         cv.notify_all();
     }
@@ -94,7 +94,7 @@ std::vector<std::string> job_queue_naive_t::report_stop() const {
 bool job_queue_naive_t::wait_for_new_job_to(job_t& job) {
     bool ret = false;
 
-#ifdef PHY_POOL_JOB_QUEUE_NAIVE_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_JOB_QUEUE_NAIVE_CONDITION_VARIABLE_OR_BUSY_WAITING
     // upon entering function, get the lock on the mutex
     std::unique_lock<std::mutex> lk(lockv);
 

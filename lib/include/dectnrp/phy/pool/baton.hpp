@@ -28,8 +28,8 @@
 
 #include "dectnrp/phy/rx/sync/irregular_report.hpp"
 
-#define PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#define PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
 #else
 #include <atomic>
 #endif
@@ -100,7 +100,7 @@ class baton_t {
         upper::tpoint_t* tpoint;
         std::shared_ptr<token_t> token;
 
-#ifdef PHY_POOL_BATON_USES_CONDITION_VARIABLE_OR_BUSYWAITING
+#ifdef PHY_POOL_BATON_CONDITION_VARIABLE_OR_BUSY_WAITING
         mutable std::mutex mtx;
         std::condition_variable cv;
         uint32_t id_holder;
