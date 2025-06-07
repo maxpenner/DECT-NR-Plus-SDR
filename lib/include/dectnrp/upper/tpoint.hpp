@@ -132,10 +132,11 @@ class tpoint_t : public common::layer_unit_t {
 #ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
         /**
          * \brief Function called after decoding a PCC with incorrect CRC. This function is virtual
-         * while all other functions which are pure virtual. Furthermore, it must be explicitly
-         * enabled by defining the enclosing preprocessor directive. Notifying the MAC of a PCC with
-         * incorrect CRC can be useful if MAC was expecting a packet at that time. Downside is that
-         * the MAC layer is called and blocked for every false alarm produced by synchronization.
+         * while all other functions are pure virtual. Furthermore, it must be explicitly enabled by
+         * defining the enclosing preprocessor directive. Notifying the MAC layer of a PCC with
+         * incorrect CRC can be useful if the MAC layer was expecting a packet at that time.
+         * Downside is that the MAC layer is called and blocked for every false alarm produced by
+         * synchronization.
          *
          * 1. Called only after unsuccessful PCC decoding, i.e. incorrect CRC.
          * 2. Called in the same FIFO order as put into the job_queue (sync_report_t).
@@ -175,7 +176,7 @@ class tpoint_t : public common::layer_unit_t {
         /**
          * \brief Function called when a channel measurement has finished.
          *
-         * 1. PHY conducts ch measurements only if machigh_phy_t<true>::chscan_opt contains a value.
+         * 1. PHY conducts ch measurements only if machigh_phy_t::chscan_opt contains a value.
          * 2. Called ASAP, but not in any specific order relative to other work-functions (async).
          *
          * \param chscan result of channel measurement instruction

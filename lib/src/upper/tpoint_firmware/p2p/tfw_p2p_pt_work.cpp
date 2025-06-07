@@ -44,8 +44,7 @@ phy::machigh_phy_t tfw_p2p_pt_t::work_regular(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_p2p_pt_t::work_irregular(
-    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
+phy::machigh_phy_t tfw_p2p_pt_t::work_irregular(const phy::irregular_report_t& irregular_report) {
     // update time of callbacks
     callbacks.run(buffer_rx.get_rx_time_passed());
 

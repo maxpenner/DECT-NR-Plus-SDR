@@ -45,7 +45,7 @@ class estimator_aoa_t final : public estimator_t {
         virtual void reset_internal() override final;
 
         /// number of physical antennas
-        const uint32_t N_RX;
+        [[maybe_unused]] const uint32_t N_RX;
 };
 
 }  // namespace dectnrp::phy

@@ -36,7 +36,7 @@ irregular_t::irregular_t() {
                    "incorrect default value");
 }
 
-void irregular_t::push([[maybe_unused]] const irregular_report_t&& irregular_report) {
+void irregular_t::push(const irregular_report_t&& irregular_report) {
     dectnrp_assert(irregular_report.has_finite_time(), "invalid");
 
     lockv.lock();

@@ -680,7 +680,7 @@ void* hw_usrp_t::work_tx_async_helper(void* hw_usrp) {
     // async message receive is blocking
     const double timeout = 0.1;
 
-    // stats (ununsed if logging is turned off)
+    // stats (unused if logging is turned off)
     [[maybe_unused]] uint64_t ACK = 0;
     [[maybe_unused]] uint64_t UF = 0;
     [[maybe_unused]] uint64_t UFIP = 0;
