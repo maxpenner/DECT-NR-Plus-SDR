@@ -75,8 +75,8 @@ void app_server_t::work_sc() {
 
 void app_server_t::enqueue_job_nto(const uint32_t conn_idx, uint32_t n_written) {
     if (watch_job_queue_access_protection.get_elapsed() >= job_queue_access_protection_ns_64) {
-        job_queue.enqueue_nto(phy::job_t(
-            upper::upper_report_t(conn_idx, n_written, watch_since_start.get_elapsed())));
+        job_queue.enqueue_nto(phy::job_t(application::application_report_t(
+            conn_idx, n_written, watch_since_start.get_elapsed())));
 
         watch_job_queue_access_protection.reset();
     }

@@ -209,7 +209,8 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
     return machigh_phy;
 }
 
-phy::machigh_phy_t tfw_rtt_t::work_application(const upper::upper_report_t& upper_report) {
+phy::machigh_phy_t tfw_rtt_t::work_application(
+    const application::application_report_t& application_report) {
     // return immediately if PT
     if (0 < tpoint_config.firmware_id) {
         return phy::machigh_phy_t();
@@ -219,7 +220,7 @@ phy::machigh_phy_t tfw_rtt_t::work_application(const upper::upper_report_t& uppe
      * completed and the result should be logged. All variables must be reset for a new measurement
      * run.
      */
-    if (upper_report.conn_idx == 1) {
+    if (application_report.conn_idx == 1) {
         // convert rtt to us (unused if logging is turned off)
         [[maybe_unused]] const int64_t rtt_min_us = rtt_min / int64_t{1000};
         [[maybe_unused]] const int64_t rtt_max_us = rtt_max / int64_t{1000};

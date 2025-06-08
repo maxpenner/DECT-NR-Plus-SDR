@@ -49,7 +49,7 @@ class tfw_loopback_t : public tpoint_t {
         // work_pcc() and work_pdc_async() are implemented in deriving classes
 
         phy::machigh_phy_t work_application(
-            const upper::upper_report_t& upper_report) override final;
+            const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
 
     private:

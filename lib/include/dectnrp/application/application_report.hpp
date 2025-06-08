@@ -22,20 +22,20 @@
 
 #include <cstdint>
 
-namespace dectnrp::upper {
+namespace dectnrp::application {
 
-class upper_report_t {
+class application_report_t {
     public:
-        explicit upper_report_t(const uint32_t conn_idx_,
-                                const uint32_t N_byte_,
-                                const int64_t rx_time_opsys_64_)
+        explicit application_report_t(const uint32_t conn_idx_,
+                                      const uint32_t N_byte_,
+                                      const int64_t rx_time_opsys_64_)
             : conn_idx(conn_idx_),
               N_byte(N_byte_),
               rx_time_opsys_64(rx_time_opsys_64_) {};
 
         /**
          * \brief When data is passed from or to the application layer, this connection index is
-         * used as an identifier between the application layer and the lower layers.
+         * used as an identifier between the application layer and the upper layers.
          *
          * A connection index can, for instance, represent one of multiple UDP ports that data was
          * received at (app_server_t) or should be transmitted to (app_client_t). A connection index
@@ -56,4 +56,4 @@ class upper_report_t {
         int64_t rx_time_opsys_64;
 };
 
-}  // namespace dectnrp::upper
+}  // namespace dectnrp::application

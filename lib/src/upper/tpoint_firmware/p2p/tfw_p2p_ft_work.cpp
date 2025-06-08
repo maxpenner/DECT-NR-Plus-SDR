@@ -109,7 +109,7 @@ phy::machigh_phy_t tfw_p2p_ft_t::work_irregular(
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_application(
-    [[maybe_unused]] const upper::upper_report_t& upper_report) {
+    [[maybe_unused]] const application::application_report_t& application_report) {
     phy::machigh_phy_t machigh_phy;
 
     worksub_tx_unicast_consecutive(machigh_phy);

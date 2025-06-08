@@ -48,7 +48,8 @@ class tfw_txrxdelay_t final : public tpoint_t {
             const phy::irregular_report_t& irregular_report) override final;
         phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override;
         phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
-        phy::machigh_phy_t work_application(const upper::upper_report_t& upper_report) override;
+        phy::machigh_phy_t work_application(
+            const application::application_report_t& application_report) override;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override;
 
     private:
