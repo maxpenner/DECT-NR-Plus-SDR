@@ -105,13 +105,13 @@ phy::machigh_phy_t tfw_p2p_ft_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
 
         const sp4::user_plane_data_t* upd = static_cast<sp4::user_plane_data_t*>(mmie);
 
-        if (app_client->write_nto(
+        if (application_client->write_nto(
                 contact.conn_idx_client, upd->get_data_ptr(), upd->get_data_size()) > 0) {
             ++datagram_cnt;
         }
     }
 
-    app_client->trigger_forward_nto(datagram_cnt);
+    application_client->trigger_forward_nto(datagram_cnt);
 
     contact.mimo_csi.update_from_phy(
         cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),

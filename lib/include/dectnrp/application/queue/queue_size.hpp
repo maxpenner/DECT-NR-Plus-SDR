@@ -31,12 +31,12 @@ struct queue_size_t {
         uint32_t N_datagram_max_byte{};
 
         bool is_valid() const {
-            if (N_datagram == 0 || limits::app_max_queue_datagram < N_datagram) {
+            if (N_datagram == 0 || limits::application_max_queue_datagram < N_datagram) {
                 return false;
             }
 
             if (N_datagram_max_byte == 0 ||
-                limits::app_max_queue_datagram_byte < N_datagram_max_byte) {
+                limits::application_max_queue_datagram_byte < N_datagram_max_byte) {
                 return false;
             }
 

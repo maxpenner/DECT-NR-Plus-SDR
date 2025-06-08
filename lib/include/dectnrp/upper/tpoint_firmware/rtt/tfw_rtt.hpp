@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include "dectnrp/application/app_client.hpp"
-#include "dectnrp/application/app_server.hpp"
+#include "dectnrp/application/application_client.hpp"
+#include "dectnrp/application/application_server.hpp"
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
@@ -80,8 +80,8 @@ class tfw_rtt_t final : public tpoint_t {
         sp4::plcf_10_t plcf_10;
 
         /// FT receives data from application layer, and forwards data to application layer
-        std::unique_ptr<application::app_server_t> app_server;
-        std::unique_ptr<application::app_client_t> app_client;
+        std::unique_ptr<application::application_server_t> application_server;
+        std::unique_ptr<application::application_client_t> application_client;
 
         /// working copy to transfer payloads
         std::vector<uint8_t> stage_a;

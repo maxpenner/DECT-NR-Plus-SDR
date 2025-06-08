@@ -48,10 +48,10 @@ struct tpoint_config_t {
         std::vector<uint32_t> network_ids;
 
         /// configuration for server
-        common::threads_core_prio_config_t app_server_thread_config;
+        common::threads_core_prio_config_t application_server_thread_config;
 
         /// configuration for client
-        common::threads_core_prio_config_t app_client_thread_config;
+        common::threads_core_prio_config_t application_client_thread_config;
 };
 
 }  // namespace dectnrp::upper

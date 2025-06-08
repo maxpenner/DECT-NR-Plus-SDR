@@ -47,15 +47,19 @@ upper_config_t::upper_config_t(const std::string directory)
             tpoint_config.network_ids.push_back(network_id);
         }
 
-        const auto app_server_thread_config =
-            common::jsonparse::read_int_array(it, "app_server_thread_config", 2, 2, 2);
-        tpoint_config.app_server_thread_config.prio_offset = app_server_thread_config[0];
-        tpoint_config.app_server_thread_config.cpu_core = app_server_thread_config[1];
+        const auto application_server_thread_config =
+            common::jsonparse::read_int_array(it, "application_server_thread_config", 2, 2, 2);
+        tpoint_config.application_server_thread_config.prio_offset =
+            application_server_thread_config[0];
+        tpoint_config.application_server_thread_config.cpu_core =
+            application_server_thread_config[1];
 
-        const auto app_client_thread_config =
-            common::jsonparse::read_int_array(it, "app_client_thread_config", 2, 2, 2);
-        tpoint_config.app_client_thread_config.prio_offset = app_client_thread_config[0];
-        tpoint_config.app_client_thread_config.cpu_core = app_client_thread_config[1];
+        const auto application_client_thread_config =
+            common::jsonparse::read_int_array(it, "application_client_thread_config", 2, 2, 2);
+        tpoint_config.application_client_thread_config.prio_offset =
+            application_client_thread_config[0];
+        tpoint_config.application_client_thread_config.cpu_core =
+            application_client_thread_config[1];
 
         dectnrp_assert(
             tpoint_config.id == layer_unit_config_vec.size(), "incorrect id {}", tpoint_config.id);

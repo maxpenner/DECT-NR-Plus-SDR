@@ -26,26 +26,26 @@
 #include <limits>
 #include <vector>
 
-#include "dectnrp/application/app.hpp"
+#include "dectnrp/application/application.hpp"
 #include "dectnrp/application/queue/queue_level.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 
 namespace dectnrp::application {
 
-class app_server_t : public app_t {
+class application_server_t : public application_t {
     public:
-        explicit app_server_t(const uint32_t id_,
-                              const common::threads_core_prio_config_t thread_config_,
-                              phy::job_queue_t& job_queue_,
-                              const uint32_t N_queue,
-                              const queue_size_t queue_size);
-        virtual ~app_server_t() = default;
+        explicit application_server_t(const uint32_t id_,
+                                      const common::threads_core_prio_config_t thread_config_,
+                                      phy::job_queue_t& job_queue_,
+                                      const uint32_t N_queue,
+                                      const queue_size_t queue_size);
+        virtual ~application_server_t() = default;
 
-        app_server_t() = delete;
-        app_server_t(const app_server_t&) = delete;
-        app_server_t& operator=(const app_server_t&) = delete;
-        app_server_t(app_server_t&&) = delete;
-        app_server_t& operator=(app_server_t&&) = delete;
+        application_server_t() = delete;
+        application_server_t(const application_server_t&) = delete;
+        application_server_t& operator=(const application_server_t&) = delete;
+        application_server_t(application_server_t&&) = delete;
+        application_server_t& operator=(application_server_t&&) = delete;
 
         virtual uint32_t get_n_connections() const override = 0;
 
@@ -90,10 +90,10 @@ class app_server_t : public app_t {
         virtual bool filter_ingress_datagram(const uint32_t conn_idx) = 0;
 
         /**
-         * \brief The app_server_t accepts data from outside. For each individual datagram, it can
-         * enqueue one job to notify the other layers of the SDR. To reduce the number of jobs and
-         * by that the number of calls of the job queue, we can define a protection time. Two jobs
-         * must be separated by this minimum time.
+         * \brief The application_server_t accepts data from outside. For each individual datagram,
+         * it can enqueue one job to notify the other layers of the SDR. To reduce the number of
+         * jobs and by that the number of calls of the job queue, we can define a protection time.
+         * Two jobs must be separated by this minimum time.
          *
          * By default, this time is set to zero. So we create one job for every incoming datagram.
          * We can set it to a very large value, so that no jobs are created.

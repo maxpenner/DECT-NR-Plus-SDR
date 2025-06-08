@@ -169,10 +169,10 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
     for (auto mmie : mmie_decoded_vec) {
         if (const auto* mmie_child = dynamic_cast<const sp4::user_plane_data_t*>(mmie);
             mmie_child != nullptr) {
-            // submit to app_client
-            if (app_client->write_nto(contact_pt.conn_idx_client,
-                                      mmie_child->get_data_ptr(),
-                                      mmie_child->get_data_size()) > 0) {
+            // submit to application_client
+            if (application_client->write_nto(contact_pt.conn_idx_client,
+                                              mmie_child->get_data_ptr(),
+                                              mmie_child->get_data_size()) > 0) {
                 ++datagram_cnt;
             }
 
@@ -182,7 +182,7 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
         dectnrp_log_wrn("MMIE not user plane data");
     }
 
-    app_client->trigger_forward_nto(datagram_cnt);
+    application_client->trigger_forward_nto(datagram_cnt);
 
     contact_pt.mimo_csi.update_from_phy(
         cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),

@@ -18,20 +18,20 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/application/app_server.hpp"
+#include "dectnrp/application/application_server.hpp"
 
 namespace dectnrp::application {
 
-app_server_t::app_server_t(const uint32_t id_,
-                           const common::threads_core_prio_config_t thread_config_,
-                           phy::job_queue_t& job_queue_,
-                           const uint32_t N_queue,
-                           const queue_size_t queue_size)
-    : app_t(id_, thread_config_, job_queue_, N_queue, queue_size) {
+application_server_t::application_server_t(const uint32_t id_,
+                                           const common::threads_core_prio_config_t thread_config_,
+                                           phy::job_queue_t& job_queue_,
+                                           const uint32_t N_queue,
+                                           const queue_size_t queue_size)
+    : application_t(id_, thread_config_, job_queue_, N_queue, queue_size) {
     pfds.resize(N_queue);
 }
 
-void app_server_t::work_sc() {
+void application_server_t::work_sc() {
     int pollin_happened, n;
     uint32_t n_written;
 
@@ -73,7 +73,7 @@ void app_server_t::work_sc() {
     }
 };
 
-void app_server_t::enqueue_job_nto(const uint32_t conn_idx, uint32_t n_written) {
+void application_server_t::enqueue_job_nto(const uint32_t conn_idx, uint32_t n_written) {
     if (watch_job_queue_access_protection.get_elapsed() >= job_queue_access_protection_ns_64) {
         job_queue.enqueue_nto(phy::job_t(application::application_report_t(
             conn_idx, n_written, watch_since_start.get_elapsed())));

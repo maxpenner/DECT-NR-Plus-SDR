@@ -38,10 +38,11 @@ class application_report_t {
          * used as an identifier between the application layer and the upper layers.
          *
          * A connection index can, for instance, represent one of multiple UDP ports that data was
-         * received at (app_server_t) or should be transmitted to (app_client_t). A connection index
-         * may also represent a single TUN interface, i.e. the connection index is always 0 and the
-         * IP address is part of each in- or outgoing datagram. However, it is also possible that
-         * the TUN interface demultiplexes the IP addresses and uses one connection index per IP.
+         * received at (application_server_t) or should be transmitted to (application_client_t). A
+         * connection index may also represent a single TUN interface, i.e. the connection index is
+         * always 0 and the IP address is part of each in- or outgoing datagram. However, it is also
+         * possible that the TUN interface demultiplexes the IP addresses and uses one connection
+         * index per IP.
          *
          * It is always up to the firmware what a connection index stands for, since the firmware
          * starts the application layer. The first connection index is always 0, and then

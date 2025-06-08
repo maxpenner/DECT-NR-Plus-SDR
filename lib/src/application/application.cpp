@@ -18,25 +18,25 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/application/app.hpp"
+#include "dectnrp/application/application.hpp"
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 
 namespace dectnrp::application {
 
-app_t::app_t(const uint32_t id_,
-             const common::threads_core_prio_config_t thread_config_,
-             phy::job_queue_t& job_queue_,
-             const uint32_t N_queue,
-             const queue_size_t queue_size)
+application_t::application_t(const uint32_t id_,
+                             const common::threads_core_prio_config_t thread_config_,
+                             phy::job_queue_t& job_queue_,
+                             const uint32_t N_queue,
+                             const queue_size_t queue_size)
     : id(id_),
       thread_config(thread_config_),
       job_queue(job_queue_) {
     keep_running.store(false, std::memory_order_release);
 
     dectnrp_assert(0 < N_queue, "ill-defined");
-    dectnrp_assert(N_queue <= limits::app_max_connections, "ill-defined");
+    dectnrp_assert(N_queue <= limits::application_max_connections, "ill-defined");
     dectnrp_assert(queue_size.is_valid(), "ill-defined");
 
     for (uint32_t i = 0; i < N_queue; ++i) {
@@ -44,7 +44,7 @@ app_t::app_t(const uint32_t id_,
     }
 }
 
-void app_t::start_sc() {
+void application_t::start_sc() {
     dectnrp_assert(!keep_running.load(std::memory_order_acquire), "keep_running already true");
 
     // give thread permission to run
@@ -62,7 +62,7 @@ void app_t::start_sc() {
                                 common::get_thread_properties(work_thread, thread_config)));
 };
 
-void app_t::stop_sc() {
+void application_t::stop_sc() {
     // make thread stop execution internally
     keep_running.store(false, std::memory_order_release);
 

@@ -22,12 +22,12 @@
 
 #include <netinet/in.h>
 
-#include "dectnrp/application/app_server.hpp"
+#include "dectnrp/application/application_server.hpp"
 #include "dectnrp/application/socket/socketx.hpp"
 
 namespace dectnrp::application::sockets {
 
-class socket_server_t final : public app_server_t, public socketx_t {
+class socket_server_t final : public application_server_t, public socketx_t {
     public:
         explicit socket_server_t(const uint32_t id_,
                                  const common::threads_core_prio_config_t thread_config_,

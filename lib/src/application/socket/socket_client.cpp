@@ -34,7 +34,7 @@ socket_client_t::socket_client_t(const uint32_t id_,
                                  phy::job_queue_t& job_queue_,
                                  const std::vector<uint32_t> ports,
                                  const queue_size_t queue_size)
-    : app_client_t(id_, thread_config_, job_queue_, ports.size(), queue_size),
+    : application_client_t(id_, thread_config_, job_queue_, ports.size(), queue_size),
       socketx_t(ports) {
     // setup one socket for every udp defined
     for (uint32_t i = 0; i < udp_vec.size(); ++i) {

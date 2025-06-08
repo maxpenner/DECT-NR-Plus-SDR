@@ -24,12 +24,12 @@
 
 #include <string>
 
-#include "dectnrp/application/app_server.hpp"
+#include "dectnrp/application/application_server.hpp"
 #include "dectnrp/application/vnic/vnic.hpp"
 
 namespace dectnrp::application::vnic {
 
-class vnic_server_t final : public app_server_t, public vnic_t {
+class vnic_server_t final : public application_server_t, public vnic_t {
     public:
         /**
          * \brief An instance of vnic_config_t can either describe a TUN or a TAP interface.
