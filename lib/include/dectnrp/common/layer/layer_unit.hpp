@@ -56,9 +56,6 @@ class layer_unit_t {
          * Any running threads must be stopped. Deriving classes may also block this function, and
          * hence the main thread, for a finite duration to execute additional shutdown
          * functionality, for instance, shutting down a DECT NR+ connection gracefully.
-         *
-         * \return Lines of reporting the units was to be written to the log file. Unit type and
-         * number will the prepended by the layer.
          */
         virtual void shutdown() = 0;
 };
