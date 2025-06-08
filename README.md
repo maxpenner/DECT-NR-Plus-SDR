@@ -9,7 +9,7 @@ This repository contains my work-in-progress SDR implementation of DECT NR+ ([ET
 - **Fast**: supports low latencies (<250 $\mu s$) and high data rates (>100 $Mbps$)
 - **Reliable**: supports MIMO (transmit diversity, beamforming etc.) for diversity combining and SINR maximization
 
-DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](https://www.etsi.org/newsroom/press-releases/1988-2021-10-world-s-first-non-cellular-5g-technology-etsi-dect-2020-gets-itu-r-approval-setting-example-of-new-era-connectivity). Introductions are available at [ETSI](https://www.etsi.org/technologies/dect), [DECT Forum](https://www.dect.org/nrplus) and [Wikipedia](https://en.wikipedia.org/wiki/DECT-2020). While commonly referred to as DECT NR+, the standard's official designation is DECT-2020 New Radio (NR).
+DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](https://www.etsi.org/newsroom/press-releases/1988-2021-10-world-s-first-non-cellular-5g-technology-etsi-dect-2020-gets-itu-r-approval-setting-example-of-new-era-connectivity). Introductions are available at [ETSI](https://www.etsi.org/technologies/dect), [DECT Forum](https://www.dect.org/nrplus) and [Wikipedia](https://en.wikipedia.org/wiki/DECT-2020). While commonly referred to as DECT NR+, the standard's official designation is DECT-2020 New Radio (NR). The name of the project in this repository is DECTNRP.
 
 ## Table of Contents
 
@@ -252,9 +252,9 @@ Exemplary measurements:
 
 ## AGC
 
-An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second in regular intervals.
+An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second in regular intervals. These comparatively infrequent gain adjustments impair the performance in fast time-variant channels when simultaneously using a high modulation order.
 
-One drawback of a slow AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
+Another drawback of a slow AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power, for example in a near–far scenario. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
 
 | **$\mu$** | **GI length in $\mu s$** | **STF length in $\mu s$**  |
 |:---------:|:------------------------:|:--------------------------:|
