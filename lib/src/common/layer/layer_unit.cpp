@@ -18,32 +18,20 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/cvg/cvg.hpp"
-
 #include "dectnrp/common/layer/layer_unit.hpp"
-#include "dectnrp/cvg/io/inp_res.hpp"
 
-namespace dectnrp::cvg {
+#include "dectnrp/common/prog/log.hpp"
 
-cvg_t::cvg_t(const size_t id_, const cvg_config_t cvg_config_)
-    : common::layer_unit_t("cvg", id_),
-      cvg_config(cvg_config_) {}
+namespace dectnrp::common {
 
-common::adt::expected_t<handle_t, request_error_t> cvg_t::request_handle(
-    [[maybe_unused]] const request_t request) {
-    return handle_t();
+void layer_unit_t::log_line(const std::string line) const {
+    dectnrp_log_inf("{}", std::string(identifier + " | " + line));
 }
 
-inp_res_t cvg_t::write([[maybe_unused]] const handle_t& handle, [[maybe_unused]] const inp_t& inp) {
-    return inp_res_t();
+void layer_unit_t::log_lines(const std::vector<std::string> lines) const {
+    for (const auto& line : lines) {
+        log_line(line);
+    }
 }
 
-out_res_t cvg_t::read([[maybe_unused]] const handle_t& handle, [[maybe_unused]] out_t& out) {
-    return out_res_t();
-}
-
-close_res_t cvg_t::close([[maybe_unused]] const handle_t& handle) { return close_res_t(); }
-
-void cvg_t::shutdown() {}
-
-}  // namespace dectnrp::cvg
+}  // namespace dectnrp::common

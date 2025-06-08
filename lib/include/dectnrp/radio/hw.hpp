@@ -28,7 +28,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "dectnrp/common/ant.hpp"
 #include "dectnrp/common/layer/layer_unit.hpp"
@@ -102,12 +101,6 @@ class hw_t : public common::layer_unit_t {
         void set_tx_gap_samples(const uint32_t tx_gap_samples_);
 
         /**
-         * \brief Call after nof antennas and sample rate have been negotiated. Puts device into a
-         * state so that we can call start_threads().
-         */
-        virtual void initialize_device() = 0;
-
-        /**
          * \brief Call after nof antennas and sample rate have been negotiated. Creates internal
          * buffers for streaming. Actual buffer size can depend on device type, therefore virtual.
          *
@@ -122,6 +115,18 @@ class hw_t : public common::layer_unit_t {
          * \param ant_streams_length_samples RX ring buffer length
          */
         virtual void initialize_buffer_rx(const uint32_t ant_streams_length_samples) = 0;
+
+        /**
+         * \brief Call after nof antennas and sample rate have been negotiated. Puts device into a
+         * state so that TX/RX threads can be started.
+         */
+        virtual void initialize_device() = 0;
+
+        /**
+         * \brief Called after initialize_device(). Starts threads to exchange information with
+         * radio device.
+         */
+        virtual void start_threads_and_iq_streaming() = 0;
 
         /**
          * \brief Command time of timed commands, all functions ending with tc.
@@ -259,8 +264,7 @@ class hw_t : public common::layer_unit_t {
         const hw_config_t hw_config;
 
     protected:
-        virtual std::vector<std::string> start_threads() override = 0;
-        virtual std::vector<std::string> stop_threads() override = 0;
+        virtual void shutdown() override = 0;
 
         // ##################################################
         // hardware properties

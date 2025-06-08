@@ -74,23 +74,19 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
 
     init_appiface();
 
-    // ##################################################
-    // debugging
-
-    // -
-}
-
-std::vector<std::string> tfw_p2p_pt_t::start_threads() {
     // first start sink
     app_client->start_sc();
 
     // then start source
     app_server->start_sc();
 
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
+    // ##################################################
+    // debugging
+
+    // -
 }
 
-std::vector<std::string> tfw_p2p_pt_t::stop_threads() {
+void tfw_p2p_pt_t::shutdown() {
     // gracefully shut down any DECT NR+ connections, block this function until done
     // ToDo
 
@@ -102,8 +98,6 @@ std::vector<std::string> tfw_p2p_pt_t::stop_threads() {
 
     // finally stop the data sink
     app_client->stop_sc();
-
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
 }
 
 void tfw_p2p_pt_t::init_radio() {

@@ -73,7 +73,7 @@ phy::machigh_phy_t tfw_basic_t::work_pdc_async(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_basic_t::work_upper(
+phy::machigh_phy_t tfw_basic_t::work_application(
     [[maybe_unused]] const upper::upper_report_t& upper_report) {
     return phy::machigh_phy_t();
 }
@@ -82,14 +82,6 @@ phy::machigh_phy_tx_t tfw_basic_t::work_chscan_async([[maybe_unused]] const phy:
     return phy::machigh_phy_tx_t();
 }
 
-std::vector<std::string> tfw_basic_t::start_threads() {
-    dectnrp_log_inf("start_threads() called, press ctrl+c to stop program");
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
-}
-
-std::vector<std::string> tfw_basic_t::stop_threads() {
-    dectnrp_log_inf("stop_threads() called");
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
-}
+void tfw_basic_t::shutdown() { dectnrp_log_inf("shutdown() called"); }
 
 }  // namespace dectnrp::upper::tfw::basic

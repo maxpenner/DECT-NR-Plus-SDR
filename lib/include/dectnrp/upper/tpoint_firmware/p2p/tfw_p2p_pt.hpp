@@ -49,12 +49,12 @@ class tfw_p2p_pt_t final : public tfw_p2p_base_t {
 
         // work_pcc() and work_pdc_async() are implemented in deriving classes
 
-        phy::machigh_phy_t work_upper(const upper::upper_report_t& upper_report) override final;
+        phy::machigh_phy_t work_application(
+            const upper::upper_report_t& upper_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
 
     private:
-        std::vector<std::string> start_threads() override final;
-        std::vector<std::string> stop_threads() override final;
+        void shutdown() override final;
 
         // ##################################################
         // Radio Layer + PHY

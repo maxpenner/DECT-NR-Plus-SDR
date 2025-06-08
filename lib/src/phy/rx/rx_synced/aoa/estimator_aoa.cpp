@@ -22,12 +22,9 @@
 
 namespace dectnrp::phy {
 
-estimator_aoa_t::estimator_aoa_t([[maybe_unused]] const uint32_t b_max,
-                                 [[maybe_unused]] const uint32_t N_RX_)
+estimator_aoa_t::estimator_aoa_t([[maybe_unused]] const uint32_t b_max, const uint32_t N_RX_)
     : estimator_t(),
-      N_RX(N_RX_) {
-    (void)N_RX;
-}
+      N_RX(N_RX_) {}
 
 estimator_aoa_t::~estimator_aoa_t() {}
 

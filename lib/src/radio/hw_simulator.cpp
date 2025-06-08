@@ -23,7 +23,6 @@
 #include <utility>
 
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/calibration/cal_simulator.hpp"
 #include "dectnrp/radio/complex.hpp"
@@ -73,7 +72,7 @@ void hw_simulator_t::set_samp_rate(const uint32_t samp_rate_in) {
     dectnrp_assert(0 < samp_rate_in, "sample rate is 0");
 
     if (!hw_config_t::sim_samp_rate_lte) {
-        // assume we can generate any DECTNRP sample rate
+        // assume we can generate any DECT NR+ sample rate
         samp_rate = samp_rate_in;
     } else {
         // multiple of the LTE base frequency 30.72MS/s*16 = 245760000MS/s*2 = 491520000MS/s.
@@ -102,6 +101,23 @@ void hw_simulator_t::set_samp_rate(const uint32_t samp_rate_in) {
     }
 }
 
+void hw_simulator_t::initialize_buffer_tx_pool(const uint32_t ant_streams_length_samples_max) {
+    dectnrp_assert(tx_gap_samples > 0, "allowed gap size should be larger than 0");
+
+    buffer_tx_pool = std::make_unique<buffer_tx_pool_t>(
+        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + tx_gap_samples);
+}
+
+void hw_simulator_t::initialize_buffer_rx(const uint32_t ant_streams_length_samples) {
+    buffer_rx = std::make_unique<buffer_rx_t>(id,
+                                              nof_antennas,
+                                              ant_streams_length_samples,
+                                              samp_rate,
+                                              vspptx->spp_size,
+                                              hw_config.rx_prestream_ms,
+                                              hw_config.rx_notification_period_us);
+}
+
 void hw_simulator_t::initialize_device() {
     dectnrp_assert(50 <= hw_config.sim_spp_us, "spp too small");
     dectnrp_assert(hw_config.sim_spp_us <= 500, "spp too large");
@@ -123,21 +139,47 @@ void hw_simulator_t::initialize_device() {
     set_rx_power_ant_0dBFS_uniform_tc(1000.0f);  // minimum RX sensitivity
 }
 
-void hw_simulator_t::initialize_buffer_tx_pool(const uint32_t ant_streams_length_samples_max) {
-    dectnrp_assert(tx_gap_samples > 0, "allowed gap size should be larger than 0");
+void hw_simulator_t::start_threads_and_iq_streaming() {
+    dectnrp_assert(!keep_running.load(std::memory_order_acquire), "keep_running already true");
 
-    buffer_tx_pool = std::make_unique<buffer_tx_pool_t>(
-        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + tx_gap_samples);
-}
+    dectnrp_assert(0 < nof_antennas && nof_antennas <= nof_antennas_max,
+                   "number of antennas not set correctly");
+    dectnrp_assert(samp_rate > 0, "sample rate not set correctly");
+    dectnrp_assert(tx_gap_samples > 0, "minimum size of gap not set correctly");
 
-void hw_simulator_t::initialize_buffer_rx(const uint32_t ant_streams_length_samples) {
-    buffer_rx = std::make_unique<buffer_rx_t>(id,
-                                              nof_antennas,
-                                              ant_streams_length_samples,
-                                              samp_rate,
-                                              vspptx->spp_size,
-                                              hw_config.rx_prestream_ms,
-                                              hw_config.rx_notification_period_us);
+    // set before starting threads
+    keep_running.store(true, std::memory_order_release);
+
+    // start tx thread
+    if (!common::threads_new_rt_mask_custom(
+            &thread_tx, &work_tx, this, hw_config.tx_thread_config)) {
+        dectnrp_assert_failure("simulator unable to start TX thread");
+    }
+
+    log_line(std::string("Thread TX " +
+                         common::get_thread_properties(thread_tx, hw_config.tx_thread_config)));
+
+#ifdef RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS
+    common::watch_t::sleep<common::milli>(RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS);
+#endif
+
+    // start rx thread
+    if (!common::threads_new_rt_mask_custom(
+            &thread_rx, &work_rx, this, hw_config.rx_thread_config)) {
+        dectnrp_assert_failure("simulator unable to start RX thread");
+    }
+
+    log_line(std::string("Thread RX " +
+                         common::get_thread_properties(thread_rx, hw_config.rx_thread_config)));
+
+    std::string str("Simulator");
+    str.append(" nof_antennas " + std::to_string(nof_antennas));
+    str.append(" samp_rate " + std::to_string(samp_rate));
+    str.append(" spp_size " + std::to_string(buffer_rx->nof_new_samples_max));
+    str.append(" buffer_tx_pool.size() " + std::to_string(buffer_tx_pool->nof_buffer_tx));
+    str.append(" buffer_rx->ant_streams_length_samples " +
+               std::to_string(buffer_rx->ant_streams_length_samples));
+    log_line(str);
 }
 
 void hw_simulator_t::set_command_time([[maybe_unused]] const int64_t set_time) {
@@ -265,61 +307,7 @@ void hw_simulator_t::set_all_buffers_as_transmitted() {
     }
 }
 
-std::vector<std::string> hw_simulator_t::start_threads() {
-    dectnrp_assert(!keep_running.load(std::memory_order_acquire), "keep_running already true");
-
-    dectnrp_assert(0 < nof_antennas && nof_antennas <= nof_antennas_max,
-                   "number of antennas not set correctly");
-    dectnrp_assert(samp_rate > 0, "sample rate not set correctly");
-    dectnrp_assert(tx_gap_samples > 0, "minimum size of gap not set correctly");
-
-    // set before starting threads
-    keep_running.store(true, std::memory_order_release);
-
-    // start tx thread
-    if (!common::threads_new_rt_mask_custom(
-            &thread_tx, &work_tx, this, hw_config.tx_thread_config)) {
-        dectnrp_assert_failure("simulator unable to start TX thread");
-    }
-
-    dectnrp_log_inf(
-        "{}",
-        std::string("THREAD " + identifier + " TX " +
-                    common::get_thread_properties(thread_tx, hw_config.tx_thread_config)));
-
-#ifdef RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS
-    common::watch_t::sleep<common::milli>(RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS);
-#endif
-
-    // start rx thread
-    if (!common::threads_new_rt_mask_custom(
-            &thread_rx, &work_rx, this, hw_config.rx_thread_config)) {
-        dectnrp_assert_failure("simulator unable to start RX thread");
-    }
-
-    dectnrp_log_inf(
-        "{}",
-        std::string("THREAD " + identifier + " RX " +
-                    common::get_thread_properties(thread_rx, hw_config.rx_thread_config)));
-
-    std::vector<std::string> lines;
-
-    std::string str("Simulator");
-    str.append(" nof_antennas " + std::to_string(nof_antennas));
-    str.append(" samp_rate " + std::to_string(samp_rate));
-    str.append(" spp_size " + std::to_string(buffer_rx->nof_new_samples_max));
-    str.append(" buffer_tx_pool.size() " + std::to_string(buffer_tx_pool->nof_buffer_tx));
-    str.append(" buffer_rx->ant_streams_length_samples " +
-               std::to_string(buffer_rx->ant_streams_length_samples));
-    lines.push_back(str);
-
-    str.clear();
-    lines.push_back(str);
-
-    return lines;
-}
-
-std::vector<std::string> hw_simulator_t::stop_threads() {
+void hw_simulator_t::shutdown() {
     dectnrp_assert(keep_running.load(std::memory_order_acquire), "keep_running already false");
 
     keep_running.store(false, std::memory_order_release);
@@ -327,23 +315,17 @@ std::vector<std::string> hw_simulator_t::stop_threads() {
     pthread_join(thread_rx, NULL);
     pthread_join(thread_tx, NULL);
 
-    std::vector<std::string> lines;
-
     std::string str("Simulator");
     str.append(" Sample Rate Target " + std::to_string(static_cast<double>(samp_rate)));
     str.append(" TX Samples sent " + std::to_string(tx_stats.samples_sent));
     str.append(" TX Sample Rate Is " + std::to_string(tx_stats.samp_rate_is));
     str.append(" RX Samples received " + std::to_string(rx_stats.samples_received));
     str.append(" RX Sample Rate Is " + std::to_string(rx_stats.samp_rate_is));
-    lines.push_back(str);
+    log_line(str);
 
-    // each TX Buffer
     for (auto& elem : buffer_tx_pool->buffer_tx_vec) {
-        auto lines_w = elem->report_stop();
-        lines.insert(lines.end(), lines_w.begin(), lines_w.end());
+        log_lines(elem->report_stop());
     }
-
-    return lines;
 }
 
 void* hw_simulator_t::work_tx(void* hw_simulator) {

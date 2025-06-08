@@ -74,8 +74,8 @@ static constexpr uint32_t max_callbacks{4};
 // ##################################################
 // Application
 
-static constexpr uint32_t app_max_connections{32U};
-static constexpr uint32_t app_max_queue_datagram{256U};
+static constexpr uint32_t app_max_connections{32};
+static constexpr uint32_t app_max_queue_datagram{256};
 static constexpr uint32_t app_max_queue_datagram_byte{1600};
 
 /// maximum number of datagrams reportable at once

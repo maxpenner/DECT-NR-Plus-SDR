@@ -88,6 +88,12 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
         std::vector<uint32_t>{8050},
         queue_size);
 
+    // client thread is not started as all data is forwarded directly from the calling worker thread
+    // app_client->start_sc();
+
+    // then start source
+    app_server->start_sc();
+
     stage_a.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
 }
 
@@ -203,7 +209,7 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
     return machigh_phy;
 }
 
-phy::machigh_phy_t tfw_rtt_t::work_upper(const upper::upper_report_t& upper_report) {
+phy::machigh_phy_t tfw_rtt_t::work_application(const upper::upper_report_t& upper_report) {
     // return immediately if PT
     if (0 < tpoint_config.firmware_id) {
         return phy::machigh_phy_t();
@@ -263,24 +269,12 @@ phy::machigh_phy_tx_t tfw_rtt_t::work_chscan_async([[maybe_unused]] const phy::c
     return phy::machigh_phy_tx_t();
 }
 
-std::vector<std::string> tfw_rtt_t::start_threads() {
-    // first start sink
-    // app_client->start_sc();
-
-    // then start source
-    app_server->start_sc();
-
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
-}
-
-std::vector<std::string> tfw_rtt_t::stop_threads() {
+void tfw_rtt_t::shutdown() {
     // first stop accepting new data from upper
     app_server->stop_sc();
 
-    // finally stop the data sink
+    // data sink threads were not started
     // app_client->stop_sc();
-
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
 }
 
 void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {

@@ -144,7 +144,7 @@ uint32_t coarse_peak_f_domain_t::estimate_beta() const {
         RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_FIND_BETA_THRESHOLD_DB_OR_ASSUME_MAX_OF_RDC);
 
     /* Our current best guess for beta is b_estim. We will now keep testing the next larger beta
-     * value until we either have tested all, or until we believe to have found the correct of beta.
+     * value until we either have tested all, or until we believe to have found the correct beta.
      */
     for (uint32_t b_idx = 1; b_estim <= b_max; ++b_idx) {
         // next beta to best

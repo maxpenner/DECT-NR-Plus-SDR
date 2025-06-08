@@ -45,11 +45,11 @@ struct worker_pool_config_t {
         sp3::packet_sizes_t maximum_packet_sizes;
 
         /**
-         * \brief The PHY always provides the radio layer with signals of the same sample
-         * rate, irrespective of bandwidth or subcarrier spacing of a specific DECTNRP
-         * packet. Therefore, depending on the values of u and b, the actual oversampling
-         * can be much larger. The minimum oversampling is used for the maximum values of u
-         * and b from the radio device class definition.
+         * \brief The PHY always provides the radio layer with signals of the same sample rate,
+         * irrespective of bandwidth or subcarrier spacing of a specific DECT NR+ packet. Therefore,
+         * depending on the values of u and b, the actual oversampling can be much larger. The
+         * minimum oversampling is used for the maximum values of u and b from the radio device
+         * class definition.
          */
         uint32_t os_min;
 

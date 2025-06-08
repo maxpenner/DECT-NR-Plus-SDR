@@ -132,10 +132,11 @@ class tpoint_t : public common::layer_unit_t {
 #ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
         /**
          * \brief Function called after decoding a PCC with incorrect CRC. This function is virtual
-         * while all other functions which are pure virtual. Furthermore, it must be explicitly
-         * enabled by defining the enclosing preprocessor directive. Notifying the MAC of a PCC with
-         * incorrect CRC can be useful if MAC was expecting a packet at that time. Downside is that
-         * the MAC layer is called and blocked for every false alarm produced by synchronization.
+         * while all other functions are pure virtual. Furthermore, it must be explicitly enabled by
+         * defining the enclosing preprocessor directive. Notifying the MAC layer of a PCC with
+         * incorrect CRC can be useful if the MAC layer was expecting a packet at that time.
+         * Downside is that the MAC layer is called and blocked for every false alarm produced by
+         * synchronization.
          *
          * 1. Called only after unsuccessful PCC decoding, i.e. incorrect CRC.
          * 2. Called in the same FIFO order as put into the job_queue (sync_report_t).
@@ -170,12 +171,13 @@ class tpoint_t : public common::layer_unit_t {
          * \param upper_report information about available data on upper layers
          * \return
          */
-        [[nodiscard]] virtual phy::machigh_phy_t work_upper(const upper_report_t& upper_report) = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_application(
+            const upper_report_t& upper_report) = 0;
 
         /**
          * \brief Function called when a channel measurement has finished.
          *
-         * 1. PHY conducts ch measurements only if machigh_phy_t<true>::chscan_opt contains a value.
+         * 1. PHY conducts ch measurements only if machigh_phy_t::chscan_opt contains a value.
          * 2. Called ASAP, but not in any specific order relative to other work-functions (async).
          *
          * \param chscan result of channel measurement instruction
@@ -189,25 +191,13 @@ class tpoint_t : public common::layer_unit_t {
         const tpoint_config_t tpoint_config;
 
         /**
-         * \brief For any firmware, this function is always called first. It is called by the main
-         * thread once the entire stack (radio, PHY and upper) has been fully initialized and all
-         * constructors called. It can be used to start threads. Most firmware will need to start
-         * threads for the application layer interface.
-         *
-         * \return lines to log
-         */
-        [[nodiscard]] virtual std::vector<std::string> start_threads() override = 0;
-
-        /**
          * \brief Function will be called by the main thread when the SDR is supposed to shut down
          * because the user pressed ctrl+c. A firmware may block this function until all DECT NR+
          * connections have been shut down gracefully. After that, all job queues should be made
          * impermeable so that the work-function will no longer be called after processing the
          * remaining jobs. Lastly, all threads must be shut down.
-         *
-         * \return lines to log
          */
-        [[nodiscard]] virtual std::vector<std::string> stop_threads() override = 0;
+        virtual void shutdown() override = 0;
 
         // ##################################################
         // Radio Layer + PHY

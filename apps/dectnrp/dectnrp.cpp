@@ -101,12 +101,11 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    // write log file before starting threads
+    // write log file before starting IQ streaming
     dectnrp_log_save();
 
-    upper->start_threads_of_all_layer_units();  // start upper layers
-    phy->start_threads_of_all_layer_units();    // start PHY layer and get ready to process samples
-    radio->start_threads_of_all_layer_units();  // start radio layer and stream samples
+    phy->start_threads_of_all_layer_units();    // get ready to process IQ samples
+    radio->start_threads_of_all_layer_units();  // start streaming IQ samples
 
     // wait for user to press ctrl+c
     while (!ctrl_c_pressed.load()) {
@@ -117,10 +116,11 @@ int main(int argc, char** argv) {
     dectnrp_log_inf("dectnrp ctrl+c pressed.");
     dectnrp_print_inf("dectnrp ctrl+c pressed.");
 
-    upper->stop_threads_of_all_layer_units();  // gracefully shut down DECTNRP connections
-    phy->stop_threads_of_all_layer_units();    // stop processing samples
-    radio->stop_threads_of_all_layer_units();  // stop streaming samples, stopped last as many
-                                               // components depend on an increasing sample time
+    // gracefully shut down DECT NR+ connections
+    upper->shutdown_all_layer_units();
+    phy->shutdown_all_layer_units();    // stop processing samples
+    radio->shutdown_all_layer_units();  // stop streaming samples, stopped last as many
+                                        // components depend on an increasing sample time
 
     // log and print stop time
     const auto stop_time_str = dectnrp::common::watch_t::get_date_and_time();

@@ -48,7 +48,7 @@ class rx_pacer_t {
         /// pacer holds two kinds of localbuffers
         enum class localbuffer_choice_t {
             LOCALBUFFER_FILTER = 0,   // filter at hardware sample rate
-            LOCALBUFFER_RESAMPLE = 1  // resample to DECTNRP sample rate
+            LOCALBUFFER_RESAMPLE = 1  // resample to DECT NR+ sample rate
         };
 
         const uint32_t nof_antennas_limited;

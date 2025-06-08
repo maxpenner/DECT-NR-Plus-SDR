@@ -88,4 +88,10 @@ phy_t::phy_t(const phy_config_t& phy_config_, const radio::radio_t& radio_)
     }
 }
 
+void phy_t::start_threads_of_all_layer_units() {
+    for (auto& worker_pool : layer_unit_vec) {
+        worker_pool->start_threads_and_get_ready_to_process_iq_samples();
+    }
+}
+
 }  // namespace dectnrp::phy

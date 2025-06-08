@@ -61,10 +61,10 @@ class tx_descriptor_t {
         /// 6.3.4 Beamforming and antenna port mapping
         const uint32_t codebook_index;
 
-        /// additional PHY meta data that is not strictly DECTNRP related
+        /// additional PHY meta data that is not strictly DECT NR+ related
         const tx_meta_t tx_meta;
 
-        /// additional radio layer meta data that is not strictly DECTNRP related
+        /// additional radio layer meta data that is not strictly DECT NR+ related
         const radio::buffer_tx_meta_t buffer_tx_meta;
 
         /**

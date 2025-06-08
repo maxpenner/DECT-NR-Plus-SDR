@@ -41,15 +41,15 @@ namespace dectnrp::phy {
 class fec_t {
     public:
         /**
-         * \brief This class acts as a state machine facilitating the encoding and decoding of
-         * DECTNRP packets with the channel coding functionality provided by srsran. It comprises
+         * \brief This class acts as a state machine facilitating the encoding and decoding of DECT
+         * NR+ packets with the channel coding functionality provided by srsran. It comprises
          * segmentation, scrambling and the turbo encoding and decoding of transport blocks for
          * either PCC or PDC. For turbo encoding and decoding, fec_t internally uses functionality
          * from pcc_enc.h and pcd_enc.h, which are variations of srsran functions from
          * https://github.com/srsran/srsRAN_4G/blob/master/lib/src/phy/phch/sch.c.
          *
          * The major changes compared to the srsran functions are codeblock-wise encoding/decoding,
-         * and DECTNRP specific additions such as scrambling (based on network ID), CRC masking and
+         * and DECT NR+ specific additions such as scrambling (based on network ID), CRC masking and
          * the number of soft bits at the receiver.
          *
          * \param packet_sizes_maximum maximum packet sizes across the radio device class
