@@ -101,7 +101,7 @@ phy::machigh_phy_t tfw_chscanner_t::work_pdc_async(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_chscanner_t::work_upper(
+phy::machigh_phy_t tfw_chscanner_t::work_application(
     [[maybe_unused]] const upper::upper_report_t& upper_report) {
     return phy::machigh_phy_t();
 }

@@ -56,7 +56,7 @@ phy::machigh_phy_t tfw_p2p_pt_t::work_irregular(const phy::irregular_report_t& i
     return ret;
 }
 
-phy::machigh_phy_t tfw_p2p_pt_t::work_upper(
+phy::machigh_phy_t tfw_p2p_pt_t::work_application(
     [[maybe_unused]] const upper::upper_report_t& upper_report) {
     phy::machigh_phy_t machigh_phy;
 

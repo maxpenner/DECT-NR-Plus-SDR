@@ -225,7 +225,8 @@ void worker_tx_rx_t::work() {
 
             } else if (std::holds_alternative<upper::upper_report_t>(job.content)) {
                 TOKEN_LOCK_FIFO_OR_RETURN
-                auto machigh_phy = tpoint->work_upper(std::get<upper::upper_report_t>(job.content));
+                auto machigh_phy =
+                    tpoint->work_application(std::get<upper::upper_report_t>(job.content));
                 token->unlock_fifo();
 
                 run_tx_chscan(machigh_phy.tx_descriptor_vec,

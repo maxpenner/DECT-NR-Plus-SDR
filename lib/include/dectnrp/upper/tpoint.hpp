@@ -171,7 +171,8 @@ class tpoint_t : public common::layer_unit_t {
          * \param upper_report information about available data on upper layers
          * \return
          */
-        [[nodiscard]] virtual phy::machigh_phy_t work_upper(const upper_report_t& upper_report) = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_application(
+            const upper_report_t& upper_report) = 0;
 
         /**
          * \brief Function called when a channel measurement has finished.

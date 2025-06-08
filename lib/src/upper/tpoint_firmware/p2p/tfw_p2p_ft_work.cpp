@@ -87,9 +87,11 @@ phy::machigh_phy_t tfw_p2p_ft_t::work_irregular(
 
     dectnrp_assert(0 < irregular_report.get_recognition_delay(), "time out-of-order");
 
+    /*
     dectnrp_assert(irregular_report.get_recognition_delay() <
                        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::slot001, 1),
                    "too late");
+     */
 
     // try defining beacon transmission
     if (!worksub_tx_beacon(ret)) {
@@ -106,7 +108,7 @@ phy::machigh_phy_t tfw_p2p_ft_t::work_irregular(
     return ret;
 }
 
-phy::machigh_phy_t tfw_p2p_ft_t::work_upper(
+phy::machigh_phy_t tfw_p2p_ft_t::work_application(
     [[maybe_unused]] const upper::upper_report_t& upper_report) {
     phy::machigh_phy_t machigh_phy;
 

@@ -63,7 +63,7 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
 | 4 | work_pcc()            | called upon PCC reception with correct CRC (event-driven)                 |
 | 5 | work_pcc_crc_error()  | called upon PCC reception with incorrect CRC (event-driven, optional)     |
 | 6 | work_pdc_async()      | called upon PDC reception (event-driven)                                  |
-| 7 | work_upper()          | called upon availability of new data on application layer (event-driven)  |
+| 7 | work_application()    | called upon availability of new data on application layer (event-driven)  |
 | 8 | work_chscan_async()   | called upon finished channel measurement (event-driven)                   |
 | 9 | shutdown()            | called once during SDR shutdown                                           |
 

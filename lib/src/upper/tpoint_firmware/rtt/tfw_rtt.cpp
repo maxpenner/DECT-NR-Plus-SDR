@@ -209,7 +209,7 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
     return machigh_phy;
 }
 
-phy::machigh_phy_t tfw_rtt_t::work_upper(const upper::upper_report_t& upper_report) {
+phy::machigh_phy_t tfw_rtt_t::work_application(const upper::upper_report_t& upper_report) {
     // return immediately if PT
     if (0 < tpoint_config.firmware_id) {
         return phy::machigh_phy_t();
