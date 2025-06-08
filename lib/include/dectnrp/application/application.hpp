@@ -35,7 +35,7 @@
 
 namespace dectnrp::application {
 
-class app_t {
+class application_t {
     public:
         /**
          * \brief Root class for all servers (accept ingress packets from external applications to
@@ -47,18 +47,18 @@ class app_t {
          * \param N_queue same as the number of connections
          * \param queue_size every queue has the same size
          */
-        explicit app_t(const uint32_t id_,
-                       const common::threads_core_prio_config_t thread_config_,
-                       phy::job_queue_t& job_queue_,
-                       const uint32_t N_queue,
-                       const queue_size_t queue_size);
-        virtual ~app_t() = default;
+        explicit application_t(const uint32_t id_,
+                               const common::threads_core_prio_config_t thread_config_,
+                               phy::job_queue_t& job_queue_,
+                               const uint32_t N_queue,
+                               const queue_size_t queue_size);
+        virtual ~application_t() = default;
 
-        app_t() = delete;
-        app_t(const app_t&) = delete;
-        app_t& operator=(const app_t&) = delete;
-        app_t(app_t&&) = delete;
-        app_t& operator=(app_t&&) = delete;
+        application_t() = delete;
+        application_t(const application_t&) = delete;
+        application_t& operator=(const application_t&) = delete;
+        application_t(application_t&&) = delete;
+        application_t& operator=(application_t&&) = delete;
 
         static constexpr uint32_t APP_POLL_WAIT_TIMEOUT_MS{100U};
 
@@ -85,7 +85,7 @@ class app_t {
         common::watch_t watch_since_start;
 
         /// local buffer which inheriting classes can use to temporarily buffer write
-        uint8_t buffer_local[limits::app_max_queue_datagram_byte];
+        uint8_t buffer_local[limits::application_max_queue_datagram_byte];
 
         /// one queue per connection
         std::vector<std::unique_ptr<queue_t>> queue_vec;
@@ -94,8 +94,9 @@ class app_t {
         virtual void work_sc() = 0;
 
         /// start routine called from pthread_create()
-        static void* work_spawn(void* app_server_or_client) {
-            app_t* calling_instance = reinterpret_cast<app_t*>(app_server_or_client);
+        static void* work_spawn(void* application_server_or_client) {
+            application_t* calling_instance =
+                reinterpret_cast<application_t*>(application_server_or_client);
             calling_instance->work_sc();
             return nullptr;
         }

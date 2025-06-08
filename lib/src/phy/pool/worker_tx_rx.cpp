@@ -223,10 +223,10 @@ void worker_tx_rx_t::work() {
                 // layer configured the HARQ process
                 maclow_phy.hp_rx->finalize(pdc_report.crc_status);
 
-            } else if (std::holds_alternative<upper::upper_report_t>(job.content)) {
+            } else if (std::holds_alternative<application::application_report_t>(job.content)) {
                 TOKEN_LOCK_FIFO_OR_RETURN
-                auto machigh_phy =
-                    tpoint->work_application(std::get<upper::upper_report_t>(job.content));
+                auto machigh_phy = tpoint->work_application(
+                    std::get<application::application_report_t>(job.content));
                 token->unlock_fifo();
 
                 run_tx_chscan(machigh_phy.tx_descriptor_vec,

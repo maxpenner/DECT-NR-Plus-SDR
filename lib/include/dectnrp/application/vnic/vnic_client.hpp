@@ -20,12 +20,12 @@
 
 #pragma once
 
-#include "dectnrp/application/app_client.hpp"
+#include "dectnrp/application/application_client.hpp"
 #include "dectnrp/application/vnic/vnic.hpp"
 
 namespace dectnrp::application::vnic {
 
-class vnic_client_t final : public app_client_t, public vnic_t {
+class vnic_client_t final : public application_client_t, public vnic_t {
     public:
         explicit vnic_client_t(const uint32_t id_,
                                const common::threads_core_prio_config_t thread_config_,

@@ -22,9 +22,8 @@
 
 #include <cstdint>
 #include <memory>
-#include <string>
-#include <vector>
 
+#include "dectnrp/application/application_report.hpp"
 #include "dectnrp/common/layer/layer_unit.hpp"
 #include "dectnrp/phy/agc/agc_rx.hpp"
 #include "dectnrp/phy/agc/agc_tx.hpp"
@@ -39,7 +38,6 @@
 #include "dectnrp/sections_part3/derivative/packet_sizes_def.hpp"
 #include "dectnrp/upper/tpoint_config.hpp"
 #include "dectnrp/upper/tpoint_stats.hpp"
-#include "dectnrp/upper/upper_report.hpp"
 
 namespace dectnrp::upper {
 
@@ -166,13 +164,13 @@ class tpoint_t : public common::layer_unit_t {
          * application layer.
          *
          * 1. Call rate depends on settings on application layer.
-         * 2. Called in the same FIFO order as put into the job_queue (upper_report_).
+         * 2. Called in the same FIFO order as put into the job_queue (application_report_).
          *
-         * \param upper_report information about available data on upper layers
+         * \param application_report information about available data on upper layers
          * \return
          */
         [[nodiscard]] virtual phy::machigh_phy_t work_application(
-            const upper_report_t& upper_report) = 0;
+            const application::application_report_t& application_report) = 0;
 
         /**
          * \brief Function called when a channel measurement has finished.

@@ -31,7 +31,7 @@ vnic_client_t::vnic_client_t(const uint32_t id_,
                              phy::job_queue_t& job_queue_,
                              const int tuntap_fd_,
                              const queue_size_t queue_size)
-    : app_client_t(id_, thread_config_, job_queue_, 1, queue_size),
+    : application_client_t(id_, thread_config_, job_queue_, 1, queue_size),
       vnic_t(),
       tuntap_fd(tuntap_fd_) {}
 

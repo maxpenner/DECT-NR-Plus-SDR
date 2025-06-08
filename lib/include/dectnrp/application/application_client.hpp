@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "dectnrp/application/app.hpp"
+#include "dectnrp/application/application.hpp"
 
 #define APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
 #ifdef APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
@@ -31,20 +31,20 @@
 
 namespace dectnrp::application {
 
-class app_client_t : public app_t {
+class application_client_t : public application_t {
     public:
-        explicit app_client_t(const uint32_t id_,
-                              const common::threads_core_prio_config_t thread_config_,
-                              phy::job_queue_t& job_queue_,
-                              const uint32_t N_queue,
-                              const queue_size_t queue_size);
-        virtual ~app_client_t() = default;
+        explicit application_client_t(const uint32_t id_,
+                                      const common::threads_core_prio_config_t thread_config_,
+                                      phy::job_queue_t& job_queue_,
+                                      const uint32_t N_queue,
+                                      const queue_size_t queue_size);
+        virtual ~application_client_t() = default;
 
-        app_client_t() = delete;
-        app_client_t(const app_client_t&) = delete;
-        app_client_t& operator=(const app_client_t&) = delete;
-        app_client_t(app_client_t&&) = delete;
-        app_client_t& operator=(app_client_t&&) = delete;
+        application_client_t() = delete;
+        application_client_t(const application_client_t&) = delete;
+        application_client_t& operator=(const application_client_t&) = delete;
+        application_client_t(application_client_t&&) = delete;
+        application_client_t& operator=(application_client_t&&) = delete;
 
         virtual uint32_t get_n_connections() const override = 0;
 

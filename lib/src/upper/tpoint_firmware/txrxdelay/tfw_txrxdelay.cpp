@@ -140,7 +140,7 @@ phy::machigh_phy_t tfw_txrxdelay_t::work_pdc_async(
 }
 
 phy::machigh_phy_t tfw_txrxdelay_t::work_application(
-    [[maybe_unused]] const upper::upper_report_t& upper_report) {
+    [[maybe_unused]] const application::application_report_t& application_report) {
     return phy::machigh_phy_t();
 }
 

@@ -109,7 +109,7 @@ uint32_t queue_t::read_try(uint8_t* dst) {
 }
 
 queue_level_t queue_t::get_queue_level_under_lock(const uint32_t n) const {
-    dectnrp_assert(n <= limits::max_queue_level_reported,
+    dectnrp_assert(n <= limits::application_max_queue_level_reported,
                    "number of levels for reporting is limited");
 
     // make sure returned vector is readable

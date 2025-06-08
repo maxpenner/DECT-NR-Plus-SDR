@@ -18,21 +18,21 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/application/app_client.hpp"
+#include "dectnrp/application/application_client.hpp"
 
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::application {
 
-app_client_t::app_client_t(const uint32_t id_,
-                           const common::threads_core_prio_config_t thread_config_,
-                           phy::job_queue_t& job_queue_,
-                           const uint32_t N_queue,
-                           const queue_size_t queue_size)
-    : app_t(id_, thread_config_, job_queue_, N_queue, queue_size),
+application_client_t::application_client_t(const uint32_t id_,
+                                           const common::threads_core_prio_config_t thread_config_,
+                                           phy::job_queue_t& job_queue_,
+                                           const uint32_t N_queue,
+                                           const queue_size_t queue_size)
+    : application_t(id_, thread_config_, job_queue_, N_queue, queue_size),
       indicator_cnt{0} {}
 
-void app_client_t::trigger_forward_nto(const uint32_t datagram_cnt) {
+void application_client_t::trigger_forward_nto(const uint32_t datagram_cnt) {
 #ifdef APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
     lockv.lock();
 #else
@@ -46,7 +46,7 @@ void app_client_t::trigger_forward_nto(const uint32_t datagram_cnt) {
 #endif
 }
 
-void app_client_t::work_sc() {
+void application_client_t::work_sc() {
     // external exit condition
     while (keep_running.load(std::memory_order_acquire)) {
 #ifdef APPLICATION_APP_CLIENT_CONDITION_VARIABLE_OR_BUSY_WAITING
@@ -92,25 +92,25 @@ void app_client_t::work_sc() {
     }
 };
 
-void app_client_t::inc_indicator_cnt_under_lock(const uint32_t datagram_cnt) {
+void application_client_t::inc_indicator_cnt_under_lock(const uint32_t datagram_cnt) {
     // ToDo: use conn_idx for better efficiency
 
     indicator_cnt += datagram_cnt;
 }
 
-void app_client_t::dec_indicator_cnt_under_lock() {
+void application_client_t::dec_indicator_cnt_under_lock() {
     // ToDo: use conn_idx for better efficiency
 
     indicator_cnt--;
 }
 
-uint32_t app_client_t::get_indicator_cnt_under_lock() {
+uint32_t application_client_t::get_indicator_cnt_under_lock() {
     // ToDo: return conn_idx for better efficiency
 
     return indicator_cnt;
 }
 
-void app_client_t::forward_under_lock() {
+void application_client_t::forward_under_lock() {
     // process until all indicated datagrams have been processed
     while (get_indicator_cnt_under_lock() > 0) {
 #ifdef ENABLE_ASSERT

@@ -22,8 +22,8 @@
 
 #include <optional>
 
-#include "dectnrp/application/app_client.hpp"
-#include "dectnrp/application/app_server.hpp"
+#include "dectnrp/application/application_client.hpp"
+#include "dectnrp/application/application_server.hpp"
 #include "dectnrp/common/adt/callbacks.hpp"
 #include "dectnrp/cvg/cvg.hpp"
 #include "dectnrp/dlc/dlc.hpp"
@@ -194,11 +194,11 @@ class tfw_p2p_base_t : public tpoint_t {
         // ##################################################
         // Application Layer
 
-        /// app_server receives data from external applications and feeds it into the SDR
-        std::unique_ptr<application::app_server_t> app_server;
+        /// application_server receives data from external applications and feeds it into the SDR
+        std::unique_ptr<application::application_server_t> application_server;
 
-        /// app_client takes data from the SDR and sends it to external applications
-        std::unique_ptr<application::app_client_t> app_client;
+        /// application_client takes data from the SDR and sends it to external applications
+        std::unique_ptr<application::application_client_t> application_client;
 
         virtual void init_appiface() = 0;
 

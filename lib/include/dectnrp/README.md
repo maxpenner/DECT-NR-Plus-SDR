@@ -13,7 +13,7 @@ Mutexes are typically held for a very short period of time, so switching to a sp
 
 Switching from a condition variable to busy waiting will lead to one or multiple CPU cores spinning at 100% usage.
 
-- [app_client.hpp](/lib/include/dectnrp/application/app_client.hpp)
+- [application_client.hpp](/lib/include/dectnrp/application/application_client.hpp)
 - [baton.hpp](/lib/include/dectnrp/phy/pool/baton.hpp)
 - [job_queue_naive.hpp](/lib/include/dectnrp/phy/pool/job_queue_naive.hpp)
 - [token.hpp](/lib/include/dectnrp/phy/pool/token.hpp)

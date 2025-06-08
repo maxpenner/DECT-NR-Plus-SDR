@@ -33,7 +33,7 @@ socket_server_t::socket_server_t(const uint32_t id_,
                                  phy::job_queue_t& job_queue_,
                                  const std::vector<uint32_t> ports,
                                  const queue_size_t queue_size)
-    : app_server_t(id_, thread_config_, job_queue_, ports.size(), queue_size),
+    : application_server_t(id_, thread_config_, job_queue_, ports.size(), queue_size),
       socketx_t(ports) {
     // setup one socket for every UDP ports requested
     for (uint32_t i = 0; i < udp_vec.size(); ++i) {

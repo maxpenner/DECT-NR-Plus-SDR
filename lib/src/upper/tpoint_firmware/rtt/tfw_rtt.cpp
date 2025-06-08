@@ -72,27 +72,27 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     plcf_10.DFMCS = psdef.mcs_index;
 
     const application::queue_size_t queue_size = {
-        .N_datagram = 4, .N_datagram_max_byte = limits::app_max_queue_datagram_byte};
+        .N_datagram = 4, .N_datagram_max_byte = limits::application_max_queue_datagram_byte};
 
-    app_server = std::make_unique<application::sockets::socket_server_t>(
+    application_server = std::make_unique<application::sockets::socket_server_t>(
         id,
-        tpoint_config.app_server_thread_config,
+        tpoint_config.application_server_thread_config,
         job_queue,
         std::vector<uint32_t>{TFW_RTT_UDP_PORT_DATA, TFW_RTT_UDP_PORT_PRINT},
         queue_size);
 
-    app_client = std::make_unique<application::sockets::socket_client_t>(
+    application_client = std::make_unique<application::sockets::socket_client_t>(
         id,
-        tpoint_config.app_client_thread_config,
+        tpoint_config.application_client_thread_config,
         job_queue,
         std::vector<uint32_t>{8050},
         queue_size);
 
     // client thread is not started as all data is forwarded directly from the calling worker thread
-    // app_client->start_sc();
+    // application_client->start_sc();
 
     // then start source
-    app_server->start_sc();
+    application_server->start_sc();
 
     stage_a.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
 }
@@ -185,7 +185,7 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
         memcpy(&stage_a[TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE], &rtt, sizeof(rtt));
 
         // forward to rtt
-        app_client->write_immediate(0, &stage_a[0], a_raw.second);
+        application_client->write_immediate(0, &stage_a[0], a_raw.second);
 
         ++N_measurement_rx_cnt;
     } else {
@@ -209,7 +209,8 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
     return machigh_phy;
 }
 
-phy::machigh_phy_t tfw_rtt_t::work_application(const upper::upper_report_t& upper_report) {
+phy::machigh_phy_t tfw_rtt_t::work_application(
+    const application::application_report_t& application_report) {
     // return immediately if PT
     if (0 < tpoint_config.firmware_id) {
         return phy::machigh_phy_t();
@@ -219,7 +220,7 @@ phy::machigh_phy_t tfw_rtt_t::work_application(const upper::upper_report_t& uppe
      * completed and the result should be logged. All variables must be reset for a new measurement
      * run.
      */
-    if (upper_report.conn_idx == 1) {
+    if (application_report.conn_idx == 1) {
         // convert rtt to us (unused if logging is turned off)
         [[maybe_unused]] const int64_t rtt_min_us = rtt_min / int64_t{1000};
         [[maybe_unused]] const int64_t rtt_max_us = rtt_max / int64_t{1000};
@@ -249,7 +250,7 @@ phy::machigh_phy_t tfw_rtt_t::work_application(const upper::upper_report_t& uppe
         rms_max = -1000.0f;
 
         // invalidate payload
-        app_server->read_nto(1, nullptr);
+        application_server->read_nto(1, nullptr);
 
         return phy::machigh_phy_t();
     }
@@ -271,10 +272,10 @@ phy::machigh_phy_tx_t tfw_rtt_t::work_chscan_async([[maybe_unused]] const phy::c
 
 void tfw_rtt_t::shutdown() {
     // first stop accepting new data from upper
-    app_server->stop_sc();
+    application_server->stop_sc();
 
     // data sink threads were not started
-    // app_client->stop_sc();
+    // application_client->stop_sc();
 }
 
 void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
@@ -296,14 +297,14 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // define MAC PDU
     if (tpoint_config.firmware_id == 0) {
         // datagram sizes for first connection
-        const auto queue_level = app_server->get_queue_level_nto(0, 1);
+        const auto queue_level = application_server->get_queue_level_nto(0, 1);
 
         dectnrp_assert(queue_level.N_filled > 0, "queue empty");
         dectnrp_assert(queue_level.levels[0] <= packet_sizes.N_TB_byte,
                        "N_TB_byte is only {}",
                        packet_sizes.N_TB_byte);
 
-        app_server->read_nto(0, hp_tx->get_a_tb());
+        application_server->read_nto(0, hp_tx->get_a_tb());
     } else {
         memcpy(hp_tx->get_a_tb(), &stage_a[0], packet_sizes.N_TB_byte);
     }
