@@ -52,8 +52,7 @@ class tfw_p2p_ft_t final : public tfw_p2p_base_t {
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
 
     private:
-        std::vector<std::string> start_threads() override final;
-        std::vector<std::string> stop_threads() override final;
+        void shutdown() override final;
 
         // ##################################################
         // Radio Layer + PHY

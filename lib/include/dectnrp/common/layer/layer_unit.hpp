@@ -48,27 +48,19 @@ class layer_unit_t {
         const size_t id;
         const std::string identifier;
 
-        /**
-         * \brief Each layer_unit startup is a two-stage process. First stage is the call of the
-         * constructors, and the second stage is a call of start_threads() which can be used to
-         * start any required threads. Both stages are executed by the main thread. Threads should
-         * not be started from the constructors.
-         *
-         * \return Lines of reporting the units was to be written to the log file. Unit type and
-         * number will the prepended by the layer.
-         */
-        virtual std::vector<std::string> start_threads() = 0;
+        void log_line(const std::string line) const;
+        void log_lines(const std::vector<std::string> lines) const;
 
         /**
          * \brief This function is called by the main thread to signal that the SDR must shutdown.
-         * Threads started in start_threads() must be stopped. Deriving classes may also block this
-         * function, and hence the main thread, for a finite duration to execute additional shutdown
-         * functionality.
+         * Any running threads must be stopped. Deriving classes may also block this function, and
+         * hence the main thread, for a finite duration to execute additional shutdown
+         * functionality, for instance, shutting down a DECT NR+ connection gracefully.
          *
          * \return Lines of reporting the units was to be written to the log file. Unit type and
          * number will the prepended by the layer.
          */
-        virtual std::vector<std::string> stop_threads() = 0;
+        virtual void shutdown() = 0;
 };
 
 }  // namespace dectnrp::common

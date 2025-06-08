@@ -27,7 +27,6 @@
 #include <vector>
 
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/calibration/cal_usrp_b210.hpp"
@@ -200,6 +199,23 @@ void hw_usrp_t::set_samp_rate(const uint32_t samp_rate_in) {
     for (std::size_t i = 0; i < std::to_underlying(tmin_t::CARDINALITY); ++i) {
         tmin_samples.at(i) = get_samples_in_us(tmin_us.at(i));
     }
+}
+
+void hw_usrp_t::initialize_buffer_tx_pool(const uint32_t ant_streams_length_samples_max) {
+    dectnrp_assert(tx_gap_samples > 0, "allowed gap size should be larger than 0");
+
+    buffer_tx_pool = std::make_unique<buffer_tx_pool_t>(
+        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + tx_gap_samples);
+}
+
+void hw_usrp_t::initialize_buffer_rx(const uint32_t ant_streams_length_samples) {
+    buffer_rx = std::make_unique<buffer_rx_t>(id,
+                                              nof_antennas,
+                                              ant_streams_length_samples,
+                                              samp_rate,
+                                              rx_stream->get_max_num_samps(),
+                                              hw_config.rx_prestream_ms,
+                                              hw_config.rx_notification_period_us);
 }
 
 void hw_usrp_t::initialize_device() {
@@ -376,14 +392,14 @@ void hw_usrp_t::initialize_device() {
         try {
             m_usrp->set_rx_dc_offset(true, i);
         } catch (std::exception& e) {
-            dectnrp_log_wrn("Exception during USRP configuration: {}", e.what());
+            log_line("Exception during USRP configuration: {}" + std::string(e.what()));
         }
 
         // not all settings are supported by all devices
         try {
             m_usrp->set_rx_iq_balance(true, i);
         } catch (std::exception& e) {
-            dectnrp_log_wrn("Exception during USRP configuration: {}", e.what());
+            log_line("Exception during USRP configuration: {}" + std::string(e.what()));
         }
     }
 
@@ -426,21 +442,73 @@ void hw_usrp_t::initialize_device() {
     rx_stream = m_usrp->get_rx_stream(stream_args_rx);
 }
 
-void hw_usrp_t::initialize_buffer_tx_pool(const uint32_t ant_streams_length_samples_max) {
-    dectnrp_assert(tx_gap_samples > 0, "allowed gap size should be larger than 0");
+void hw_usrp_t::start_threads_and_iq_streaming() {
+    dectnrp_assert(!keep_running.load(std::memory_order_acquire), "keep_running already true");
 
-    buffer_tx_pool = std::make_unique<buffer_tx_pool_t>(
-        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + tx_gap_samples);
-}
+    dectnrp_assert(0 < nof_antennas && nof_antennas <= nof_antennas_max,
+                   "Number of antennas not set correctly.");
+    dectnrp_assert(samp_rate > 0, "Sample rate not set correctly.");
+    dectnrp_assert(tx_gap_samples > 0, "Minimum size of gap not set correctly.");
 
-void hw_usrp_t::initialize_buffer_rx(const uint32_t ant_streams_length_samples) {
-    buffer_rx = std::make_unique<buffer_rx_t>(id,
-                                              nof_antennas,
-                                              ant_streams_length_samples,
-                                              samp_rate,
-                                              rx_stream->get_max_num_samps(),
-                                              hw_config.rx_prestream_ms,
-                                              hw_config.rx_notification_period_us);
+    // give the threads the okay to execute
+    keep_running.store(true, std::memory_order_release);
+
+    /* Correct order of thread startup:
+     * 1) First TX async helper to detect potential errors.
+     *
+     * 2) TX thread. However, transmission timing should depend on RX sense of time which remains at
+     * 0 as long as the RX thread is not running.
+     *
+     * 3) RX thread, which increases system time and only by that enables upper layers to start
+     * transmission.
+     */
+
+    // start tx thread async helper thread
+    if (!common::threads_new_rt_mask_custom(&thread_tx_async_helper,
+                                            &work_tx_async_helper,
+                                            this,
+                                            hw_config.usrp_tx_async_helper_thread_config)) {
+        dectnrp_assert_failure("USRP unable to start TX async helper thread.");
+    }
+
+    log_line(
+        std::string("Thread Async Helper " +
+                    common::get_thread_properties(thread_tx_async_helper,
+                                                  hw_config.usrp_tx_async_helper_thread_config)));
+
+    // start tx thread first
+    if (!common::threads_new_rt_mask_custom(
+            &thread_tx, &work_tx, this, hw_config.tx_thread_config)) {
+        dectnrp_assert_failure("USRP unable to start TX work thread.");
+    }
+
+    log_line(std::string("Thread TX " +
+                         common::get_thread_properties(thread_tx, hw_config.tx_thread_config)));
+
+#ifdef RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS
+    common::watch_t::sleep<common::milli>(RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS);
+#endif
+
+    // start rx thread second
+    if (!common::threads_new_rt_mask_custom(
+            &thread_rx, &work_rx, this, hw_config.rx_thread_config)) {
+        dectnrp_assert_failure("USRP unable to start RX work thread.");
+    }
+
+    log_line(std::string("Thread RX " +
+                         common::get_thread_properties(thread_rx, hw_config.rx_thread_config)));
+
+    std::string str("USRP");
+    str.append(" nof_antennas " + std::to_string(nof_antennas));
+    str.append(" samp_rate " + std::to_string(samp_rate));
+    str.append(" buffer_tx_pool.nof_buffer_tx " + std::to_string(buffer_tx_pool->nof_buffer_tx));
+    str.append(" buffer_rx->ant_streams_length_samples " +
+               std::to_string(buffer_rx->ant_streams_length_samples));
+    log_line(str);
+
+    str.clear();
+    str.append("product " + device_addrs.at(0).get("product", ""));
+    log_line(str);
 }
 
 void hw_usrp_t::set_command_time(const int64_t set_time) {
@@ -552,85 +620,7 @@ void hw_usrp_t::pps_set_full_sec_at_next_pps_and_wait_until_it_passed() {
     dectnrp_assert(full_second_to_pps_measured_samples < samp_rate, "ill-defined");
 }
 
-std::vector<std::string> hw_usrp_t::start_threads() {
-    dectnrp_assert(!keep_running.load(std::memory_order_acquire), "keep_running already true");
-
-    dectnrp_assert(0 < nof_antennas && nof_antennas <= nof_antennas_max,
-                   "Number of antennas not set correctly.");
-    dectnrp_assert(samp_rate > 0, "Sample rate not set correctly.");
-    dectnrp_assert(tx_gap_samples > 0, "Minimum size of gap not set correctly.");
-
-    // give the threads the okay to execute
-    keep_running.store(true, std::memory_order_release);
-
-    /* Correct order of thread startup:
-     * 1) First TX async helper to detect potential errors.
-     *
-     * 2) TX thread. However, transmission timing should depend on RX sense of time which remains at
-     * 0 as long as the RX thread is not running.
-     *
-     * 3) RX thread, which increases system time and only by that enables upper layers to start
-     * transmission.
-     */
-
-    // start tx thread async helper thread
-    if (!common::threads_new_rt_mask_custom(&thread_tx_async_helper,
-                                            &work_tx_async_helper,
-                                            this,
-                                            hw_config.usrp_tx_async_helper_thread_config)) {
-        dectnrp_assert_failure("USRP unable to start TX async helper thread.");
-    }
-
-    dectnrp_log_inf(
-        "{}",
-        std::string("THREAD " + identifier + " Async Helper " +
-                    common::get_thread_properties(thread_tx_async_helper,
-                                                  hw_config.usrp_tx_async_helper_thread_config)));
-
-    // start tx thread first
-    if (!common::threads_new_rt_mask_custom(
-            &thread_tx, &work_tx, this, hw_config.tx_thread_config)) {
-        dectnrp_assert_failure("USRP unable to start TX work thread.");
-    }
-
-    dectnrp_log_inf(
-        "{}",
-        std::string("THREAD " + identifier + " TX " +
-                    common::get_thread_properties(thread_tx, hw_config.tx_thread_config)));
-
-#ifdef RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS
-    common::watch_t::sleep<common::milli>(RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS);
-#endif
-
-    // start rx thread second
-    if (!common::threads_new_rt_mask_custom(
-            &thread_rx, &work_rx, this, hw_config.rx_thread_config)) {
-        dectnrp_assert_failure("USRP unable to start RX work thread.");
-    }
-
-    dectnrp_log_inf(
-        "{}",
-        std::string("THREAD " + identifier + " RX " +
-                    common::get_thread_properties(thread_rx, hw_config.rx_thread_config)));
-
-    std::vector<std::string> lines;
-
-    std::string str("USRP");
-    str.append(" nof_antennas " + std::to_string(nof_antennas));
-    str.append(" samp_rate " + std::to_string(samp_rate));
-    str.append(" buffer_tx_pool.nof_buffer_tx " + std::to_string(buffer_tx_pool->nof_buffer_tx));
-    str.append(" buffer_rx->ant_streams_length_samples " +
-               std::to_string(buffer_rx->ant_streams_length_samples));
-    lines.push_back(str);
-
-    str.clear();
-    str.append("product " + device_addrs.at(0).get("product", ""));
-    lines.push_back(str);
-
-    return lines;
-}
-
-std::vector<std::string> hw_usrp_t::stop_threads() {
+void hw_usrp_t::shutdown() {
     dectnrp_assert(keep_running.load(std::memory_order_acquire), "keep_running already false");
 
     // this variable will be read in all threads and leads to them leaving their loops
@@ -639,8 +629,6 @@ std::vector<std::string> hw_usrp_t::stop_threads() {
     pthread_join(thread_rx, NULL);
     pthread_join(thread_tx, NULL);
     pthread_join(thread_tx_async_helper, NULL);
-
-    std::vector<std::string> lines;
 
     // USRP
     std::string str("USRP");
@@ -654,15 +642,12 @@ std::vector<std::string> hw_usrp_t::stop_threads() {
         std::to_string((buffer_rx->time_as_sample_cnt_64 / static_cast<int64_t>(samp_rate)) %
                        60ULL) +
         " sec");
-    lines.push_back(str);
+    log_line(str);
 
     // each TX Buffer
     for (auto& elem : buffer_tx_pool->buffer_tx_vec) {
-        auto lines_w = elem->report_stop();
-        lines.insert(lines.end(), lines_w.begin(), lines_w.end());
+        log_lines(elem->report_stop());
     }
-
-    return lines;
 }
 
 void* hw_usrp_t::work_tx_async_helper(void* hw_usrp) {
@@ -717,14 +702,10 @@ void* hw_usrp_t::work_tx_async_helper(void* hw_usrp) {
         }
 
         if (watch.is_elapsed<common::seconds>(5)) {
-            dectnrp_log_inf("{} USRP ACK: {}  UF: {}  UFIP: {}  SE: {}  SEIB: {}  LATE: {}",
-                            calling_instance->identifier,
-                            ACK,
-                            UF,
-                            UFIP,
-                            SE,
-                            SEIB,
-                            LATE);
+            calling_instance->log_line(
+                "USRP ACK: " + std::to_string(ACK) + "  UF: " + std::to_string(UF) +
+                "  UFIP: " + std::to_string(UFIP) + "  SE: " + std::to_string(SE) +
+                "  SEIB: " + std::to_string(SEIB) + "  LATE: " + std::to_string(LATE));
             watch.reset();
         }
     }
@@ -782,21 +763,13 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
     // timeout when calling send(), should ideally never timeout
     const double send_timeout = 0.01;
 
-    // show properties of streamer to verify correct operation
-    dectnrp_log_inf(
-        "{} USRP Work TX Thread: rate:         {} MHz", calling_instance->identifier, rate / 1e6);
-    dectnrp_log_inf("{} USRP Work TX Thread: nof channels: {}",
-                    calling_instance->identifier,
-                    tx_stream->get_num_channels());
-    dectnrp_log_inf("{} USRP Work TX Thread: spp samples:  {}",
-                    calling_instance->identifier,
-                    tx_stream->get_max_num_samps());
-    dectnrp_log_inf("{} USRP Work TX Thread: spp length:   {} us",
-                    calling_instance->identifier,
-                    static_cast<double>(tx_stream->get_max_num_samps()) / rate * 1e6);
-    dectnrp_log_inf("{} USRP Work TX Thread: send_timeout: {} us",
-                    calling_instance->identifier,
-                    send_timeout * 1e6);
+    // clang-format off
+    calling_instance->log_line("USRP Work TX Thread: rate:         " + std::to_string(rate / 1e6) + " MHz");
+    calling_instance->log_line("USRP Work TX Thread: nof channels: " + std::to_string(tx_stream->get_num_channels()));
+    calling_instance->log_line("USRP Work TX Thread: spp samples:  " + std::to_string(tx_stream->get_max_num_samps()));
+    calling_instance->log_line("USRP Work TX Thread: spp length:   " + std::to_string(static_cast<double>(tx_stream->get_max_num_samps()) / rate * 1e6) + " us");
+    calling_instance->log_line("USRP Work TX Thread: send_timeout: " + std::to_string(rate / 1e6) + " us");
+    // clang-format on
 
     // each packet has a 64 bit number, we transmit them in exact order
     int64_t tx_order_id_expected = 0;
@@ -1044,25 +1017,14 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
     // initial delay until streaming begins, irrelevant for later latency
     const double rx_delay = 5000.0 / 1.0e6;
 
-    // show properties of streamer to verify correct operation
-    dectnrp_log_inf("{} USRP Work RX Thread: rate:         {} MHz",
-                    calling_instance->identifier.c_str(),
-                    rate / 1e6);
-    dectnrp_log_inf("{} USRP Work RX Thread: nof channels: {}",
-                    calling_instance->identifier.c_str(),
-                    rx_stream->get_num_channels());
-    dectnrp_log_inf("{} USRP Work RX Thread: spp samples:  {}",
-                    calling_instance->identifier.c_str(),
-                    static_cast<long unsigned int>(max_samps_per_packet));
-    dectnrp_log_inf("{} USRP Work RX Thread: spp length:   {} us",
-                    calling_instance->identifier.c_str(),
-                    static_cast<double>(max_samps_per_packet) / rate * 1e6);
-    dectnrp_log_inf("{} USRP Work RX Thread: rx_delay:     {} us",
-                    calling_instance->identifier.c_str(),
-                    rx_delay * 1e6);
-    dectnrp_log_inf("{} USRP Work RX Thread: recv_timeout: {} us",
-                    calling_instance->identifier.c_str(),
-                    recv_timeout * 1e6);
+    // clang-format off
+    calling_instance->log_line("USRP Work RX Thread: rate:         " + std::to_string(rate / 1e6) + " MHz");
+    calling_instance->log_line("USRP Work RX Thread: nof channels: " + std::to_string(rx_stream->get_num_channels()));
+    calling_instance->log_line("USRP Work RX Thread: spp samples:  " + std::to_string(static_cast<long unsigned int>(max_samps_per_packet)));
+    calling_instance->log_line("USRP Work RX Thread: spp length:   " + std::to_string(static_cast<double>(max_samps_per_packet) / rate * 1e6) + " us");
+    calling_instance->log_line("USRP Work RX Thread: rx_delay:     " + std::to_string(rx_delay * 1e6) + " us");
+    calling_instance->log_line("USRP Work RX Thread: recv_timeout: " + std::to_string(recv_timeout * 1e6) + " us");
+    // clang-format on
 
     // updated for every new call of rx_streamer->recv()
     int64_t time_of_first_sample;

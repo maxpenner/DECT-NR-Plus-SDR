@@ -48,8 +48,7 @@ class cvg_t final : public common::layer_unit_t {
         [[nodiscard]] close_res_t close(const handle_t& handle);
 
     private:
-        virtual std::vector<std::string> start_threads() override final;
-        virtual std::vector<std::string> stop_threads() override final;
+        virtual void shutdown() override final;
 
         [[maybe_unused]] cvg_config_t cvg_config;
 };

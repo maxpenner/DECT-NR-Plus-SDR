@@ -249,14 +249,10 @@ phy::machigh_phy_tx_t tfw_loopback_t::work_chscan_async(
     return phy::machigh_phy_tx_t();
 }
 
-std::vector<std::string> tfw_loopback_t::start_threads() { return std::vector<std::string>(); }
-
-std::vector<std::string> tfw_loopback_t::stop_threads() {
+void tfw_loopback_t::shutdown() {
     if (state == STATE_t::DEAD_END) {
         save_all_results_to_file();
     }
-
-    return std::vector<std::string>();
 }
 
 void tfw_loopback_t::packet_params_t::update_plcf_unpacked() {

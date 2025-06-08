@@ -269,8 +269,7 @@ void tx_t::generate_tx_packet(const tx_descriptor_t& tx_descriptor_,
         // scale in frequency domain, execute IFFT and insert CP
         run_ifft_cp_scale(N_b_CP_os, final_scale);
 
-        // resample from DECTNRP sample rate to actual hardware sample rate and write into output
-        // buffer
+        // resample from DECT NR+ sample rate to hardware sample rate and write into output buffer
         run_resampling_and_freq_shift(N_b_CP_os);
 
 #ifdef PHY_TX_BACKPRESSURED_OR_PACKET_IS_ALWAYS_COMPLETE

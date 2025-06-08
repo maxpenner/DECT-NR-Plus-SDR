@@ -51,9 +51,8 @@ class tfw_loopback_t : public tpoint_t {
         phy::machigh_phy_t work_upper(const upper::upper_report_t& upper_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
 
-    protected:
-        std::vector<std::string> start_threads() override final;
-        std::vector<std::string> stop_threads() override final;
+    private:
+        void shutdown() override final;
 
         radio::hw_simulator_t* hw_simulator;
 
@@ -78,6 +77,7 @@ class tfw_loopback_t : public tpoint_t {
         /// timing between states
         int64_t state_time_reference_64;
 
+    protected:
         /// every deriving class uses a parameter vector
         uint32_t parameter_cnt;
 

@@ -149,13 +149,7 @@ phy::machigh_phy_tx_t tfw_txrxdelay_t::work_chscan_async(
     return phy::machigh_phy_tx_t();
 }
 
-std::vector<std::string> tfw_txrxdelay_t::start_threads() {
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
-}
-
-std::vector<std::string> tfw_txrxdelay_t::stop_threads() {
-    return std::vector<std::string>{{"tpoint " + firmware_name + " " + std::to_string(id)}};
-}
+void tfw_txrxdelay_t::shutdown() {}
 
 int64_t tfw_txrxdelay_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // request harq process

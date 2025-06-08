@@ -302,7 +302,7 @@ void worker_tx_rx_t::run_tx_chscan(const tx_descriptor_vec_t& tx_descriptor_vec,
 
             if (buffer_tx == nullptr) {
                 ++stats.tx_fail_no_buffer;
-                dectnrp_log_wrn("worker_tx_rx {} got nullptr as buffer", id);
+                dectnrp_assert_failure("worker_tx_rx {} got nullptr as buffer", id);
                 continue;
             }
 
@@ -315,7 +315,7 @@ void worker_tx_rx_t::run_tx_chscan(const tx_descriptor_vec_t& tx_descriptor_vec,
 
             if (buffer_tx == nullptr) {
                 ++stats.tx_fail_no_buffer_other_hw;
-                dectnrp_log_wrn("worker_tx_rx {} got nullptr as buffer from other hw", id);
+                dectnrp_assert_failure("worker_tx_rx {} got nullptr as buffer from other hw", id);
                 continue;
             }
         }

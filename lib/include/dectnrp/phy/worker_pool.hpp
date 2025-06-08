@@ -23,7 +23,6 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
-#include <string>
 #include <vector>
 
 #include "dectnrp/common/json/json_export.hpp"
@@ -89,13 +88,17 @@ class worker_pool_t final : public common::layer_unit_t {
          */
         void add_network_id(const uint32_t network_id);
 
+        /**
+         * \brief Threads must be started after construction because upper must give each
+         * worker_pool_t a reference to its tpoint_t.
+         */
+        void start_threads_and_get_ready_to_process_iq_samples();
+
     private:
         const worker_pool_config_t worker_pool_config;
 
-        std::vector<std::string> start_threads() override final;
-        std::vector<std::string> stop_threads() override final;
+        void shutdown() override final;
 
-        /// all workers shut down when false
         std::atomic<bool> keep_running;
 
         /// job queue: filled by worker_sync_t, read by worker_tx_rx

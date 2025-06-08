@@ -48,8 +48,7 @@ class tfw_basic_t final : public tpoint_t {
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
 
     private:
-        std::vector<std::string> start_threads() override final;
-        std::vector<std::string> stop_threads() override final;
+        void shutdown() override final;
 
         int64_t sync_time_last_64{common::adt::UNDEFINED_EARLY_64};
         int64_t barrier_time_64{common::adt::UNDEFINED_EARLY_64};

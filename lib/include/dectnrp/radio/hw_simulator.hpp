@@ -58,10 +58,11 @@ class hw_simulator_t final : public hw_t {
 
         /// called from the main thread before starting any threads, not thread-safe
         void set_samp_rate(const uint32_t samp_rate_in) override final;
-        void initialize_device() override final;
         void initialize_buffer_tx_pool(
             const uint32_t ant_streams_length_samples_max) override final;
         void initialize_buffer_rx(const uint32_t ant_streams_length_samples) override final;
+        void initialize_device() override final;
+        void start_threads_and_iq_streaming() override final;
 
         /// called from tpoint firmware, thread-safe
         void set_command_time(const int64_t set_time = -1) override final;
@@ -91,8 +92,7 @@ class hw_simulator_t final : public hw_t {
         void set_all_buffers_as_transmitted();
 
     private:
-        std::vector<std::string> start_threads() override final;
-        std::vector<std::string> stop_threads() override final;
+        void shutdown() override final;
 
         /// ##################################################
         /// hardware properties and simulation properties

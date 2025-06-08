@@ -44,9 +44,11 @@ class layer_config_t {
             : filepath(directory + filename),
               json_parsed(jsonparse::parse(filepath)) {}
 
-        std::size_t get_nof_layer_unit_config() const { return layer_unit_config_vec.size(); };
+        [[nodiscard]] std::size_t get_nof_layer_unit_config() const {
+            return layer_unit_config_vec.size();
+        };
 
-        const T& get_layer_unit_config(const std::size_t id) const {
+        [[nodiscard]] const T& get_layer_unit_config(const std::size_t id) const {
             return layer_unit_config_vec[id];
         };
 

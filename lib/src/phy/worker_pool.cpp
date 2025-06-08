@@ -23,7 +23,6 @@
 #include <string>
 
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/phy/rx/sync/sync_param.hpp"
@@ -36,7 +35,6 @@ worker_pool_t::worker_pool_t(const worker_pool_config_t& worker_pool_config_,
                              phy_radio_t& phy_radio_)
     : layer_unit_t(worker_pool_config_.json_log_key, worker_pool_config_.id),
       worker_pool_config(worker_pool_config_) {
-    // switched to true in start_threads()
     keep_running.store(false, std::memory_order_release);
 
     job_queue = std::make_unique<job_queue_t>(id, worker_pool_config.nof_jobs);
@@ -115,7 +113,7 @@ void worker_pool_t::add_network_id(const uint32_t network_id) {
     }
 }
 
-std::vector<std::string> worker_pool_t::start_threads() {
+void worker_pool_t::start_threads_and_get_ready_to_process_iq_samples() {
     // assert
     for (auto& elem : worker_tx_rx_vec) {
         dectnrp_assert(elem->tpoint != nullptr, "tpoint pointer not initialized.");
@@ -136,12 +134,10 @@ std::vector<std::string> worker_pool_t::start_threads() {
             dectnrp_assert_failure("Worker pool {} unable to start TX/RX work thread.", id);
         }
 
-        dectnrp_log_inf("{}",
-                        std::string("THREAD " + identifier + " Worker TX/RX " +
-                                    std::to_string(worker_tx_rx_vec[i]->id) + " " +
-                                    common::get_thread_properties(
-                                        worker_tx_rx_vec[i]->work_thread,
-                                        worker_pool_config.threads_core_prio_config_tx_rx_vec[i])));
+        log_line(std::string("Thread Worker TX/RX " +
+                             common::get_thread_properties(
+                                 worker_tx_rx_vec[i]->work_thread,
+                                 worker_pool_config.threads_core_prio_config_tx_rx_vec[i])));
     }
 
     // spawn workers for sync second, they produce jobs
@@ -154,15 +150,11 @@ std::vector<std::string> worker_pool_t::start_threads() {
             dectnrp_assert_failure("Worker pool {} unable to start sync work thread.", id);
         }
 
-        dectnrp_log_inf("{}",
-                        std::string("THREAD " + identifier + " Worker Sync " +
-                                    std::to_string(worker_tx_rx_vec[i]->id) + " " +
-                                    common::get_thread_properties(
-                                        worker_sync_vec[i]->work_thread,
-                                        worker_pool_config.threads_core_prio_config_sync_vec[i])));
+        log_line(std::string("Thread Worker Sync " +
+                             common::get_thread_properties(
+                                 worker_sync_vec[i]->work_thread,
+                                 worker_pool_config.threads_core_prio_config_sync_vec[i])));
     }
-
-    std::vector<std::string> lines;
 
     /* The synchronization configuration determines how often a termination point firmware is called
      * per second, i.e. the number of regular calls. Since that number if quite useful, we write it
@@ -172,33 +164,27 @@ std::vector<std::string> worker_pool_t::start_threads() {
         constants::u8_subslots_per_sec / worker_pool_config.rx_chunk_length_u8subslot;
     const float regular_calls_span_us = 1e6 / static_cast<float>(regular_calls_per_second);
 
-    lines.push_back("regular_calls_per_second " + std::to_string(regular_calls_per_second) +
-                    " regular_calls_span_us " + std::to_string(regular_calls_span_us));
+    log_line("regular_calls_per_second " + std::to_string(regular_calls_per_second) +
+             " regular_calls_span_us " + std::to_string(regular_calls_span_us));
 
-    auto lines_jq = job_queue->report_start();
-    lines.insert(lines.end(), lines_jq.begin(), lines_jq.end());
+    log_lines(job_queue->report_start());
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
     if (json_export.get() != nullptr) {
-        auto lines_jex = json_export->report_start();
-        lines.insert(lines.end(), lines_jex.begin(), lines_jex.end());
+        log_lines(json_export->report_start());
     }
 #endif
 
-    for (auto& elem : worker_tx_rx_vec) {
-        auto lines_w = elem->report_start();
-        lines.insert(lines.end(), lines_w.begin(), lines_w.end());
+    for (const auto& elem : worker_tx_rx_vec) {
+        log_lines(elem->report_start());
     }
 
-    for (auto& elem : worker_sync_vec) {
-        auto lines_w = elem->report_start();
-        lines.insert(lines.end(), lines_w.begin(), lines_w.end());
+    for (const auto& elem : worker_sync_vec) {
+        log_lines(elem->report_start());
     }
-
-    return lines;
 }
 
-std::vector<std::string> worker_pool_t::stop_threads() {
+void worker_pool_t::shutdown() {
     dectnrp_assert(keep_running.load(std::memory_order_acquire), "keep_running already false");
 
     // this variable will be read in all workers and leads to them leaving their loops
@@ -207,43 +193,30 @@ std::vector<std::string> worker_pool_t::stop_threads() {
     // stop job producers first
     for (auto& elem : worker_sync_vec) {
         pthread_join(elem->work_thread, NULL);
-
-        dectnrp_log_inf(
-            "{}",
-            std::string("THREAD " + identifier + " Worker TX/RX " + std::to_string(elem->id)));
+        log_line(std::string("Thread Worker TX/RX " + std::to_string(elem->id)));
     }
 
     // stop job consumers second
     for (auto& elem : worker_tx_rx_vec) {
         pthread_join(elem->work_thread, NULL);
-
-        dectnrp_log_inf(
-            "{}", std::string("THREAD " + identifier + " Worker Sync " + std::to_string(elem->id)));
+        log_line(std::string("Thread Worker Sync " + std::to_string(elem->id)));
     }
 
-    std::vector<std::string> lines;
-
-    auto lines_jq = job_queue->report_stop();
-    lines.insert(lines.end(), lines_jq.begin(), lines_jq.end());
+    log_lines(job_queue->report_stop());
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
     if (json_export.get() != nullptr) {
-        auto lines_jex = json_export->report_stop();
-        lines.insert(lines.end(), lines_jex.begin(), lines_jex.end());
+        log_lines(json_export->report_stop());
     }
 #endif
 
     for (auto& elem : worker_tx_rx_vec) {
-        auto lines_w = elem->report_stop();
-        lines.insert(lines.end(), lines_w.begin(), lines_w.end());
+        log_lines(elem->report_stop());
     }
 
     for (auto& elem : worker_sync_vec) {
-        auto lines_w = elem->report_stop();
-        lines.insert(lines.end(), lines_w.begin(), lines_w.end());
+        log_lines(elem->report_stop());
     }
-
-    return lines;
 }
 
 void worker_pool_t::check_sync_param() const {
@@ -279,7 +252,7 @@ void worker_pool_t::check_sync_timing() const {
      * 
      *  Example:    RX buffer of 10 milliseconds, can be shorter or longer
      *              24 slots
-     *              Each slots contains 16 u=8-subslots (this is a fixed DECTNRP property)
+     *              Each slots contains 16 u=8-subslots (this is a fixed DECT NR+ property)
      *              Each chunk contains 8 u=8-subslots
      *              Chunks are split between 2 workers
      *              Within the workers, the resampler is fed with units, their size is a multiple of u=8-subslots.
@@ -324,12 +297,12 @@ void worker_pool_t::check_sync_timing() const {
 }
 
 int64_t worker_pool_t::get_sync_time_unique_limit() const {
-    /* In a DECTNRP packet transmission, the reasonable minimum time difference between two
-     * packet synchronization times is the length of the shortest possible STF, otherwise STFs
-     * overlap. With DF and GI taken into consideration, the reasonable minimum time difference
-     * between two packets becomes even larger. However, if we synchronize the same packet twice in
-     * different sync_worker_t instances, the time difference between both synchronization times is
-     * much smaller. Thus, we can easily distinguish these both cases.
+    /* In a DECT NR+ packet transmission, the reasonable minimum time difference between two packet
+     * synchronization times is the length of the shortest possible STF, otherwise STFs overlap.
+     * With DF and GI taken into consideration, the reasonable minimum time difference between two
+     * packets becomes even larger. However, if we synchronize the same packet twice in different
+     * sync_worker_t instances, the time difference between both synchronization times is much
+     * smaller. Thus, we can easily distinguish these both cases.
      *
      * For a synchronization time to be considered unique, it must be later than the predecessor and
      * the distance to the predecessor must be larger than the limit defined here.

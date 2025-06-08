@@ -26,7 +26,6 @@
 #include <vector>
 
 #include "dectnrp/common/layer/layer_unit.hpp"
-#include "dectnrp/common/prog/log.hpp"
 
 namespace dectnrp::common {
 
@@ -69,28 +68,14 @@ class layer_t {
          *
          * \return number of units
          */
-        size_t get_nof_layer_unit() const { return layer_unit_vec.size(); };
+        [[nodiscard]] size_t get_nof_layer_unit() const { return layer_unit_vec.size(); };
 
         /// reference to derivative of layer unit
-        T& get_layer_unit(const size_t idx) const { return *layer_unit_vec[idx]; };
+        [[nodiscard]] T& get_layer_unit(const size_t idx) const { return *layer_unit_vec[idx]; };
 
-        /// start all units
-        void start_threads_of_all_layer_units() {
+        void shutdown_all_layer_units() {
             for (size_t idx = 0; idx < get_nof_layer_unit(); ++idx) {
-                layer_unit_t& layer_unit = get_layer_unit_base(idx);
-
-                log_lines("Report Start | " + type + " | " + layer_unit.identifier + " | ",
-                          layer_unit.start_threads());
-            }
-        };
-
-        /// stop all units
-        void stop_threads_of_all_layer_units() {
-            for (size_t idx = 0; idx < get_nof_layer_unit(); ++idx) {
-                layer_unit_t& layer_unit = get_layer_unit_base(idx);
-
-                log_lines("Report Stop | " + type + " | " + layer_unit.identifier + " | ",
-                          layer_unit.stop_threads());
+                get_layer_unit_base(idx).shutdown();
             }
         };
 
@@ -101,14 +86,9 @@ class layer_t {
          * \param idx index of layer unit
          * \return reference to specific layer unit
          */
-        layer_unit_t& get_layer_unit_base(const size_t idx) const { return *layer_unit_vec[idx]; };
-
-        void log_lines([[maybe_unused]] const std::string identifier,
-                       const std::vector<std::string> lines) {
-            for (auto elem : lines) {
-                dectnrp_log_inf("{}", std::string(identifier + elem));
-            }
-        }
+        [[nodiscard]] layer_unit_t& get_layer_unit_base(const size_t idx) const {
+            return *layer_unit_vec[idx];
+        };
 
     protected:
         const std::string type;

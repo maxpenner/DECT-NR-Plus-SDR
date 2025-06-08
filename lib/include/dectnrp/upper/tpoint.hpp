@@ -190,25 +190,13 @@ class tpoint_t : public common::layer_unit_t {
         const tpoint_config_t tpoint_config;
 
         /**
-         * \brief For any firmware, this function is always called first. It is called by the main
-         * thread once the entire stack (radio, PHY and upper) has been fully initialized and all
-         * constructors called. It can be used to start threads. Most firmware will need to start
-         * threads for the application layer interface.
-         *
-         * \return lines to log
-         */
-        [[nodiscard]] virtual std::vector<std::string> start_threads() override = 0;
-
-        /**
          * \brief Function will be called by the main thread when the SDR is supposed to shut down
          * because the user pressed ctrl+c. A firmware may block this function until all DECT NR+
          * connections have been shut down gracefully. After that, all job queues should be made
          * impermeable so that the work-function will no longer be called after processing the
          * remaining jobs. Lastly, all threads must be shut down.
-         *
-         * \return lines to log
          */
-        [[nodiscard]] virtual std::vector<std::string> stop_threads() override = 0;
+        virtual void shutdown() override = 0;
 
         // ##################################################
         // Radio Layer + PHY

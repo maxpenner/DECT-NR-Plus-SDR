@@ -52,8 +52,7 @@ class tfw_rtt_t final : public tpoint_t {
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override;
 
     private:
-        std::vector<std::string> start_threads() override final;
-        std::vector<std::string> stop_threads() override final;
+        void shutdown() override final;
 
         /// number of transmitted and received packets per run
         uint32_t N_measurement_tx_cnt{0};

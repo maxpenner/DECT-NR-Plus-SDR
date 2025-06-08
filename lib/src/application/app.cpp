@@ -58,7 +58,7 @@ void app_t::start_sc() {
     }
 
     dectnrp_log_inf("{}",
-                    std::string("THREAD app " + std::to_string(id) + " " +
+                    std::string("app " + std::to_string(id) + " Thread " +
                                 common::get_thread_properties(work_thread, thread_config)));
 };
 

@@ -48,13 +48,13 @@ int generate_random_TX_packet_within_rdc_limits(std::string radio_device_class_s
     // create HARQ buffer pool for TX and RX
     auto hpp = std::make_unique<dectnrp::phy::harq::process_pool_t>(packet_sizes_maximum, 1, 1);
 
-    // oversampling is not a DECTNRP variable
+    // oversampling is not a DECT NR+ variable
     const uint32_t os_min = randomgen.randi(1, 2);
 
-    // with resampling given, what will the maximum oversampled DECTNRP sample rate be?
+    // with resampling given, what will the maximum oversampled DECT NR+ sample rate be?
     const uint32_t dect_samp_rate_os = packet_sizes_maximum.numerology.B_u_b_DFT * os_min;
 
-    // resampling is not a DECTNRP variable
+    // resampling is not a DECT NR+ variable
     const uint32_t use_resampling = randomgen.randi(0, 1);
     uint32_t L, M;
     if (use_resampling == 0) {

@@ -40,9 +40,10 @@ class radio_t final : public common::layer_t<hw_t> {
         radio_t(radio_t&&) = delete;
         radio_t& operator=(radio_t&&) = delete;
 
-        /// higher layers need to know whether devices are real or part of a simulation in the
-        /// vspace
-        bool is_simulation() const { return vspace.get() != nullptr; };
+        /// higher layers need to know whether devices are real or part of a simulation
+        [[nodiscard]] bool is_simulation() const { return vspace.get() != nullptr; };
+
+        void start_threads_of_all_layer_units();
 
         const radio_config_t& radio_config;
 

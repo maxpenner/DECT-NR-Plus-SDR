@@ -51,6 +51,12 @@ radio_t::radio_t(const radio_config_t& radio_config_)
     }
 }
 
+void radio_t::start_threads_of_all_layer_units() {
+    for (auto& hw : layer_unit_vec) {
+        hw->start_threads_and_iq_streaming();
+    }
+}
+
 void radio_t::is_vspace_valid_if_so_init() {
     // number of devices (multi-devices hidden behind driver count as one device)
     const uint32_t nof_radio_hardware = radio_config.get_nof_layer_unit_config();

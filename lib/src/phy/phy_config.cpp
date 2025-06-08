@@ -30,7 +30,7 @@
 namespace dectnrp::phy {
 
 const std::array<resampler_param_t, 28> phy_config_t::resampler_param_verified = {
-    // DECTNRP rates
+    // DECT NR+ rates
     resampler_param_t(constants::samp_rate_min_u_b, 1, 1),
     resampler_param_t(3456000, 1, 1),
     resampler_param_t(6912000, 1, 1),
@@ -44,7 +44,7 @@ const std::array<resampler_param_t, 28> phy_config_t::resampler_param_verified =
     resampler_param_t(165888000, 1, 1),
     resampler_param_t(221184000, 1, 1),
 
-    // DECTNRP rates with oversampling of at least 2 for highest sample rates
+    // DECT NR+ rates with oversampling of at least 2 for highest sample rates
     resampler_param_t(331776000, 1, 1),  // 165.888 with OS = 2
     resampler_param_t(442368000, 1, 1),  // 221.184 with OS = 2
 

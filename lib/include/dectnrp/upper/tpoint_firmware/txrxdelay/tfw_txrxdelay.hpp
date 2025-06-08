@@ -52,8 +52,7 @@ class tfw_txrxdelay_t final : public tpoint_t {
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override;
 
     private:
-        std::vector<std::string> start_threads() override final;
-        std::vector<std::string> stop_threads() override final;
+        void shutdown() override final;
 
         const int64_t measurement_separation_ms{500};
 
