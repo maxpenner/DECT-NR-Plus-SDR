@@ -69,7 +69,7 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
 
 For every firmware, constructors are always called first. When the constructors are called, underlying devices on the radio layer as well as the PHY have already been initialized, and thus hardware properties such as center frequency and gains may be changed. However, the radio devices are not streaming IQ samples yet.
 
-After all constructors have been called, work_start_imminent() is called to announce the imminent beginning of IQ streaming. Only then all other work-functions are called. For event-driven functions, calls are only made if and when the associated event occurs. Once the SDR receives a signal triggered by pressing ctrl+c, shutdown() is called and the running firmware must stop such that the SDR can shut down.
+After all constructors have been called, work_start_imminent() is called to announce the imminent beginning of IQ streaming. Only then all other work-functions are called. For event-driven functions, calls are only made if and when the associated event occurs. Once the SDR receives a signal triggered by pressing ctrl+c, shutdown() is called and the running firmware must stop execution such that the SDR can shut down.
 
 ## Directories
 
@@ -176,8 +176,8 @@ Furthermore, most SDRs are general-purpose devices with limitations regarding ty
 
 ### Radio Layer
 
-- [X] GPIO support for B210, currently only X410 supported
-- [ ] B210 USB transfer stability and 
+- [X] GPIO support for USRP B-series
+- [ ] continuous TX mode for USRP B-series
 - [ ] integrate [SoapySDR](https://github.com/pothosware/SoapySDR)
 
 ### Physical Layer
