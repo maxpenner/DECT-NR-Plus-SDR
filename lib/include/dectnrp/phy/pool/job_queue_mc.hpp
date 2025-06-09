@@ -53,7 +53,7 @@ class job_queue_mc_t final : public job_queue_base_t {
          * As a countermeasure, moodycamel::ConcurrentQueue allows using tokens. We can use a single
          * producer token for all producers, which enforces a single producer queue and thus an
          * absolute order when dequeuing. A downside is that access to the token must be
-         * thread-safe, for which we use a spinlock.
+         * thread-safe, for which we use a mutex or spinlock.
          * https://github.com/cameron314/concurrentqueue?tab=readme-ov-file#advanced-features.
          */
         explicit job_queue_mc_t(const uint32_t id_, const uint32_t capacity_);

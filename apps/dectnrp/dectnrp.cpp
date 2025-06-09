@@ -116,8 +116,7 @@ int main(int argc, char** argv) {
     dectnrp_log_inf("dectnrp ctrl+c pressed.");
     dectnrp_print_inf("dectnrp ctrl+c pressed.");
 
-    // gracefully shut down DECT NR+ connections
-    upper->shutdown_all_layer_units();
+    upper->shutdown_all_layer_units();  // gracefully shut down DECT NR+ connections
     phy->shutdown_all_layer_units();    // stop processing samples
     radio->shutdown_all_layer_units();  // stop streaming samples, stopped last as many
                                         // components depend on an increasing sample time
