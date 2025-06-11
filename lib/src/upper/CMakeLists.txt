@@ -24,4 +24,9 @@ target_link_libraries(dectnrp_upper dectnrp_common dectnrp_radio dectnrp_phy dec
 file(GLOB DECTNRP_UPPER_SOURCES "*.cpp")
 target_sources(dectnrp_upper PRIVATE ${DECTNRP_UPPER_SOURCES})
 
-add_subdirectory(tpoint_firmware)
+add_subdirectory(basic)
+add_subdirectory(chscanner)
+add_subdirectory(loopback)
+add_subdirectory(p2p)
+add_subdirectory(rtt)
+add_subdirectory(txrxdelay)
