@@ -18,7 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/upper/p2p/tfw_p2p_ft.hpp"
+#include "dectnrp/upper/p2p/procedure/steady_ft.hpp"
 //
 
 #include <functional>
@@ -27,7 +27,7 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-phy::irregular_report_t tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t steady_ft_t::work_start_imminent(const int64_t start_time_64) {
     // what is the next full second after start_time_64?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
 
@@ -41,48 +41,49 @@ phy::irregular_report_t tfw_p2p_ft_t::work_start_imminent(const int64_t start_ti
 #endif
 
     // set first beacon transmission time, beacon is aligned with full second
-    allocation_ft.set_beacon_time_scheduled(B);
+    rd.allocation_ft.set_beacon_time_scheduled(B);
 
 #ifdef TFW_P2P_EXPORT_PPX
     dectnrp_assert(B - duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001) > 0,
                    "time out-of-order");
 
     // set virtual time of first rising edge, next edge is then aligned with the first beacon
-    ppx.set_ppx_rising_edge(B - duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001));
+    rd.ppx.set_ppx_rising_edge(B -
+                               duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001));
 #endif
 
     // initialize regular callback for logs
-    callbacks.add_callback(
-        std::bind(&tfw_p2p_ft_t::worksub_callback_log, this, std::placeholders::_1),
+    rd.callbacks.add_callback(
+        std::bind(&steady_ft_t::worksub_callback_log, this, std::placeholders::_1),
         A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 500),
         duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
-                                                 worksub_callback_log_period_sec));
+                                                 rd.worksub_callback_log_period_sec));
 
 #ifdef TFW_P2P_EXPORT_PPX
-    callbacks.add_callback(std::bind(&tfw_p2p_ft_t::worksub_callback_ppx,
-                                     this,
-                                     std::placeholders::_1,
-                                     std::placeholders::_2,
-                                     std::placeholders::_3),
-                           B - ppx.get_ppx_time_advance_samples(),
-                           ppx.get_ppx_period_warped());
+    rd.callbacks.add_callback(std::bind(&steady_ft_t::worksub_callback_ppx,
+                                        this,
+                                        std::placeholders::_1,
+                                        std::placeholders::_2,
+                                        std::placeholders::_3),
+                              B - rd.ppx.get_ppx_time_advance_samples(),
+                              rd.ppx.get_ppx_period_warped());
 #endif
 
     return phy::irregular_report_t(
-        allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
+        rd.allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
 }
 
-phy::machigh_phy_t tfw_p2p_ft_t::work_regular(
+phy::machigh_phy_t steady_ft_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_p2p_ft_t::work_irregular(
+phy::machigh_phy_t steady_ft_t::work_irregular(
     [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     phy::machigh_phy_t ret;
 
     dectnrp_assert(irregular_report.call_asap_after_this_time_has_passed_64 <
-                       allocation_ft.get_beacon_time_scheduled(),
+                       rd.allocation_ft.get_beacon_time_scheduled(),
                    "too late");
 
     dectnrp_assert(0 < irregular_report.get_recognition_delay(), "time out-of-order");
@@ -100,15 +101,15 @@ phy::machigh_phy_t tfw_p2p_ft_t::work_irregular(
 
     worksub_tx_unicast_consecutive(ret);
 
-    ret.irregular_report =
-        phy::irregular_report_t(allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
+    ret.irregular_report = phy::irregular_report_t(
+        rd.allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
 
-    callbacks.run(buffer_rx.get_rx_time_passed());
+    rd.callbacks.run(buffer_rx.get_rx_time_passed());
 
     return ret;
 }
 
-phy::machigh_phy_t tfw_p2p_ft_t::work_application(
+phy::machigh_phy_t steady_ft_t::work_application(
     [[maybe_unused]] const application::application_report_t& application_report) {
     phy::machigh_phy_t machigh_phy;
 
@@ -117,8 +118,7 @@ phy::machigh_phy_t tfw_p2p_ft_t::work_application(
     return machigh_phy;
 }
 
-phy::machigh_phy_tx_t tfw_p2p_ft_t::work_chscan_async(
-    [[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t steady_ft_t::work_chscan_async([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

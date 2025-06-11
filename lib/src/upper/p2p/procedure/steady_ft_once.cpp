@@ -18,7 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/upper/p2p/tfw_p2p_ft.hpp"
+#include "dectnrp/upper/p2p/procedure/steady_ft.hpp"
 //
 
 #ifdef APPLICATION_INTERFACE_VNIC_OR_SOCKET
@@ -36,10 +36,12 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-const std::string tfw_p2p_ft_t::firmware_name("p2p_ft");
-
-tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
-    : tfw_p2p_base_t(tpoint_config_, mac_lower_) {
+steady_ft_t::steady_ft_t(const tpoint_config_t& tpoint_config_,
+                         phy::mac_lower_t& mac_lower_,
+                         rd_t& rd_,
+                         ft_t& ft_)
+    : steady_rd_t(tpoint_config_, mac_lower_, rd_),
+      ft(ft_) {
 #ifdef TFW_P2P_MIMO
     dectnrp_assert(
         1 < buffer_rx.nof_antennas,
@@ -51,17 +53,17 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
 
     init_radio();
 
-    if (hw_simulator != nullptr) {
+    if (rd.hw_simulator != nullptr) {
         init_simulation_if_detected();
     }
 
     // ##################################################
     // MAC Layer
 
-    contact_list.reserve(10);
+    ft.contact_list.reserve(10);
 
     // init contact list
-    for (uint32_t firmware_id_pt = 0; firmware_id_pt < N_pt; ++firmware_id_pt) {
+    for (uint32_t firmware_id_pt = 0; firmware_id_pt < rd.N_pt; ++firmware_id_pt) {
         // load identity of one PT
         const auto identity_pt = init_identity_pt(firmware_id_pt);
 
@@ -70,10 +72,10 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
         const uint32_t conn_idx_client{firmware_id_pt};
 
         // add PT as new contact
-        contact_list.add_new_contact_and_setup_indexing(
+        ft.contact_list.add_new_contact_and_setup_indexing(
             identity_pt, conn_idx_server, conn_idx_client);
 
-        auto& contact = contact_list.get_contact(identity_pt.LongRadioDeviceID);
+        auto& contact = ft.contact_list.get_contact(identity_pt.LongRadioDeviceID);
 
         contact.sync_report = phy::sync_report_t(buffer_rx.nof_antennas);
         contact.identity = identity_pt;
@@ -95,9 +97,9 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     }
 
     init_packet_beacon();
-    init_packet_unicast(identity_ft.ShortRadioDeviceID,
+    init_packet_unicast(rd.identity_ft.ShortRadioDeviceID,
                         sp4::mac_architecture::identity_t::ShortRadioDeviceID_reserved,
-                        identity_ft.LongRadioDeviceID,
+                        rd.identity_ft.LongRadioDeviceID,
                         sp4::mac_architecture::identity_t::LongRadioDeviceID_reserved);
 
     // ##################################################
@@ -110,17 +112,17 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     init_appiface();
 
     // first start sink
-    application_client->start_sc();
+    rd.application_client->start_sc();
 
     // then start source
-    application_server->start_sc();
+    rd.application_server->start_sc();
 
     // ##################################################
     // debugging
     // -
 }
 
-void tfw_p2p_ft_t::shutdown() {
+void steady_ft_t::shutdown() {
     // gracefully shut down any DECT NR+ connections, block this function until done
     // ToDo
 
@@ -128,24 +130,24 @@ void tfw_p2p_ft_t::shutdown() {
     job_queue.set_impermeable();
 
     // first stop accepting new data from upper
-    application_server->stop_sc();
+    rd.application_server->stop_sc();
 
     // finally stop the data sink
-    application_client->stop_sc();
+    rd.application_client->stop_sc();
 }
 
-void tfw_p2p_ft_t::init_radio() {
+void steady_ft_t::init_radio() {
     hw.set_command_time();
     hw.set_freq_tc(3830.0e6);
 
     // check what output power at 0dBFS the radio device can deliver
-    TransmitPower_dBm_fixed = hw.set_tx_power_ant_0dBFS_tc(20.0f);
+    ft.TransmitPower_dBm_fixed = hw.set_tx_power_ant_0dBFS_tc(20.0f);
 
     // make AGC remember current power at 0dBFS, taking effect immediately
-    agc_tx.set_power_ant_0dBFS_pending(TransmitPower_dBm_fixed);
+    agc_tx.set_power_ant_0dBFS_pending(ft.TransmitPower_dBm_fixed);
 
     // take into consideration the OFDM crest factor
-    TransmitPower_dBm_fixed += common::adt::mag2db(agc_tx.get_ofdm_amplitude_factor());
+    ft.TransmitPower_dBm_fixed += common::adt::mag2db(agc_tx.get_ofdm_amplitude_factor());
 
     const auto& rx_power_ant_0dBFS = hw.set_rx_power_ant_0dBFS_uniform_tc(-40.0f);
 
@@ -153,19 +155,19 @@ void tfw_p2p_ft_t::init_radio() {
     agc_rx.set_power_ant_0dBFS_pending(rx_power_ant_0dBFS);
 }
 
-void tfw_p2p_ft_t::init_simulation_if_detected() {
-    dectnrp_assert(hw_simulator != nullptr, "not a simulation");
+void steady_ft_t::init_simulation_if_detected() {
+    dectnrp_assert(rd.hw_simulator != nullptr, "not a simulation");
 
     // place fixed close to origin
     const auto offset = simulation::topology::position_t::from_cartesian(0.1f, 0.1f, 0.1f);
 
     // add no movement
-    hw_simulator->set_trajectory(simulation::topology::trajectory_t(offset));
+    rd.hw_simulator->set_trajectory(simulation::topology::trajectory_t(offset));
 }
 
-void tfw_p2p_ft_t::init_packet_beacon() {
+void steady_ft_t::init_packet_beacon() {
     // meta packet size
-    sp3::packet_sizes_def_t& psdef = ppmp_beacon.psdef;
+    sp3::packet_sizes_def_t& psdef = rd.ppmp_beacon.psdef;
     psdef.u = worker_pool_config.radio_device_class.u_min;
     psdef.b = worker_pool_config.radio_device_class.b_min;
     psdef.PacketLengthType = 1;
@@ -179,35 +181,35 @@ void tfw_p2p_ft_t::init_packet_beacon() {
     psdef.Z = worker_pool_config.radio_device_class.Z_min;
 
     // define PLCFs
-    sp4::plcf_10_t& plcf_10 = ppmp_beacon.plcf_10;
+    sp4::plcf_10_t& plcf_10 = rd.ppmp_beacon.plcf_10;
     plcf_10.HeaderFormat = 0;
     plcf_10.PacketLengthType = psdef.PacketLengthType;
     plcf_10.set_PacketLength_m1(psdef.PacketLength);
-    plcf_10.ShortNetworkID = identity_ft.ShortNetworkID;
-    plcf_10.TransmitterIdentity = identity_ft.ShortRadioDeviceID;
-    plcf_10.set_TransmitPower(TransmitPower_dBm_fixed);
+    plcf_10.ShortNetworkID = rd.identity_ft.ShortNetworkID;
+    plcf_10.TransmitterIdentity = rd.identity_ft.ShortRadioDeviceID;
+    plcf_10.set_TransmitPower(ft.TransmitPower_dBm_fixed);
     plcf_10.Reserved = 0;
     plcf_10.DFMCS = psdef.mcs_index;
 
     // pick one PLCF
-    ppmp_beacon.plcf_base_effective = &ppmp_beacon.plcf_10;
+    rd.ppmp_beacon.plcf_base_effective = &rd.ppmp_beacon.plcf_10;
 
     // define MAC header type
-    ppmp_beacon.mac_header_type.Version = sp4::mac_header_type_t::version_ec::v00;
-    ppmp_beacon.mac_header_type.MAC_security =
+    rd.ppmp_beacon.mac_header_type.Version = sp4::mac_header_type_t::version_ec::v00;
+    rd.ppmp_beacon.mac_header_type.MAC_security =
         sp4::mac_header_type_t::mac_security_ec::macsec_not_used;
-    ppmp_beacon.mac_header_type.MAC_header_type =
+    rd.ppmp_beacon.mac_header_type.MAC_header_type =
         sp4::mac_header_type_t::mac_header_type_ec::Beacon;
 
     // define MAC common header
-    ppmp_beacon.beacon_header.set_Network_ID_3_lsb(identity_ft.NetworkID);
-    ppmp_beacon.beacon_header.Transmitter_Address = identity_ft.LongRadioDeviceID;
+    rd.ppmp_beacon.beacon_header.set_Network_ID_3_lsb(rd.identity_ft.NetworkID);
+    rd.ppmp_beacon.beacon_header.Transmitter_Address = rd.identity_ft.LongRadioDeviceID;
 
     // pick one MAC common header
-    ppmp_beacon.mch_base_effective = &ppmp_beacon.beacon_header;
+    rd.ppmp_beacon.mch_base_effective = &rd.ppmp_beacon.beacon_header;
 
     // set values in cluster beacon IE
-    auto& cbm = mmie_pool_tx.get<sp4::cluster_beacon_message_t>();
+    auto& cbm = rd.mmie_pool_tx.get<sp4::cluster_beacon_message_t>();
     cbm.system_frame_number = 0;
     cbm.clusters_max_tx_power = sp4::network_beacon_message_t::clusters_max_tx_power_t::_19_dBm;
     cbm.has_power_constraints = true;
@@ -221,7 +223,7 @@ void tfw_p2p_ft_t::init_packet_beacon() {
     cbm.min_quality = sp4::cluster_beacon_message_t::quality_threshold_t::_9_dB;
 }
 
-void tfw_p2p_ft_t::init_appiface() {
+void steady_ft_t::init_appiface() {
 #ifdef APPLICATION_INTERFACE_VNIC_OR_SOCKET
     // we need to define the TUN interface
     application::vnic::vnic_server_t::vnic_config_t vnic_config;
@@ -231,7 +233,7 @@ void tfw_p2p_ft_t::init_appiface() {
     vnic_config.MTU = 1500;
 
     // if not a simulation, we start on different computers and use unique IPs in the same network
-    if (hw_simulator == nullptr) {
+    if (rd.hw_simulator == nullptr) {
         vnic_config.ip_address = "172.99.180." + std::to_string(50 + tpoint_config.firmware_id);
     }
     // if a simulation, we start on the same computers and use unique networks
@@ -245,7 +247,7 @@ void tfw_p2p_ft_t::init_appiface() {
     const application::queue_size_t queue_size_server = {
         .N_datagram = 20, .N_datagram_max_byte = limits::application_max_queue_datagram_byte};
 
-    application_server = std::make_unique<application::vnic::vnic_server_t>(
+    rd.application_server = std::make_unique<application::vnic::vnic_server_t>(
         id,
         tpoint_config.application_server_thread_config,
         job_queue,
@@ -254,12 +256,12 @@ void tfw_p2p_ft_t::init_appiface() {
 
     // we need a pointer to the deriving class
     const application::vnic::vnic_server_t* vnics =
-        static_cast<application::vnic::vnic_server_t*>(application_server.get());
+        static_cast<application::vnic::vnic_server_t*>(rd.application_server.get());
 
     const application::queue_size_t queue_size_client = {
         .N_datagram = 10, .N_datagram_max_byte = limits::application_max_queue_datagram_byte};
 
-    application_client = std::make_unique<application::vnic::vnic_client_t>(
+    rd.application_client = std::make_unique<application::vnic::vnic_client_t>(
         id,
         tpoint_config.application_client_thread_config,
         job_queue,
@@ -267,9 +269,9 @@ void tfw_p2p_ft_t::init_appiface() {
         queue_size_client);
 #else
     // init ports for every single PT
-    std::vector<uint32_t> ports_in(N_pt);
-    std::vector<uint32_t> ports_out(N_pt);
-    for (uint32_t i = 0; i < N_pt; ++i) {
+    std::vector<uint32_t> ports_in(rd.N_pt);
+    std::vector<uint32_t> ports_out(rd.N_pt);
+    for (uint32_t i = 0; i < rd.N_pt; ++i) {
         ports_in.at(i) = 8000 + i;
         ports_out.at(i) = 8050 + i;
     }
@@ -277,10 +279,10 @@ void tfw_p2p_ft_t::init_appiface() {
     const application::queue_size_t queue_size = {
         .N_datagram = 4, .N_datagram_max_byte = limits::application_max_queue_datagram_byte};
 
-    application_server = std::make_unique<application::sockets::socket_server_t>(
+    rd.application_server = std::make_unique<application::sockets::socket_server_t>(
         id, tpoint_config.application_server_thread_config, job_queue, ports_in, queue_size);
 
-    application_client = std::make_unique<application::sockets::socket_client_t>(
+    rd.application_client = std::make_unique<application::sockets::socket_client_t>(
         id, tpoint_config.application_client_thread_config, job_queue, ports_out, queue_size);
 #endif
 

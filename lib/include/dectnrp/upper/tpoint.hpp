@@ -184,10 +184,6 @@ class tpoint_t : public common::layer_unit_t {
         [[nodiscard]] virtual phy::machigh_phy_tx_t work_chscan_async(
             const phy::chscan_t& chscan) = 0;
 
-    protected:
-        /// configuration received during construction
-        const tpoint_config_t tpoint_config;
-
         /**
          * \brief Function will be called by the main thread when the SDR is supposed to shut down
          * because the user pressed ctrl+c. A firmware may block this function until all DECT NR+
@@ -196,6 +192,10 @@ class tpoint_t : public common::layer_unit_t {
          * remaining jobs. Lastly, all threads must be shut down.
          */
         virtual void shutdown() override = 0;
+
+    protected:
+        /// configuration received during construction
+        const tpoint_config_t tpoint_config;
 
         // ##################################################
         // Radio Layer + PHY

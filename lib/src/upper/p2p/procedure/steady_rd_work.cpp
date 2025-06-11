@@ -18,12 +18,12 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/upper/p2p/tfw_p2p_base.hpp"
+#include "dectnrp/upper/p2p/procedure/steady_rd.hpp"
 //
 
 namespace dectnrp::upper::tfw::p2p {
 
-phy::maclow_phy_t tfw_p2p_base_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
+phy::maclow_phy_t steady_rd_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     ++stats.rx_pcc_success;
 
     const sp4::plcf_base_t* plcf_base = nullptr;
@@ -108,7 +108,7 @@ phy::maclow_phy_t tfw_p2p_base_t::work_pcc(const phy::phy_maclow_t& phy_maclow) 
     return ret;
 }
 
-phy::machigh_phy_t tfw_p2p_base_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
+phy::machigh_phy_t steady_rd_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
     // ignore entire PDC if CRC is incorrect
     if (!phy_machigh.pdc_report.crc_status) {
         ++stats.rx_pdc_fail;

@@ -18,7 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/upper/p2p/tfw_p2p_pt.hpp"
+#include "dectnrp/upper/p2p/procedure/steady_pt.hpp"
 //
 
 #ifdef APPLICATION_INTERFACE_VNIC_OR_SOCKET
@@ -34,36 +34,38 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-const std::string tfw_p2p_pt_t::firmware_name("p2p_pt");
-
-tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
-    : tfw_p2p_base_t(tpoint_config_, mac_lower_) {
+steady_pt_t::steady_pt_t(const tpoint_config_t& tpoint_config_,
+                         phy::mac_lower_t& mac_lower_,
+                         rd_t& rd_,
+                         pt_t& pt_)
+    : steady_rd_t(tpoint_config_, mac_lower_, rd_),
+      pt(pt_) {
     // ##################################################
     // Radio Layer + PHY
 
     init_radio();
 
-    if (hw_simulator != nullptr) {
+    if (rd.hw_simulator != nullptr) {
         init_simulation_if_detected();
     }
 
     // ##################################################
     // MAC Layer
 
-    contact_pt.sync_report = phy::sync_report_t(buffer_rx.nof_antennas);
-    contact_pt.identity = init_identity_pt(tpoint_config.firmware_id);
-    contact_pt.allocation_pt = init_allocation_pt(tpoint_config.firmware_id);
-    contact_pt.mimo_csi = phy::mimo_csi_t();
-    contact_pt.conn_idx_server = 0;
-    contact_pt.conn_idx_client = 0;
+    pt.contact_pt.sync_report = phy::sync_report_t(buffer_rx.nof_antennas);
+    pt.contact_pt.identity = init_identity_pt(tpoint_config.firmware_id);
+    pt.contact_pt.allocation_pt = init_allocation_pt(tpoint_config.firmware_id);
+    pt.contact_pt.mimo_csi = phy::mimo_csi_t();
+    pt.contact_pt.conn_idx_server = 0;
+    pt.contact_pt.conn_idx_client = 0;
 
     // feedback format 4 for MCS, 5 for codebookindex
-    contact_pt.feedback_plan = mac::feedback_plan_t(std::vector<uint32_t>{4, 5});
+    pt.contact_pt.feedback_plan = mac::feedback_plan_t(std::vector<uint32_t>{4, 5});
 
-    init_packet_unicast(contact_pt.identity.ShortRadioDeviceID,
-                        identity_ft.ShortRadioDeviceID,
-                        contact_pt.identity.LongRadioDeviceID,
-                        identity_ft.LongRadioDeviceID);
+    init_packet_unicast(pt.contact_pt.identity.ShortRadioDeviceID,
+                        rd.identity_ft.ShortRadioDeviceID,
+                        pt.contact_pt.identity.LongRadioDeviceID,
+                        rd.identity_ft.LongRadioDeviceID);
 
     // ##################################################
     // DLC and Convergence Layer
@@ -75,10 +77,10 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     init_appiface();
 
     // first start sink
-    application_client->start_sc();
+    rd.application_client->start_sc();
 
     // then start source
-    application_server->start_sc();
+    rd.application_server->start_sc();
 
     // ##################################################
     // debugging
@@ -86,7 +88,7 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     // -
 }
 
-void tfw_p2p_pt_t::shutdown() {
+void steady_pt_t::shutdown() {
     // gracefully shut down any DECT NR+ connections, block this function until done
     // ToDo
 
@@ -94,13 +96,13 @@ void tfw_p2p_pt_t::shutdown() {
     job_queue.set_impermeable();
 
     // first stop accepting new data from upper
-    application_server->stop_sc();
+    rd.application_server->stop_sc();
 
     // finally stop the data sink
-    application_client->stop_sc();
+    rd.application_client->stop_sc();
 }
 
-void tfw_p2p_pt_t::init_radio() {
+void steady_pt_t::init_radio() {
     hw.set_command_time();
     hw.set_freq_tc(3830.0e6);
     const float tx_power_ant_0dBFS = hw.set_tx_power_ant_0dBFS_tc(10.0f);
@@ -111,8 +113,8 @@ void tfw_p2p_pt_t::init_radio() {
     agc_rx.set_power_ant_0dBFS_pending(rx_power_ant_0dBFS);
 }
 
-void tfw_p2p_pt_t::init_simulation_if_detected() {
-    dectnrp_assert(hw_simulator != nullptr, "not a simulation");
+void steady_pt_t::init_simulation_if_detected() {
+    dectnrp_assert(rd.hw_simulator != nullptr, "not a simulation");
 
     const float firmware_id_f = static_cast<float>(tpoint_config.firmware_id);
 
@@ -120,11 +122,11 @@ void tfw_p2p_pt_t::init_simulation_if_detected() {
     const auto offset = simulation::topology::position_t::from_polar(20.0f, firmware_id_f * 180.0f);
 
     // add movement
-    hw_simulator->set_trajectory(
+    rd.hw_simulator->set_trajectory(
         simulation::topology::trajectory_t(offset, 0.1f + 2.0f * firmware_id_f, 15.0f));
 }
 
-void tfw_p2p_pt_t::init_appiface() {
+void steady_pt_t::init_appiface() {
 #ifdef APPLICATION_INTERFACE_VNIC_OR_SOCKET
     // we need to define the TUN interface
     application::vnic::vnic_server_t::vnic_config_t vnic_config;
@@ -134,7 +136,7 @@ void tfw_p2p_pt_t::init_appiface() {
     vnic_config.MTU = 1500;
 
     // if not a simulation, we start on different computers and use unique IPs in the same network
-    if (hw_simulator == nullptr) {
+    if (rd.hw_simulator == nullptr) {
         vnic_config.ip_address = "172.99.180." + std::to_string(100 + tpoint_config.firmware_id);
     }
 
@@ -149,7 +151,7 @@ void tfw_p2p_pt_t::init_appiface() {
     const application::queue_size_t queue_size_server = {
         .N_datagram = 20, .N_datagram_max_byte = limits::application_max_queue_datagram_byte};
 
-    application_server = std::make_unique<application::vnic::vnic_server_t>(
+    rd.application_server = std::make_unique<application::vnic::vnic_server_t>(
         id,
         tpoint_config.application_server_thread_config,
         job_queue,
@@ -157,14 +159,14 @@ void tfw_p2p_pt_t::init_appiface() {
         queue_size_server);
 
     application::vnic::vnic_server_t* vnics =
-        dynamic_cast<application::vnic::vnic_server_t*>(application_server.get());
+        dynamic_cast<application::vnic::vnic_server_t*>(rd.application_server.get());
 
     dectnrp_assert(vnics != nullptr, "vnic server cast failed");
 
     const application::queue_size_t queue_size_client = {
         .N_datagram = 10, .N_datagram_max_byte = limits::application_max_queue_datagram_byte};
 
-    application_client = std::make_unique<application::vnic::vnic_client_t>(
+    rd.application_client = std::make_unique<application::vnic::vnic_client_t>(
         id,
         tpoint_config.application_client_thread_config,
         job_queue,
@@ -174,14 +176,14 @@ void tfw_p2p_pt_t::init_appiface() {
     const application::queue_size_t queue_size = {
         .N_datagram = 4, .N_datagram_max_byte = limits::application_max_queue_datagram_byte};
 
-    application_server = std::make_unique<application::sockets::socket_server_t>(
+    rd.application_server = std::make_unique<application::sockets::socket_server_t>(
         id,
         tpoint_config.application_server_thread_config,
         job_queue,
         std::vector<uint32_t>{8100 + tpoint_config.firmware_id},
         queue_size);
 
-    application_client = std::make_unique<application::sockets::socket_client_t>(
+    rd.application_client = std::make_unique<application::sockets::socket_client_t>(
         id,
         tpoint_config.application_client_thread_config,
         job_queue,

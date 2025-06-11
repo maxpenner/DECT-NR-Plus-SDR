@@ -20,29 +20,20 @@
 
 #pragma once
 
-#include <memory>
-
-#include "dectnrp/upper/p2p/data/ft.hpp"
-#include "dectnrp/upper/p2p/data/rd.hpp"
-#include "dectnrp/upper/p2p/procedure/nop.hpp"
-#include "dectnrp/upper/p2p/procedure/resource.hpp"
-#include "dectnrp/upper/p2p/procedure/steady_ft.hpp"
 #include "dectnrp/upper/tpoint.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class tfw_p2p_ft_t final : public tpoint_t {
+class nop_t final : public tpoint_t {
     public:
-        explicit tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
-        ~tfw_p2p_ft_t() = default;
+        explicit nop_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
+        ~nop_t() = default;
 
-        tfw_p2p_ft_t() = delete;
-        tfw_p2p_ft_t(const tfw_p2p_ft_t&) = delete;
-        tfw_p2p_ft_t& operator=(const tfw_p2p_ft_t&) = delete;
-        tfw_p2p_ft_t(tfw_p2p_ft_t&&) = delete;
-        tfw_p2p_ft_t& operator=(tfw_p2p_ft_t&&) = delete;
-
-        static const std::string firmware_name;
+        nop_t() = delete;
+        nop_t(const nop_t&) = delete;
+        nop_t& operator=(const nop_t&) = delete;
+        nop_t(nop_t&&) = delete;
+        nop_t& operator=(nop_t&&) = delete;
 
         phy::irregular_report_t work_start_imminent(const int64_t start_time_64) override final;
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
@@ -56,15 +47,6 @@ class tfw_p2p_ft_t final : public tpoint_t {
 
     private:
         void shutdown() override final;
-
-        rd_t rd;
-        ft_t ft;
-
-        std::unique_ptr<resource_t> resource;
-        std::unique_ptr<steady_ft_t> steady_ft;
-        std::unique_ptr<nop_t> nop;
-
-        tpoint_t* tpoint{nullptr};
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

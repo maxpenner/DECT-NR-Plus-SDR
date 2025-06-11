@@ -18,7 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/upper/p2p/tfw_p2p_base.hpp"
+#include "dectnrp/upper/p2p/procedure/steady_rd.hpp"
 //
 
 #include <cmath>
@@ -30,37 +30,38 @@
 namespace dectnrp::upper::tfw::p2p {
 
 #ifdef TFW_P2P_EXPORT_PPX
-void tfw_p2p_base_t::worksub_callback_ppx(const int64_t now_64,
-                                          [[maybe_unused]] const size_t idx,
-                                          int64_t& next_64) {
-    const auto pulse_config = ppx.get_ppx_imminent();
+void steady_rd_t::worksub_callback_ppx(const int64_t now_64,
+                                       [[maybe_unused]] const size_t idx,
+                                       int64_t& next_64) {
+    const auto pulse_config = rd.ppx.get_ppx_imminent();
 
     hw.schedule_pulse_tc(pulse_config);
 
     dectnrp_assert(now_64 < pulse_config.rising_edge_64, "time out-of-order");
-    dectnrp_assert(pulse_config.rising_edge_64 < now_64 + ppx.get_ppx_period_warped(),
+    dectnrp_assert(pulse_config.rising_edge_64 < now_64 + rd.ppx.get_ppx_period_warped(),
                    "time out-of-order");
 
-    ppx.extrapolate_next_rising_edge();
-
-    dectnrp_assert(now_64 + ppx.get_ppx_period_warped() < ppx.get_ppx_imminent().rising_edge_64,
-                   "time out-of-order");
+    rd.ppx.extrapolate_next_rising_edge();
 
     dectnrp_assert(
-        std::abs(pulse_config.rising_edge_64 - ppx.get_ppx_time_advance_samples() - next_64) <
+        now_64 + rd.ppx.get_ppx_period_warped() < rd.ppx.get_ppx_imminent().rising_edge_64,
+        "time out-of-order");
+
+    dectnrp_assert(
+        std::abs(pulse_config.rising_edge_64 - rd.ppx.get_ppx_time_advance_samples() - next_64) <
             duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 5),
         "callback adjustment time too large");
 
     // set time of next callback
-    next_64 = pulse_config.rising_edge_64 - ppx.get_ppx_time_advance_samples();
+    next_64 = pulse_config.rising_edge_64 - rd.ppx.get_ppx_time_advance_samples();
 }
 #endif
 
-bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
-                                        contact_p2p_t& contact_p2p,
-                                        const mac::allocation::tx_opportunity_t& tx_opportunity) {
+bool steady_rd_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
+                                     contact_p2p_t& contact_p2p,
+                                     const mac::allocation::tx_opportunity_t& tx_opportunity) {
     // first check if there even is any data to transmit
-    const auto queue_level = application_server->get_queue_level_nto(
+    const auto queue_level = rd.application_server->get_queue_level_nto(
         contact_p2p.conn_idx_server, limits::max_nof_user_plane_data_per_mac_pdu);
 
     // if not, return immediately
@@ -75,9 +76,9 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
 
     worksub_tx_unicast_psdef(contact_p2p, expiration_64);
 
-    auto* hp_tx = hpp->get_process_tx(ppmp_unicast.plcf_base_effective->get_Type(),
-                                      identity_ft.NetworkID,
-                                      ppmp_unicast.psdef,
+    auto* hp_tx = hpp->get_process_tx(rd.ppmp_unicast.plcf_base_effective->get_Type(),
+                                      rd.identity_ft.NetworkID,
+                                      rd.ppmp_unicast.psdef,
                                       phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process
@@ -90,8 +91,8 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     const auto& packet_sizes = hp_tx->get_packet_sizes();
 
     // update values in PLCF header
-    ppmp_unicast.plcf_21.DFMCS = ppmp_unicast.psdef.mcs_index;
-    ppmp_unicast.plcf_21.set_NumberOfSpatialStreams(packet_sizes.tm_mode.N_SS);
+    rd.ppmp_unicast.plcf_21.DFMCS = rd.ppmp_unicast.psdef.mcs_index;
+    rd.ppmp_unicast.plcf_21.set_NumberOfSpatialStreams(packet_sizes.tm_mode.N_SS);
 
     worksub_tx_unicast_feedback(contact_p2p, expiration_64);
 
@@ -129,48 +130,49 @@ bool tfw_p2p_base_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
     return true;
 }
 
-void tfw_p2p_base_t::worksub_tx_unicast_psdef(contact_p2p_t& contact_p2p,
-                                              const int64_t expiration_64) {
-    ppmp_unicast.psdef.mcs_index =
-        cqi_lut.clamp_mcs(contact_p2p.mimo_csi.feedback_MCS.get_val_or_fallback(
-            expiration_64, cqi_lut.get_mcs_min()));
+void steady_rd_t::worksub_tx_unicast_psdef(contact_p2p_t& contact_p2p,
+                                           const int64_t expiration_64) {
+    rd.ppmp_unicast.psdef.mcs_index =
+        rd.cqi_lut.clamp_mcs(contact_p2p.mimo_csi.feedback_MCS.get_val_or_fallback(
+            expiration_64, rd.cqi_lut.get_mcs_min()));
 
     // update transmission mode
     // ToDo
 }
 
-void tfw_p2p_base_t::worksub_tx_unicast_feedback(contact_p2p_t& contact_p2p,
-                                                 const int64_t expiration_64) {
+void steady_rd_t::worksub_tx_unicast_feedback(contact_p2p_t& contact_p2p,
+                                              const int64_t expiration_64) {
     // set next feedback format in PLCF
-    ppmp_unicast.plcf_21.FeedbackFormat = contact_p2p.feedback_plan.get_current_feedback_format();
+    rd.ppmp_unicast.plcf_21.FeedbackFormat =
+        contact_p2p.feedback_plan.get_current_feedback_format();
 
     // update respective feedback format
-    switch (ppmp_unicast.plcf_21.FeedbackFormat) {
+    switch (rd.ppmp_unicast.plcf_21.FeedbackFormat) {
         case 4:
-            ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f4.MCS =
+            rd.ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f4.MCS =
                 contact_p2p.mimo_csi.phy_MCS.get_val_or_fallback(expiration_64,
-                                                                 cqi_lut.get_mcs_min());
+                                                                 rd.cqi_lut.get_mcs_min());
 
             break;
 
         case 5:
-            ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index =
+            rd.ppmp_unicast.plcf_21.feedback_info_pool.feedback_info_f5.Codebook_index =
                 contact_p2p.mimo_csi.phy_codebook_index.get_val_or_fallback(expiration_64, 0);
 
             break;
     }
 }
 
-bool tfw_p2p_base_t::worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p,
-                                                const application::queue_level_t& queue_level,
-                                                const sp3::packet_sizes_t& packet_sizes,
-                                                phy::harq::process_tx_t& hp_tx) {
-    uint32_t a_cnt_w = ppmp_unicast.pack_first_3_header(hp_tx.get_a_plcf(), hp_tx.get_a_tb());
+bool steady_rd_t::worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p,
+                                             const application::queue_level_t& queue_level,
+                                             const sp3::packet_sizes_t& packet_sizes,
+                                             phy::harq::process_tx_t& hp_tx) {
+    uint32_t a_cnt_w = rd.ppmp_unicast.pack_first_3_header(hp_tx.get_a_plcf(), hp_tx.get_a_tb());
 
     // then attach as many user plane data MMIEs as possible
     for (uint32_t i = 0; i < queue_level.N_filled; ++i) {
         // request ...
-        auto& upd = mmie_pool_tx.get<sp4::user_plane_data_t>();
+        auto& upd = rd.mmie_pool_tx.get<sp4::user_plane_data_t>();
 
         // ... and configure user plane data MMIE
         upd.set_flow_id(1);
@@ -193,7 +195,7 @@ bool tfw_p2p_base_t::worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p
             "MAC PDU too large");
 
         // ... try reading data from upper layer to MMIE
-        if (application_server->read_nto(contact_p2p.conn_idx_server, dst_payload) == 0) {
+        if (rd.application_server->read_nto(contact_p2p.conn_idx_server, dst_payload) == 0) {
             break;
         }
 
@@ -201,12 +203,12 @@ bool tfw_p2p_base_t::worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p
     }
 
     // in case no user plane data was written
-    if (ppmp_unicast.get_packed_size_mht_mch() == a_cnt_w) {
+    if (rd.ppmp_unicast.get_packed_size_mht_mch() == a_cnt_w) {
         return false;
     }
 
-    mmie_pool_tx.fill_with_padding_ies(hp_tx.get_a_tb() + a_cnt_w,
-                                       packet_sizes.N_TB_byte - a_cnt_w);
+    rd.mmie_pool_tx.fill_with_padding_ies(hp_tx.get_a_tb() + a_cnt_w,
+                                          packet_sizes.N_TB_byte - a_cnt_w);
 
     return true;
 }

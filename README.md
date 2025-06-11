@@ -345,7 +345,7 @@ This firmware starts channel measurements in regular intervals and writes the re
 
 This is a firmware family. Each individual firmware is a simulation with a single device looping its TX signal back into its own RX path. It is used to test SDR functionality such as synchronization and packet error rates (PERs) over SNR. The wireless channel model can be switched in `radio.json` from an AWGN channel to a doubly selective Rayleigh fading channel.
 
-### [p2p](lib/include/dectnrp/upper/p2p/tfw_p2p_base.hpp)
+### [p2p](lib/include/dectnrp/upper/p2p/procedure/steady_rd.hpp)
 
 The P2P (point-to-point) firmware is started on two separate host computers, each connected to an USRP (in this example an X410). One combination of host and USRP acts as a fixed termination point (FT), while the other is the portable termination point (PT). The FT is connected to the internet and once both FT and PT are started, the PT can access the internet through the wireless DECT NR+ connection acting as pipe for IP packets.
 
@@ -353,8 +353,8 @@ The P2P (point-to-point) firmware is started on two separate host computers, eac
 
 If a different USRP type is used, the value of `“usrp_args”` in `radio.json` must be modified accordingly. Furthermore, FT and PT must be tuned to a common center frequency. This is done by opening the following two files
 
-- [lib/src/upper/p2p/tfw_p2p_ft_once.cpp](lib/src/upper/p2p/tfw_p2p_ft_once.cpp)
-- [lib/src/upper/p2p/tfw_p2p_pt_once.cpp](lib/src/upper/p2p/tfw_p2p_pt_once.cpp)
+- [lib/src/upper/p2p/procedure/steady_ft_once.cpp](lib/src/upper/p2p/procedure/steady_ft_once.cpp)
+- [lib/src/upper/p2p/procedure/steady_pt_once.cpp](lib/src/upper/p2p/procedure/steady_pt_once.cpp)
 
 and changing the following line in both files to the desired center frequency in Hz:
 

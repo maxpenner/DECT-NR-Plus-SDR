@@ -18,7 +18,7 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/upper/p2p/tfw_p2p_pt.hpp"
+#include "dectnrp/upper/p2p/procedure/steady_pt.hpp"
 //
 
 #include "dectnrp/common/prog/assert.hpp"
@@ -28,7 +28,7 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
+std::optional<phy::maclow_phy_t> steady_pt_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
     // cast guaranteed to work
     const auto* plcf_10 =
         static_cast<const sp4::plcf_10_t*>(phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
@@ -36,8 +36,8 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
     dectnrp_assert(plcf_10 != nullptr, "cast ill-formed");
 
     // is this a packet from the correct network, and from the FT?
-    if (plcf_10->ShortNetworkID != contact_pt.identity.ShortNetworkID ||
-        plcf_10->TransmitterIdentity != identity_ft.ShortRadioDeviceID) {
+    if (plcf_10->ShortNetworkID != pt.contact_pt.identity.ShortNetworkID ||
+        plcf_10->TransmitterIdentity != rd.identity_ft.ShortRadioDeviceID) {
         return std::nullopt;
     }
 
@@ -47,22 +47,24 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
     ++stats.beacon_cnt;
 
     // it's the beacon, so update beacon time
-    contact_pt.allocation_pt.set_beacon_time_last_known(phy_maclow.sync_report.fine_peak_time_64);
-    pll.provide_beacon_time(phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64);
+    pt.contact_pt.allocation_pt.set_beacon_time_last_known(
+        phy_maclow.sync_report.fine_peak_time_64);
+    rd.pll.provide_beacon_time(
+        phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64);
 
 #ifdef TFW_P2P_EXPORT_PPX
-    if (ppx.has_ppx_rising_edge()) {
-        ppx.provide_beacon_time(
+    if (rd.ppx.has_ppx_rising_edge()) {
+        rd.ppx.provide_beacon_time(
             phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64);
-        ppx.set_ppx_period_warped(pll.get_warped(ppx.get_ppx_period_samples()));
+        rd.ppx.set_ppx_period_warped(rd.pll.get_warped(rd.ppx.get_ppx_period_samples()));
     }
 #endif
 
 #ifdef TFW_P2P_PT_AGC_ENABLED
 #ifdef TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
     // apply AGC change for RX and TX immediately before the next beacon
-    const int64_t t_agc_change_64 = contact_pt.allocation_pt.get_beacon_time_last_known() +
-                                    contact_pt.allocation_pt.get_beacon_period() -
+    const int64_t t_agc_change_64 = pt.contact_pt.allocation_pt.get_beacon_time_last_known() +
+                                    pt.contact_pt.allocation_pt.get_beacon_period() -
                                     hw.get_tmin_samples(radio::hw_t::tmin_t::gain);
 #else
     // immediate AGC gain change
@@ -76,18 +78,18 @@ std::optional<phy::maclow_phy_t> tfw_p2p_pt_t::worksub_pcc_10(const phy::phy_mac
     return worksub_pcc2pdc(
         phy_maclow,
         1,
-        identity_ft.NetworkID,
+        rd.identity_ft.NetworkID,
         0,
         phy::harq::finalize_rx_t::reset_and_terminate,
-        phy::maclow_phy_handle_t(phy::handle_pcc2pdc_t::th10, identity_ft.ShortRadioDeviceID));
+        phy::maclow_phy_handle_t(phy::handle_pcc2pdc_t::th10, rd.identity_ft.ShortRadioDeviceID));
 }
 
-phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_20(
+phy::maclow_phy_t steady_pt_t::worksub_pcc_20(
     [[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
 
-phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) {
+phy::maclow_phy_t steady_pt_t::worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) {
     // cast guaranteed to work
     const auto* plcf_21 =
         static_cast<const sp4::plcf_21_t*>(phy_maclow.pcc_report.plcf_decoder.get_plcf_base(2));
@@ -95,25 +97,25 @@ phy::maclow_phy_t tfw_p2p_pt_t::worksub_pcc_21(const phy::phy_maclow_t& phy_macl
     dectnrp_assert(plcf_21 != nullptr, "cast ill-formed");
 
     // is this a packet from the correct network, from the FT and for this PT?
-    if (plcf_21->ShortNetworkID != contact_pt.identity.ShortNetworkID ||
-        plcf_21->TransmitterIdentity != identity_ft.ShortRadioDeviceID ||
-        plcf_21->ReceiverIdentity != contact_pt.identity.ShortRadioDeviceID) {
+    if (plcf_21->ShortNetworkID != pt.contact_pt.identity.ShortNetworkID ||
+        plcf_21->TransmitterIdentity != rd.identity_ft.ShortRadioDeviceID ||
+        plcf_21->ReceiverIdentity != pt.contact_pt.identity.ShortRadioDeviceID) {
         return phy::maclow_phy_t();
     }
 
-    contact_pt.mimo_csi.update_from_feedback(
+    pt.contact_pt.mimo_csi.update_from_feedback(
         plcf_21->FeedbackFormat, plcf_21->feedback_info_pool, phy_maclow.sync_report);
 
     return worksub_pcc2pdc(
         phy_maclow,
         2,
-        identity_ft.NetworkID,
+        rd.identity_ft.NetworkID,
         0,
         phy::harq::finalize_rx_t::reset_and_terminate,
-        phy::maclow_phy_handle_t(phy::handle_pcc2pdc_t::th21, identity_ft.ShortRadioDeviceID));
+        phy::maclow_phy_handle_t(phy::handle_pcc2pdc_t::th21, rd.identity_ft.ShortRadioDeviceID));
 }
 
-phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) {
+phy::machigh_phy_t steady_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) {
     // readability
     const auto& mac_pdu_decoder = phy_machigh.pdc_report.mac_pdu_decoder;
 
@@ -136,11 +138,11 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
         }
     }
 
-    contact_pt.mimo_csi.update_from_phy(phy_machigh.pdc_report.mimo_report,
-                                        phy_machigh.phy_maclow.sync_report);
+    pt.contact_pt.mimo_csi.update_from_phy(phy_machigh.pdc_report.mimo_report,
+                                           phy_machigh.phy_maclow.sync_report);
 
-    contact_pt.mimo_csi.update_from_phy(
-        cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),
+    pt.contact_pt.mimo_csi.update_from_phy(
+        rd.cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),
         phy_machigh.phy_maclow.sync_report);
 
     // check if we can generate any uplink
@@ -151,12 +153,12 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_ma
     return machigh_phy;
 }
 
-phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_20(
+phy::machigh_phy_t steady_pt_t::worksub_pdc_20(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_machigh) {
+phy::machigh_phy_t steady_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_machigh) {
     // readability
     const auto& mac_pdu_decoder = phy_machigh.pdc_report.mac_pdu_decoder;
 
@@ -170,9 +172,9 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
         if (const auto* mmie_child = dynamic_cast<const sp4::user_plane_data_t*>(mmie);
             mmie_child != nullptr) {
             // submit to application_client
-            if (application_client->write_nto(contact_pt.conn_idx_client,
-                                              mmie_child->get_data_ptr(),
-                                              mmie_child->get_data_size()) > 0) {
+            if (rd.application_client->write_nto(pt.contact_pt.conn_idx_client,
+                                                 mmie_child->get_data_ptr(),
+                                                 mmie_child->get_data_size()) > 0) {
                 ++datagram_cnt;
             }
 
@@ -182,20 +184,20 @@ phy::machigh_phy_t tfw_p2p_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_ma
         dectnrp_log_wrn("MMIE not user plane data");
     }
 
-    application_client->trigger_forward_nto(datagram_cnt);
+    rd.application_client->trigger_forward_nto(datagram_cnt);
 
-    contact_pt.mimo_csi.update_from_phy(
-        cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),
+    pt.contact_pt.mimo_csi.update_from_phy(
+        rd.cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),
         phy_machigh.phy_maclow.sync_report);
 
     return phy::machigh_phy_t();
 }
 
-void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy) {
+void steady_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy) {
     // number of definable packets is limited
-    for (uint32_t i = 0; i < max_simultaneous_tx_unicast; ++i) {
+    for (uint32_t i = 0; i < rd.max_simultaneous_tx_unicast; ++i) {
         // find next transmission opportunity
-        const auto tx_opportunity = contact_pt.allocation_pt.get_tx_opportunity(
+        const auto tx_opportunity = pt.contact_pt.allocation_pt.get_tx_opportunity(
             mac::allocation::direction_t::uplink, buffer_rx.get_rx_time_passed(), tx_earliest_64);
 
         // if no opportunity found, leave machigh_phy as is
@@ -204,7 +206,7 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
         }
 
         // try to send a packet, may return false if no data of HARQ processes are available
-        if (!worksub_tx_unicast(machigh_phy, contact_pt, tx_opportunity)) {
+        if (!worksub_tx_unicast(machigh_phy, pt.contact_pt, tx_opportunity)) {
             break;
         }
     }
@@ -212,37 +214,37 @@ void tfw_p2p_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_ph
     return;
 }
 
-void tfw_p2p_pt_t::worksub_mmie_cluster_beacon_message(
+void steady_pt_t::worksub_mmie_cluster_beacon_message(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh,
     [[maybe_unused]] const sp4::cluster_beacon_message_t& cluster_beacon_message) {
     // ToDo
 }
 
-void tfw_p2p_pt_t::worksub_mmie_time_announce(
+void steady_pt_t::worksub_mmie_time_announce(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh,
     [[maybe_unused]] const sp4::extensions::time_announce_ie_t& time_announce_ie) {
 #ifdef TFW_P2P_EXPORT_PPX
     // is this the first time_announce_ie ever received?
-    if (!ppx.has_ppx_rising_edge()) {
+    if (!rd.ppx.has_ppx_rising_edge()) {
         // initialize with first known PPX rising edge
-        ppx.set_ppx_rising_edge(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
+        rd.ppx.set_ppx_rising_edge(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
 
         // when is the next PPX due?
         const int64_t A =
-            phy_machigh.phy_maclow.sync_report.fine_peak_time_64 + ppx.get_ppx_period_warped();
+            phy_machigh.phy_maclow.sync_report.fine_peak_time_64 + rd.ppx.get_ppx_period_warped();
 
-        callbacks.add_callback(std::bind(&tfw_p2p_pt_t::worksub_callback_ppx,
-                                         this,
-                                         std::placeholders::_1,
-                                         std::placeholders::_2,
-                                         std::placeholders::_3),
-                               A - ppx.get_ppx_time_advance_samples(),
-                               ppx.get_ppx_period_warped());
+        rd.callbacks.add_callback(std::bind(&steady_pt_t::worksub_callback_ppx,
+                                            this,
+                                            std::placeholders::_1,
+                                            std::placeholders::_2,
+                                            std::placeholders::_3),
+                                  A - rd.ppx.get_ppx_time_advance_samples(),
+                                  rd.ppx.get_ppx_period_warped());
     }
 #endif
 }
 
-void tfw_p2p_pt_t::worksub_callback_log(const int64_t now_64) const {
+void steady_pt_t::worksub_callback_log(const int64_t now_64) const {
     std::string str = "id=" + std::to_string(id) + " ";
 
     str += stats.get_as_string();
