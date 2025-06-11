@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "dectnrp/upper/tpoint_firmware/rtt/tfw_rtt_param.hpp"
+#include "dectnrp/upper/rtt/tfw_rtt_param.hpp"
 
 /// priority and core, 0 implies highest priority possible
 #define RTT_RUN_WITH_THREAD_PRIORITY_OFFSET 0

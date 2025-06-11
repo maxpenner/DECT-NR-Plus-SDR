@@ -53,7 +53,7 @@ The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware
 - PHY to MAC layer interface
 - Application layer interface (e.g. UDP sockets, virtual NIC).
 
-Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for [termination point](https://www.dect.org/dect-nrplus-standard-upper-layers-technology-faq-blog) which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/tpoint_firmware/](lib/include/dectnrp/upper/tpoint_firmware/) with a brief description of each available under [Firmware](#firmware). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
+Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for [termination point](https://www.dect.org/dect-nrplus-standard-upper-layers-technology-faq-blog) which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/](lib/include/dectnrp/upper/) with a brief description of each available under [Firmware](#firmware). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
 |   | **Virtual Function**  | **Properties**                                                            |
 |:-:|-----------------------|---------------------------------------------------------------------------|
@@ -237,7 +237,7 @@ The key takeaways are:
 
 If a packet is scheduled for transmission at a specific time in the future, the packet is effectively [sent several samples later](https://docs.srsran.com/projects/project/en/latest/user_manuals/source/troubleshooting.html#usrp-time-calibration), as various delay-afflicted processes (upsampling, filtering, etc.) are performed in the radio hardware. At low sample rates, a few samples add up to several microseconds.
 
-The exact delay depends on the sample rate, radio device, software version etc. and must be measured individually. This can be achieved with the firmware [txrxdelay](lib/include/dectnrp/upper/tpoint_firmware/txrxdelay/tfw_txrxdelay.hpp). It regularly sends packets which inevitably leak into the RX path and then compares the TX and RX time. The measured delay can then be specified in `radio.json` as `tx_time_advance_samples`. Each packet will be transmitted earlier to compensate for the delay.
+The exact delay depends on the sample rate, radio device, software version etc. and must be measured individually. This can be achieved with the firmware [txrxdelay](lib/include/dectnrp/upper/txrxdelay/tfw_txrxdelay.hpp). It regularly sends packets which inevitably leak into the RX path and then compares the TX and RX time. The measured delay can then be specified in `radio.json` as `tx_time_advance_samples`. Each packet will be transmitted earlier to compensate for the delay.
 
 Exemplary measurements:
 
@@ -333,19 +333,19 @@ The following tuning tips have been tested with Ubuntu and help achieving low-la
 
 The following firmware examples each demonstrate different capabilities of the SDR. Most examples have a small code base, only the firmware [p2p](#p2p) is more complex demonstrating a full duplex IP packet pipe with PLCF feedback reporting and beamforming.
 
-### [basic](lib/include/dectnrp/upper/tpoint_firmware/basic/tfw_basic.hpp)
+### [basic](lib/include/dectnrp/upper/basic/tfw_basic.hpp)
 
 This is the smallest and simplest firmware possible. All virtual functions are empty except for a few asserts. This firmware uses a simulator on the radio layer, i.e. it does not require real radio hardware to be started. If a new firmware is written from scratch, a renamed copy of this firmware is the recommended starting point. 
 
-### [chscanner](lib/include/dectnrp/upper/tpoint_firmware/chscanner/tfw_chscanner.hpp)
+### [chscanner](lib/include/dectnrp/upper/chscanner/tfw_chscanner.hpp)
 
 This firmware starts channel measurements in regular intervals and writes the result to the log file.
 
-### [loopback](lib/include/dectnrp/upper/tpoint_firmware/loopback/tfw_loopback.hpp)
+### [loopback](lib/include/dectnrp/upper/loopback/tfw_loopback.hpp)
 
 This is a firmware family. Each individual firmware is a simulation with a single device looping its TX signal back into its own RX path. It is used to test SDR functionality such as synchronization and packet error rates (PERs) over SNR. The wireless channel model can be switched in `radio.json` from an AWGN channel to a doubly selective Rayleigh fading channel.
 
-### [p2p](lib/include/dectnrp/upper/tpoint_firmware/p2p/tfw_p2p_base.hpp)
+### [p2p](lib/include/dectnrp/upper/p2p/tfw_p2p_base.hpp)
 
 The P2P (point-to-point) firmware is started on two separate host computers, each connected to an USRP (in this example an X410). One combination of host and USRP acts as a fixed termination point (FT), while the other is the portable termination point (PT). The FT is connected to the internet and once both FT and PT are started, the PT can access the internet through the wireless DECT NR+ connection acting as pipe for IP packets.
 
@@ -353,8 +353,8 @@ The P2P (point-to-point) firmware is started on two separate host computers, eac
 
 If a different USRP type is used, the value of `“usrp_args”` in `radio.json` must be modified accordingly. Furthermore, FT and PT must be tuned to a common center frequency. This is done by opening the following two files
 
-- [lib/src/upper/tpoint_firmware/p2p/tfw_p2p_ft_once.cpp](lib/src/upper/tpoint_firmware/p2p/tfw_p2p_ft_once.cpp)
-- [lib/src/upper/tpoint_firmware/p2p/tfw_p2p_pt_once.cpp](lib/src/upper/tpoint_firmware/p2p/tfw_p2p_pt_once.cpp)
+- [lib/src/upper/p2p/tfw_p2p_ft_once.cpp](lib/src/upper/p2p/tfw_p2p_ft_once.cpp)
+- [lib/src/upper/p2p/tfw_p2p_pt_once.cpp](lib/src/upper/p2p/tfw_p2p_pt_once.cpp)
 
 and changing the following line in both files to the desired center frequency in Hz:
 
@@ -404,7 +404,7 @@ sudo ./defaultgateway_dns.sh -a 172.99.180.100 -i tun_pt_0
 
 On the PT, internet access should now happen through the DECT NR+ connection. This can be verified by running a speed test and observing the spectrum with a spectrum analyzer, or by checking the packet count in the log file in [bin/](bin/).
 
-### [rtt](lib/include/dectnrp/upper/tpoint_firmware/rtt/tfw_rtt.hpp)
+### [rtt](lib/include/dectnrp/upper/rtt/tfw_rtt.hpp)
 
 This firmware tests the achievable round-trip time (RTT) between two instances of the SDR.
 
@@ -420,7 +420,7 @@ In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310
 "firmware_id": 1
 ```
 
-### [txrxdelay](lib/include/dectnrp/upper/tpoint_firmware/txrxdelay/tfw_txrxdelay.hpp)
+### [txrxdelay](lib/include/dectnrp/upper/txrxdelay/tfw_txrxdelay.hpp)
 
 See [TX/RX Delay Calibration](#txrx-delay-calibration).
 
