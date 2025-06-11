@@ -63,16 +63,16 @@ class steady_rd_t : public tpoint_t {
         /// all PT allocations have to be known at FT, individual PTs only need their own allocation
         mac::allocation::allocation_pt_t init_allocation_pt(const uint32_t firmware_id_);
 
-#ifdef TFW_P2P_EXPORT_PPX
-        /// FT and PT both generate a PPX
-        void worksub_callback_ppx(const int64_t now_64, const size_t idx, int64_t& next_64);
-#endif
-
         /// FT and PT both generate unicast packets, however with different identities
         void init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
                                  const uint32_t ShortRadioDeviceID_rx,
                                  const uint32_t LongRadioDeviceID_tx,
                                  const uint32_t LongRadioDeviceID_rx);
+
+#ifdef TFW_P2P_EXPORT_PPX
+        /// FT and PT both generate a PPX
+        void worksub_callback_ppx(const int64_t now_64, const size_t idx, int64_t& next_64);
+#endif
 
         /**
          * \brief The routines for PCC type 1 are always called when the CRC for type 1 is correct.
