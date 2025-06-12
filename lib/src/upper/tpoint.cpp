@@ -121,10 +121,10 @@ phy::maclow_phy_t tpoint_t::worksub_pcc2pdc(const phy::phy_maclow_t& phy_maclow,
     return phy::maclow_phy_t(hp_rx, mph);
 }
 
-phy::maclow_phy_t tpoint_t::worksub_pcc2pdc_running(const uint32_t process_id,
-                                                    const uint32_t rv,
+phy::maclow_phy_t tpoint_t::worksub_pcc2pdc_running(const uint32_t rv,
                                                     const phy::harq::finalize_rx_t frx,
-                                                    const phy::maclow_phy_handle_t mph) {
+                                                    const phy::maclow_phy_handle_t mph,
+                                                    const uint32_t process_id) {
     ++stats.rx_pcc2pdc_running_success;
 
     auto* hp_rx = hpp->get_process_rx_running(process_id, rv, frx);

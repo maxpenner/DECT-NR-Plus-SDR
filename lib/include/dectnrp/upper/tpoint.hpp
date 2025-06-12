@@ -286,16 +286,16 @@ class tpoint_t : public common::layer_unit_t {
         /**
          * \brief same as worksub_pcc2pdc(), but for an already running HARQ process
          *
-         * \param process_id HARQ process id
          * \param rv redundancy version
          * \param frx final action applied to HARQ buffer after PHY used it
          * \param mph handle to identify PCC when PHY calls with decoded PDC
+         * \param process_id HARQ process id
          * \return
          */
-        [[nodiscard]] phy::maclow_phy_t worksub_pcc2pdc_running(const uint32_t process_id,
-                                                                const uint32_t rv,
+        [[nodiscard]] phy::maclow_phy_t worksub_pcc2pdc_running(const uint32_t rv,
                                                                 const phy::harq::finalize_rx_t frx,
-                                                                const phy::maclow_phy_handle_t mph);
+                                                                const phy::maclow_phy_handle_t mph,
+                                                                const uint32_t process_id);
 
         // ##################################################
         // DLC and Convergence Layer
