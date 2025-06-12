@@ -72,11 +72,13 @@ upper_t::upper_t(const upper_config_t& upper_config_,
         dectnrp_assert(phy_.get_nof_layer_unit() <= limits::max_nof_radio_phy_pairs_one_tpoint,
                        "too many pairs for a single tpoint");
 
-        // all hw + worker_pool pairs will use the same token
+        // all hw + worker_pool pairs use the same token
         auto token = phy::token_t::create(phy_.get_nof_layer_unit());
 
-        // tpoint controls hardware through this interface
-        phy::mac_lower_t mac_lower(*token.get());
+        mac_lower_vec.push_back(phy::mac_lower_t(token));
+
+        // tpoint controls alls hw + worker_pool pairs through this interface
+        phy::mac_lower_t& mac_lower = mac_lower_vec.at(0);
 
         // vector with all hw + worker_pool pairs
         for (uint32_t id = 0; id < phy_.get_nof_layer_unit(); ++id) {
@@ -99,7 +101,7 @@ upper_t::upper_t(const upper_config_t& upper_config_,
              * different IDs.
              */
             auto& worker_pool = phy_.get_layer_unit(id);
-            worker_pool.configure_tpoint_calls(layer_unit_vec.at(0).get(), token, id);
+            worker_pool.configure_tpoint_calls(layer_unit_vec.at(0).get(), mac_lower.token, id);
 
             // add network IDs to associated worker pool
             for (auto elem : tpoint_config.network_ids) {
@@ -115,13 +117,18 @@ upper_t::upper_t(const upper_config_t& upper_config_,
         dectnrp_assert(phy_.get_nof_layer_unit() == upper_config.get_nof_layer_unit_config(),
                        "number of hw, worker_pool and tpoint ill-configured");
 
+        // init mac_lower_vec, we need reference to its elements
+        for (uint32_t t_id = 0; t_id < upper_config.get_nof_layer_unit_config(); ++t_id) {
+            // all hw + worker_pool pairs use a different token
+            auto token = phy::token_t::create(phy_.get_nof_layer_unit());
+
+            mac_lower_vec.push_back(phy::mac_lower_t(token));
+        }
+
         // all hw + worker_pool pairs get a pointer to a unique tpoint
         for (uint32_t t_id = 0; t_id < upper_config.get_nof_layer_unit_config(); ++t_id) {
-            // hw + worker_pool pair use unique tokens
-            auto token = phy::token_t::create(1);
-
-            // tpoint controls hardware through this interface
-            phy::mac_lower_t mac_lower(*token.get());
+            // tpoint controls this hw + worker_pool pair through this interface
+            phy::mac_lower_t& mac_lower = mac_lower_vec.at(t_id);
 
             // vector with a single hw + worker_pool pair given to tpoint
             mac_lower.lower_ctrl_vec.emplace_back(radio_.get_layer_unit(t_id),
@@ -140,7 +147,7 @@ upper_t::upper_t(const upper_config_t& upper_config_,
              * within their respective pool.
              */
             auto& worker_pool = phy_.get_layer_unit(t_id);
-            worker_pool.configure_tpoint_calls(layer_unit_vec.at(t_id).get(), token, 0);
+            worker_pool.configure_tpoint_calls(layer_unit_vec.at(t_id).get(), mac_lower.token, 0);
 
             // add network IDs to associated worker pool
             for (auto elem : tpoint_config.network_ids) {

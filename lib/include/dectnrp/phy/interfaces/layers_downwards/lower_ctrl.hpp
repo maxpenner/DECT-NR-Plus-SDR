@@ -21,10 +21,12 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/phy/agc/agc_rx.hpp"
 #include "dectnrp/phy/agc/agc_tx.hpp"
+#include "dectnrp/phy/harq/process_pool.hpp"
 #include "dectnrp/phy/pool/job_queue.hpp"
 #include "dectnrp/phy/worker_pool_config.hpp"
 #include "dectnrp/radio/hw.hpp"
@@ -49,6 +51,8 @@ class lower_ctrl_t {
               buffer_rx(*hw.buffer_rx.get()),
               worker_pool_config(worker_pool_config_),
               job_queue(job_queue_),
+              hpp(std::make_shared<phy::harq::process_pool_t>(
+                  worker_pool_config.maximum_packet_sizes, 8, 8)),
               duration_lut(sp3::duration_lut_t(hw.get_samp_rate())),
               // generic values for a software TX AGC
               agc_tx(phy::agc::agc_tx_t(
@@ -73,6 +77,8 @@ class lower_ctrl_t {
         const radio::buffer_rx_t& buffer_rx;
         const phy::worker_pool_config_t& worker_pool_config;
         phy::job_queue_t& job_queue;
+
+        std::shared_ptr<phy::harq::process_pool_t> hpp;
 
         /**
          * \brief Lookup table (lut) to convert from generic duration enums to equivalent number of

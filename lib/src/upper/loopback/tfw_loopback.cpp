@@ -50,10 +50,6 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     hw.set_tx_power_ant_0dBFS_tc(0.0f);
     hw.set_rx_power_ant_0dBFS_uniform_tc(0.0f);
 
-    // init HARQ process pool
-    hpp =
-        std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 4, 4);
-
     // loopback requires the hardware to be a simulator
     hw_simulator = dynamic_cast<radio::hw_simulator_t*>(&hw);
 
@@ -294,10 +290,10 @@ void tfw_loopback_t::packet_params_t::update_plcf_unpacked() {
 
 void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
     // request harq process
-    auto* hp_tx = hpp->get_process_tx(pp.PLCF_type,
-                                      pp.identity.NetworkID,
-                                      pp.psdef,
-                                      phy::harq::finalize_tx_t::reset_and_terminate);
+    auto* hp_tx = hpp.get_process_tx(pp.PLCF_type,
+                                     pp.identity.NetworkID,
+                                     pp.psdef,
+                                     phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process
     if (hp_tx == nullptr) {

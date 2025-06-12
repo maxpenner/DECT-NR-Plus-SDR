@@ -52,9 +52,6 @@ steady_rd_t::steady_rd_t(args_t& args)
     // ##################################################
     // MAC Layer
 
-    tpoint_t::hpp =
-        std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 8, 8);
-
     rd.identity_ft = sp4::mac_architecture::identity_t(100, 10000000, 1000);
 
     // how often does the FT send beacons, how often does the PT expect beacons?
@@ -383,10 +380,10 @@ bool steady_rd_t::worksub_tx_unicast(phy::machigh_phy_t& machigh_phy,
 
     worksub_tx_unicast_psdef(contact_p2p, expiration_64);
 
-    auto* hp_tx = hpp->get_process_tx(rd.ppmp_unicast.plcf_base_effective->get_Type(),
-                                      rd.identity_ft.NetworkID,
-                                      rd.ppmp_unicast.psdef,
-                                      phy::harq::finalize_tx_t::reset_and_terminate);
+    auto* hp_tx = hpp.get_process_tx(rd.ppmp_unicast.plcf_base_effective->get_Type(),
+                                     rd.identity_ft.NetworkID,
+                                     rd.ppmp_unicast.psdef,
+                                     phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process
     if (hp_tx == nullptr) {

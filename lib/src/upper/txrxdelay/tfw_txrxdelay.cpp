@@ -38,9 +38,6 @@ const std::string tfw_txrxdelay_t::firmware_name("txrxdelay");
 tfw_txrxdelay_t::tfw_txrxdelay_t(const tpoint_config_t& tpoint_config_,
                                  phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {
-    hpp =
-        std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 4, 4);
-
     hw.set_command_time();
     hw.set_tx_power_ant_0dBFS_tc(10.0f);
     hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
@@ -153,7 +150,7 @@ void tfw_txrxdelay_t::work_stop() {}
 
 int64_t tfw_txrxdelay_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // request harq process
-    auto* hp_tx = hpp->get_process_tx(
+    auto* hp_tx = hpp.get_process_tx(
         1, identity_ft.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process

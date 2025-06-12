@@ -417,10 +417,10 @@ bool steady_ft_t::worksub_tx_beacon(phy::machigh_phy_t& machigh_phy) {
     // -
 
     // request harq process
-    auto* hp_tx = hpp->get_process_tx(rd.ppmp_beacon.plcf_base_effective->get_Type(),
-                                      rd.identity_ft.NetworkID,
-                                      rd.ppmp_beacon.psdef,
-                                      phy::harq::finalize_tx_t::reset_and_terminate);
+    auto* hp_tx = hpp.get_process_tx(rd.ppmp_beacon.plcf_base_effective->get_Type(),
+                                     rd.identity_ft.NetworkID,
+                                     rd.ppmp_beacon.psdef,
+                                     phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process
     if (hp_tx == nullptr) {

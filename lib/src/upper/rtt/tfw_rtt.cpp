@@ -34,10 +34,6 @@ const std::string tfw_rtt_t::firmware_name("rtt");
 
 tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {
-    // init HARQ process pool
-    hpp =
-        std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 4, 4);
-
     // set TX power, RX power, and frequency which should be free of any interference
     hw.set_command_time();
     hw.set_tx_power_ant_0dBFS_tc(10.0f);
@@ -279,7 +275,7 @@ void tfw_rtt_t::work_stop() {
 
 void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // request harq process
-    auto* hp_tx = hpp->get_process_tx(
+    auto* hp_tx = hpp.get_process_tx(
         1, identity_ft.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process

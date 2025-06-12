@@ -21,7 +21,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 
 #include "dectnrp/application/application_report.hpp"
 #include "dectnrp/common/layer/layer_unit.hpp"
@@ -194,7 +193,7 @@ class tpoint_t : public common::layer_unit_t {
 
     protected:
         /// configuration received during construction
-        const tpoint_config_t tpoint_config;
+        const tpoint_config_t& tpoint_config;
 
         // ##################################################
         // Radio Layer + PHY
@@ -205,7 +204,7 @@ class tpoint_t : public common::layer_unit_t {
          * combination of PHY plus radio layer. Thus, a single firmware can control multiple
          * hardware radios.
          */
-        phy::mac_lower_t mac_lower;
+        phy::mac_lower_t& mac_lower;
 
         /* Most firmware will use only one lower stack (PHY plus radio layer), and accessing this
          * single lower stack through mac_lower is cumbersome. For this reason, we save references
@@ -221,6 +220,7 @@ class tpoint_t : public common::layer_unit_t {
         phy::agc::agc_rx_t& agc_rx;
         int64_t& tx_order_id;
         int64_t& tx_earliest_64;
+        phy::harq::process_pool_t& hpp;
 
         // ##################################################
         // MAC Layer
@@ -252,13 +252,6 @@ class tpoint_t : public common::layer_unit_t {
                          const sp4::plcf_base_t& plcf_base,
                          const int64_t t_agc_change_64,
                          const std::size_t hw_idx = 0);
-
-        /**
-         * \brief For every transmitted and received DECT NR+ packet, a HARQ process is required.
-         * This pool contains HARQ processes for both TX and RX. Every firmware has to allocate the
-         * pool and decide how many individual HARQ processes are required.
-         */
-        std::unique_ptr<phy::harq::process_pool_t> hpp;
 
         /**
          * \brief When a firmware is called with a successfully received PCC and the choice is made

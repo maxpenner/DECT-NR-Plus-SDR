@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "dectnrp/common/layer/layer.hpp"
 #include "dectnrp/phy/phy.hpp"
 #include "dectnrp/radio/radio.hpp"
@@ -44,6 +46,9 @@ class upper_t final : public common::layer_t<tpoint_t> {
         const upper_config_t& upper_config;
 
     private:
+        /// one instance for each tpoint
+        std::vector<phy::mac_lower_t> mac_lower_vec;
+
         /// convenience function to add a new termination point
         void add_tpoint(const tpoint_config_t& tpoint_config, phy::mac_lower_t& mac_lower);
 };
