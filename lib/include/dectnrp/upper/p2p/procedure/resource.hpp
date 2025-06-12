@@ -22,16 +22,15 @@
 
 #include "dectnrp/upper/p2p/data/ft.hpp"
 #include "dectnrp/upper/p2p/data/rd.hpp"
+#include "dectnrp/upper/p2p/procedure/args.hpp"
+#include "dectnrp/upper/state.hpp"
 #include "dectnrp/upper/tpoint.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class resource_t final : public tpoint_t {
+class resource_t final : public tpoint_t, public state_t {
     public:
-        explicit resource_t(const tpoint_config_t& tpoint_config_,
-                            phy::mac_lower_t& mac_lower_,
-                            rd_t& rd_,
-                            ft_t& ft_);
+        explicit resource_t(args_t& args, ft_t& ft_);
         ~resource_t() = default;
 
         resource_t() = delete;
@@ -49,10 +48,11 @@ class resource_t final : public tpoint_t {
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
-
-    private:
         void shutdown() override final;
 
+        virtual void entry() override final;
+
+    private:
         [[maybe_unused]] rd_t& rd;
         [[maybe_unused]] ft_t& ft;
 };

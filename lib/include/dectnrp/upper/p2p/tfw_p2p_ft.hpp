@@ -22,8 +22,6 @@
 
 #include <memory>
 
-#include "dectnrp/upper/p2p/data/ft.hpp"
-#include "dectnrp/upper/p2p/data/rd.hpp"
 #include "dectnrp/upper/p2p/procedure/nop.hpp"
 #include "dectnrp/upper/p2p/procedure/resource.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_ft.hpp"
@@ -53,18 +51,25 @@ class tfw_p2p_ft_t final : public tpoint_t {
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
-
-    private:
         void shutdown() override final;
 
+    private:
+        /// called once the active state requests a state change
+        void state_transitions();
+
+        /// data of radio device shared with all states
         rd_t rd;
+
+        /// data of fixed termination point shared with all states
         ft_t ft;
 
+        /// states
         std::unique_ptr<resource_t> resource;
         std::unique_ptr<steady_ft_t> steady_ft;
         std::unique_ptr<nop_t> nop;
 
-        tpoint_t* tpoint{nullptr};
+        /// pointer to currently active state
+        tpoint_t* state{nullptr};
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

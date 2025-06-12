@@ -22,8 +22,6 @@
 
 #include <memory>
 
-#include "dectnrp/upper/p2p/data/pt.hpp"
-#include "dectnrp/upper/p2p/data/rd.hpp"
 #include "dectnrp/upper/p2p/procedure/association.hpp"
 #include "dectnrp/upper/p2p/procedure/deassociation.hpp"
 #include "dectnrp/upper/p2p/procedure/nop.hpp"
@@ -54,19 +52,26 @@ class tfw_p2p_pt_t final : public tpoint_t {
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
-
-    private:
         void shutdown() override final;
 
+    private:
+        /// called once the active state requests a state change
+        void state_transitions();
+
+        /// data of radio device shared with all states
         rd_t rd;
+
+        /// data of portable termination point shared with all states
         pt_t pt;
 
+        /// states
         std::unique_ptr<association_t> association;
         std::unique_ptr<steady_pt_t> steady_pt;
         std::unique_ptr<deassociation_t> deassociation;
         std::unique_ptr<nop_t> nop;
 
-        tpoint_t* tpoint{nullptr};
+        /// pointer to currently active state
+        tpoint_t* state{nullptr};
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

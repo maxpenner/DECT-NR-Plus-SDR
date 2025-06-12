@@ -38,11 +38,8 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-steady_pt_t::steady_pt_t(const tpoint_config_t& tpoint_config_,
-                         phy::mac_lower_t& mac_lower_,
-                         rd_t& rd_,
-                         pt_t& pt_)
-    : steady_rd_t(tpoint_config_, mac_lower_, rd_),
+steady_pt_t::steady_pt_t(args_t& args, pt_t& pt_)
+    : steady_rd_t(args),
       pt(pt_) {
     // ##################################################
     // Radio Layer + PHY
@@ -149,6 +146,8 @@ void steady_pt_t::shutdown() {
     // finally stop the data sink
     rd.application_client->stop_sc();
 }
+
+void steady_pt_t::entry() {};
 
 void steady_pt_t::init_radio() {
     hw.set_command_time();

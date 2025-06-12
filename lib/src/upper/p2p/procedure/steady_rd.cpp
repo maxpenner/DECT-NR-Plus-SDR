@@ -28,11 +28,10 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-steady_rd_t::steady_rd_t(const tpoint_config_t& tpoint_config_,
-                         phy::mac_lower_t& mac_lower_,
-                         rd_t& rd_)
-    : tpoint_t(tpoint_config_, mac_lower_),
-      rd(rd_) {
+steady_rd_t::steady_rd_t(args_t& args)
+    : tpoint_t(args.tpoint_config, args.mac_lower),
+      state_t(args.leave_callback),
+      rd(args.rd) {
     dectnrp_assert(mac_lower.lower_ctrl_vec.size() == 1,
                    "firmware written for a single pair of physical and radio layer");
 

@@ -32,10 +32,7 @@ namespace dectnrp::upper::tfw::p2p {
 
 class steady_pt_t final : public steady_rd_t {
     public:
-        explicit steady_pt_t(const tpoint_config_t& tpoint_config_,
-                             phy::mac_lower_t& mac_lower_,
-                             rd_t& rd_,
-                             pt_t& pt_);
+        explicit steady_pt_t(args_t& args, pt_t& pt_);
         ~steady_pt_t() = default;
 
         steady_pt_t() = delete;
@@ -48,14 +45,13 @@ class steady_pt_t final : public steady_rd_t {
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
-
         // work_pcc() and work_pdc_async() are implemented in parent class
-
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
-
         void shutdown() override final;
+
+        virtual void entry() override final;
 
     private:
         pt_t& pt;

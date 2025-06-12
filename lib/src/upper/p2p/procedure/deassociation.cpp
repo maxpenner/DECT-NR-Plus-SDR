@@ -22,12 +22,10 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-deassociation_t::deassociation_t(const tpoint_config_t& tpoint_config_,
-                                 phy::mac_lower_t& mac_lower_,
-                                 rd_t& rd_,
-                                 pt_t& pt_)
-    : tpoint_t(tpoint_config_, mac_lower_),
-      rd(rd_),
+deassociation_t::deassociation_t(args_t& args, pt_t& pt_)
+    : tpoint_t(args.tpoint_config, args.mac_lower),
+      state_t(args.leave_callback),
+      rd(args.rd),
       pt(pt_) {}
 
 phy::irregular_report_t deassociation_t::work_start_imminent(
@@ -65,5 +63,7 @@ phy::machigh_phy_tx_t deassociation_t::work_chscan_async(
 }
 
 void deassociation_t::shutdown() {}
+
+void deassociation_t::entry() {};
 
 }  // namespace dectnrp::upper::tfw::p2p

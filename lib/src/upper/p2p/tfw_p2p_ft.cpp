@@ -26,42 +26,56 @@ const std::string tfw_p2p_ft_t::firmware_name("p2p_ft");
 
 tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {
-    resource = std::make_unique<tfw::p2p::resource_t>(tpoint_config_, mac_lower_, rd, ft);
-    steady_ft = std::make_unique<tfw::p2p::steady_ft_t>(tpoint_config_, mac_lower_, rd, ft);
-    nop = std::make_unique<tfw::p2p::nop_t>(tpoint_config_, mac_lower_);
+    // same callback for every state
+    state_t::leave_callback_t leave_callback = std::bind(&tfw_p2p_ft_t::state_transitions, this);
 
-    tpoint = steady_ft.get();
+    // common arguments of all states
+    args_t args{.tpoint_config = tpoint_config_,
+                .mac_lower = mac_lower_,
+                .leave_callback = leave_callback,
+                .rd = rd};
+
+    resource = std::make_unique<tfw::p2p::resource_t>(args, ft);
+
+    steady_ft = std::make_unique<tfw::p2p::steady_ft_t>(args, ft);
+
+    nop = std::make_unique<tfw::p2p::nop_t>(args);
+
+    // set first state
+    state = steady_ft.get();
 }
 
 phy::irregular_report_t tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
-    return tpoint->work_start_imminent(start_time_64);
+    return state->work_start_imminent(start_time_64);
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_regular(const phy::regular_report_t& regular_report) {
-    return tpoint->work_regular(regular_report);
+    return state->work_regular(regular_report);
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_irregular(const phy::irregular_report_t& irregular_report) {
-    return tpoint->work_irregular(irregular_report);
+    return state->work_irregular(irregular_report);
 }
 
 phy::maclow_phy_t tfw_p2p_ft_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
-    return tpoint->work_pcc(phy_maclow);
+    return state->work_pcc(phy_maclow);
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
-    return tpoint->work_pdc_async(phy_machigh);
+    return state->work_pdc_async(phy_machigh);
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_application(
     const application::application_report_t& application_report) {
-    return tpoint->work_application(application_report);
+    return state->work_application(application_report);
 }
 
 phy::machigh_phy_tx_t tfw_p2p_ft_t::work_chscan_async(const phy::chscan_t& chscan) {
-    return tpoint->work_chscan_async(chscan);
+    return state->work_chscan_async(chscan);
 }
 
-void tfw_p2p_ft_t::shutdown() { tpoint->shutdown(); }
+void tfw_p2p_ft_t::shutdown() { state->shutdown(); }
+
+void tfw_p2p_ft_t::state_transitions() {}
 
 }  // namespace dectnrp::upper::tfw::p2p

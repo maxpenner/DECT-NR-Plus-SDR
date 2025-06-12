@@ -21,6 +21,7 @@
 #pragma once
 
 #include "dectnrp/upper/p2p/data/ft.hpp"
+#include "dectnrp/upper/p2p/procedure/args.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_rd.hpp"
 
 // #define TFW_P2P_FT_ALIGN_BEACON_START_TO_FULL_SECOND_OR_CORRECT_OFFSET
@@ -29,10 +30,7 @@ namespace dectnrp::upper::tfw::p2p {
 
 class steady_ft_t final : public steady_rd_t {
     public:
-        explicit steady_ft_t(const tpoint_config_t& tpoint_config_,
-                             phy::mac_lower_t& mac_lower_,
-                             rd_t& rd_,
-                             ft_t& ft_);
+        explicit steady_ft_t(args_t& args, ft_t& ft_);
         ~steady_ft_t() = default;
 
         steady_ft_t() = delete;
@@ -45,14 +43,13 @@ class steady_ft_t final : public steady_rd_t {
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
-
         // work_pcc() and work_pdc_async() are implemented in parent class
-
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
-
         void shutdown() override final;
+
+        virtual void entry() override final;
 
     private:
         ft_t& ft;

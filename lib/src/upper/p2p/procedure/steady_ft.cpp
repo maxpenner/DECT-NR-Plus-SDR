@@ -40,11 +40,8 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-steady_ft_t::steady_ft_t(const tpoint_config_t& tpoint_config_,
-                         phy::mac_lower_t& mac_lower_,
-                         rd_t& rd_,
-                         ft_t& ft_)
-    : steady_rd_t(tpoint_config_, mac_lower_, rd_),
+steady_ft_t::steady_ft_t(args_t& args, ft_t& ft_)
+    : steady_rd_t(args),
       ft(ft_) {
 #ifdef TFW_P2P_MIMO
     dectnrp_assert(
@@ -234,6 +231,8 @@ void steady_ft_t::shutdown() {
     // finally stop the data sink
     rd.application_client->stop_sc();
 }
+
+void steady_ft_t::entry() {};
 
 void steady_ft_t::init_radio() {
     hw.set_command_time();

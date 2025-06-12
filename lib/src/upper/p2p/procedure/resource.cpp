@@ -22,12 +22,10 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-resource_t::resource_t(const tpoint_config_t& tpoint_config_,
-                       phy::mac_lower_t& mac_lower_,
-                       rd_t& rd_,
-                       ft_t& ft_)
-    : tpoint_t(tpoint_config_, mac_lower_),
-      rd(rd_),
+resource_t::resource_t(args_t& args, ft_t& ft_)
+    : tpoint_t(args.tpoint_config, args.mac_lower),
+      state_t(args.leave_callback),
+      rd(args.rd),
       ft(ft_) {}
 
 phy::irregular_report_t resource_t::work_start_imminent(
@@ -64,5 +62,7 @@ phy::machigh_phy_tx_t resource_t::work_chscan_async([[maybe_unused]] const phy::
 }
 
 void resource_t::shutdown() {}
+
+void resource_t::entry() {};
 
 }  // namespace dectnrp::upper::tfw::p2p
