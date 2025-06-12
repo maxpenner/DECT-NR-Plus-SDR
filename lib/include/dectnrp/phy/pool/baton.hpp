@@ -56,7 +56,7 @@ class baton_t {
 
         /**
          * \brief Called by worker_pool_t with its associated tpoint and token. This class with use
-         * that information to call the tpoint function work_start_imminent().
+         * that information to call the tpoint function work_start().
          *
          * \param tpoint_
          * \param token_
@@ -68,7 +68,7 @@ class baton_t {
          * thread-safe with no timeout (nto).
          *
          * \param now_64 suggestion of each worker_sync_t instance
-         * \return time workers agreed upon, returned value of work_start_imminent()
+         * \return time workers agreed upon, returned value of work_start()
          */
         std::pair<int64_t, phy::irregular_report_t> register_and_wait_for_others_nto(
             const int64_t now_64);

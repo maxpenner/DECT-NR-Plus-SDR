@@ -280,7 +280,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="A43RT7BLHncz933INCX8-46" value="&amp;nbsp; work_start_imminent()&amp;nbsp;&amp;nbsp;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_regular()&lt;div&gt;work_irregular()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_pcc()&lt;div&gt;work_pcc_crc_error()&lt;br&gt;work_pdc_async()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_application()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_chscan_async()&lt;/div&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=default;rounded=1;spacingTop=0;" parent="A43RT7BLHncz933INCX8-5" vertex="1" connectable="0">
+        <mxCell id="A43RT7BLHncz933INCX8-46" value="&amp;nbsp; work_start()&amp;nbsp;&amp;nbsp;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_regular()&lt;div&gt;work_irregular()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_pcc()&lt;div&gt;work_pcc_crc_error()&lt;br&gt;work_pdc_async()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_application()&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;work_chscan_async()&lt;/div&gt;&lt;/div&gt;&lt;div&gt;work_stop()&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBorderColor=default;rounded=1;spacingTop=0;" parent="A43RT7BLHncz933INCX8-5" vertex="1" connectable="0">
           <mxGeometry x="0.2081" relative="1" as="geometry">
             <mxPoint x="37" y="-36" as="offset" />
           </mxGeometry>

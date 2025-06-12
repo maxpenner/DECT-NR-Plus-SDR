@@ -26,7 +26,7 @@ nop_t::nop_t(args_t& args)
     : tpoint_t(args.tpoint_config, args.mac_lower),
       state_t(args.leave_callback) {}
 
-phy::irregular_report_t nop_t::work_start_imminent([[maybe_unused]] const int64_t start_time_64) {
+phy::irregular_report_t nop_t::work_start([[maybe_unused]] const int64_t start_time_64) {
     return phy::irregular_report_t();
 }
 
@@ -57,7 +57,7 @@ phy::machigh_phy_tx_t nop_t::work_chscan_async([[maybe_unused]] const phy::chsca
     return phy::machigh_phy_tx_t();
 }
 
-void nop_t::shutdown() {}
+void nop_t::work_stop() {}
 
 void nop_t::entry() {};
 

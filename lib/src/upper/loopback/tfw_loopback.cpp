@@ -120,7 +120,7 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     pp.cfo_symmetric_range_subc_multiple = 1.75f;
 }
 
-phy::irregular_report_t tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_loopback_t::work_start(const int64_t start_time_64) {
     // start some time in the near future
     state_time_reference_64 = start_time_64 + stt.x_to_A_64;
 
@@ -249,7 +249,7 @@ phy::machigh_phy_tx_t tfw_loopback_t::work_chscan_async(
     return phy::machigh_phy_tx_t();
 }
 
-void tfw_loopback_t::shutdown() {
+void tfw_loopback_t::work_stop() {
     if (state == STATE_t::DEAD_END) {
         save_all_results_to_file();
     }

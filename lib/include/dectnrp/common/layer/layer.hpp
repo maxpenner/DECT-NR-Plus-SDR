@@ -73,9 +73,9 @@ class layer_t {
         /// reference to derivative of layer unit
         [[nodiscard]] T& get_layer_unit(const size_t idx) const { return *layer_unit_vec[idx]; };
 
-        void shutdown_all_layer_units() {
+        void stop_all_layer_units() {
             for (size_t idx = 0; idx < get_nof_layer_unit(); ++idx) {
-                get_layer_unit_base(idx).shutdown();
+                get_layer_unit_base(idx).work_stop();
             }
         };
 

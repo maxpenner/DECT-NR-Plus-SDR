@@ -28,8 +28,7 @@ deassociation_t::deassociation_t(args_t& args, pt_t& pt_)
       rd(args.rd),
       pt(pt_) {}
 
-phy::irregular_report_t deassociation_t::work_start_imminent(
-    [[maybe_unused]] const int64_t start_time_64) {
+phy::irregular_report_t deassociation_t::work_start([[maybe_unused]] const int64_t start_time_64) {
     return phy::irregular_report_t();
 }
 
@@ -62,7 +61,7 @@ phy::machigh_phy_tx_t deassociation_t::work_chscan_async(
     return phy::machigh_phy_tx_t();
 }
 
-void deassociation_t::shutdown() {}
+void deassociation_t::work_stop() {}
 
 void deassociation_t::entry() {};
 

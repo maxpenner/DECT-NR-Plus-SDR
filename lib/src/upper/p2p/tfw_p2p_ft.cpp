@@ -45,8 +45,8 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     state = steady_ft.get();
 }
 
-phy::irregular_report_t tfw_p2p_ft_t::work_start_imminent(const int64_t start_time_64) {
-    return state->work_start_imminent(start_time_64);
+phy::irregular_report_t tfw_p2p_ft_t::work_start(const int64_t start_time_64) {
+    return state->work_start(start_time_64);
 }
 
 phy::machigh_phy_t tfw_p2p_ft_t::work_regular(const phy::regular_report_t& regular_report) {
@@ -74,7 +74,7 @@ phy::machigh_phy_tx_t tfw_p2p_ft_t::work_chscan_async(const phy::chscan_t& chsca
     return state->work_chscan_async(chscan);
 }
 
-void tfw_p2p_ft_t::shutdown() { state->shutdown(); }
+void tfw_p2p_ft_t::work_stop() { state->work_stop(); }
 
 void tfw_p2p_ft_t::state_transitions() {}
 

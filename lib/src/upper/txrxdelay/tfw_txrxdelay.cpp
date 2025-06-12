@@ -66,7 +66,7 @@ tfw_txrxdelay_t::tfw_txrxdelay_t(const tpoint_config_t& tpoint_config_,
     plcf_10.DFMCS = psdef.mcs_index;
 }
 
-phy::irregular_report_t tfw_txrxdelay_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_txrxdelay_t::work_start(const int64_t start_time_64) {
     next_measurement_time_64 =
         start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
                                                                  measurement_separation_ms);
@@ -149,7 +149,7 @@ phy::machigh_phy_tx_t tfw_txrxdelay_t::work_chscan_async(
     return phy::machigh_phy_tx_t();
 }
 
-void tfw_txrxdelay_t::shutdown() {}
+void tfw_txrxdelay_t::work_stop() {}
 
 int64_t tfw_txrxdelay_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // request harq process

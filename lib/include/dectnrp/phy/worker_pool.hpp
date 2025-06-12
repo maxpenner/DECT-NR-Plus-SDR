@@ -97,7 +97,7 @@ class worker_pool_t final : public common::layer_unit_t {
     private:
         const worker_pool_config_t worker_pool_config;
 
-        void shutdown() override final;
+        void work_stop() override final;
 
         std::atomic<bool> keep_running;
 

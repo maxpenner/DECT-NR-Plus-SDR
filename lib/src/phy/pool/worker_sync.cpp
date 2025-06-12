@@ -92,8 +92,8 @@ void worker_sync_t::work() {
      * last instance to register triggers the other instances.
      *
      * Once a one common value of now_64 has been found, the baton will also call the respective
-     * termination point and its function work_start_imminent() to tell the firmware at what exact
-     * time synchronization is about to start.
+     * termination point and its function work_start() to tell the firmware at what exact time
+     * synchronization is about to start.
      */
     const auto [start_time_64, irregular_report] = baton.register_and_wait_for_others_nto(now_64);
 

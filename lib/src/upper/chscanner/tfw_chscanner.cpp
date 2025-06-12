@@ -59,7 +59,7 @@ tfw_chscanner_t::tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
     hw.set_freq_tc(freqs[freqs_idx]);
 }
 
-phy::irregular_report_t tfw_chscanner_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_chscanner_t::work_start(const int64_t start_time_64) {
     next_measurement_time_64 =
         start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 50);
 
@@ -153,6 +153,6 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& ch
     return ret;
 }
 
-void tfw_chscanner_t::shutdown() {}
+void tfw_chscanner_t::work_stop() {}
 
 }  // namespace dectnrp::upper::tfw::chscanner

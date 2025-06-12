@@ -80,8 +80,7 @@ class tpoint_t : public common::layer_unit_t {
          * count at the hardware sample rate
          * \return first opportunity to schedule an irregular callback
          */
-        [[nodiscard]] virtual phy::irregular_report_t work_start_imminent(
-            const int64_t start_time_64) = 0;
+        [[nodiscard]] virtual phy::irregular_report_t work_start(const int64_t start_time_64) = 0;
 
         /**
          * \brief Function being called regularly. It contains two important pieces of information.
@@ -191,7 +190,7 @@ class tpoint_t : public common::layer_unit_t {
          * impermeable so that the work-function will no longer be called after processing the
          * remaining jobs. Lastly, all threads must be shut down.
          */
-        virtual void shutdown() override = 0;
+        virtual void work_stop() override = 0;
 
     protected:
         /// configuration received during construction

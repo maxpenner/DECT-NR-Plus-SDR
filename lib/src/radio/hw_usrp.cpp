@@ -620,7 +620,7 @@ void hw_usrp_t::pps_set_full_sec_at_next_pps_and_wait_until_it_passed() {
     dectnrp_assert(full_second_to_pps_measured_samples < samp_rate, "ill-defined");
 }
 
-void hw_usrp_t::shutdown() {
+void hw_usrp_t::work_stop() {
     dectnrp_assert(keep_running.load(std::memory_order_acquire), "keep_running already false");
 
     // this variable will be read in all threads and leads to them leaving their loops

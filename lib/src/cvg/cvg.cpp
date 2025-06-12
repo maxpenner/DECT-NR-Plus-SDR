@@ -44,6 +44,6 @@ out_res_t cvg_t::read([[maybe_unused]] const handle_t& handle, [[maybe_unused]] 
 
 close_res_t cvg_t::close([[maybe_unused]] const handle_t& handle) { return close_res_t(); }
 
-void cvg_t::shutdown() {}
+void cvg_t::work_stop() {}
 
 }  // namespace dectnrp::cvg

@@ -28,8 +28,7 @@ association_t::association_t(args_t& args, pt_t& pt_)
       rd(args.rd),
       pt(pt_) {}
 
-phy::irregular_report_t association_t::work_start_imminent(
-    [[maybe_unused]] const int64_t start_time_64) {
+phy::irregular_report_t association_t::work_start([[maybe_unused]] const int64_t start_time_64) {
     return phy::irregular_report_t();
 }
 
@@ -64,6 +63,6 @@ phy::machigh_phy_tx_t association_t::work_chscan_async(
 
 void association_t::entry() {};
 
-void association_t::shutdown() {}
+void association_t::work_stop() {}
 
 }  // namespace dectnrp::upper::tfw::p2p

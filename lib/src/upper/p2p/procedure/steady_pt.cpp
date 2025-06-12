@@ -89,7 +89,7 @@ steady_pt_t::steady_pt_t(args_t& args, pt_t& pt_)
     // -
 }
 
-phy::irregular_report_t steady_pt_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t steady_pt_t::work_start(const int64_t start_time_64) {
     // what is the next full second after PHY becomes operational?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
 
@@ -133,7 +133,7 @@ phy::machigh_phy_tx_t steady_pt_t::work_chscan_async([[maybe_unused]] const phy:
     return phy::machigh_phy_tx_t();
 }
 
-void steady_pt_t::shutdown() {
+void steady_pt_t::work_stop() {
     // gracefully shut down any DECT NR+ connections, block this function until done
     // ToDo
 

@@ -38,7 +38,7 @@ class tfw_basic_t final : public tpoint_t {
 
         static const std::string firmware_name;
 
-        phy::irregular_report_t work_start_imminent(const int64_t start_time_64) override final;
+        phy::irregular_report_t work_start(const int64_t start_time_64) override final;
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
@@ -47,10 +47,9 @@ class tfw_basic_t final : public tpoint_t {
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
+        void work_stop() override final;
 
     private:
-        void shutdown() override final;
-
         int64_t sync_time_last_64{common::adt::UNDEFINED_EARLY_64};
         int64_t barrier_time_64{common::adt::UNDEFINED_EARLY_64};
 };

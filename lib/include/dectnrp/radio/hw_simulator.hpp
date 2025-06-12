@@ -92,7 +92,7 @@ class hw_simulator_t final : public hw_t {
         void set_all_buffers_as_transmitted();
 
     private:
-        void shutdown() override final;
+        void work_stop() override final;
 
         /// ##################################################
         /// hardware properties and simulation properties

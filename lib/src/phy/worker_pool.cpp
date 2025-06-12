@@ -184,7 +184,7 @@ void worker_pool_t::start_threads_and_get_ready_to_process_iq_samples() {
     }
 }
 
-void worker_pool_t::shutdown() {
+void worker_pool_t::work_stop() {
     dectnrp_assert(keep_running.load(std::memory_order_acquire), "keep_running already false");
 
     // this variable will be read in all workers and leads to them leaving their loops

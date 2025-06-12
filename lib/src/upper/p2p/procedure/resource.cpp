@@ -28,8 +28,7 @@ resource_t::resource_t(args_t& args, ft_t& ft_)
       rd(args.rd),
       ft(ft_) {}
 
-phy::irregular_report_t resource_t::work_start_imminent(
-    [[maybe_unused]] const int64_t start_time_64) {
+phy::irregular_report_t resource_t::work_start([[maybe_unused]] const int64_t start_time_64) {
     return phy::irregular_report_t();
 }
 
@@ -61,7 +60,7 @@ phy::machigh_phy_tx_t resource_t::work_chscan_async([[maybe_unused]] const phy::
     return phy::machigh_phy_tx_t();
 }
 
-void resource_t::shutdown() {}
+void resource_t::work_stop() {}
 
 void resource_t::entry() {};
 

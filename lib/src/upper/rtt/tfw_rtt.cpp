@@ -97,8 +97,7 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     stage_a.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
 }
 
-phy::irregular_report_t tfw_rtt_t::work_start_imminent(
-    [[maybe_unused]] const int64_t start_time_64) {
+phy::irregular_report_t tfw_rtt_t::work_start([[maybe_unused]] const int64_t start_time_64) {
     return phy::irregular_report_t();
 }
 
@@ -270,7 +269,7 @@ phy::machigh_phy_tx_t tfw_rtt_t::work_chscan_async([[maybe_unused]] const phy::c
     return phy::machigh_phy_tx_t();
 }
 
-void tfw_rtt_t::shutdown() {
+void tfw_rtt_t::work_stop() {
     // first stop accepting new data from upper
     application_server->stop_sc();
 

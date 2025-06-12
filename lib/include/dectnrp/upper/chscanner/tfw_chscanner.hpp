@@ -41,7 +41,7 @@ class tfw_chscanner_t final : public tpoint_t {
 
         static const std::string firmware_name;
 
-        phy::irregular_report_t work_start_imminent(const int64_t start_time_64) override final;
+        phy::irregular_report_t work_start(const int64_t start_time_64) override final;
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
@@ -50,10 +50,9 @@ class tfw_chscanner_t final : public tpoint_t {
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
+        void work_stop() override final;
 
     private:
-        void shutdown() override final;
-
         /// timing between states
         int64_t next_measurement_time_64;
 

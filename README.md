@@ -57,7 +57,7 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
 
 |   | **Virtual Function**  | **Properties**                                                            |
 |:-:|-----------------------|---------------------------------------------------------------------------|
-| 1 | work_start_imminent() | called once immediately before IQ sample processing begins                |
+| 1 | work_start()          | called once immediately before IQ sample processing begins                |
 | 2 | work_regular()        | called regularly (polling)                                                |
 | 3 | work_irregular()      | called irregularly based on requests of the firmware (event-driven)       |
 | 4 | work_pcc()            | called upon PCC reception with correct CRC (event-driven)                 |
@@ -65,11 +65,11 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
 | 6 | work_pdc_async()      | called upon PDC reception (event-driven)                                  |
 | 7 | work_application()    | called upon availability of new data on application layer (event-driven)  |
 | 8 | work_chscan_async()   | called upon finished channel measurement (event-driven)                   |
-| 9 | shutdown()            | called once during SDR shutdown                                           |
+| 9 | work_stop()           | called once when the SDR stops execution                                  |
 
 For every firmware, constructors are always called first. When the constructors are called, underlying devices on the radio layer as well as the PHY have already been initialized, and thus hardware properties such as center frequency and gains may be changed. However, the radio devices are not streaming IQ samples yet.
 
-After all constructors have been called, work_start_imminent() is called to announce the imminent beginning of IQ streaming. Only then all other work-functions are called. For event-driven functions, calls are only made if and when the associated event occurs. Once the SDR receives a signal triggered by pressing ctrl+c, shutdown() is called and the running firmware must stop execution such that the SDR can shut down.
+After all constructors have been called, work_start() is called to announce the imminent beginning of IQ streaming. Only then all other work-functions are called. For event-driven functions, calls are only made if and when the associated event occurs. Once the SDR receives a signal triggered by pressing ctrl+c, work_stop() is called and the running firmware must stop execution such that the SDR can shut down.
 
 ## Directories
 

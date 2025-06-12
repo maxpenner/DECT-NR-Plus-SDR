@@ -48,7 +48,7 @@ class cvg_t final : public common::layer_unit_t {
         [[nodiscard]] close_res_t close(const handle_t& handle);
 
     private:
-        virtual void shutdown() override final;
+        virtual void work_stop() override final;
 
         [[maybe_unused]] cvg_config_t cvg_config;
 };
