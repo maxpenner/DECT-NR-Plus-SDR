@@ -23,8 +23,7 @@
 namespace dectnrp::upper::tfw::p2p {
 
 resource_t::resource_t(args_t& args, ft_t& ft_)
-    : tpoint_t(args.tpoint_config, args.mac_lower),
-      state_t(args.leave_callback),
+    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.leave_callback),
       rd(args.rd),
       ft(ft_) {}
 

@@ -21,7 +21,7 @@
 #pragma once
 
 #include "dectnrp/upper/p2p/data/rd.hpp"
-#include "dectnrp/upper/tpoint.hpp"
+#include "dectnrp/upper/tpoint_state.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
@@ -47,7 +47,7 @@ class tfw_p2p_rd_t {
         rd_t rd;
 
         /// pointer to currently active state
-        tpoint_t* state{nullptr};
+        tpoint_state_t* tpoint_state{nullptr};
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

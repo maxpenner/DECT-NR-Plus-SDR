@@ -21,12 +21,11 @@
 #pragma once
 
 #include "dectnrp/upper/p2p/procedure/args.hpp"
-#include "dectnrp/upper/state.hpp"
-#include "dectnrp/upper/tpoint.hpp"
+#include "dectnrp/upper/tpoint_state.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class nop_t final : public tpoint_t, public state_t {
+class nop_t final : public tpoint_state_t {
     public:
         explicit nop_t(args_t& args);
         ~nop_t() = default;

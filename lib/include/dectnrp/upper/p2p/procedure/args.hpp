@@ -22,15 +22,15 @@
 
 #include "dectnrp/phy/interfaces/layers_downwards/mac_lower.hpp"
 #include "dectnrp/upper/p2p/data/rd.hpp"
-#include "dectnrp/upper/state.hpp"
 #include "dectnrp/upper/tpoint_config.hpp"
+#include "dectnrp/upper/tpoint_state.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
 struct args_t {
         const tpoint_config_t& tpoint_config;
         phy::mac_lower_t& mac_lower;
-        state_t::leave_callback_t& leave_callback;
+        tpoint_state_t::leave_callback_t& leave_callback;
         rd_t& rd;
 };
 

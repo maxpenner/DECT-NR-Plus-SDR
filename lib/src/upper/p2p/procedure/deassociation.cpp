@@ -23,8 +23,7 @@
 namespace dectnrp::upper::tfw::p2p {
 
 deassociation_t::deassociation_t(args_t& args, pt_t& pt_)
-    : tpoint_t(args.tpoint_config, args.mac_lower),
-      state_t(args.leave_callback),
+    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.leave_callback),
       rd(args.rd),
       pt(pt_) {}
 

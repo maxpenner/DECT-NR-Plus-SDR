@@ -28,12 +28,11 @@
 #include "dectnrp/upper/p2p/data/contact_p2p.hpp"
 #include "dectnrp/upper/p2p/data/rd.hpp"
 #include "dectnrp/upper/p2p/procedure/args.hpp"
-#include "dectnrp/upper/state.hpp"
-#include "dectnrp/upper/tpoint.hpp"
+#include "dectnrp/upper/tpoint_state.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class steady_rd_t : public tpoint_t, public state_t {
+class steady_rd_t : public tpoint_state_t {
     public:
         steady_rd_t(args_t& args);
         virtual ~steady_rd_t() = default;

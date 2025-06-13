@@ -22,26 +22,31 @@
 
 #include <functional>
 
+#include "dectnrp/upper/tpoint.hpp"
+
 namespace dectnrp::upper {
 
-class state_t {
+class tpoint_state_t : public tpoint_t {
     public:
         typedef std::function<void(void)> leave_callback_t;
 
-        explicit state_t(leave_callback_t leave_callback_)
-            : leave_callback(leave_callback_) {}
-        virtual ~state_t() = default;
+        explicit tpoint_state_t(const tpoint_config_t& tpoint_config_,
+                                phy::mac_lower_t& mac_lower_,
+                                leave_callback_t leave_callback_)
+            : tpoint_t(tpoint_config_, mac_lower_),
+              leave_callback(leave_callback_) {}
+        virtual ~tpoint_state_t() = default;
 
-        state_t() = delete;
-        state_t(const state_t&) = delete;
-        state_t& operator=(const state_t&) = delete;
-        state_t(state_t&&) = delete;
-        state_t& operator=(state_t&&) = delete;
+        tpoint_state_t() = delete;
+        tpoint_state_t(const tpoint_state_t&) = delete;
+        tpoint_state_t& operator=(const tpoint_state_t&) = delete;
+        tpoint_state_t(tpoint_state_t&&) = delete;
+        tpoint_state_t& operator=(tpoint_state_t&&) = delete;
 
         /// called by meta firmware when state is entered
         virtual void entry() = 0;
 
-    private:
+    protected:
         /// called to notify meta firmware of state having finished
         leave_callback_t leave_callback;
 };

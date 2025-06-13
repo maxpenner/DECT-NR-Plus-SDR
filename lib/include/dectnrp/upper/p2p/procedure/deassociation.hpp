@@ -23,12 +23,11 @@
 #include "dectnrp/upper/p2p/data/pt.hpp"
 #include "dectnrp/upper/p2p/data/rd.hpp"
 #include "dectnrp/upper/p2p/procedure/args.hpp"
-#include "dectnrp/upper/state.hpp"
-#include "dectnrp/upper/tpoint.hpp"
+#include "dectnrp/upper/tpoint_state.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class deassociation_t final : public tpoint_t, public state_t {
+class deassociation_t final : public tpoint_state_t {
     public:
         explicit deassociation_t(args_t& args, pt_t& pt_);
         ~deassociation_t() = default;
