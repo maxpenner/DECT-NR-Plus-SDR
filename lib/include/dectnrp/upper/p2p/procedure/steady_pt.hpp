@@ -58,9 +58,7 @@ class steady_pt_t final : public steady_rd_t {
 
         // ##################################################
         // Radio Layer + PHY
-
-        void init_radio() override final;
-        void init_simulation_if_detected() override final;
+        // -
 
         // ##################################################
         // MAC Layer
@@ -91,8 +89,7 @@ class steady_pt_t final : public steady_rd_t {
 
         // ##################################################
         // Application Layer
-
-        void init_appiface() override final;
+        // -
 
         // ##################################################
         // logging

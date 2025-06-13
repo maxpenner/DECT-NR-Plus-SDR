@@ -25,11 +25,12 @@
 #include "dectnrp/upper/p2p/procedure/nop.hpp"
 #include "dectnrp/upper/p2p/procedure/resource.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_ft.hpp"
+#include "dectnrp/upper/p2p/tfw_p2p_rd.hpp"
 #include "dectnrp/upper/tpoint.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class tfw_p2p_ft_t final : public tpoint_t {
+class tfw_p2p_ft_t final : public tpoint_t, public tfw_p2p_rd_t {
     public:
         explicit tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
         ~tfw_p2p_ft_t() = default;
@@ -54,11 +55,10 @@ class tfw_p2p_ft_t final : public tpoint_t {
         void work_stop() override final;
 
     private:
-        /// called once the active state requests a state change
-        void state_transitions();
-
-        /// data of radio device shared with all states
-        rd_t rd;
+        void init_radio() override final;
+        void init_simulation_if_detected() override final;
+        void init_appiface() override final;
+        void state_transitions() override final;
 
         /// data of fixed termination point shared with all states
         ft_t ft;
@@ -67,9 +67,6 @@ class tfw_p2p_ft_t final : public tpoint_t {
         std::unique_ptr<resource_t> resource;
         std::unique_ptr<steady_ft_t> steady_ft;
         std::unique_ptr<nop_t> nop;
-
-        /// pointer to currently active state
-        tpoint_t* state{nullptr};
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

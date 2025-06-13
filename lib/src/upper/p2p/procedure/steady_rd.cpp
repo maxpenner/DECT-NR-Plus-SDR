@@ -47,8 +47,6 @@ steady_rd_t::steady_rd_t(args_t& args)
     rd.cqi_lut = phy::indicators::cqi_lut_t(minimum_mcs_allowed, minimum_mcs_allowed, 8.0f);
 #endif
 
-    rd.hw_simulator = dynamic_cast<radio::hw_simulator_t*>(&hw);
-
     // ##################################################
     // MAC Layer
 

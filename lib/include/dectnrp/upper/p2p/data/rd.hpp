@@ -57,13 +57,6 @@ struct rd_t {
         /// mapping of SNR to MCS
         phy::indicators::cqi_lut_t cqi_lut;
 
-        /**
-         * \brief Firmware can run on real hardware or in simulation. Whether we are in a simulation
-         * is detected at runtime by casting to hw_simulator. That way we also get access to the
-         * functions of the hw_simulator to change the position, trajectory and so forth.
-         */
-        radio::hw_simulator_t* hw_simulator{nullptr};
-
         // ##################################################
         // MAC Layer
 

@@ -49,12 +49,7 @@ class steady_rd_t : public tpoint_t, public state_t {
 
         // ##################################################
         // Radio Layer + PHY
-
-        /// sets initial radio settings such as TX gain, RX gain and frequency
-        virtual void init_radio() = 0;
-
-        /// if running in a simulation, we set position and trajectory in the virtual space
-        virtual void init_simulation_if_detected() = 0;
+        // -
 
         // ##################################################
         // MAC Layer
@@ -128,8 +123,7 @@ class steady_rd_t : public tpoint_t, public state_t {
 
         // ##################################################
         // Application Layer
-
-        virtual void init_appiface() = 0;
+        // -
 
         // ##################################################
         // logging
