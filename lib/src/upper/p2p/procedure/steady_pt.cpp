@@ -68,18 +68,9 @@ steady_pt_t::steady_pt_t(args_t& args, pt_t& pt_)
     // -
 }
 
-phy::irregular_report_t steady_pt_t::work_start(const int64_t start_time_64) {
-    // what is the next full second after PHY becomes operational?
-    const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
-
-    // initialize regular callback for prints
-    rd.callbacks.add_callback(
-        std::bind(&steady_pt_t::worksub_callback_log, this, std::placeholders::_1),
-        A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001),
-        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
-                                                 rd.worksub_callback_log_period_sec));
-
-    return phy::irregular_report_t(start_time_64 + rd.allocation_ft.get_beacon_period());
+phy::irregular_report_t steady_pt_t::work_start([[maybe_unused]] const int64_t start_time_64) {
+    dectnrp_assert_failure("work_start called");
+    return phy::irregular_report_t();
 }
 
 phy::machigh_phy_t steady_pt_t::work_regular(
@@ -114,7 +105,21 @@ phy::machigh_phy_tx_t steady_pt_t::work_chscan_async([[maybe_unused]] const phy:
 
 void steady_pt_t::work_stop() {}
 
-void steady_pt_t::entry() {};
+phy::irregular_report_t steady_pt_t::entry() {
+    const int64_t now_64 = buffer_rx.get_rx_time_passed();
+
+    // what is the next full second after PHY becomes operational?
+    const int64_t A = duration_lut.get_N_samples_at_next_full_second(now_64);
+
+    // initialize regular callback for prints
+    rd.callbacks.add_callback(
+        std::bind(&steady_pt_t::worksub_callback_log, this, std::placeholders::_1),
+        A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001),
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
+                                                 rd.worksub_callback_log_period_sec));
+
+    return phy::irregular_report_t(now_64 + rd.allocation_ft.get_beacon_period());
+};
 
 std::optional<phy::maclow_phy_t> steady_pt_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
     // cast guaranteed to work

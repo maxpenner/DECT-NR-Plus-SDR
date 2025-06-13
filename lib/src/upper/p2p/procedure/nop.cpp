@@ -26,6 +26,7 @@ nop_t::nop_t(args_t& args)
     : tpoint_state_t(args.tpoint_config, args.mac_lower, args.leave_callback) {}
 
 phy::irregular_report_t nop_t::work_start([[maybe_unused]] const int64_t start_time_64) {
+    dectnrp_assert_failure("work_start called");
     return phy::irregular_report_t();
 }
 
@@ -58,6 +59,6 @@ phy::machigh_phy_tx_t nop_t::work_chscan_async([[maybe_unused]] const phy::chsca
 
 void nop_t::work_stop() {}
 
-void nop_t::entry() {};
+phy::irregular_report_t nop_t::entry() { return phy::irregular_report_t(); };
 
 }  // namespace dectnrp::upper::tfw::p2p

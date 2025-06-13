@@ -28,7 +28,7 @@ namespace dectnrp::upper {
 
 class tpoint_state_t : public tpoint_t {
     public:
-        typedef std::function<void(void)> leave_callback_t;
+        typedef std::function<phy::irregular_report_t(void)> leave_callback_t;
 
         explicit tpoint_state_t(const tpoint_config_t& tpoint_config_,
                                 phy::mac_lower_t& mac_lower_,
@@ -43,8 +43,24 @@ class tpoint_state_t : public tpoint_t {
         tpoint_state_t(tpoint_state_t&&) = delete;
         tpoint_state_t& operator=(tpoint_state_t&&) = delete;
 
+        [[nodiscard]] virtual phy::irregular_report_t work_start(
+            const int64_t start_time_64) override = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_regular(
+            const phy::regular_report_t& regular_report) override = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_irregular(
+            const phy::irregular_report_t& irregular_report) override = 0;
+        [[nodiscard]] virtual phy::maclow_phy_t work_pcc(
+            const phy::phy_maclow_t& phy_maclow) override = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_pdc_async(
+            const phy::phy_machigh_t& phy_machigh) override = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_application(
+            const application::application_report_t& application_report) override = 0;
+        [[nodiscard]] virtual phy::machigh_phy_tx_t work_chscan_async(
+            const phy::chscan_t& chscan) override = 0;
+        virtual void work_stop() override = 0;
+
         /// called by meta firmware when state is entered
-        virtual void entry() = 0;
+        [[nodiscard]] virtual phy::irregular_report_t entry() = 0;
 
     protected:
         /// called to notify meta firmware of state having finished

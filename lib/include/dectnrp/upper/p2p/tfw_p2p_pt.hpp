@@ -27,11 +27,10 @@
 #include "dectnrp/upper/p2p/procedure/nop.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_pt.hpp"
 #include "dectnrp/upper/p2p/tfw_p2p_rd.hpp"
-#include "dectnrp/upper/tpoint.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class tfw_p2p_pt_t final : public tpoint_t, public tfw_p2p_rd_t {
+class tfw_p2p_pt_t final : public tfw_p2p_rd_t {
     public:
         explicit tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
         ~tfw_p2p_pt_t() = default;
@@ -44,7 +43,7 @@ class tfw_p2p_pt_t final : public tpoint_t, public tfw_p2p_rd_t {
 
         static const std::string firmware_name;
 
-        phy::irregular_report_t work_start(const int64_t start_time_64) override final;
+        // phy::irregular_report_t work_start(const int64_t start_time_64) override final;
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
@@ -59,7 +58,7 @@ class tfw_p2p_pt_t final : public tpoint_t, public tfw_p2p_rd_t {
         void init_radio() override final;
         void init_simulation_if_detected() override final;
         void init_appiface() override final;
-        void state_transitions() override final;
+        [[nodiscard]] phy::irregular_report_t state_transitions() override final;
 
         /// data of portable termination point shared with all states
         pt_t pt;

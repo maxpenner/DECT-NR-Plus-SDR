@@ -27,8 +27,9 @@ association_t::association_t(args_t& args, pt_t& pt_)
       rd(args.rd),
       pt(pt_) {}
 
-phy::irregular_report_t association_t::work_start([[maybe_unused]] const int64_t start_time_64) {
-    return phy::irregular_report_t();
+phy::irregular_report_t association_t::work_start(const int64_t start_time_64) {
+    return phy::irregular_report_t(
+        start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 100));
 }
 
 phy::machigh_phy_t association_t::work_regular(
@@ -38,7 +39,9 @@ phy::machigh_phy_t association_t::work_regular(
 
 phy::machigh_phy_t association_t::work_irregular(
     [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
-    return phy::machigh_phy_t();
+    phy::machigh_phy_t ret;
+    ret.irregular_report = leave_callback();
+    return ret;
 }
 
 phy::maclow_phy_t association_t::work_pcc([[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
@@ -60,7 +63,7 @@ phy::machigh_phy_tx_t association_t::work_chscan_async(
     return phy::machigh_phy_tx_t();
 }
 
-void association_t::entry() {};
+phy::irregular_report_t association_t::entry() { return phy::irregular_report_t(); };
 
 void association_t::work_stop() {}
 

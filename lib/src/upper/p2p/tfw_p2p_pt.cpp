@@ -33,7 +33,7 @@ namespace dectnrp::upper::tfw::p2p {
 const std::string tfw_p2p_pt_t::firmware_name("p2p_pt");
 
 tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
-    : tpoint_t(tpoint_config_, mac_lower_) {
+    : tfw_p2p_rd_t(tpoint_config_, mac_lower_) {
     init_radio();
 
     if (dynamic_cast<radio::hw_simulator_t*>(&hw) != nullptr) {
@@ -61,11 +61,7 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     nop = std::make_unique<tfw::p2p::nop_t>(args);
 
     // set first state
-    tpoint_state = steady_pt.get();
-}
-
-phy::irregular_report_t tfw_p2p_pt_t::work_start(const int64_t start_time_64) {
-    return tpoint_state->work_start(start_time_64);
+    tpoint_state = association.get();
 }
 
 phy::machigh_phy_t tfw_p2p_pt_t::work_regular(const phy::regular_report_t& regular_report) {
@@ -206,6 +202,22 @@ void tfw_p2p_pt_t::init_appiface() {
     rd.application_server->start_sc();
 }
 
-void tfw_p2p_pt_t::state_transitions() {}
+phy::irregular_report_t tfw_p2p_pt_t::state_transitions() {
+    phy::irregular_report_t ret;
+
+    if (tpoint_state == association.get()) {
+        ret = steady_pt->entry();
+        tpoint_state = steady_pt.get();
+    } else if (tpoint_state == steady_pt.get()) {
+        ret = nop->entry();
+        tpoint_state = nop.get();
+    } else if (tpoint_state == nop.get()) {
+        // state must not be exited
+    } else {
+        dectnrp_assert_failure("undefined state");
+    }
+
+    return ret;
+}
 
 }  // namespace dectnrp::upper::tfw::p2p

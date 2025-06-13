@@ -101,50 +101,9 @@ steady_ft_t::steady_ft_t(args_t& args, ft_t& ft_)
     // -
 }
 
-phy::irregular_report_t steady_ft_t::work_start(const int64_t start_time_64) {
-    // what is the next full second after start_time_64?
-    const int64_t A = duration_lut.get_N_samples_at_next_full_second(start_time_64);
-
-#ifdef TFW_P2P_FT_ALIGN_BEACON_START_TO_FULL_SECOND_OR_CORRECT_OFFSET
-    // time first beacon is transmitted
-    const int64_t B = A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001);
-#else
-    // time first beacon is transmitted
-    const int64_t B = A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001) +
-                      hw.get_pps_to_full_second_measured_samples();
-#endif
-
-    // set first beacon transmission time, beacon is aligned with full second
-    rd.allocation_ft.set_beacon_time_scheduled(B);
-
-#ifdef TFW_P2P_EXPORT_PPX
-    dectnrp_assert(B - duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001) > 0,
-                   "time out-of-order");
-
-    // set virtual time of first rising edge, next edge is then aligned with the first beacon
-    rd.ppx.set_ppx_rising_edge(B -
-                               duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001));
-#endif
-
-    // initialize regular callback for logs
-    rd.callbacks.add_callback(
-        std::bind(&steady_ft_t::worksub_callback_log, this, std::placeholders::_1),
-        A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 500),
-        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
-                                                 rd.worksub_callback_log_period_sec));
-
-#ifdef TFW_P2P_EXPORT_PPX
-    rd.callbacks.add_callback(std::bind(&steady_ft_t::worksub_callback_ppx,
-                                        this,
-                                        std::placeholders::_1,
-                                        std::placeholders::_2,
-                                        std::placeholders::_3),
-                              B - rd.ppx.get_ppx_time_advance_samples(),
-                              rd.ppx.get_ppx_period_warped());
-#endif
-
-    return phy::irregular_report_t(
-        rd.allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
+phy::irregular_report_t steady_ft_t::work_start([[maybe_unused]] const int64_t start_time_64) {
+    dectnrp_assert_failure("work_start called");
+    return phy::irregular_report_t();
 }
 
 phy::machigh_phy_t steady_ft_t::work_regular(
@@ -198,7 +157,53 @@ phy::machigh_phy_tx_t steady_ft_t::work_chscan_async([[maybe_unused]] const phy:
 
 void steady_ft_t::work_stop() {}
 
-void steady_ft_t::entry() {};
+phy::irregular_report_t steady_ft_t::entry() {
+    const int64_t now_64 = buffer_rx.get_rx_time_passed();
+
+    // what is the next full second after start_time_64?
+    const int64_t A = duration_lut.get_N_samples_at_next_full_second(now_64);
+
+#ifdef TFW_P2P_FT_ALIGN_BEACON_START_TO_FULL_SECOND_OR_CORRECT_OFFSET
+    // time first beacon is transmitted
+    const int64_t B = A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001);
+#else
+    // time first beacon is transmitted
+    const int64_t B = A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001) +
+                      hw.get_pps_to_full_second_measured_samples();
+#endif
+
+    // set first beacon transmission time, beacon is aligned with full second
+    rd.allocation_ft.set_beacon_time_scheduled(B);
+
+#ifdef TFW_P2P_EXPORT_PPX
+    dectnrp_assert(B - duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001) > 0,
+                   "time out-of-order");
+
+    // set virtual time of first rising edge, next edge is then aligned with the first beacon
+    rd.ppx.set_ppx_rising_edge(B -
+                               duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001));
+#endif
+
+    // initialize regular callback for logs
+    rd.callbacks.add_callback(
+        std::bind(&steady_ft_t::worksub_callback_log, this, std::placeholders::_1),
+        A + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 500),
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::s001,
+                                                 rd.worksub_callback_log_period_sec));
+
+#ifdef TFW_P2P_EXPORT_PPX
+    rd.callbacks.add_callback(std::bind(&steady_ft_t::worksub_callback_ppx,
+                                        this,
+                                        std::placeholders::_1,
+                                        std::placeholders::_2,
+                                        std::placeholders::_3),
+                              B - rd.ppx.get_ppx_time_advance_samples(),
+                              rd.ppx.get_ppx_period_warped());
+#endif
+
+    return phy::irregular_report_t(
+        rd.allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
+};
 
 void steady_ft_t::init_packet_beacon() {
     // meta packet size

@@ -49,7 +49,7 @@ class resource_t final : public tpoint_state_t {
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
         void work_stop() override final;
 
-        virtual void entry() override final;
+        [[nodiscard]] virtual phy::irregular_report_t entry() override final;
 
     private:
         [[maybe_unused]] rd_t& rd;

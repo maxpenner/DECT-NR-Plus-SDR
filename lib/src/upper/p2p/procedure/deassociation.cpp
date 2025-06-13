@@ -28,6 +28,7 @@ deassociation_t::deassociation_t(args_t& args, pt_t& pt_)
       pt(pt_) {}
 
 phy::irregular_report_t deassociation_t::work_start([[maybe_unused]] const int64_t start_time_64) {
+    dectnrp_assert_failure("work_start called");
     return phy::irregular_report_t();
 }
 
@@ -62,6 +63,6 @@ phy::machigh_phy_tx_t deassociation_t::work_chscan_async(
 
 void deassociation_t::work_stop() {}
 
-void deassociation_t::entry() {};
+phy::irregular_report_t deassociation_t::entry() { return phy::irregular_report_t(); };
 
 }  // namespace dectnrp::upper::tfw::p2p

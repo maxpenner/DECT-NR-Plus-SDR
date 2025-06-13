@@ -21,13 +21,15 @@
 #pragma once
 
 #include "dectnrp/upper/p2p/data/rd.hpp"
+#include "dectnrp/upper/tpoint.hpp"
 #include "dectnrp/upper/tpoint_state.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class tfw_p2p_rd_t {
+class tfw_p2p_rd_t : public tpoint_t {
     public:
-        tfw_p2p_rd_t() = default;
+        tfw_p2p_rd_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
+            : tpoint_t(tpoint_config_, mac_lower_) {};
         virtual ~tfw_p2p_rd_t() = default;
 
         tfw_p2p_rd_t(const tfw_p2p_rd_t&) = delete;
@@ -35,13 +37,15 @@ class tfw_p2p_rd_t {
         tfw_p2p_rd_t(tfw_p2p_rd_t&&) = delete;
         tfw_p2p_rd_t& operator=(tfw_p2p_rd_t&&) = delete;
 
+        phy::irregular_report_t work_start(const int64_t start_time_64) override final;
+
     protected:
         virtual void init_radio() = 0;
         virtual void init_simulation_if_detected() = 0;
         virtual void init_appiface() = 0;
 
         /// called by active state to request a state change
-        virtual void state_transitions() = 0;
+        [[nodiscard]] virtual phy::irregular_report_t state_transitions() = 0;
 
         /// data of radio device shared with all states
         rd_t rd;
