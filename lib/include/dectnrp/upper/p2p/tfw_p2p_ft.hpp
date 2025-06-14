@@ -22,6 +22,7 @@
 
 #include <memory>
 
+#include "dectnrp/upper/p2p/procedure/dissociation_ft.hpp"
 #include "dectnrp/upper/p2p/procedure/nop.hpp"
 #include "dectnrp/upper/p2p/procedure/resource.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_ft.hpp"
@@ -65,6 +66,7 @@ class tfw_p2p_ft_t final : public tfw_p2p_rd_t {
         /// states
         std::unique_ptr<resource_t> resource;
         std::unique_ptr<steady_ft_t> steady_ft;
+        std::unique_ptr<dissociation_ft_t> dissociation_ft;
         std::unique_ptr<nop_t> nop;
 };
 

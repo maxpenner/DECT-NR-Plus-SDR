@@ -61,4 +61,6 @@ void nop_t::work_stop() {}
 
 phy::irregular_report_t nop_t::entry() { return phy::irregular_report_t(); };
 
+void nop_t::request_to_leave_asap() {}
+
 }  // namespace dectnrp::upper::tfw::p2p

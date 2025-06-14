@@ -51,6 +51,8 @@ class resource_t final : public tpoint_state_t {
 
         [[nodiscard]] virtual phy::irregular_report_t entry() override final;
 
+        virtual void request_to_leave_asap() override final;
+
     private:
         [[maybe_unused]] rd_t& rd;
         [[maybe_unused]] ft_t& ft;

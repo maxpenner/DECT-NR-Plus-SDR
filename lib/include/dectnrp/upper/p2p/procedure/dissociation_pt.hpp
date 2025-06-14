@@ -27,16 +27,16 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-class deassociation_t final : public tpoint_state_t {
+class dissociation_pt_t final : public tpoint_state_t {
     public:
-        explicit deassociation_t(args_t& args, pt_t& pt_);
-        ~deassociation_t() = default;
+        explicit dissociation_pt_t(args_t& args, pt_t& pt_);
+        ~dissociation_pt_t() = default;
 
-        deassociation_t() = delete;
-        deassociation_t(const deassociation_t&) = delete;
-        deassociation_t& operator=(const deassociation_t&) = delete;
-        deassociation_t(deassociation_t&&) = delete;
-        deassociation_t& operator=(deassociation_t&&) = delete;
+        dissociation_pt_t() = delete;
+        dissociation_pt_t(const dissociation_pt_t&) = delete;
+        dissociation_pt_t& operator=(const dissociation_pt_t&) = delete;
+        dissociation_pt_t(dissociation_pt_t&&) = delete;
+        dissociation_pt_t& operator=(dissociation_pt_t&&) = delete;
 
         phy::irregular_report_t work_start(const int64_t start_time_64) override final;
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
@@ -50,6 +50,8 @@ class deassociation_t final : public tpoint_state_t {
         void work_stop() override final;
 
         [[nodiscard]] virtual phy::irregular_report_t entry() override final;
+
+        virtual void request_to_leave_asap() override final;
 
     private:
         [[maybe_unused]] rd_t& rd;

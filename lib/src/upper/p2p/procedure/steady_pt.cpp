@@ -121,6 +121,8 @@ phy::irregular_report_t steady_pt_t::entry() {
     return phy::irregular_report_t(now_64 + rd.allocation_ft.get_beacon_period());
 };
 
+void steady_pt_t::request_to_leave_asap() {}
+
 std::optional<phy::maclow_phy_t> steady_pt_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
     // cast guaranteed to work
     const auto* plcf_10 =

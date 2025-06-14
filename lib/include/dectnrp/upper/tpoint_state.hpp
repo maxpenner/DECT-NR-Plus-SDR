@@ -62,6 +62,9 @@ class tpoint_state_t : public tpoint_t {
         /// called by meta firmware when state is entered
         [[nodiscard]] virtual phy::irregular_report_t entry() = 0;
 
+        /// called by meta firmware if current state must finish up and call leave_callback
+        virtual void request_to_leave_asap() = 0;
+
     protected:
         /// called to notify meta firmware of state having finished
         leave_callback_t leave_callback;

@@ -55,11 +55,13 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
                 .leave_callback = leave_callback,
                 .rd = rd};
 
-    resource = std::make_unique<tfw::p2p::resource_t>(args, ft);
+    resource = std::make_unique<resource_t>(args, ft);
 
-    steady_ft = std::make_unique<tfw::p2p::steady_ft_t>(args, ft);
+    steady_ft = std::make_unique<steady_ft_t>(args, ft);
 
-    nop = std::make_unique<tfw::p2p::nop_t>(args);
+    dissociation_ft = std::make_unique<dissociation_ft_t>(args, ft);
+
+    nop = std::make_unique<nop_t>(args);
 
     // set first state
     tpoint_state = resource.get();

@@ -23,7 +23,7 @@
 #include <memory>
 
 #include "dectnrp/upper/p2p/procedure/association.hpp"
-#include "dectnrp/upper/p2p/procedure/deassociation.hpp"
+#include "dectnrp/upper/p2p/procedure/dissociation_pt.hpp"
 #include "dectnrp/upper/p2p/procedure/nop.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_pt.hpp"
 #include "dectnrp/upper/p2p/tfw_p2p_rd.hpp"
@@ -66,7 +66,7 @@ class tfw_p2p_pt_t final : public tfw_p2p_rd_t {
         /// states
         std::unique_ptr<association_t> association;
         std::unique_ptr<steady_pt_t> steady_pt;
-        std::unique_ptr<deassociation_t> deassociation;
+        std::unique_ptr<dissociation_pt_t> dissociation_pt;
         std::unique_ptr<nop_t> nop;
 };
 

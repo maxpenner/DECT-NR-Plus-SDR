@@ -51,6 +51,8 @@ class steady_ft_t final : public steady_rd_t {
 
         [[nodiscard]] virtual phy::irregular_report_t entry() override final;
 
+        virtual void request_to_leave_asap() override final;
+
     private:
         ft_t& ft;
 

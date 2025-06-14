@@ -52,13 +52,13 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
                 .leave_callback = leave_callback,
                 .rd = rd};
 
-    association = std::make_unique<tfw::p2p::association_t>(args, pt);
+    association = std::make_unique<association_t>(args, pt);
 
-    steady_pt = std::make_unique<tfw::p2p::steady_pt_t>(args, pt);
+    steady_pt = std::make_unique<steady_pt_t>(args, pt);
 
-    deassociation = std::make_unique<tfw::p2p::deassociation_t>(args, pt);
+    dissociation_pt = std::make_unique<dissociation_pt_t>(args, pt);
 
-    nop = std::make_unique<tfw::p2p::nop_t>(args);
+    nop = std::make_unique<nop_t>(args);
 
     // set first state
     tpoint_state = association.get();
@@ -209,6 +209,9 @@ phy::irregular_report_t tfw_p2p_pt_t::state_transitions() {
         ret = steady_pt->entry();
         tpoint_state = steady_pt.get();
     } else if (tpoint_state == steady_pt.get()) {
+        ret = dissociation_pt->entry();
+        tpoint_state = dissociation_pt.get();
+    } else if (tpoint_state == dissociation_pt.get()) {
         ret = nop->entry();
         tpoint_state = nop.get();
     } else if (tpoint_state == nop.get()) {

@@ -20,23 +20,23 @@
 
 #pragma once
 
-#include "dectnrp/upper/p2p/data/pt.hpp"
+#include "dectnrp/upper/p2p/data/ft.hpp"
 #include "dectnrp/upper/p2p/data/rd.hpp"
 #include "dectnrp/upper/p2p/procedure/args.hpp"
 #include "dectnrp/upper/tpoint_state.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class association_t final : public tpoint_state_t {
+class dissociation_ft_t final : public tpoint_state_t {
     public:
-        explicit association_t(args_t& args, pt_t& pt_);
-        ~association_t() = default;
+        explicit dissociation_ft_t(args_t& args, ft_t& ft_);
+        ~dissociation_ft_t() = default;
 
-        association_t() = delete;
-        association_t(const association_t&) = delete;
-        association_t& operator=(const association_t&) = delete;
-        association_t(association_t&&) = delete;
-        association_t& operator=(association_t&&) = delete;
+        dissociation_ft_t() = delete;
+        dissociation_ft_t(const dissociation_ft_t&) = delete;
+        dissociation_ft_t& operator=(const dissociation_ft_t&) = delete;
+        dissociation_ft_t(dissociation_ft_t&&) = delete;
+        dissociation_ft_t& operator=(dissociation_ft_t&&) = delete;
 
         phy::irregular_report_t work_start(const int64_t start_time_64) override final;
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
@@ -55,7 +55,7 @@ class association_t final : public tpoint_state_t {
 
     private:
         [[maybe_unused]] rd_t& rd;
-        [[maybe_unused]] pt_t& pt;
+        [[maybe_unused]] ft_t& ft;
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

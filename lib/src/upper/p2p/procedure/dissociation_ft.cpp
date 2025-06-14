@@ -18,51 +18,55 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/upper/p2p/procedure/deassociation.hpp"
+#include "dectnrp/upper/p2p/procedure/dissociation_ft.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-deassociation_t::deassociation_t(args_t& args, pt_t& pt_)
+dissociation_ft_t::dissociation_ft_t(args_t& args, ft_t& ft_)
     : tpoint_state_t(args.tpoint_config, args.mac_lower, args.leave_callback),
       rd(args.rd),
-      pt(pt_) {}
+      ft(ft_) {}
 
-phy::irregular_report_t deassociation_t::work_start([[maybe_unused]] const int64_t start_time_64) {
+phy::irregular_report_t dissociation_ft_t::work_start(
+    [[maybe_unused]] const int64_t start_time_64) {
     dectnrp_assert_failure("work_start called");
     return phy::irregular_report_t();
 }
 
-phy::machigh_phy_t deassociation_t::work_regular(
+phy::machigh_phy_t dissociation_ft_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t deassociation_t::work_irregular(
+phy::machigh_phy_t dissociation_ft_t::work_irregular(
     [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     return phy::machigh_phy_t();
 }
 
-phy::maclow_phy_t deassociation_t::work_pcc([[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
+phy::maclow_phy_t dissociation_ft_t::work_pcc(
+    [[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
 
-phy::machigh_phy_t deassociation_t::work_pdc_async(
+phy::machigh_phy_t dissociation_ft_t::work_pdc_async(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t deassociation_t::work_application(
+phy::machigh_phy_t dissociation_ft_t::work_application(
     [[maybe_unused]] const application::application_report_t& application_report) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t deassociation_t::work_chscan_async(
+phy::machigh_phy_tx_t dissociation_ft_t::work_chscan_async(
     [[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 
-void deassociation_t::work_stop() {}
+void dissociation_ft_t::work_stop() {}
 
-phy::irregular_report_t deassociation_t::entry() { return phy::irregular_report_t(); };
+phy::irregular_report_t dissociation_ft_t::entry() { return phy::irregular_report_t(); };
+
+void dissociation_ft_t::request_to_leave_asap() {}
 
 }  // namespace dectnrp::upper::tfw::p2p

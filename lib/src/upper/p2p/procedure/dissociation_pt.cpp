@@ -18,55 +18,55 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/upper/p2p/procedure/association.hpp"
+#include "dectnrp/upper/p2p/procedure/dissociation_pt.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-association_t::association_t(args_t& args, pt_t& pt_)
+dissociation_pt_t::dissociation_pt_t(args_t& args, pt_t& pt_)
     : tpoint_state_t(args.tpoint_config, args.mac_lower, args.leave_callback),
       rd(args.rd),
       pt(pt_) {}
 
-phy::irregular_report_t association_t::work_start(const int64_t start_time_64) {
-    return phy::irregular_report_t(
-        start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 100));
+phy::irregular_report_t dissociation_pt_t::work_start(
+    [[maybe_unused]] const int64_t start_time_64) {
+    dectnrp_assert_failure("work_start called");
+    return phy::irregular_report_t();
 }
 
-phy::machigh_phy_t association_t::work_regular(
+phy::machigh_phy_t dissociation_pt_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t association_t::work_irregular(
+phy::machigh_phy_t dissociation_pt_t::work_irregular(
     [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
-    phy::machigh_phy_t ret;
-    ret.irregular_report = leave_callback();
-    return ret;
+    return phy::machigh_phy_t();
 }
 
-phy::maclow_phy_t association_t::work_pcc([[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
+phy::maclow_phy_t dissociation_pt_t::work_pcc(
+    [[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
 
-phy::machigh_phy_t association_t::work_pdc_async(
+phy::machigh_phy_t dissociation_pt_t::work_pdc_async(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t association_t::work_application(
+phy::machigh_phy_t dissociation_pt_t::work_application(
     [[maybe_unused]] const application::application_report_t& application_report) {
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t association_t::work_chscan_async(
+phy::machigh_phy_tx_t dissociation_pt_t::work_chscan_async(
     [[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 
-phy::irregular_report_t association_t::entry() { return phy::irregular_report_t(); };
+void dissociation_pt_t::work_stop() {}
 
-void association_t::request_to_leave_asap() {}
+phy::irregular_report_t dissociation_pt_t::entry() { return phy::irregular_report_t(); };
 
-void association_t::work_stop() {}
+void dissociation_pt_t::request_to_leave_asap() {}
 
 }  // namespace dectnrp::upper::tfw::p2p

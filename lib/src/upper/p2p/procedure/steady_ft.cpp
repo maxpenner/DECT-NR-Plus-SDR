@@ -205,6 +205,8 @@ phy::irregular_report_t steady_ft_t::entry() {
         rd.allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
 };
 
+void steady_ft_t::request_to_leave_asap() {}
+
 void steady_ft_t::init_packet_beacon() {
     // meta packet size
     sp3::packet_sizes_def_t& psdef = rd.ppmp_beacon.psdef;
