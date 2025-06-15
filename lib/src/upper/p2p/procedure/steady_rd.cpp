@@ -20,8 +20,7 @@
 
 #include "dectnrp/upper/p2p/procedure/steady_rd.hpp"
 
-#include <cmath>
-
+#include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/limits.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
@@ -29,7 +28,7 @@
 namespace dectnrp::upper::tfw::p2p {
 
 steady_rd_t::steady_rd_t(args_t& args)
-    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.leave_callback),
+    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.state_transitions_cb),
       rd(args.rd) {
     dectnrp_assert(mac_lower.lower_ctrl_vec.size() == 1,
                    "firmware written for a single pair of physical and radio layer");

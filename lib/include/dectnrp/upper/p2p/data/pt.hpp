@@ -27,31 +27,13 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-struct pt_t {
-        // ##################################################
-        // Radio Layer + PHY
-        // -
-
-        // ##################################################
-        // MAC Layer
-
+class pt_t {
+    public:
         /**
-         * \brief The FT saves a full contact_list_t with one entry per PT. A PT saves a single
-         * contact with information about itself.
+         * \brief The FT saves a full contact_list_t with one entry per PT. A single PT saves a
+         * single contact with information about itself.
          */
         contact_p2p_t contact_pt;
-
-        // ##################################################
-        // DLC and Convergence Layer
-        // -
-
-        // ##################################################
-        // Application Layer
-        // -
-
-        // ##################################################
-        // logging
-        // -
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

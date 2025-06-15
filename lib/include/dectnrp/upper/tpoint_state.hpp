@@ -28,13 +28,13 @@ namespace dectnrp::upper {
 
 class tpoint_state_t : public tpoint_t {
     public:
-        typedef std::function<phy::irregular_report_t(void)> leave_callback_t;
+        typedef std::function<phy::irregular_report_t(void)> state_transitions_cb_t;
 
         explicit tpoint_state_t(const tpoint_config_t& tpoint_config_,
                                 phy::mac_lower_t& mac_lower_,
-                                leave_callback_t leave_callback_)
+                                state_transitions_cb_t state_transitions_cb_)
             : tpoint_t(tpoint_config_, mac_lower_),
-              leave_callback(leave_callback_) {}
+              state_transitions_cb(state_transitions_cb_) {}
         virtual ~tpoint_state_t() = default;
 
         tpoint_state_t() = delete;
@@ -43,8 +43,6 @@ class tpoint_state_t : public tpoint_t {
         tpoint_state_t(tpoint_state_t&&) = delete;
         tpoint_state_t& operator=(tpoint_state_t&&) = delete;
 
-        [[nodiscard]] virtual phy::irregular_report_t work_start(
-            const int64_t start_time_64) override = 0;
         [[nodiscard]] virtual phy::machigh_phy_t work_regular(
             const phy::regular_report_t& regular_report) override = 0;
         [[nodiscard]] virtual phy::machigh_phy_t work_irregular(
@@ -57,17 +55,20 @@ class tpoint_state_t : public tpoint_t {
             const application::application_report_t& application_report) override = 0;
         [[nodiscard]] virtual phy::machigh_phy_tx_t work_chscan_async(
             const phy::chscan_t& chscan) override = 0;
-        virtual void work_stop() override = 0;
 
-        /// called by meta firmware when state is entered
         [[nodiscard]] virtual phy::irregular_report_t entry() = 0;
 
-        /// called by meta firmware if current state must finish up and call leave_callback
-        virtual void request_to_leave_asap() = 0;
+    private:
+        /// can and must not be called
+        [[nodiscard]] phy::irregular_report_t work_start(
+            [[maybe_unused]] const int64_t start_time_64) override final;
+
+        /// can and must not be called
+        void work_stop() override final;
 
     protected:
-        /// called to notify meta firmware of state having finished
-        leave_callback_t leave_callback;
+        /// called to trigger state transition, return value must not be discarded
+        state_transitions_cb_t state_transitions_cb;
 };
 
 }  // namespace dectnrp::upper

@@ -20,15 +20,46 @@
 
 #include "dectnrp/upper/p2p/tfw_p2p_rd.hpp"
 
+#include "dectnrp/common/prog/assert.hpp"
+
 namespace dectnrp::upper::tfw::p2p {
 
 phy::irregular_report_t tfw_p2p_rd_t::work_start(const int64_t start_time_64) {
-    [[maybe_unused]] const auto irregular_report = tpoint_state->entry();
+    dectnrp_assert(tpoint_state != nullptr, "initial state not set");
 
-    dectnrp_assert(!irregular_report.has_finite_time(),
-                   "entry should return empty irregular_report_t");
+    rd.start_time_iq_streaming_64 = start_time_64;
 
-    return tpoint_state->work_start(start_time_64);
+    return tpoint_state->entry();
+}
+
+void tfw_p2p_rd_t::work_stop() {
+    rd.rd_mode.store(rd_mode_t::SHUTTING_DOWN, std::memory_order_release);
+
+    // now wait until the SDR can be shut down gracefully
+    stop_request_block_nto();
+
+    // close job queue so work functions will no longer be called
+    job_queue.set_impermeable();
+
+    // first stop accepting new data from upper
+    rd.application_server->stop_sc();
+
+    // finally stop the data sink
+    rd.application_client->stop_sc();
+}
+
+void tfw_p2p_rd_t::stop_request_block_nto() {
+    std::unique_lock<std::mutex> lk(stop_mtx);
+
+    while (!stop_released) {
+        stop_cvar.wait(lk);
+    }
+}
+
+void tfw_p2p_rd_t::stop_request_unblock() {
+    std::unique_lock<std::mutex> lock(stop_mtx);
+    stop_released = true;
+    stop_cvar.notify_all();
 }
 
 }  // namespace dectnrp::upper::tfw::p2p

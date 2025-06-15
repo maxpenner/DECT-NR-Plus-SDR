@@ -27,30 +27,13 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-struct ft_t {
-        // ##################################################
-        // Radio Layer + PHY
-
-        /// FT uses a fixed transmit power that must be written into the PLCF
+class ft_t {
+    public:
+        /// FTs use a fixed transmit power that must be written into the PLCF
         float TransmitPower_dBm_fixed;
 
-        // ##################################################
-        // MAC Layer
-
-        /// fast lookup of all PTs and their properties the FT requires for uplink and downlink
+        /// fast lookup of all PTs and their properties
         mac::contact_list_t<contact_p2p_t> contact_list;
-
-        // ##################################################
-        // DLC and Convergence Layer
-        // -
-
-        // ##################################################
-        // Application Layer
-        // -
-
-        // ##################################################
-        // logging
-        // -
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

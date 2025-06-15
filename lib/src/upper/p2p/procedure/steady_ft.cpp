@@ -20,8 +20,6 @@
 
 #include "dectnrp/upper/p2p/procedure/steady_ft.hpp"
 
-#include <functional>
-
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/cluster_beacon_message.hpp"
@@ -101,11 +99,6 @@ steady_ft_t::steady_ft_t(args_t& args, ft_t& ft_)
     // -
 }
 
-phy::irregular_report_t steady_ft_t::work_start([[maybe_unused]] const int64_t start_time_64) {
-    dectnrp_assert_failure("work_start called");
-    return phy::irregular_report_t();
-}
-
 phy::machigh_phy_t steady_ft_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
     return phy::machigh_phy_t();
@@ -114,6 +107,11 @@ phy::machigh_phy_t steady_ft_t::work_regular(
 phy::machigh_phy_t steady_ft_t::work_irregular(
     [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     phy::machigh_phy_t ret;
+
+    if (rd.is_shutting_down()) {
+        ret.irregular_report = state_transitions_cb();
+        return ret;
+    }
 
     dectnrp_assert(irregular_report.call_asap_after_this_time_has_passed_64 <
                        rd.allocation_ft.get_beacon_time_scheduled(),
@@ -155,13 +153,10 @@ phy::machigh_phy_tx_t steady_ft_t::work_chscan_async([[maybe_unused]] const phy:
     return phy::machigh_phy_tx_t();
 }
 
-void steady_ft_t::work_stop() {}
-
 phy::irregular_report_t steady_ft_t::entry() {
-    const int64_t now_64 = buffer_rx.get_rx_time_passed();
-
     // what is the next full second after start_time_64?
-    const int64_t A = duration_lut.get_N_samples_at_next_full_second(now_64);
+    const int64_t A =
+        duration_lut.get_N_samples_at_next_full_second(buffer_rx.get_rx_time_passed());
 
 #ifdef TFW_P2P_FT_ALIGN_BEACON_START_TO_FULL_SECOND_OR_CORRECT_OFFSET
     // time first beacon is transmitted
@@ -203,9 +198,7 @@ phy::irregular_report_t steady_ft_t::entry() {
 
     return phy::irregular_report_t(
         rd.allocation_ft.get_beacon_time_scheduled_minus_prepare_duration());
-};
-
-void steady_ft_t::request_to_leave_asap() {}
+}
 
 void steady_ft_t::init_packet_beacon() {
     // meta packet size

@@ -38,7 +38,6 @@ class dissociation_ft_t final : public tpoint_state_t {
         dissociation_ft_t(dissociation_ft_t&&) = delete;
         dissociation_ft_t& operator=(dissociation_ft_t&&) = delete;
 
-        phy::irregular_report_t work_start(const int64_t start_time_64) override final;
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
@@ -47,11 +46,8 @@ class dissociation_ft_t final : public tpoint_state_t {
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
-        void work_stop() override final;
 
-        [[nodiscard]] virtual phy::irregular_report_t entry() override final;
-
-        virtual void request_to_leave_asap() override final;
+        phy::irregular_report_t entry() override final;
 
     private:
         [[maybe_unused]] rd_t& rd;

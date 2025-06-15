@@ -20,6 +20,9 @@
 
 #pragma once
 
+#include <condition_variable>
+#include <mutex>
+
 #include "dectnrp/upper/p2p/data/rd.hpp"
 #include "dectnrp/upper/tpoint.hpp"
 #include "dectnrp/upper/tpoint_state.hpp"
@@ -38,6 +41,7 @@ class tfw_p2p_rd_t : public tpoint_t {
         tfw_p2p_rd_t& operator=(tfw_p2p_rd_t&&) = delete;
 
         phy::irregular_report_t work_start(const int64_t start_time_64) override final;
+        void work_stop() override final;
 
     protected:
         virtual void init_radio() = 0;
@@ -52,6 +56,14 @@ class tfw_p2p_rd_t : public tpoint_t {
 
         /// pointer to currently active state
         tpoint_state_t* tpoint_state{nullptr};
+
+        void stop_request_block_nto();
+        void stop_request_unblock();
+
+    private:
+        std::condition_variable stop_cvar;
+        std::mutex stop_mtx;
+        bool stop_released{false};
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

@@ -20,18 +20,22 @@
 
 #pragma once
 
+#include <atomic>
+#include <cstdint>
+
 #include "dectnrp/application/application_client.hpp"
 #include "dectnrp/application/application_server.hpp"
 #include "dectnrp/common/adt/callbacks.hpp"
+#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/cvg/cvg.hpp"
 #include "dectnrp/dlc/dlc.hpp"
 #include "dectnrp/mac/allocation/allocation_ft.hpp"
 #include "dectnrp/mac/pll/pll.hpp"
 #include "dectnrp/phy/indicators/cqi_lut.hpp"
-#include "dectnrp/radio/hw_simulator.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie_pool_tx.hpp"
 #include "dectnrp/sections_part4/psdef_plcf_mac_pdu.hpp"
+#include "dectnrp/upper/p2p/data/rd_mode.hpp"
 
 #define APPLICATION_INTERFACE_VNIC_OR_SOCKET
 
@@ -50,9 +54,12 @@
 
 namespace dectnrp::upper::tfw::p2p {
 
-struct rd_t {
+class rd_t {
+    public:
         // ##################################################
         // Radio Layer + PHY
+
+        int64_t start_time_iq_streaming_64{common::adt::UNDEFINED_EARLY_64};
 
         /// mapping of SNR to MCS
         phy::indicators::cqi_lut_t cqi_lut;
@@ -112,9 +119,18 @@ struct rd_t {
         std::unique_ptr<application::application_client_t> application_client;
 
         // ##################################################
-        // logging
+        // general
+
+        rd_mode_t get_rd_mode() const { return rd_mode.load(std::memory_order_acquire); }
+        bool is_shutting_down() const { return get_rd_mode() == rd_mode_t::SHUTTING_DOWN; };
 
         static constexpr uint32_t worksub_callback_log_period_sec{2};
+
+        /// only class that is allowed to change the mode
+        friend class tfw_p2p_rd_t;
+
+    private:
+        std::atomic<rd_mode_t> rd_mode{rd_mode_t::NORMAL_OPERATION};
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

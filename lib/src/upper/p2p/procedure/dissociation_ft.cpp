@@ -20,18 +20,16 @@
 
 #include "dectnrp/upper/p2p/procedure/dissociation_ft.hpp"
 
+#include "dectnrp/common/prog/assert.hpp"
+
 namespace dectnrp::upper::tfw::p2p {
 
+static constexpr uint32_t handle = 1234;
+
 dissociation_ft_t::dissociation_ft_t(args_t& args, ft_t& ft_)
-    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.leave_callback),
+    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.state_transitions_cb),
       rd(args.rd),
       ft(ft_) {}
-
-phy::irregular_report_t dissociation_ft_t::work_start(
-    [[maybe_unused]] const int64_t start_time_64) {
-    dectnrp_assert_failure("work_start called");
-    return phy::irregular_report_t();
-}
 
 phy::machigh_phy_t dissociation_ft_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
@@ -39,8 +37,14 @@ phy::machigh_phy_t dissociation_ft_t::work_regular(
 }
 
 phy::machigh_phy_t dissociation_ft_t::work_irregular(
-    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
-    return phy::machigh_phy_t();
+    const phy::irregular_report_t& irregular_report) {
+    phy::machigh_phy_t ret;
+
+    if (irregular_report.handle == handle) {
+        ret.irregular_report = state_transitions_cb();
+    }
+
+    return ret;
 }
 
 phy::maclow_phy_t dissociation_ft_t::work_pcc(
@@ -63,10 +67,13 @@ phy::machigh_phy_tx_t dissociation_ft_t::work_chscan_async(
     return phy::machigh_phy_tx_t();
 }
 
-void dissociation_ft_t::work_stop() {}
+phy::irregular_report_t dissociation_ft_t::entry() {
+    dectnrp_assert(rd.is_shutting_down(), "not shutting down");
 
-phy::irregular_report_t dissociation_ft_t::entry() { return phy::irregular_report_t(); };
-
-void dissociation_ft_t::request_to_leave_asap() {}
+    return phy::irregular_report_t(
+        buffer_rx.get_rx_time_passed() +
+            duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 100),
+        handle);
+}
 
 }  // namespace dectnrp::upper::tfw::p2p

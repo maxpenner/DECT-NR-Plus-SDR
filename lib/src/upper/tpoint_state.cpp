@@ -18,20 +18,17 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#pragma once
-
-#include "dectnrp/phy/interfaces/layers_downwards/mac_lower.hpp"
-#include "dectnrp/upper/p2p/data/rd.hpp"
-#include "dectnrp/upper/tpoint_config.hpp"
 #include "dectnrp/upper/tpoint_state.hpp"
 
-namespace dectnrp::upper::tfw::p2p {
+#include "dectnrp/common/prog/assert.hpp"
 
-struct args_t {
-        const tpoint_config_t& tpoint_config;
-        phy::mac_lower_t& mac_lower;
-        tpoint_state_t::state_transitions_cb_t& state_transitions_cb;
-        rd_t& rd;
+namespace dectnrp::upper {
+
+phy::irregular_report_t tpoint_state_t::work_start([[maybe_unused]] const int64_t start_time_64) {
+    dectnrp_assert_failure("uncallable");
+    return phy::irregular_report_t();
 };
 
-}  // namespace dectnrp::upper::tfw::p2p
+void tpoint_state_t::work_stop() { dectnrp_assert_failure("uncallable"); };
+
+}  // namespace dectnrp::upper

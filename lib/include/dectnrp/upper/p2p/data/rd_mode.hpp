@@ -20,18 +20,11 @@
 
 #pragma once
 
-#include "dectnrp/phy/interfaces/layers_downwards/mac_lower.hpp"
-#include "dectnrp/upper/p2p/data/rd.hpp"
-#include "dectnrp/upper/tpoint_config.hpp"
-#include "dectnrp/upper/tpoint_state.hpp"
-
 namespace dectnrp::upper::tfw::p2p {
 
-struct args_t {
-        const tpoint_config_t& tpoint_config;
-        phy::mac_lower_t& mac_lower;
-        tpoint_state_t::state_transitions_cb_t& state_transitions_cb;
-        rd_t& rd;
+enum class rd_mode_t {
+    NORMAL_OPERATION,
+    SHUTTING_DOWN
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

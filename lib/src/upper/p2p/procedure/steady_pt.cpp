@@ -20,8 +20,6 @@
 
 #include "dectnrp/upper/p2p/procedure/steady_pt.hpp"
 
-#include <functional>
-
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
@@ -68,21 +66,21 @@ steady_pt_t::steady_pt_t(args_t& args, pt_t& pt_)
     // -
 }
 
-phy::irregular_report_t steady_pt_t::work_start([[maybe_unused]] const int64_t start_time_64) {
-    dectnrp_assert_failure("work_start called");
-    return phy::irregular_report_t();
-}
-
 phy::machigh_phy_t steady_pt_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
     return phy::machigh_phy_t();
 }
 
 phy::machigh_phy_t steady_pt_t::work_irregular(const phy::irregular_report_t& irregular_report) {
+    phy::machigh_phy_t ret;
+
+    if (rd.is_shutting_down()) {
+        ret.irregular_report = state_transitions_cb();
+        return ret;
+    }
+
     // update time of callbacks
     rd.callbacks.run(buffer_rx.get_rx_time_passed());
-
-    phy::machigh_phy_t ret;
 
     ret.irregular_report =
         irregular_report.get_with_time_increment(rd.allocation_ft.get_beacon_period());
@@ -103,10 +101,8 @@ phy::machigh_phy_tx_t steady_pt_t::work_chscan_async([[maybe_unused]] const phy:
     return phy::machigh_phy_tx_t();
 }
 
-void steady_pt_t::work_stop() {}
-
 phy::irregular_report_t steady_pt_t::entry() {
-    const int64_t now_64 = buffer_rx.get_rx_time_passed();
+    int64_t now_64 = buffer_rx.get_rx_time_passed();
 
     // what is the next full second after PHY becomes operational?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(now_64);
@@ -119,9 +115,7 @@ phy::irregular_report_t steady_pt_t::entry() {
                                                  rd.worksub_callback_log_period_sec));
 
     return phy::irregular_report_t(now_64 + rd.allocation_ft.get_beacon_period());
-};
-
-void steady_pt_t::request_to_leave_asap() {}
+}
 
 std::optional<phy::maclow_phy_t> steady_pt_t::worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) {
     // cast guaranteed to work

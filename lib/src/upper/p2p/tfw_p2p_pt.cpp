@@ -28,6 +28,8 @@
 #include "dectnrp/application/socket/socket_server.hpp"
 #endif
 
+#include "dectnrp/radio/hw_simulator.hpp"
+
 namespace dectnrp::upper::tfw::p2p {
 
 const std::string tfw_p2p_pt_t::firmware_name("p2p_pt");
@@ -43,13 +45,13 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     init_appiface();
 
     // same callback for every state
-    tpoint_state_t::leave_callback_t leave_callback =
+    tpoint_state_t::state_transitions_cb_t state_transitions_cb =
         std::bind(&tfw_p2p_pt_t::state_transitions, this);
 
     // common arguments of all states
     args_t args{.tpoint_config = tpoint_config_,
                 .mac_lower = mac_lower_,
-                .leave_callback = leave_callback,
+                .state_transitions_cb = state_transitions_cb,
                 .rd = rd};
 
     association = std::make_unique<association_t>(args, pt);
@@ -87,20 +89,6 @@ phy::machigh_phy_t tfw_p2p_pt_t::work_application(
 
 phy::machigh_phy_tx_t tfw_p2p_pt_t::work_chscan_async(const phy::chscan_t& chscan) {
     return tpoint_state->work_chscan_async(chscan);
-}
-
-void tfw_p2p_pt_t::work_stop() {
-    // gracefully shut down any DECT NR+ connections, block this function until done
-    tpoint_state->work_stop();
-
-    // close job queue so work functions will no longer be called
-    job_queue.set_impermeable();
-
-    // first stop accepting new data from upper
-    rd.application_server->stop_sc();
-
-    // finally stop the data sink
-    rd.application_client->stop_sc();
 }
 
 void tfw_p2p_pt_t::init_radio() {
@@ -208,12 +196,18 @@ phy::irregular_report_t tfw_p2p_pt_t::state_transitions() {
     if (tpoint_state == association.get()) {
         ret = steady_pt->entry();
         tpoint_state = steady_pt.get();
+
+        if (rd.is_shutting_down()) {
+            ret = dissociation_pt->entry();
+            tpoint_state = dissociation_pt.get();
+        }
+
     } else if (tpoint_state == steady_pt.get()) {
         ret = dissociation_pt->entry();
         tpoint_state = dissociation_pt.get();
     } else if (tpoint_state == dissociation_pt.get()) {
-        ret = nop->entry();
         tpoint_state = nop.get();
+        stop_request_unblock();
     } else if (tpoint_state == nop.get()) {
         // state must not be exited
     } else {

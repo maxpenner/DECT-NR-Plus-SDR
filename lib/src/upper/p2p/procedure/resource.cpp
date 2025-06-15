@@ -23,14 +23,9 @@
 namespace dectnrp::upper::tfw::p2p {
 
 resource_t::resource_t(args_t& args, ft_t& ft_)
-    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.leave_callback),
+    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.state_transitions_cb),
       rd(args.rd),
       ft(ft_) {}
-
-phy::irregular_report_t resource_t::work_start(const int64_t start_time_64) {
-    return phy::irregular_report_t(
-        start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 500));
-}
 
 phy::machigh_phy_t resource_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
@@ -40,7 +35,7 @@ phy::machigh_phy_t resource_t::work_regular(
 phy::machigh_phy_t resource_t::work_irregular(
     [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
     phy::machigh_phy_t ret;
-    ret.irregular_report = leave_callback();
+    ret.irregular_report = state_transitions_cb();
     return ret;
 }
 
@@ -62,10 +57,10 @@ phy::machigh_phy_tx_t resource_t::work_chscan_async([[maybe_unused]] const phy::
     return phy::machigh_phy_tx_t();
 }
 
-void resource_t::work_stop() {}
-
-phy::irregular_report_t resource_t::entry() { return phy::irregular_report_t(); };
-
-void resource_t::request_to_leave_asap() {}
+phy::irregular_report_t resource_t::entry() {
+    return phy::irregular_report_t(
+        rd.start_time_iq_streaming_64 +
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 500));
+}
 
 }  // namespace dectnrp::upper::tfw::p2p

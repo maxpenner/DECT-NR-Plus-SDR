@@ -23,12 +23,7 @@
 namespace dectnrp::upper::tfw::p2p {
 
 nop_t::nop_t(args_t& args)
-    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.leave_callback) {}
-
-phy::irregular_report_t nop_t::work_start([[maybe_unused]] const int64_t start_time_64) {
-    dectnrp_assert_failure("work_start called");
-    return phy::irregular_report_t();
-}
+    : tpoint_state_t(args.tpoint_config, args.mac_lower, args.state_transitions_cb) {}
 
 phy::machigh_phy_t nop_t::work_regular(
     [[maybe_unused]] const phy::regular_report_t& regular_report) {
@@ -57,10 +52,6 @@ phy::machigh_phy_tx_t nop_t::work_chscan_async([[maybe_unused]] const phy::chsca
     return phy::machigh_phy_tx_t();
 }
 
-void nop_t::work_stop() {}
-
-phy::irregular_report_t nop_t::entry() { return phy::irregular_report_t(); };
-
-void nop_t::request_to_leave_asap() {}
+phy::irregular_report_t nop_t::entry() { return phy::irregular_report_t(); }
 
 }  // namespace dectnrp::upper::tfw::p2p

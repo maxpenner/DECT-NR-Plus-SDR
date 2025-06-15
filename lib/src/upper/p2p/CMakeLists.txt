@@ -21,5 +21,4 @@
 file(GLOB DECTNRP_UPPER_SOURCES "*.cpp")
 target_sources(dectnrp_upper PRIVATE ${DECTNRP_UPPER_SOURCES})
 
-add_subdirectory(data)
 add_subdirectory(procedure)
