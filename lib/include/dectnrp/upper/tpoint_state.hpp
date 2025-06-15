@@ -20,15 +20,14 @@
 
 #pragma once
 
-#include <functional>
-
+#include "dectnrp/common/adt/callback_nodiscard.hpp"
 #include "dectnrp/upper/tpoint.hpp"
 
 namespace dectnrp::upper {
 
 class tpoint_state_t : public tpoint_t {
     public:
-        typedef std::function<phy::irregular_report_t(void)> state_transitions_cb_t;
+        typedef common::adt::callback_nodiscard_t<phy::irregular_report_t> state_transitions_cb_t;
 
         explicit tpoint_state_t(const tpoint_config_t& tpoint_config_,
                                 phy::mac_lower_t& mac_lower_,

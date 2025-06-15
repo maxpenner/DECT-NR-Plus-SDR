@@ -45,8 +45,8 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
     init_appiface();
 
     // same callback for every state
-    tpoint_state_t::state_transitions_cb_t state_transitions_cb =
-        std::bind(&tfw_p2p_pt_t::state_transitions, this);
+    tpoint_state_t::state_transitions_cb_t state_transitions_cb(
+        std::bind(&tfw_p2p_pt_t::state_transitions, this));
 
     // common arguments of all states
     args_t args{.tpoint_config = tpoint_config_,
