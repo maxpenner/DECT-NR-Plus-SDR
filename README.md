@@ -55,17 +55,18 @@ The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware
 
 Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for [termination point](https://www.dect.org/dect-nrplus-standard-upper-layers-technology-faq-blog) which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/](lib/include/dectnrp/upper/) with a brief description of each available under [Firmware](#firmware). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
-|   | **Virtual Function**  | **Properties**                                                            |
-|:-:|-----------------------|---------------------------------------------------------------------------|
-| 1 | work_start()          | called once immediately before IQ sample processing begins                |
-| 2 | work_regular()        | called regularly (polling)                                                |
-| 3 | work_irregular()      | called irregularly based on requests of the firmware (event-driven)       |
-| 4 | work_pcc()            | called upon PCC reception with correct CRC (event-driven)                 |
-| 5 | work_pcc_crc_error()  | called upon PCC reception with incorrect CRC (event-driven, optional)     |
-| 6 | work_pdc_async()      | called upon PDC reception (event-driven)                                  |
-| 7 | work_application()    | called upon availability of new data on application layer (event-driven)  |
-| 8 | work_chscan_async()   | called upon finished channel measurement (event-driven)                   |
-| 9 | work_stop()           | called once when the SDR stops execution                                  |
+|    | **Virtual Function** | **Properties**                                                            |
+|:--:|----------------------|---------------------------------------------------------------------------|
+|  1 | work_start()         | called once immediately before PHY starts processing IQ sample            |
+|  2 | work_regular()       | called regularly (polling)                                                |
+|  3 | work_irregular()     | called irregularly based on requests of the firmware (event-driven)       |
+|  4 | work_pcc()           | called upon PCC reception with correct CRC (event-driven)                 |
+|  5 | work_pcc_error()     | called upon PCC reception with incorrect CRC (event-driven, optional)     |
+|  6 | work_pdc()           | called upon PDC reception with correct CRC (event-driven, asynchronous)   |
+|  7 | work_pdc_error()     | called upon PDC reception with incorrect CRC (event-driven, asynchronous) |
+|  8 | work_application()   | called upon availability of new data on application layer (event-driven)  |
+|  9 | work_chscan()        | called upon finished channel measurement (event-driven, asynchronous)     |
+| 10 | work_stop()          | called once when the SDR must shut down                                   |
 
 For every firmware, constructors are always called first. When the constructors are called, underlying devices on the radio layer as well as the PHY have already been initialized, and thus hardware properties such as center frequency and gains may be changed. However, the radio devices are not streaming IQ samples yet.
 

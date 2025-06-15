@@ -96,7 +96,12 @@ phy::maclow_phy_t tfw_chscanner_t::work_pcc([[maybe_unused]] const phy::phy_macl
     return phy::maclow_phy_t();
 }
 
-phy::machigh_phy_t tfw_chscanner_t::work_pdc_async(
+phy::machigh_phy_t tfw_chscanner_t::work_pdc(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_chscanner_t::work_pdc_error(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
@@ -106,7 +111,7 @@ phy::machigh_phy_t tfw_chscanner_t::work_application(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan_async(const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan(const phy::chscan_t& chscan) {
     // save measurement
     rms_min = std::min(rms_min, chscan.get_rms_avg());
     rms_max = std::max(rms_max, chscan.get_rms_avg());

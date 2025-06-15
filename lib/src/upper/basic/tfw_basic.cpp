@@ -68,7 +68,11 @@ phy::maclow_phy_t tfw_basic_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
 
-phy::machigh_phy_t tfw_basic_t::work_pdc_async(
+phy::machigh_phy_t tfw_basic_t::work_pdc([[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_basic_t::work_pdc_error(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
@@ -78,7 +82,7 @@ phy::machigh_phy_t tfw_basic_t::work_application(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t tfw_basic_t::work_chscan_async([[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_basic_t::work_chscan([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

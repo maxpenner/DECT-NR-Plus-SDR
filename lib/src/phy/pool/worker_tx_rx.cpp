@@ -130,7 +130,7 @@ void worker_tx_rx_t::work() {
                     const phy_maclow_t phy_maclow{std::get<sync_report_t>(job.content), pcc_report};
 
                     TOKEN_LOCK_FIFO_OR_RETURN
-                    auto machigh_phy = tpoint->work_pcc_crc_error(phy_maclow);
+                    auto machigh_phy = tpoint->work_pcc_error(phy_maclow);
                     token->unlock_fifo();
 
                     run_tx_chscan(machigh_phy.tx_descriptor_vec,
@@ -181,19 +181,21 @@ void worker_tx_rx_t::work() {
                 // demodulate and decode PDC for the PCC choice made by lower MAC
                 const auto pdc_report = rx_synced->demoddecod_rx_pdc(maclow_phy);
 
-                // save stats
-                if (pdc_report.crc_status) {
-                    ++stats.rx_pdc_success;
-                } else {
-                    ++stats.rx_pdc_fail;
-                }
-
                 // compile all reports
                 const phy_machigh_t phy_machigh{phy_maclow, maclow_phy, pdc_report};
 
+                // allocate return value from higher MAC
+                machigh_phy_t machigh_phy;
+
                 // call MAC regardless of correct or incorrect CRC
                 token->lock(token_call_id);
-                auto machigh_phy = tpoint->work_pdc_async(phy_machigh);
+                if (pdc_report.crc_status) {
+                    ++stats.rx_pdc_success;
+                    machigh_phy = tpoint->work_pdc(phy_machigh);
+                } else {
+                    ++stats.rx_pdc_fail;
+                    machigh_phy = tpoint->work_pdc_error(phy_machigh);
+                }
                 token->unlock();
 
                 run_tx_chscan(machigh_phy.tx_descriptor_vec,
@@ -337,7 +339,7 @@ void worker_tx_rx_t::run_tx_chscan(const tx_descriptor_vec_t& tx_descriptor_vec,
         chscanner->scan(chscan_opt.value());
 
         token->lock(token_call_id);
-        const auto machigh_phy = tpoint->work_chscan_async(chscan_opt.value());
+        const auto machigh_phy = tpoint->work_chscan(chscan_opt.value());
         token->unlock();
 
         chscan_opt_t chscan_opt_empty = chscan_opt_t{std::nullopt};

@@ -240,8 +240,7 @@ phy::machigh_phy_t tfw_loopback_t::work_application(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t tfw_loopback_t::work_chscan_async(
-    [[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_loopback_t::work_chscan([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

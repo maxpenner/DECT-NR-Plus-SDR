@@ -45,10 +45,10 @@ class tfw_loopback_t : public tpoint_t {
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
-        // work_pcc() and work_pdc_async() are implemented in deriving classes
+        // work_pcc(), work_pdc() and work_pdc_error() are implemented in deriving classes
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
-        phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
+        phy::machigh_phy_tx_t work_chscan(const phy::chscan_t& chscan) override final;
         void work_stop() override final;
 
     private:

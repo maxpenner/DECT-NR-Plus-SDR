@@ -153,12 +153,7 @@ phy::maclow_phy_t tfw_rtt_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
                            phy::maclow_phy_handle_t());
 }
 
-phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
-    // ignore entire PDC if CRC is incorrect
-    if (!phy_machigh.pdc_report.crc_status) {
-        return phy::machigh_phy_t();
-    }
-
+phy::machigh_phy_t tfw_rtt_t::work_pdc(const phy::phy_machigh_t& phy_machigh) {
     phy::machigh_phy_t machigh_phy;
 
     if (tpoint_config.firmware_id == 0) {
@@ -202,6 +197,11 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
     }
 
     return machigh_phy;
+}
+
+phy::machigh_phy_t tfw_rtt_t::work_pdc_error(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
+    return phy::machigh_phy_t();
 }
 
 phy::machigh_phy_t tfw_rtt_t::work_application(
@@ -261,7 +261,7 @@ phy::machigh_phy_t tfw_rtt_t::work_application(
     return machigh_phy;
 }
 
-phy::machigh_phy_tx_t tfw_rtt_t::work_chscan_async([[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_rtt_t::work_chscan([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

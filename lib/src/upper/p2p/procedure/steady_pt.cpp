@@ -97,7 +97,7 @@ phy::machigh_phy_t steady_pt_t::work_application(
     return machigh_phy;
 }
 
-phy::machigh_phy_tx_t steady_pt_t::work_chscan_async([[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t steady_pt_t::work_chscan([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

@@ -41,7 +41,8 @@ class tfw_loopback_snr_t final : public tfw_loopback_t {
         static const std::string firmware_name;
 
         phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override;
-        phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override;
+        phy::machigh_phy_t work_pdc(const phy::phy_machigh_t& phy_machigh) override;
+        phy::machigh_phy_t work_pdc_error(const phy::phy_machigh_t& phy_machigh) override;
 
     private:
         /// MCS range to measure

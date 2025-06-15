@@ -49,11 +49,13 @@ class tpoint_state_t : public tpoint_t {
             const phy::irregular_report_t& irregular_report) override = 0;
         [[nodiscard]] virtual phy::maclow_phy_t work_pcc(
             const phy::phy_maclow_t& phy_maclow) override = 0;
-        [[nodiscard]] virtual phy::machigh_phy_t work_pdc_async(
+        [[nodiscard]] virtual phy::machigh_phy_t work_pdc(
+            const phy::phy_machigh_t& phy_machigh) override = 0;
+        [[nodiscard]] virtual phy::machigh_phy_t work_pdc_error(
             const phy::phy_machigh_t& phy_machigh) override = 0;
         [[nodiscard]] virtual phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override = 0;
-        [[nodiscard]] virtual phy::machigh_phy_tx_t work_chscan_async(
+        [[nodiscard]] virtual phy::machigh_phy_tx_t work_chscan(
             const phy::chscan_t& chscan) override = 0;
 
         [[nodiscard]] virtual phy::irregular_report_t entry() = 0;

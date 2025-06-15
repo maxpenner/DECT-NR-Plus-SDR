@@ -160,12 +160,8 @@ phy::maclow_phy_t steady_rd_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     return ret;
 }
 
-phy::machigh_phy_t steady_rd_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
-    // ignore entire PDC if CRC is incorrect
-    if (!phy_machigh.pdc_report.crc_status) {
-        ++stats.rx_pdc_fail;
-        return phy::machigh_phy_t();
-    }
+phy::machigh_phy_t steady_rd_t::work_pdc(const phy::phy_machigh_t& phy_machigh) {
+    dectnrp_assert(phy_machigh.pdc_report.crc_status, "incorrect CRC");
 
     ++stats.rx_pdc_success;
 
@@ -194,6 +190,11 @@ phy::machigh_phy_t steady_rd_t::work_pdc_async(const phy::phy_machigh_t& phy_mac
             break;
     }
 
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t steady_rd_t::work_pdc_error(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 

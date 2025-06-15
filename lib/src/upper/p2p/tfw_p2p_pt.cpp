@@ -78,8 +78,12 @@ phy::maclow_phy_t tfw_p2p_pt_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     return tpoint_state->work_pcc(phy_maclow);
 }
 
-phy::machigh_phy_t tfw_p2p_pt_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
-    return tpoint_state->work_pdc_async(phy_machigh);
+phy::machigh_phy_t tfw_p2p_pt_t::work_pdc(const phy::phy_machigh_t& phy_machigh) {
+    return tpoint_state->work_pdc(phy_machigh);
+}
+
+phy::machigh_phy_t tfw_p2p_pt_t::work_pdc_error(const phy::phy_machigh_t& phy_machigh) {
+    return tpoint_state->work_pdc_error(phy_machigh);
 }
 
 phy::machigh_phy_t tfw_p2p_pt_t::work_application(
@@ -87,8 +91,8 @@ phy::machigh_phy_t tfw_p2p_pt_t::work_application(
     return tpoint_state->work_application(application_report);
 }
 
-phy::machigh_phy_tx_t tfw_p2p_pt_t::work_chscan_async(const phy::chscan_t& chscan) {
-    return tpoint_state->work_chscan_async(chscan);
+phy::machigh_phy_tx_t tfw_p2p_pt_t::work_chscan(const phy::chscan_t& chscan) {
+    return tpoint_state->work_chscan(chscan);
 }
 
 void tfw_p2p_pt_t::init_radio() {

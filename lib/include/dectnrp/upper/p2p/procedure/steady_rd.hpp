@@ -37,11 +37,11 @@ class steady_rd_t : public tpoint_state_t {
         steady_rd_t(args_t& args);
         virtual ~steady_rd_t() = default;
 
-        /// same dispatcher for FT and PT, calls worksub_* functions
-        phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override final;
+        // same dispatchers for FT and PT, calls worksub_* functions
 
-        /// same dispatcher for FT and PT, calls worksub_* functions
-        phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override final;
+        phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override final;
+        phy::machigh_phy_t work_pdc(const phy::phy_machigh_t& phy_machigh) override final;
+        phy::machigh_phy_t work_pdc_error(const phy::phy_machigh_t& phy_machigh) override final;
 
     protected:
         rd_t& rd;

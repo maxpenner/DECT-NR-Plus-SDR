@@ -111,14 +111,17 @@ phy::maclow_phy_t tfw_loopback_mmie_t::work_pcc(const phy::phy_maclow_t& phy_mac
                            phy::maclow_phy_handle_t());
 }
 
-phy::machigh_phy_t tfw_loopback_mmie_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
-    if (phy_machigh.pdc_report.crc_status) {
-        ++result.n_pdc;
+phy::machigh_phy_t tfw_loopback_mmie_t::work_pdc(const phy::phy_machigh_t& phy_machigh) {
+    ++result.n_pdc;
 
-        result.overwrite_or_discard_snr_max(parameter_cnt, snr_cnt, phy_machigh.pdc_report.snr_dB);
-        result.overwrite_or_discard_snr_min(parameter_cnt, snr_cnt, phy_machigh.pdc_report.snr_dB);
-    }
+    result.overwrite_or_discard_snr_max(parameter_cnt, snr_cnt, phy_machigh.pdc_report.snr_dB);
+    result.overwrite_or_discard_snr_min(parameter_cnt, snr_cnt, phy_machigh.pdc_report.snr_dB);
 
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_loopback_mmie_t::work_pdc_error(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
 
