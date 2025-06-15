@@ -25,23 +25,24 @@
 namespace dectnrp::upper::tfw::p2p {
 
 phy::irregular_report_t tfw_p2p_rd_t::work_start(const int64_t start_time_64) {
-    dectnrp_assert(tpoint_state != nullptr, "initial state not set");
-
     rd.start_time_iq_streaming_64 = start_time_64;
+
+    dectnrp_assert(tpoint_state != nullptr, "initial state not set");
 
     return tpoint_state->entry();
 }
 
 void tfw_p2p_rd_t::work_stop() {
+    // instruct radio device to shut down
     rd.rd_mode.store(rd_mode_t::SHUTTING_DOWN, std::memory_order_release);
 
-    // now wait until the SDR can be shut down gracefully
+    // block main thread until all DECT NR+ connections were closed gracefully
     stop_request_block_nto();
 
     // close job queue so work functions will no longer be called
     job_queue.set_impermeable();
 
-    // first stop accepting new data from upper
+    // first stop accepting new data from application layer
     rd.application_server->stop_sc();
 
     // finally stop the data sink

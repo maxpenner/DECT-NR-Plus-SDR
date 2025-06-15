@@ -55,14 +55,11 @@ tfw_p2p_pt_t::tfw_p2p_pt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
                 .rd = rd};
 
     association = std::make_unique<association_t>(args, pt);
-
     steady_pt = std::make_unique<steady_pt_t>(args, pt);
-
     dissociation_pt = std::make_unique<dissociation_pt_t>(args, pt);
-
     nop = std::make_unique<nop_t>(args);
 
-    // set first state
+    // first state
     tpoint_state = association.get();
 }
 

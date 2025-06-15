@@ -36,8 +36,6 @@ steady_rd_t::steady_rd_t(args_t& args)
     // ##################################################
     // Radio Layer + PHY
 
-    const uint32_t minimum_mcs_allowed = 4;
-
 #ifdef TFW_P2P_VARIABLE_MCS
     rd.cqi_lut = phy::indicators::cqi_lut_t(
         minimum_mcs_allowed, worker_pool_config.radio_device_class.mcs_index_min, 8.0f);

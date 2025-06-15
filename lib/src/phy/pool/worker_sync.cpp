@@ -312,7 +312,7 @@ void worker_sync_t::irregular_callback(const int64_t now_64) {
 
     irregular_report.time_of_recognition = now_64;
 
-    dectnrp_assert(0 < irregular_report.get_recognition_delay(),
+    dectnrp_assert(0 <= irregular_report.get_recognition_delay(),
                    "irregular job recognized before due time");
 
     job_queue.enqueue_nto(job_t(std::move(irregular_report)));

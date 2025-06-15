@@ -57,14 +57,11 @@ tfw_p2p_ft_t::tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower
                 .rd = rd};
 
     resource = std::make_unique<resource_t>(args, ft);
-
     steady_ft = std::make_unique<steady_ft_t>(args, ft);
-
     dissociation_ft = std::make_unique<dissociation_ft_t>(args, ft);
-
     nop = std::make_unique<nop_t>(args);
 
-    // set first state
+    // first state
     tpoint_state = resource.get();
 }
 

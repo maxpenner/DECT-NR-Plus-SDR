@@ -22,7 +22,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <optional>
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/phy/rx/sync/irregular_report.hpp"

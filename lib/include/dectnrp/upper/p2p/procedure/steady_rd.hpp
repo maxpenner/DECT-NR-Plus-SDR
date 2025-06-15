@@ -53,6 +53,8 @@ class steady_rd_t : public tpoint_state_t {
         // ##################################################
         // MAC Layer
 
+        static constexpr uint32_t minimum_mcs_allowed{4};
+
         /// all PT identities have to be known at FT, individual PTs only need their own identity
         sp4::mac_architecture::identity_t init_identity_pt(const uint32_t firmware_id_);
 
