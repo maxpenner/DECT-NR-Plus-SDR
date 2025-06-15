@@ -42,11 +42,11 @@
 namespace dectnrp::phy {
 
 worker_tx_rx_t::worker_tx_rx_t(worker_config_t& worker_config,
-                               irregular_t& irregular_,
+                               irregular_queue_t& irregular_queue_,
                                phy_radio_t& phy_radio_,
                                common::json_export_t* json_export_)
     : worker_t(worker_config),
-      irregular(irregular_),
+      irregular_queue(irregular_queue_),
       phy_radio(phy_radio_),
       json_export(json_export_) {
     tx = std::make_unique<tx_t>(worker_pool_config.maximum_packet_sizes,
@@ -331,7 +331,7 @@ void worker_tx_rx_t::run_tx_chscan(const tx_descriptor_vec_t& tx_descriptor_vec,
     }
 
     if (irregular_report.has_finite_time()) {
-        irregular.push(std::move(irregular_report));
+        irregular_queue.push(std::move(irregular_report));
     }
 
     // run channel measurement

@@ -26,7 +26,7 @@
 #include "dectnrp/common/json/json_switch.hpp"
 #include "dectnrp/phy/interfaces/layers_downwards/phy_radio.hpp"
 #include "dectnrp/phy/interfaces/machigh_phy.hpp"
-#include "dectnrp/phy/pool/irregular.hpp"
+#include "dectnrp/phy/pool/irregular_queue.hpp"
 #include "dectnrp/phy/pool/token.hpp"
 #include "dectnrp/phy/pool/worker.hpp"
 #include "dectnrp/phy/rx/chscan/chscanner.hpp"
@@ -39,7 +39,7 @@ namespace dectnrp::phy {
 class worker_tx_rx_t final : public worker_t {
     public:
         explicit worker_tx_rx_t(worker_config_t& worker_config,
-                                irregular_t& irregular_,
+                                irregular_queue_t& irregular_queue_,
                                 phy_radio_t& phy_radio_,
                                 common::json_export_t* json_export_);
         ~worker_tx_rx_t() = default;
@@ -57,7 +57,7 @@ class worker_tx_rx_t final : public worker_t {
         std::vector<std::string> report_start() const override final;
         std::vector<std::string> report_stop() const override final;
 
-        irregular_t& irregular;
+        irregular_queue_t& irregular_queue;
 
         std::unique_ptr<tx_t> tx;
         std::unique_ptr<rx_synced_t> rx_synced;

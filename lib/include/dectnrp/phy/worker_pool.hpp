@@ -30,7 +30,7 @@
 #include "dectnrp/common/layer/layer_unit.hpp"
 #include "dectnrp/phy/interfaces/layers_downwards/phy_radio.hpp"
 #include "dectnrp/phy/pool/baton.hpp"
-#include "dectnrp/phy/pool/irregular.hpp"
+#include "dectnrp/phy/pool/irregular_queue.hpp"
 #include "dectnrp/phy/pool/job_queue.hpp"
 #include "dectnrp/phy/pool/token.hpp"
 #include "dectnrp/phy/pool/worker_sync.hpp"
@@ -121,7 +121,7 @@ class worker_pool_t final : public common::layer_unit_t {
          */
         std::unique_ptr<baton_t> baton;
 
-        irregular_t irregular;
+        irregular_queue_t irregular_queue;
 
         std::vector<std::unique_ptr<worker_sync_t>> worker_sync_vec;
 

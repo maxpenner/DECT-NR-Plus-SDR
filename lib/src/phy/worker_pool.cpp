@@ -66,7 +66,7 @@ worker_pool_t::worker_pool_t(const worker_pool_config_t& worker_pool_config_,
 
         // create
         worker_tx_rx_vec.push_back(std::make_unique<worker_tx_rx_t>(
-            worker_config, irregular, phy_radio_, json_export.get()));
+            worker_config, irregular_queue, phy_radio_, json_export.get()));
     }
 
     check_sync_param();
@@ -86,7 +86,7 @@ worker_pool_t::worker_pool_t(const worker_pool_config_t& worker_pool_config_,
 
         // create
         worker_sync_vec.push_back(
-            std::make_unique<worker_sync_t>(worker_config, *baton.get(), irregular));
+            std::make_unique<worker_sync_t>(worker_config, *baton.get(), irregular_queue));
     }
 }
 
