@@ -189,7 +189,7 @@ class tpoint_t : public common::layer_unit_t {
          * \param chscan result of channel measurement instruction
          * \return
          */
-        [[nodiscard]] virtual phy::machigh_phy_tx_t work_chscan(const phy::chscan_t& chscan) = 0;
+        [[nodiscard]] virtual phy::machigh_phy_tx_t work_channel(const phy::chscan_t& chscan) = 0;
 
         /**
          * \brief Function will be called by the main thread when the SDR is supposed to shut down

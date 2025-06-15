@@ -67,7 +67,8 @@ phy::machigh_phy_t dissociation_pt_t::work_application(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t dissociation_pt_t::work_chscan([[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t dissociation_pt_t::work_channel(
+    [[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 

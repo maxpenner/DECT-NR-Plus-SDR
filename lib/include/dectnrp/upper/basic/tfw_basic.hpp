@@ -47,7 +47,7 @@ class tfw_basic_t final : public tpoint_t {
         phy::machigh_phy_t work_pdc_error(const phy::phy_machigh_t& phy_machigh) override final;
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
-        phy::machigh_phy_tx_t work_chscan(const phy::chscan_t& chscan) override final;
+        phy::machigh_phy_tx_t work_channel(const phy::chscan_t& chscan) override final;
         void work_stop() override final;
 
     private:

@@ -111,7 +111,7 @@ phy::machigh_phy_t tfw_chscanner_t::work_application(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t tfw_chscanner_t::work_chscan(const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_chscanner_t::work_channel(const phy::chscan_t& chscan) {
     // save measurement
     rms_min = std::min(rms_min, chscan.get_rms_avg());
     rms_max = std::max(rms_max, chscan.get_rms_avg());

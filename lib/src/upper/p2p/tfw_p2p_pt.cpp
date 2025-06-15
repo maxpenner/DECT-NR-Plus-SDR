@@ -88,8 +88,8 @@ phy::machigh_phy_t tfw_p2p_pt_t::work_application(
     return tpoint_state->work_application(application_report);
 }
 
-phy::machigh_phy_tx_t tfw_p2p_pt_t::work_chscan(const phy::chscan_t& chscan) {
-    return tpoint_state->work_chscan(chscan);
+phy::machigh_phy_tx_t tfw_p2p_pt_t::work_channel(const phy::chscan_t& chscan) {
+    return tpoint_state->work_channel(chscan);
 }
 
 void tfw_p2p_pt_t::init_radio() {

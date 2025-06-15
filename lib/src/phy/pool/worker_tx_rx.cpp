@@ -339,7 +339,7 @@ void worker_tx_rx_t::run_tx_chscan(const tx_descriptor_vec_t& tx_descriptor_vec,
         chscanner->scan(chscan_opt.value());
 
         token->lock(token_call_id);
-        const auto machigh_phy = tpoint->work_chscan(chscan_opt.value());
+        const auto machigh_phy = tpoint->work_channel(chscan_opt.value());
         token->unlock();
 
         chscan_opt_t chscan_opt_empty = chscan_opt_t{std::nullopt};
