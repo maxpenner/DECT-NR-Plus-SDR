@@ -32,12 +32,10 @@
 
 namespace dectnrp::phy {
 
-worker_sync_t::worker_sync_t(worker_config_t& worker_config,
-                             baton_t& baton_,
-                             irregular_queue_t& irregular_queue_)
+worker_sync_t::worker_sync_t(worker_config_t& worker_config, baton_t& baton_)
     : worker_t(worker_config),
       baton(baton_),
-      irregular_queue(irregular_queue_) {
+      irregular_queue(worker_config.irregular_queue) {
     /* The length of a chunk is the same for every worker_sync_t instance, but their chunks are
      * interleaved by fixed offsets.
      */
@@ -53,7 +51,7 @@ worker_sync_t::worker_sync_t(worker_config_t& worker_config,
         chunk_length_samples * worker_pool_config.threads_core_prio_config_sync_vec.size(),
         chunk_length_samples * id,
         u8subslot_length_samples * worker_pool_config.rx_chunk_unit_length_u8subslot,
-        std::bind(&worker_sync_t::enqueue_irregular_if_due, this, std::placeholders::_1));
+        std::bind(&worker_sync_t::enqueue_irregular_job_if_due, this, std::placeholders::_1));
 }
 
 void worker_sync_t::work() {
@@ -62,7 +60,7 @@ void worker_sync_t::work() {
     dectnrp_assert(1 <= RX_SYNC_PARAM_MAX_NOF_BUFFERABLE_SYNC_BEFORE_ACQUIRING_BATON,
                    "at least one packet must be bufferable");
 
-    // preallocate the maximum number of instances of sync_report_t that can be buffer
+    // preallocate the maximum number of instances of sync_report_t that can be buffered
     std::array<sync_report_t, RX_SYNC_PARAM_MAX_NOF_BUFFERABLE_SYNC_BEFORE_ACQUIRING_BATON>
         sync_report_arr;
 
@@ -99,7 +97,7 @@ void worker_sync_t::work() {
 
     if (irregular_report.has_finite_time()) {
         dectnrp_assert(start_time_64 <= irregular_report.call_asap_after_this_time_has_passed_64,
-                       "first irregular callback must not occur before IQ sampling begins");
+                       "first irregular callback must not occur before IQ streaming begins");
 
         irregular_queue.push(std::move(irregular_report));
     }
@@ -292,7 +290,7 @@ void worker_sync_t::warmup() {
     }
 }
 
-void worker_sync_t::enqueue_irregular_if_due(const int64_t no_sync_before_this_time_possible_64) {
+void worker_sync_t::enqueue_irregular_job_if_due(const int64_t no_more_syncs_earlier_64) {
     // baton must be held to enqueue jobs
     if (!baton.is_id_holder_the_same(id)) {
         return;
@@ -304,13 +302,13 @@ void worker_sync_t::enqueue_irregular_if_due(const int64_t no_sync_before_this_t
         return;
     }
 
-    if (no_sync_before_this_time_possible_64 < next_time_64) {
+    if (no_more_syncs_earlier_64 < next_time_64) {
         return;
     }
 
     auto irregular_report = irregular_queue.pop();
 
-    irregular_report.time_of_recognition = no_sync_before_this_time_possible_64;
+    irregular_report.time_of_recognition = no_more_syncs_earlier_64;
 
     dectnrp_assert(0 <= irregular_report.get_recognition_delay(),
                    "irregular job recognized before due time");
@@ -327,7 +325,7 @@ void worker_sync_t::enqueue_job_nto(const sync_report_t& sync_report) {
         ++stats.job_packet_not_unique;
     }
 
-    enqueue_irregular_if_due(sync_report.fine_peak_time_64);
+    enqueue_irregular_job_if_due(sync_report.fine_peak_time_64);
 }
 
 }  // namespace dectnrp::phy

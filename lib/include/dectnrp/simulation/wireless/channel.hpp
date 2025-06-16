@@ -71,7 +71,7 @@ class channel_t {
         cf_t* large_scale_stage;
         cf_t* small_scale_stage;
 
-        bool check_args(const vspptx_t& vspptx, const vspprx_t& vspprx) const;
+        bool are_args_valid(const vspptx_t& vspptx, const vspprx_t& vspprx) const;
 };
 
 }  // namespace dectnrp::simulation

@@ -29,7 +29,7 @@ user_plane_data_t::user_plane_data_t() {
     mac_mux_header.zero();
     data_ptr = nullptr;
 
-    dectnrp_assert(check_validity_at_runtime(this), "mmie invalid");
+    dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
 }
 
 void user_plane_data_t::set_flow_id(const uint32_t flow_id) {

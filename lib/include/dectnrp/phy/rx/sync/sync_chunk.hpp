@@ -36,7 +36,7 @@ namespace dectnrp::phy {
 
 class sync_chunk_t final : public rx_pacer_t {
     public:
-        typedef std::function<void(int64_t)> enqueue_irregular_if_due_cb_t;
+        typedef std::function<void(int64_t)> enqueue_irregular_job_if_due_cb_t;
 
         explicit sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
                               const worker_pool_config_t& worker_pool_config_,
@@ -44,7 +44,7 @@ class sync_chunk_t final : public rx_pacer_t {
                               const uint32_t chunk_stride_samples_,
                               const uint32_t chunk_offset_samples_,
                               const uint32_t ant_streams_unit_length_samples_,
-                              enqueue_irregular_if_due_cb_t enqueue_irregular_if_due_cb_);
+                              enqueue_irregular_job_if_due_cb_t enqueue_irregular_job_if_due_cb_);
         ~sync_chunk_t() = default;
 
         sync_chunk_t() = delete;
@@ -123,7 +123,7 @@ class sync_chunk_t final : public rx_pacer_t {
          */
         const uint32_t A, B, C, D;
 
-        enqueue_irregular_if_due_cb_t enqueue_irregular_if_due_cb;
+        enqueue_irregular_job_if_due_cb_t enqueue_irregular_job_if_due_cb;
 
         /// internal time keeping
         int64_t chunk_time_start_64;

@@ -76,7 +76,7 @@ float agc_tx_t::get_gain_step_dB(const int64_t t_64,
                                  const common::ant_t& rx_power_ant_0dBFS,
                                  const common::ant_t& rms_measured_) {
     // return zero gain change if gain is protected
-    if (!check_protect_duration_passed(t_64)) {
+    if (!has_protect_duration_passed(t_64)) {
         return 0.0f;
     } else {
         protect_duration_start_64 = t_64;

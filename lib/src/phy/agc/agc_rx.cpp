@@ -90,7 +90,7 @@ const common::ant_t agc_rx_t::get_gain_step_dB(const int64_t t_64,
     rms_measured_last_known = rms_measured_;
 
     // return zero gain change if gain is protected
-    if (!check_protect_duration_passed(t_64)) {
+    if (!has_protect_duration_passed(t_64)) {
         return common::ant_t{};
     } else {
         protect_duration_start_64 = t_64;

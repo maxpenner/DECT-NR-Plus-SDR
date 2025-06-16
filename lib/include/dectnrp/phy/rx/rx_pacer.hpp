@@ -114,7 +114,7 @@ class rx_pacer_t {
 
 #ifdef ENABLE_ASSERT
         int64_t search_time_start_64{common::adt::UNDEFINED_EARLY_64};
-        void check_time_lag(const int64_t time_to_check_for_lag_64) const;
+        void assert_time_lag(const int64_t time_to_check_for_lag_64) const;
 #endif
 
         /// blocks until global_time_64 is reached, wrapper of buffer_rx functions, nto = no timeout

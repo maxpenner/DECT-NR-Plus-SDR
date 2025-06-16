@@ -30,7 +30,7 @@ configuration_request_ie_t::configuration_request_ie_t() {
     mac_mux_header.ie_type.mac_ext_11_len_0 =
         mac_multiplexing_header_t::ie_type_mac_ext_11_len_0_t::Configuration_Request_IE;
 
-    dectnrp_assert(check_validity_at_runtime(this), "mmie invalid");
+    dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
 }
 
 }  // namespace dectnrp::sp4

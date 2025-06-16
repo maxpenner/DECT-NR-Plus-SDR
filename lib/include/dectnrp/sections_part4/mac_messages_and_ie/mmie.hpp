@@ -50,7 +50,7 @@ class mmie_t {
          */
         virtual void pack_mmh_sdu(uint8_t* mac_pdu_offset) { mac_mux_header.pack(mac_pdu_offset); }
 
-        friend bool check_validity_at_runtime(const mmie_t* mmie);
+        friend bool has_valid_inheritance_and_properties(const mmie_t* mmie);
 
         friend class mac_pdu_decoder_t;
 

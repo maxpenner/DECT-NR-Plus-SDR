@@ -58,7 +58,7 @@ channel_doubly_t::channel_doubly_t(const uint32_t id_0_,
 void channel_doubly_t::superimpose(const vspptx_t& vspptx,
                                    vspprx_t& vspprx,
                                    const vspptx_t& vspptx_other) const {
-    dectnrp_assert(check_args(vspptx_other, vspprx), "Incorrect two devices");
+    dectnrp_assert(are_args_valid(vspptx_other, vspprx), "Incorrect two devices");
 
     // a single link has two directions, is this the primary direction?
     const bool primary_direction = vspptx_other.id < vspprx.id;

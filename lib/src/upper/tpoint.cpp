@@ -64,7 +64,7 @@ void tpoint_t::worksub_agc(const phy::sync_report_t& sync_report,
 
     hw_local.set_command_time(t_agc_change_64);
 
-    if (agc_tx_local.check_protect_duration_passed(sync_report.fine_peak_time_64)) {
+    if (agc_tx_local.has_protect_duration_passed(sync_report.fine_peak_time_64)) {
 #ifdef AGC_RX_PT
         // get required RX gain change
         const auto rx_gain_change =

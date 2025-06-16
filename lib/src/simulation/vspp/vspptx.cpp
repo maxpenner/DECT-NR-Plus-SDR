@@ -40,7 +40,7 @@ vspptx_t::vspptx_t(const uint32_t id_,
 }
 
 void vspptx_t::spp_write(const std::vector<cf_t*>& inp, uint32_t offset, uint32_t nof_samples) {
-    dectnrp_assert(check_args(inp.size(), offset, nof_samples), "Input ill-configured");
+    dectnrp_assert(are_args_valid(inp.size(), offset, nof_samples), "Input ill-configured");
 
     for (uint32_t ant_idx = 0; ant_idx < nof_antennas; ++ant_idx) {
         srsran_vec_cf_copy(&spp[ant_idx][offset], inp[ant_idx], nof_samples);
@@ -48,7 +48,7 @@ void vspptx_t::spp_write(const std::vector<cf_t*>& inp, uint32_t offset, uint32_
 }
 
 void vspptx_t::spp_write_v(const std::vector<void*>& inp, uint32_t offset, uint32_t nof_samples) {
-    dectnrp_assert(check_args(inp.size(), offset, nof_samples), "Input ill-configured");
+    dectnrp_assert(are_args_valid(inp.size(), offset, nof_samples), "Input ill-configured");
 
     for (uint32_t ant_idx = 0; ant_idx < nof_antennas; ++ant_idx) {
         srsran_vec_cf_copy(&spp[ant_idx][offset], (cf_t*)inp[ant_idx], nof_samples);

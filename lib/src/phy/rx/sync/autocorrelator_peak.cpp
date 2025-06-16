@@ -180,7 +180,7 @@ bool autocorrelator_peak_t::search_by_correlation(const uint32_t localbuffer_cnt
             metric_smoother[ant_idx].pop_push(metric);
 
             // metric larger?
-            peak_vec[ant_idx].check_update(
+            peak_vec[ant_idx].update_if_metric_is_larger(
                 metric_smoother[ant_idx].get_mean(),
                 localbuffer_cnt_r + consumed - metric_smoother_bos_offset_to_center_samples);
 

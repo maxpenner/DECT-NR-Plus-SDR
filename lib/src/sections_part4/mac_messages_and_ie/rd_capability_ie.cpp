@@ -36,7 +36,7 @@ rd_capability_ie_t::rd_capability_ie_t() {
 
     zero();
 
-    dectnrp_assert(check_validity_at_runtime(this), "mmie invalid");
+    dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
 }
 
 void rd_capability_ie_t::zero() {

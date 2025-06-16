@@ -35,7 +35,7 @@ broadcast_indication_ie_t::broadcast_indication_ie_t() {
 
     zero();
 
-    dectnrp_assert(check_validity_at_runtime(this), "mmie invalid");
+    dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
 }
 
 void broadcast_indication_ie_t::zero() {

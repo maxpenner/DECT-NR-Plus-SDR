@@ -104,6 +104,8 @@ class worker_pool_t final : public common::layer_unit_t {
         /// job queue: filled by worker_sync_t, read by worker_tx_rx
         std::unique_ptr<job_queue_t> job_queue;
 
+        irregular_queue_t irregular_queue;
+
         /// export data in real-time
         std::unique_ptr<common::json_export_t> json_export;
 
@@ -121,15 +123,13 @@ class worker_pool_t final : public common::layer_unit_t {
          */
         std::unique_ptr<baton_t> baton;
 
-        irregular_queue_t irregular_queue;
-
         std::vector<std::unique_ptr<worker_sync_t>> worker_sync_vec;
 
         /// check whether sync parameters are set correctly
-        void check_sync_param() const;
+        void is_sync_param_for_cover_sequence_valid() const;
 
         /// check whether timing of synchronization is possible
-        void check_sync_timing() const;
+        void is_sync_timing_valid() const;
 
         /// determine the maximum number of samples of deviation
         int64_t get_sync_time_unique_limit() const;

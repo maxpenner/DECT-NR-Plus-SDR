@@ -39,7 +39,7 @@ cluster_beacon_message_t::cluster_beacon_message_t() {
     zero();
     mu = 0;
 
-    dectnrp_assert(check_validity_at_runtime(this), "mmie invalid");
+    dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
 }
 
 void cluster_beacon_message_t::testing_set_random() {

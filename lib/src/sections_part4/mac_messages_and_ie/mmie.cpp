@@ -26,7 +26,7 @@
 
 namespace dectnrp::sp4 {
 
-bool check_validity_at_runtime(const mmie_t* mmie) {
+bool has_valid_inheritance_and_properties(const mmie_t* mmie) {
     if (dynamic_cast<const mmie_packing_t*>(mmie) != nullptr &&
         dynamic_cast<const mmie_flowing_t*>(mmie) != nullptr) {
         return false;

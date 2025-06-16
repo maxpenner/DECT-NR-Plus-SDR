@@ -42,16 +42,19 @@
 namespace dectnrp::phy {
 
 worker_tx_rx_t::worker_tx_rx_t(worker_config_t& worker_config,
-                               irregular_queue_t& irregular_queue_,
                                phy_radio_t& phy_radio_,
                                common::json_export_t* json_export_)
     : worker_t(worker_config),
-      irregular_queue(irregular_queue_),
+      irregular_queue(worker_config.irregular_queue),
       phy_radio(phy_radio_),
       json_export(json_export_) {
     tx = std::make_unique<tx_t>(worker_pool_config.maximum_packet_sizes,
                                 worker_pool_config.os_min,
                                 worker_pool_config.resampler_param);
+
+    dectnrp_assert(
+        worker_pool_config.resampler_param.hw_samp_rate % constants::u8_subslots_per_sec == 0,
+        "hardware sample rate not a multiple of u-8 slots");
 
     const uint32_t u8subslot_length_samples =
         worker_pool_config.resampler_param.hw_samp_rate / constants::u8_subslots_per_sec;
