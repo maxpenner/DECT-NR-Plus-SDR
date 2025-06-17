@@ -41,7 +41,7 @@ class irregular_report_t {
             return call_asap_after_this_time_has_passed_64 < undefined_late;
         }
 
-        irregular_report_t get_with_time_increment(const int64_t time_increment_64) const;
+        irregular_report_t get_same_with_time_increment(const int64_t time_increment_64) const;
 
         /// when did synchronization recognize this job was due to be put into the job queue?
         int64_t time_of_recognition{common::adt::UNDEFINED_EARLY_64};
@@ -54,7 +54,7 @@ class irregular_report_t {
          * \brief The irregular report will be create as soon as possible after this time has passed
          * for synchronization. The actual call can be delayed by a packet reception.
          */
-        int64_t call_asap_after_this_time_has_passed_64{std::numeric_limits<int64_t>::max()};
+        int64_t call_asap_after_this_time_has_passed_64{undefined_late};
 
         /**
          * \brief Handle a firmware can use to identify the irregular called it requested. It is up

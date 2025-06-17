@@ -65,7 +65,7 @@ Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](li
 |  6 | work_pdc()           | called upon PDC reception with correct CRC (event-driven, asynchronous)   |
 |  7 | work_pdc_error()     | called upon PDC reception with incorrect CRC (event-driven, asynchronous) |
 |  8 | work_application()   | called upon availability of new data on application layer (event-driven)  |
-|  9 | work_channel()       | called upon finished channel measurement (event-driven, asynchronous)     |
+|  9 | work_channel()       | called upon a finished channel measurement (event-driven, asynchronous)   |
 | 10 | work_stop()          | called once when the SDR must shut down                                   |
 
 For every firmware, constructors are always called first. When the constructors are called, underlying devices on the radio layer as well as the PHY have already been initialized, and thus hardware properties such as center frequency and gains may be changed. However, the radio devices are not streaming IQ samples yet.

@@ -83,7 +83,7 @@ phy::machigh_phy_t steady_pt_t::work_irregular(const phy::irregular_report_t& ir
     rd.callbacks.run(buffer_rx.get_rx_time_passed());
 
     ret.irregular_report =
-        irregular_report.get_with_time_increment(rd.allocation_ft.get_beacon_period());
+        irregular_report.get_same_with_time_increment(rd.allocation_ft.get_beacon_period());
 
     return ret;
 }
@@ -102,7 +102,7 @@ phy::machigh_phy_tx_t steady_pt_t::work_channel([[maybe_unused]] const phy::chsc
 }
 
 phy::irregular_report_t steady_pt_t::entry() {
-    int64_t now_64 = buffer_rx.get_rx_time_passed();
+    const int64_t now_64 = buffer_rx.get_rx_time_passed();
 
     // what is the next full second after PHY becomes operational?
     const int64_t A = duration_lut.get_N_samples_at_next_full_second(now_64);
