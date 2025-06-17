@@ -41,15 +41,15 @@ tpoint_t::tpoint_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_
       agc_tx(mac_lower.lower_ctrl_vec.at(0).agc_tx),
       agc_rx(mac_lower.lower_ctrl_vec.at(0).agc_rx),
       tx_order_id(mac_lower.lower_ctrl_vec.at(0).tx_order_id),
-      tx_earliest_64(mac_lower.lower_ctrl_vec.at(0).tx_earliest_64) {
+      tx_earliest_64(mac_lower.lower_ctrl_vec.at(0).tx_earliest_64),
+      hpp(*mac_lower.lower_ctrl_vec.at(0).hpp.get()) {
     dectnrp_assert(tx_order_id == 0, "radio layer expects 0 as first transmission order");
     dectnrp_assert(tx_earliest_64 <= common::adt::UNDEFINED_EARLY_64,
                    "must be negative so first transmission is guaranteed to occur later");
 };
 
 #ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
-phy::machigh_phy_t tpoint_t::work_pcc_crc_error(
-    [[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
+phy::machigh_phy_t tpoint_t::work_pcc_error([[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return phy::machigh_phy_t();
 };
 #endif
@@ -64,7 +64,7 @@ void tpoint_t::worksub_agc(const phy::sync_report_t& sync_report,
 
     hw_local.set_command_time(t_agc_change_64);
 
-    if (agc_tx_local.check_protect_duration_passed(sync_report.fine_peak_time_64)) {
+    if (agc_tx_local.has_protect_duration_passed(sync_report.fine_peak_time_64)) {
 #ifdef AGC_RX_PT
         // get required RX gain change
         const auto rx_gain_change =
@@ -107,7 +107,7 @@ phy::maclow_phy_t tpoint_t::worksub_pcc2pdc(const phy::phy_maclow_t& phy_maclow,
     ++stats.rx_pcc2pdc_success;
 
     auto* hp_rx =
-        hpp->get_process_rx(PLCF_type, network_id, worksub_psdef(phy_maclow, PLCF_type), rv, frx);
+        hpp.get_process_rx(PLCF_type, network_id, worksub_psdef(phy_maclow, PLCF_type), rv, frx);
 
     dectnrp_assert(hp_rx != nullptr, "HARQ process RX unavailable");
 
@@ -121,13 +121,13 @@ phy::maclow_phy_t tpoint_t::worksub_pcc2pdc(const phy::phy_maclow_t& phy_maclow,
     return phy::maclow_phy_t(hp_rx, mph);
 }
 
-phy::maclow_phy_t tpoint_t::worksub_pcc2pdc_running(const uint32_t process_id,
-                                                    const uint32_t rv,
+phy::maclow_phy_t tpoint_t::worksub_pcc2pdc_running(const uint32_t rv,
                                                     const phy::harq::finalize_rx_t frx,
-                                                    const phy::maclow_phy_handle_t mph) {
+                                                    const phy::maclow_phy_handle_t mph,
+                                                    const uint32_t process_id) {
     ++stats.rx_pcc2pdc_running_success;
 
-    auto* hp_rx = hpp->get_process_rx_running(process_id, rv, frx);
+    auto* hp_rx = hpp.get_process_rx_running(process_id, rv, frx);
 
     dectnrp_assert(hp_rx != nullptr, "HARQ process RX unavailable, PHY may not finished yet");
 

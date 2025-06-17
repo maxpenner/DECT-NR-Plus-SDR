@@ -119,7 +119,7 @@ class autocorrelator_peak_t final : public correlator_t {
                     index = 0;
                 }
 
-                void check_update(const float metric_, const uint32_t index_) {
+                void update_if_metric_is_larger(const float metric_, const uint32_t index_) {
                     if (metric_ >= metric) {
                         metric = metric_;
                         index = index_;

@@ -52,12 +52,12 @@ class layer_unit_t {
         void log_lines(const std::vector<std::string> lines) const;
 
         /**
-         * \brief This function is called by the main thread to signal that the SDR must shutdown.
-         * Any running threads must be stopped. Deriving classes may also block this function, and
-         * hence the main thread, for a finite duration to execute additional shutdown
-         * functionality, for instance, shutting down a DECT NR+ connection gracefully.
+         * \brief This function is called by the main thread to signal that the SDR must stop
+         * execution. Any running threads must be stopped. Deriving classes may also block this
+         * function, and hence the main thread, for a finite duration to finish task that take
+         * longer, for instance, shutting down a DECT NR+ connection gracefully.
          */
-        virtual void shutdown() = 0;
+        virtual void work_stop() = 0;
 };
 
 }  // namespace dectnrp::common

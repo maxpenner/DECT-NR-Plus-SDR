@@ -23,7 +23,6 @@
 #include <memory>
 
 #include "dectnrp/phy/pool/baton.hpp"
-#include "dectnrp/phy/pool/irregular.hpp"
 #include "dectnrp/phy/pool/worker.hpp"
 #include "dectnrp/phy/rx/sync/sync_chunk.hpp"
 
@@ -31,9 +30,7 @@ namespace dectnrp::phy {
 
 class worker_sync_t final : public worker_t {
     public:
-        explicit worker_sync_t(worker_config_t& worker_config,
-                               baton_t& baton_,
-                               irregular_t& irregular_);
+        explicit worker_sync_t(worker_config_t& worker_config, baton_t& baton_);
         ~worker_sync_t() = default;
 
         worker_sync_t() = delete;
@@ -50,7 +47,7 @@ class worker_sync_t final : public worker_t {
         std::vector<std::string> report_stop() const override final;
 
         baton_t& baton;
-        irregular_t& irregular;
+        irregular_queue_t& irregular_queue;
 
         std::unique_ptr<sync_chunk_t> sync_chunk;
 
@@ -65,7 +62,7 @@ class worker_sync_t final : public worker_t {
 
         static constexpr std::size_t warmup_sec{1};
 
-        void irregular_callback(const int64_t now_64);
+        void enqueue_irregular_job_if_due(const int64_t no_more_syncs_earlier_64);
 
         void enqueue_job_nto(const sync_report_t& sync_report);
 

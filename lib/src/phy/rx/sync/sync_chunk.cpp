@@ -35,7 +35,7 @@ sync_chunk_t::sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
                            const uint32_t chunk_stride_samples_,
                            const uint32_t chunk_offset_samples_,
                            const uint32_t ant_streams_unit_length_samples_,
-                           irregular_callable_t irregular_callable_)
+                           enqueue_irregular_job_if_due_cb_t enqueue_irregular_job_if_due_cb_)
     // clang-format off
     : rx_pacer_t(std::min(buffer_rx_.nof_antennas, RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT),
                  buffer_rx_,
@@ -68,7 +68,7 @@ sync_chunk_t::sync_chunk_t(const radio::buffer_rx_t& buffer_rx_,
       D(static_cast<uint32_t>(RX_SYNC_PARAM_AUTOCORRELATOR_PEAK_MAX_SEARCH_LENGTH_IN_STFS_DP *
                               static_cast<double>(stf_bos_length_samples))),
 
-      irregular_callable(irregular_callable_) {
+      enqueue_irregular_job_if_due_cb(enqueue_irregular_job_if_due_cb_) {
     // initialize buffer where samples after resampling will be written to
     const std::vector<cf_t*> localbuffer_resample = get_initialized_localbuffer(
         rx_pacer_t::localbuffer_choice_t::LOCALBUFFER_RESAMPLE, A + B + C + D);
@@ -261,12 +261,12 @@ std::optional<sync_report_t> sync_chunk_t::search() {
                 // reset all values of sync_report
                 sync_report = sync_report_t(nof_antennas_limited);
 
-                irregular_callable(
+                enqueue_irregular_job_if_due_cb(
                     chunk_time_start_64 +
                     static_cast<int64_t>(autocorrelator_detection->get_localbuffer_cnt_r()));
             }
         } else {
-            irregular_callable(
+            enqueue_irregular_job_if_due_cb(
                 chunk_time_start_64 +
                 static_cast<int64_t>(autocorrelator_detection->get_localbuffer_cnt_r()));
         }
@@ -290,7 +290,7 @@ int64_t sync_chunk_t::get_chunk_time_end() const {
 
 void sync_chunk_t::set_next_chunk() {
 #ifdef ENABLE_ASSERT
-    check_time_lag(get_chunk_time_end());
+    assert_time_lag(get_chunk_time_end());
 #endif
 
     chunk_time_start_64 += static_cast<int64_t>(chunk_stride_samples);

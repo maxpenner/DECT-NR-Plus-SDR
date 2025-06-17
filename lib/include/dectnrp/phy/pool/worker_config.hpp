@@ -23,6 +23,7 @@
 #include <atomic>
 #include <cstdint>
 
+#include "dectnrp/phy/pool/irregular_queue.hpp"
 #include "dectnrp/phy/pool/job_queue.hpp"
 #include "dectnrp/phy/worker_pool_config.hpp"
 #include "dectnrp/radio/hw.hpp"
@@ -34,17 +35,20 @@ struct worker_config_t {
                         const std::atomic<bool>& keep_running_,
                         radio::hw_t& hw_,
                         job_queue_t& job_queue_,
+                        irregular_queue_t& irregular_queue_,
                         const worker_pool_config_t& worker_pool_config_)
             : id(id_),
               keep_running(keep_running_),
               hw(hw_),
               job_queue(job_queue_),
+              irregular_queue(irregular_queue_),
               worker_pool_config(worker_pool_config_) {}
 
         uint32_t id;
         const std::atomic<bool>& keep_running;
         radio::hw_t& hw;
         job_queue_t& job_queue;
+        irregular_queue_t& irregular_queue;
         const worker_pool_config_t& worker_pool_config;
 };
 

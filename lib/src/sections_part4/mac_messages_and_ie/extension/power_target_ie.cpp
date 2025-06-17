@@ -31,7 +31,7 @@ power_target_ie_t::power_target_ie_t() {
 
     zero();
 
-    dectnrp_assert(check_validity_at_runtime(this), "mmie invalid");
+    dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
 }
 
 void power_target_ie_t::zero() { power_target_dBm_coded = common::adt::UNDEFINED_NUMERIC_32; }

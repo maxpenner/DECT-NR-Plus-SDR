@@ -30,7 +30,7 @@ const std::string tfw_basic_t::firmware_name("basic");
 tfw_basic_t::tfw_basic_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {}
 
-phy::irregular_report_t tfw_basic_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_basic_t::work_start(const int64_t start_time_64) {
     dectnrp_assert(0 <= start_time_64, "start_time_64 too small");
 
     // value has no other function than being used in dectnrp_assert()
@@ -68,7 +68,11 @@ phy::maclow_phy_t tfw_basic_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     return phy::maclow_phy_t();
 }
 
-phy::machigh_phy_t tfw_basic_t::work_pdc_async(
+phy::machigh_phy_t tfw_basic_t::work_pdc([[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_basic_t::work_pdc_error(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
@@ -78,10 +82,10 @@ phy::machigh_phy_t tfw_basic_t::work_application(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t tfw_basic_t::work_chscan_async([[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_basic_t::work_channel([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 
-void tfw_basic_t::shutdown() { dectnrp_log_inf("shutdown() called"); }
+void tfw_basic_t::work_stop() { dectnrp_log_inf("work_stop() called"); }
 
 }  // namespace dectnrp::upper::tfw::basic

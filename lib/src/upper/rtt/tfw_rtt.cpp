@@ -34,10 +34,6 @@ const std::string tfw_rtt_t::firmware_name("rtt");
 
 tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {
-    // init HARQ process pool
-    hpp =
-        std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 4, 4);
-
     // set TX power, RX power, and frequency which should be free of any interference
     hw.set_command_time();
     hw.set_tx_power_ant_0dBFS_tc(10.0f);
@@ -97,8 +93,7 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     stage_a.resize(TFW_RTT_TX_LENGTH_MAXIMUM_BYTE);
 }
 
-phy::irregular_report_t tfw_rtt_t::work_start_imminent(
-    [[maybe_unused]] const int64_t start_time_64) {
+phy::irregular_report_t tfw_rtt_t::work_start([[maybe_unused]] const int64_t start_time_64) {
     return phy::irregular_report_t();
 }
 
@@ -158,12 +153,7 @@ phy::maclow_phy_t tfw_rtt_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
                            phy::maclow_phy_handle_t());
 }
 
-phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machigh) {
-    // ignore entire PDC if CRC is incorrect
-    if (!phy_machigh.pdc_report.crc_status) {
-        return phy::machigh_phy_t();
-    }
-
+phy::machigh_phy_t tfw_rtt_t::work_pdc(const phy::phy_machigh_t& phy_machigh) {
     phy::machigh_phy_t machigh_phy;
 
     if (tpoint_config.firmware_id == 0) {
@@ -207,6 +197,11 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_async(const phy::phy_machigh_t& phy_machi
     }
 
     return machigh_phy;
+}
+
+phy::machigh_phy_t tfw_rtt_t::work_pdc_error(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
+    return phy::machigh_phy_t();
 }
 
 phy::machigh_phy_t tfw_rtt_t::work_application(
@@ -266,11 +261,11 @@ phy::machigh_phy_t tfw_rtt_t::work_application(
     return machigh_phy;
 }
 
-phy::machigh_phy_tx_t tfw_rtt_t::work_chscan_async([[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_rtt_t::work_channel([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 
-void tfw_rtt_t::shutdown() {
+void tfw_rtt_t::work_stop() {
     // first stop accepting new data from upper
     application_server->stop_sc();
 
@@ -280,7 +275,7 @@ void tfw_rtt_t::shutdown() {
 
 void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // request harq process
-    auto* hp_tx = hpp->get_process_tx(
+    auto* hp_tx = hpp.get_process_tx(
         1, identity_ft.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process

@@ -30,7 +30,7 @@
 #include "dectnrp/common/layer/layer_unit.hpp"
 #include "dectnrp/phy/interfaces/layers_downwards/phy_radio.hpp"
 #include "dectnrp/phy/pool/baton.hpp"
-#include "dectnrp/phy/pool/irregular.hpp"
+#include "dectnrp/phy/pool/irregular_queue.hpp"
 #include "dectnrp/phy/pool/job_queue.hpp"
 #include "dectnrp/phy/pool/token.hpp"
 #include "dectnrp/phy/pool/worker_sync.hpp"
@@ -97,12 +97,14 @@ class worker_pool_t final : public common::layer_unit_t {
     private:
         const worker_pool_config_t worker_pool_config;
 
-        void shutdown() override final;
+        void work_stop() override final;
 
         std::atomic<bool> keep_running;
 
         /// job queue: filled by worker_sync_t, read by worker_tx_rx
         std::unique_ptr<job_queue_t> job_queue;
+
+        irregular_queue_t irregular_queue;
 
         /// export data in real-time
         std::unique_ptr<common::json_export_t> json_export;
@@ -121,15 +123,13 @@ class worker_pool_t final : public common::layer_unit_t {
          */
         std::unique_ptr<baton_t> baton;
 
-        irregular_t irregular;
-
         std::vector<std::unique_ptr<worker_sync_t>> worker_sync_vec;
 
         /// check whether sync parameters are set correctly
-        void check_sync_param() const;
+        void is_sync_param_for_cover_sequence_valid() const;
 
         /// check whether timing of synchronization is possible
-        void check_sync_timing() const;
+        void is_sync_timing_valid() const;
 
         /// determine the maximum number of samples of deviation
         int64_t get_sync_time_unique_limit() const;

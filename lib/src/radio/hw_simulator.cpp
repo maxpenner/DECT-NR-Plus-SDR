@@ -307,7 +307,7 @@ void hw_simulator_t::set_all_buffers_as_transmitted() {
     }
 }
 
-void hw_simulator_t::shutdown() {
+void hw_simulator_t::work_stop() {
     dectnrp_assert(keep_running.load(std::memory_order_acquire), "keep_running already false");
 
     keep_running.store(false, std::memory_order_release);

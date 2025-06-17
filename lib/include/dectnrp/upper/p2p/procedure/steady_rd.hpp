@@ -22,120 +22,55 @@
 
 #include <optional>
 
-#include "dectnrp/application/application_client.hpp"
-#include "dectnrp/application/application_server.hpp"
-#include "dectnrp/common/adt/callbacks.hpp"
-#include "dectnrp/cvg/cvg.hpp"
-#include "dectnrp/dlc/dlc.hpp"
-#include "dectnrp/mac/allocation/allocation_ft.hpp"
 #include "dectnrp/mac/allocation/allocation_pt.hpp"
 #include "dectnrp/mac/allocation/tx_opportunity.hpp"
-#include "dectnrp/mac/pll/pll.hpp"
-#include "dectnrp/phy/indicators/cqi_lut.hpp"
-#include "dectnrp/radio/hw_simulator.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
-#include "dectnrp/sections_part4/mac_messages_and_ie/mmie_pool_tx.hpp"
-#include "dectnrp/sections_part4/psdef_plcf_mac_pdu.hpp"
-#include "dectnrp/upper/p2p/contact_p2p.hpp"
-#include "dectnrp/upper/tpoint.hpp"
-
-#define APPLICATION_INTERFACE_VNIC_OR_SOCKET
-
-// #define TFW_P2P_EXPORT_PPX
-#ifndef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
-#undef TFW_P2P_EXPORT_PPX
-#endif
-
-#ifdef TFW_P2P_EXPORT_PPX
-#include "dectnrp/mac/ppx/ppx.hpp"
-#endif
-
-// #define TFW_P2P_VARIABLE_MCS
-
-// #define TFW_P2P_MIMO
+#include "dectnrp/upper/p2p/data/contact_p2p.hpp"
+#include "dectnrp/upper/p2p/data/rd.hpp"
+#include "dectnrp/upper/p2p/procedure/args.hpp"
+#include "dectnrp/upper/tpoint_state.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class tfw_p2p_base_t : public tpoint_t {
+class steady_rd_t : public tpoint_state_t {
     public:
-        tfw_p2p_base_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
-        virtual ~tfw_p2p_base_t() = default;
+        steady_rd_t(args_t& args);
+        virtual ~steady_rd_t() = default;
 
-        /// same dispatcher for FT and PT, calls worksub_* functions
+        // same dispatchers for FT and PT, calls worksub_* functions
+
         phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override final;
-
-        /// same dispatcher for FT and PT, calls worksub_* functions
-        phy::machigh_phy_t work_pdc_async(const phy::phy_machigh_t& phy_machigh) override final;
+        phy::machigh_phy_t work_pdc(const phy::phy_machigh_t& phy_machigh) override final;
+        phy::machigh_phy_t work_pdc_error(const phy::phy_machigh_t& phy_machigh) override final;
 
     protected:
+        rd_t& rd;
+
         // ##################################################
         // Radio Layer + PHY
-
-        /// mapping of SNR to MCS
-        phy::indicators::cqi_lut_t cqi_lut;
-
-        /**
-         * \brief Firmware can run on real hardware or in simulation. Whether we are in a simulation
-         * is detected at runtime by casting to hw_simulator. That way we also get access to the
-         * functions of the hw_simulator to change the position, trajectory and so forth.
-         */
-        radio::hw_simulator_t* hw_simulator{nullptr};
-
-        /// sets initial radio settings such as TX gain, RX gain and frequency
-        virtual void init_radio() = 0;
-
-        /// if running in a simulation, we set position and trajectory in the virtual space
-        virtual void init_simulation_if_detected() = 0;
+        // -
 
         // ##################################################
         // MAC Layer
 
-        /// used for regular callbacks (logging, PPX generation etc.)
-        common::adt::callbacks_t<void> callbacks;
-
-        /// both FT and PT must know the FT's identity
-        sp4::mac_architecture::identity_t identity_ft;
-
-#ifdef APPLICATION_INTERFACE_VNIC_OR_SOCKET
-        /// when using a VNIC, only one PT is supported in this demo firmware
-        const uint32_t N_pt{1};
-#else
-        /// when using sockets, two PTs are supported in this demo firmware
-        const uint32_t N_pt{2};
-#endif
+        static constexpr uint32_t minimum_mcs_allowed{4};
 
         /// all PT identities have to be known at FT, individual PTs only need their own identity
         sp4::mac_architecture::identity_t init_identity_pt(const uint32_t firmware_id_);
 
-        /// the FT's allocation defines beacon periods, and thus has to be known at FT and PT
-        mac::allocation::allocation_ft_t allocation_ft;
-
         /// all PT allocations have to be known at FT, individual PTs only need their own allocation
         mac::allocation::allocation_pt_t init_allocation_pt(const uint32_t firmware_id_);
-
-        /// estimation of deviation between time bases
-        mac::pll_t pll;
-
-#ifdef TFW_P2P_EXPORT_PPX
-        /// convert beacons beginnings to a PPX
-        mac::ppx_t ppx;
-
-        /// FT and PT both generate a PPX
-        void worksub_callback_ppx(const int64_t now_64, const size_t idx, int64_t& next_64);
-#endif
-
-        /// part 2 defines five MAC PDU types, these are generators for each type
-        sp4::ppmp_data_t ppmp_data;
-        sp4::ppmp_beacon_t ppmp_beacon;
-        sp4::ppmp_unicast_t ppmp_unicast;
-        sp4::ppmp_rd_broadcast_t ppmp_rd_broadcast;
-        sp4::mmie_pool_tx_t mmie_pool_tx;
 
         /// FT and PT both generate unicast packets, however with different identities
         void init_packet_unicast(const uint32_t ShortRadioDeviceID_tx,
                                  const uint32_t ShortRadioDeviceID_rx,
                                  const uint32_t LongRadioDeviceID_tx,
                                  const uint32_t LongRadioDeviceID_rx);
+
+#ifdef TFW_P2P_EXPORT_PPX
+        /// FT and PT both generate a PPX
+        void worksub_callback_ppx(const int64_t now_64, const size_t idx, int64_t& next_64);
+#endif
 
         /**
          * \brief The routines for PCC type 1 are always called when the CRC for type 1 is correct.
@@ -164,7 +99,6 @@ class tfw_p2p_base_t : public tpoint_t {
         // clang-format on
 
         /// each FT and PT may schedule multiple packets into the future
-        static constexpr uint32_t max_simultaneous_tx_unicast{8};
         virtual void worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy) = 0;
 
         /// common procedure for FT and PT generating a single packet with multiple MAC PDUs
@@ -186,26 +120,15 @@ class tfw_p2p_base_t : public tpoint_t {
 
         // ##################################################
         // DLC and Convergence Layer
-
-        /// not implemented, just a dummy
-        std::unique_ptr<cvg::cvg_t> cvg;
-        std::unique_ptr<dlc::dlc_t> dlc;
+        // -
 
         // ##################################################
         // Application Layer
-
-        /// application_server receives data from external applications and feeds it into the SDR
-        std::unique_ptr<application::application_server_t> application_server;
-
-        /// application_client takes data from the SDR and sends it to external applications
-        std::unique_ptr<application::application_client_t> application_client;
-
-        virtual void init_appiface() = 0;
+        // -
 
         // ##################################################
         // logging
 
-        static constexpr uint32_t worksub_callback_log_period_sec{2};
         virtual void worksub_callback_log(const int64_t now_64) const = 0;
 };
 

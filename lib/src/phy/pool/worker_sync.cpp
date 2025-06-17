@@ -26,18 +26,16 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/constants.hpp"
-#include "dectnrp/phy/pool/irregular.hpp"
+#include "dectnrp/phy/pool/irregular_queue.hpp"
 #include "dectnrp/phy/rx/sync/regular_report.hpp"
 #include "dectnrp/phy/rx/sync/sync_param.hpp"
 
 namespace dectnrp::phy {
 
-worker_sync_t::worker_sync_t(worker_config_t& worker_config,
-                             baton_t& baton_,
-                             irregular_t& irregular_)
+worker_sync_t::worker_sync_t(worker_config_t& worker_config, baton_t& baton_)
     : worker_t(worker_config),
       baton(baton_),
-      irregular(irregular_) {
+      irregular_queue(worker_config.irregular_queue) {
     /* The length of a chunk is the same for every worker_sync_t instance, but their chunks are
      * interleaved by fixed offsets.
      */
@@ -53,7 +51,7 @@ worker_sync_t::worker_sync_t(worker_config_t& worker_config,
         chunk_length_samples * worker_pool_config.threads_core_prio_config_sync_vec.size(),
         chunk_length_samples * id,
         u8subslot_length_samples * worker_pool_config.rx_chunk_unit_length_u8subslot,
-        std::bind(&worker_sync_t::irregular_callback, this, std::placeholders::_1));
+        std::bind(&worker_sync_t::enqueue_irregular_job_if_due, this, std::placeholders::_1));
 }
 
 void worker_sync_t::work() {
@@ -62,7 +60,7 @@ void worker_sync_t::work() {
     dectnrp_assert(1 <= RX_SYNC_PARAM_MAX_NOF_BUFFERABLE_SYNC_BEFORE_ACQUIRING_BATON,
                    "at least one packet must be bufferable");
 
-    // preallocate the maximum number of instances of sync_report_t that can be buffer
+    // preallocate the maximum number of instances of sync_report_t that can be buffered
     std::array<sync_report_t, RX_SYNC_PARAM_MAX_NOF_BUFFERABLE_SYNC_BEFORE_ACQUIRING_BATON>
         sync_report_arr;
 
@@ -92,16 +90,16 @@ void worker_sync_t::work() {
      * last instance to register triggers the other instances.
      *
      * Once a one common value of now_64 has been found, the baton will also call the respective
-     * termination point and its function work_start_imminent() to tell the firmware at what exact
-     * time synchronization is about to start.
+     * termination point and its function work_start() to tell the firmware at what exact time
+     * synchronization is about to start.
      */
     const auto [start_time_64, irregular_report] = baton.register_and_wait_for_others_nto(now_64);
 
     if (irregular_report.has_finite_time()) {
         dectnrp_assert(start_time_64 <= irregular_report.call_asap_after_this_time_has_passed_64,
-                       "first irregular callback must not occur before IQ sampling begins");
+                       "first irregular callback must not occur before IQ streaming begins");
 
-        irregular.push(std::move(irregular_report));
+        irregular_queue.push(std::move(irregular_report));
     }
 
     dectnrp_assert(start_time_64 % static_cast<int64_t>(buffer_rx.ant_streams_length_samples) == 0,
@@ -292,27 +290,27 @@ void worker_sync_t::warmup() {
     }
 }
 
-void worker_sync_t::irregular_callback(const int64_t now_64) {
+void worker_sync_t::enqueue_irregular_job_if_due(const int64_t no_more_syncs_earlier_64) {
     // baton must be held to enqueue jobs
     if (!baton.is_id_holder_the_same(id)) {
         return;
     }
 
-    const auto next_time_64 = irregular.get_next_time();
+    const auto next_time_64 = irregular_queue.get_next_time();
 
     if (next_time_64 == irregular_report_t::undefined_late) {
         return;
     }
 
-    if (now_64 < next_time_64) {
+    if (no_more_syncs_earlier_64 < next_time_64) {
         return;
     }
 
-    auto irregular_report = irregular.pop();
+    auto irregular_report = irregular_queue.pop();
 
-    irregular_report.time_of_recognition = now_64;
+    irregular_report.time_of_recognition = no_more_syncs_earlier_64;
 
-    dectnrp_assert(0 < irregular_report.get_recognition_delay(),
+    dectnrp_assert(0 <= irregular_report.get_recognition_delay(),
                    "irregular job recognized before due time");
 
     job_queue.enqueue_nto(job_t(std::move(irregular_report)));
@@ -326,6 +324,8 @@ void worker_sync_t::enqueue_job_nto(const sync_report_t& sync_report) {
     } else {
         ++stats.job_packet_not_unique;
     }
+
+    enqueue_irregular_job_if_due(sync_report.fine_peak_time_64);
 }
 
 }  // namespace dectnrp::phy

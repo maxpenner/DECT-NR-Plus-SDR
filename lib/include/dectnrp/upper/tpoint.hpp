@@ -21,7 +21,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 
 #include "dectnrp/application/application_report.hpp"
 #include "dectnrp/common/layer/layer_unit.hpp"
@@ -80,8 +79,7 @@ class tpoint_t : public common::layer_unit_t {
          * count at the hardware sample rate
          * \return first opportunity to schedule an irregular callback
          */
-        [[nodiscard]] virtual phy::irregular_report_t work_start_imminent(
-            const int64_t start_time_64) = 0;
+        [[nodiscard]] virtual phy::irregular_report_t work_start(const int64_t start_time_64) = 0;
 
         /**
          * \brief Function being called regularly. It contains two important pieces of information.
@@ -117,7 +115,7 @@ class tpoint_t : public common::layer_unit_t {
             const phy::irregular_report_t& irregular_report) = 0;
 
         /**
-         * \brief Function called after decoding a PCC.
+         * \brief Function called after decoding a PCC with correct CRC.
          *
          * 1. Called only after successful PCC decoding, i.e. correct CRC.
          * 2. Called in the same FIFO order as put into the job_queue (sync_report_t).
@@ -142,21 +140,31 @@ class tpoint_t : public common::layer_unit_t {
          * \param phy_maclow information provided by PHY about synchronization and PCC
          * \return
          */
-        [[nodiscard]] virtual phy::machigh_phy_t work_pcc_crc_error(
+        [[nodiscard]] virtual phy::machigh_phy_t work_pcc_error(
             const phy::phy_maclow_t& phy_maclow);
 #endif
 
         /**
-         * \brief Function called after decoding a PDC.
+         * \brief Function called after decoding a PDC with correct CRC.
          *
          * 1. PHY processes PDC only if maclow_phy_t::continue_with_pdc=true for the respective PCC.
          * 2. Called after successful and unsuccessful PDC decoding, i.e. correct and incorrect CRC.
-         * 3. Called ASAP, but not in any specific order relative to other work-functions (async).
+         * 3. Called ASAP, but not in any specific order relative to other work-functions.
          *
          * \param phy_machigh information provided by PHY about synchronization, PCC and PDC
          * \return
          */
-        [[nodiscard]] virtual phy::machigh_phy_t work_pdc_async(
+        [[nodiscard]] virtual phy::machigh_phy_t work_pdc(
+            const phy::phy_machigh_t& phy_machigh) = 0;
+
+        /**
+         * \brief Function called after decoding a PDC with incorrect CRC. Same properties as
+         * work_pdc().
+         *
+         * \param phy_machigh information provided by PHY about synchronization, PCC and PDC
+         * \return
+         */
+        [[nodiscard]] virtual phy::machigh_phy_t work_pdc_error(
             const phy::phy_machigh_t& phy_machigh) = 0;
 
         /**
@@ -176,17 +184,12 @@ class tpoint_t : public common::layer_unit_t {
          * \brief Function called when a channel measurement has finished.
          *
          * 1. PHY conducts ch measurements only if machigh_phy_t::chscan_opt contains a value.
-         * 2. Called ASAP, but not in any specific order relative to other work-functions (async).
+         * 2. Called ASAP, but not in any specific order relative to other work-functions.
          *
          * \param chscan result of channel measurement instruction
          * \return
          */
-        [[nodiscard]] virtual phy::machigh_phy_tx_t work_chscan_async(
-            const phy::chscan_t& chscan) = 0;
-
-    protected:
-        /// configuration received during construction
-        const tpoint_config_t tpoint_config;
+        [[nodiscard]] virtual phy::machigh_phy_tx_t work_channel(const phy::chscan_t& chscan) = 0;
 
         /**
          * \brief Function will be called by the main thread when the SDR is supposed to shut down
@@ -195,7 +198,11 @@ class tpoint_t : public common::layer_unit_t {
          * impermeable so that the work-function will no longer be called after processing the
          * remaining jobs. Lastly, all threads must be shut down.
          */
-        virtual void shutdown() override = 0;
+        virtual void work_stop() override = 0;
+
+    protected:
+        /// configuration received during construction
+        const tpoint_config_t& tpoint_config;
 
         // ##################################################
         // Radio Layer + PHY
@@ -206,7 +213,7 @@ class tpoint_t : public common::layer_unit_t {
          * combination of PHY plus radio layer. Thus, a single firmware can control multiple
          * hardware radios.
          */
-        phy::mac_lower_t mac_lower;
+        phy::mac_lower_t& mac_lower;
 
         /* Most firmware will use only one lower stack (PHY plus radio layer), and accessing this
          * single lower stack through mac_lower is cumbersome. For this reason, we save references
@@ -222,6 +229,7 @@ class tpoint_t : public common::layer_unit_t {
         phy::agc::agc_rx_t& agc_rx;
         int64_t& tx_order_id;
         int64_t& tx_earliest_64;
+        phy::harq::process_pool_t& hpp;
 
         // ##################################################
         // MAC Layer
@@ -255,13 +263,6 @@ class tpoint_t : public common::layer_unit_t {
                          const std::size_t hw_idx = 0);
 
         /**
-         * \brief For every transmitted and received DECT NR+ packet, a HARQ process is required.
-         * This pool contains HARQ processes for both TX and RX. Every firmware has to allocate the
-         * pool and decide how many individual HARQ processes are required.
-         */
-        std::unique_ptr<phy::harq::process_pool_t> hpp;
-
-        /**
          * \brief When a firmware is called with a successfully received PCC and the choice is made
          * to proceed with the PDC, this convenience can be used to create the respective
          * instruction of type maclow_phy_t for the PHY. For the PDC, a new HARQ buffer is
@@ -287,16 +288,16 @@ class tpoint_t : public common::layer_unit_t {
         /**
          * \brief same as worksub_pcc2pdc(), but for an already running HARQ process
          *
-         * \param process_id HARQ process id
          * \param rv redundancy version
          * \param frx final action applied to HARQ buffer after PHY used it
          * \param mph handle to identify PCC when PHY calls with decoded PDC
+         * \param process_id HARQ process id
          * \return
          */
-        [[nodiscard]] phy::maclow_phy_t worksub_pcc2pdc_running(const uint32_t process_id,
-                                                                const uint32_t rv,
+        [[nodiscard]] phy::maclow_phy_t worksub_pcc2pdc_running(const uint32_t rv,
                                                                 const phy::harq::finalize_rx_t frx,
-                                                                const phy::maclow_phy_handle_t mph);
+                                                                const phy::maclow_phy_handle_t mph,
+                                                                const uint32_t process_id);
 
         // ##################################################
         // DLC and Convergence Layer

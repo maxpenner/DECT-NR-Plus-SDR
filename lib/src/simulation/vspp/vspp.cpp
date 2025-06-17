@@ -50,7 +50,7 @@ vspp_t::~vspp_t() {
 }
 
 void vspp_t::spp_zero(uint32_t offset, uint32_t nof_samples) {
-    dectnrp_assert(check_args(spp.size(), offset, nof_samples), "input ill-configured");
+    dectnrp_assert(are_args_valid(spp.size(), offset, nof_samples), "input ill-configured");
 
     for (uint32_t ant_idx = 0; ant_idx < nof_antennas; ++ant_idx) {
         srsran_vec_cf_zero(&spp[ant_idx][offset], nof_samples);
@@ -59,7 +59,7 @@ void vspp_t::spp_zero(uint32_t offset, uint32_t nof_samples) {
 
 void vspp_t::spp_zero() { spp_zero(0, spp_size); }
 
-bool vspp_t::check_args(const uint32_t inp_dim, uint32_t offset, uint32_t nof_samples) const {
+bool vspp_t::are_args_valid(const uint32_t inp_dim, uint32_t offset, uint32_t nof_samples) const {
     return inp_dim == nof_antennas && nof_samples != 0 && (offset + nof_samples) <= spp_size;
 }
 

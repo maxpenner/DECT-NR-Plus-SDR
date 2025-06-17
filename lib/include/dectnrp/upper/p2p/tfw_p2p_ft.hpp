@@ -20,15 +20,17 @@
 
 #pragma once
 
-#include "dectnrp/mac/contact_list.hpp"
-#include "dectnrp/upper/p2p/contact_p2p.hpp"
-#include "dectnrp/upper/p2p/tfw_p2p_base.hpp"
+#include <memory>
 
-// #define TFW_P2P_FT_ALIGN_BEACON_START_TO_FULL_SECOND_OR_CORRECT_OFFSET
+#include "dectnrp/upper/p2p/procedure/dissociation_ft.hpp"
+#include "dectnrp/upper/p2p/procedure/nop.hpp"
+#include "dectnrp/upper/p2p/procedure/resource.hpp"
+#include "dectnrp/upper/p2p/procedure/steady_ft.hpp"
+#include "dectnrp/upper/p2p/tfw_p2p_rd.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
-class tfw_p2p_ft_t final : public tfw_p2p_base_t {
+class tfw_p2p_ft_t final : public tfw_p2p_rd_t {
     public:
         explicit tfw_p2p_ft_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
         ~tfw_p2p_ft_t() = default;
@@ -41,65 +43,30 @@ class tfw_p2p_ft_t final : public tfw_p2p_base_t {
 
         static const std::string firmware_name;
 
-        phy::irregular_report_t work_start_imminent(const int64_t start_time_64) override final;
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
-
-        // work_pcc() and work_pdc_async() are implemented in deriving classes
-
+        phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) override final;
+        phy::machigh_phy_t work_pdc(const phy::phy_machigh_t& phy_machigh) override final;
+        phy::machigh_phy_t work_pdc_error(const phy::phy_machigh_t& phy_machigh) override final;
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
-        phy::machigh_phy_tx_t work_chscan_async(const phy::chscan_t& chscan) override final;
+        phy::machigh_phy_tx_t work_channel(const phy::chscan_t& chscan) override final;
 
     private:
-        void shutdown() override final;
-
-        // ##################################################
-        // Radio Layer + PHY
-
-        /// FT uses a fixed transmit power that must be written into the PLCF
-        float TransmitPower_dBm_fixed;
-
         void init_radio() override final;
         void init_simulation_if_detected() override final;
-
-        // ##################################################
-        // MAC Layer
-
-        /// fast lookup of all PTs and their properties the FT requires for uplink and downlink
-        mac::contact_list_t<contact_p2p_t> contact_list;
-
-        // besides unicast for downlink, the FT also requires a beacon packet
-        void init_packet_beacon();
-
-        // clang-format off
-        std::optional<phy::maclow_phy_t> worksub_pcc_10(const phy::phy_maclow_t& phy_maclow) override final;
-        phy::maclow_phy_t worksub_pcc_20(const phy::phy_maclow_t& phy_maclow) override final;
-        phy::maclow_phy_t worksub_pcc_21(const phy::phy_maclow_t& phy_maclow) override final;
-        
-        phy::machigh_phy_t worksub_pdc_10(const phy::phy_machigh_t& phy_machigh) override final;
-        phy::machigh_phy_t worksub_pdc_20(const phy::phy_machigh_t& phy_machigh) override final;
-        phy::machigh_phy_t worksub_pdc_21(const phy::phy_machigh_t& phy_machigh) override final;
-        // clang-format on
-
-        bool worksub_tx_beacon(phy::machigh_phy_t& machigh_phy);
-
-        void worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy) override final;
-
-        // ##################################################
-        // DLC and Convergence Layer
-        // -
-
-        // ##################################################
-        // Application Layer
-
         void init_appiface() override final;
+        [[nodiscard]] phy::irregular_report_t state_transitions() override final;
 
-        // ##################################################
-        // logging
+        /// data of fixed termination point shared with all states
+        ft_t ft;
 
-        void worksub_callback_log(const int64_t now_64) const override final;
+        /// states
+        std::unique_ptr<resource_t> resource;
+        std::unique_ptr<steady_ft_t> steady_ft;
+        std::unique_ptr<dissociation_ft_t> dissociation_ft;
+        std::unique_ptr<nop_t> nop;
 };
 
 }  // namespace dectnrp::upper::tfw::p2p

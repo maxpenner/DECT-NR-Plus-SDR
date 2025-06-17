@@ -62,7 +62,7 @@ class hw_usrp_t final : public hw_t {
         void pps_set_full_sec_at_next_pps_and_wait_until_it_passed() override final;
 
     private:
-        void shutdown() override final;
+        void work_stop() override final;
 
         // ##################################################
         // hardware properties

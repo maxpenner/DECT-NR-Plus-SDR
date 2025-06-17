@@ -50,10 +50,6 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     hw.set_tx_power_ant_0dBFS_tc(0.0f);
     hw.set_rx_power_ant_0dBFS_uniform_tc(0.0f);
 
-    // init HARQ process pool
-    hpp =
-        std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 4, 4);
-
     // loopback requires the hardware to be a simulator
     hw_simulator = dynamic_cast<radio::hw_simulator_t*>(&hw);
 
@@ -120,7 +116,7 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     pp.cfo_symmetric_range_subc_multiple = 1.75f;
 }
 
-phy::irregular_report_t tfw_loopback_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_loopback_t::work_start(const int64_t start_time_64) {
     // start some time in the near future
     state_time_reference_64 = start_time_64 + stt.x_to_A_64;
 
@@ -244,12 +240,11 @@ phy::machigh_phy_t tfw_loopback_t::work_application(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t tfw_loopback_t::work_chscan_async(
-    [[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_loopback_t::work_channel([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 
-void tfw_loopback_t::shutdown() {
+void tfw_loopback_t::work_stop() {
     if (state == STATE_t::DEAD_END) {
         save_all_results_to_file();
     }
@@ -294,10 +289,10 @@ void tfw_loopback_t::packet_params_t::update_plcf_unpacked() {
 
 void tfw_loopback_t::generate_packet(phy::machigh_phy_t& machigh_phy) {
     // request harq process
-    auto* hp_tx = hpp->get_process_tx(pp.PLCF_type,
-                                      pp.identity.NetworkID,
-                                      pp.psdef,
-                                      phy::harq::finalize_tx_t::reset_and_terminate);
+    auto* hp_tx = hpp.get_process_tx(pp.PLCF_type,
+                                     pp.identity.NetworkID,
+                                     pp.psdef,
+                                     phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process
     if (hp_tx == nullptr) {

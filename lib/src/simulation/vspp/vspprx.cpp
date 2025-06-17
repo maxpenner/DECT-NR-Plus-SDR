@@ -40,7 +40,7 @@ vspprx_t::vspprx_t(const uint32_t id_,
 }
 
 void vspprx_t::spp_read(std::vector<cf_t*>& out, uint32_t nof_samples) const {
-    dectnrp_assert(check_args(out.size(), 0, nof_samples), "Output ill-configured");
+    dectnrp_assert(are_args_valid(out.size(), 0, nof_samples), "Output ill-configured");
 
     for (uint32_t ant_idx = 0; ant_idx < nof_antennas; ++ant_idx) {
         srsran_vec_cf_copy(out[ant_idx], spp[ant_idx], nof_samples);
@@ -48,7 +48,7 @@ void vspprx_t::spp_read(std::vector<cf_t*>& out, uint32_t nof_samples) const {
 }
 
 void vspprx_t::spp_read_v(std::vector<void*>& out, uint32_t nof_samples) const {
-    dectnrp_assert(check_args(out.size(), 0, nof_samples), "Output ill-configured");
+    dectnrp_assert(are_args_valid(out.size(), 0, nof_samples), "Output ill-configured");
 
     for (uint32_t ant_idx = 0; ant_idx < nof_antennas; ++ant_idx) {
         srsran_vec_cf_copy((cf_t*)out[ant_idx], spp[ant_idx], nof_samples);

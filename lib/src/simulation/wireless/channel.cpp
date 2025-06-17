@@ -46,7 +46,7 @@ channel_t::~channel_t() {
     free(small_scale_stage);
 }
 
-bool channel_t::check_args(const vspptx_t& vspptx, const vspprx_t& vspprx) const {
+bool channel_t::are_args_valid(const vspptx_t& vspptx, const vspprx_t& vspprx) const {
     return (vspptx.id == id_0 && vspprx.id == id_1) || (vspptx.id == id_1 && vspprx.id == id_0);
 }
 

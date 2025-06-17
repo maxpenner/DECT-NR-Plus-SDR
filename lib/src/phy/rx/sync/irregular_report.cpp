@@ -24,9 +24,11 @@
 
 namespace dectnrp::phy {
 
-irregular_report_t irregular_report_t::get_with_time_increment(
+irregular_report_t irregular_report_t::get_same_with_time_increment(
     const int64_t time_increment_64) const {
-    dectnrp_assert(has_finite_time(), "replicating undefined");
+    dectnrp_assert(has_finite_time(), "has no finite time");
+    dectnrp_assert(0 < time_increment_64, "increment must be positive");
+    dectnrp_assert(time_increment_64 < undefined_late, "increment must be finite");
 
     return irregular_report_t(call_asap_after_this_time_has_passed_64 + time_increment_64, handle);
 };

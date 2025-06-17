@@ -34,7 +34,7 @@ time_announce_ie_t::time_announce_ie_t() {
 
     zero();
 
-    dectnrp_assert(check_validity_at_runtime(this), "mmie invalid");
+    dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
 }
 
 void time_announce_ie_t::set_time(const time_type_t time_type_,

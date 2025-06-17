@@ -78,7 +78,7 @@ std::pair<int64_t, phy::irregular_report_t> baton_t::register_and_wait_for_other
         if (!token->try_lock(0)) {
             dectnrp_assert_failure("unable to lock token");
         }
-        irregular_report = tpoint->work_start_imminent(register_now_64);
+        irregular_report = tpoint->work_start(register_now_64);
         token->unlock();
 
         register_cv.notify_all();

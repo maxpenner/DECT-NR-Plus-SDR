@@ -62,7 +62,7 @@ class vspp_t {
         const uint32_t spp_size;
 
     protected:
-        bool check_args(const uint32_t inp_dim, uint32_t offset, uint32_t nof_samples) const;
+        bool are_args_valid(const uint32_t inp_dim, uint32_t offset, uint32_t nof_samples) const;
 };
 
 }  // namespace dectnrp::simulation

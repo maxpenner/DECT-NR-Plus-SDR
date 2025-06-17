@@ -25,7 +25,9 @@
 
 namespace dectnrp::sp4 {
 
-padding_ie_t::padding_ie_t() { dectnrp_assert(check_validity_at_runtime(this), "mmie invalid"); }
+padding_ie_t::padding_ie_t() {
+    dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
+}
 
 void padding_ie_t::set_nof_padding_bytes(const uint32_t N_bytes) {
     dectnrp_assert(1 <= N_bytes && N_bytes <= N_PADDING_BYTES_MAX,

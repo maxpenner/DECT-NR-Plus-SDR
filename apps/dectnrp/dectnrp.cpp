@@ -116,10 +116,10 @@ int main(int argc, char** argv) {
     dectnrp_log_inf("dectnrp ctrl+c pressed.");
     dectnrp_print_inf("dectnrp ctrl+c pressed.");
 
-    upper->shutdown_all_layer_units();  // gracefully shut down DECT NR+ connections
-    phy->shutdown_all_layer_units();    // stop processing samples
-    radio->shutdown_all_layer_units();  // stop streaming samples, stopped last as many
-                                        // components depend on an increasing sample time
+    upper->stop_all_layer_units();  // gracefully shut down DECT NR+ connections
+    phy->stop_all_layer_units();    // stop processing samples
+    radio->stop_all_layer_units();  // stop streaming samples, stopped last as many
+                                    // components depend on an increasing sample time
 
     // log and print stop time
     const auto stop_time_str = dectnrp::common::watch_t::get_date_and_time();

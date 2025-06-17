@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include "dectnrp/phy/interfaces/layers_downwards/lower_ctrl.hpp"
@@ -29,11 +30,11 @@ namespace dectnrp::phy {
 
 class mac_lower_t {
     public:
-        mac_lower_t(const token_t& token_)
+        mac_lower_t(const std::shared_ptr<token_t> token_)
             : token(token_) {}
 
         /// coordinates access to tpoint from worker_pool
-        const token_t& token;
+        const std::shared_ptr<token_t> token;
 
         /// one tpoint can control multiple pairs
         std::vector<lower_ctrl_t> lower_ctrl_vec;

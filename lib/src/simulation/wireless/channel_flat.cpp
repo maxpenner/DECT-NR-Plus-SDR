@@ -48,7 +48,7 @@ channel_flat_t::channel_flat_t(const uint32_t id_0_,
 void channel_flat_t::superimpose(const vspptx_t& vspptx,
                                  vspprx_t& vspprx,
                                  const vspptx_t& vspptx_other) const {
-    dectnrp_assert(check_args(vspptx_other, vspprx), "Incorrect two devices");
+    dectnrp_assert(are_args_valid(vspptx_other, vspprx), "Incorrect two devices");
 
     // superimpose every TX antenna ..
     for (uint32_t tx_idx = 0; tx_idx < vspptx_other.nof_antennas; ++tx_idx) {

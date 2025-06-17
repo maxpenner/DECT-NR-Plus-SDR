@@ -39,7 +39,8 @@ worker_pool_t::worker_pool_t(const worker_pool_config_t& worker_pool_config_,
 
     job_queue = std::make_unique<job_queue_t>(id, worker_pool_config.nof_jobs);
 
-    worker_config_t worker_config(0, keep_running, hw_, *job_queue.get(), worker_pool_config);
+    worker_config_t worker_config(
+        0, keep_running, hw_, *job_queue.get(), irregular_queue, worker_pool_config);
 
 #ifdef PHY_JSON_SWITCH_IMPLEMENT_ANY_JSON_FUNCTIONALITY
     if (worker_pool_config.json_export_length > 0) {
@@ -65,12 +66,12 @@ worker_pool_t::worker_pool_t(const worker_pool_config_t& worker_pool_config_,
         worker_config.id = worker_id;
 
         // create
-        worker_tx_rx_vec.push_back(std::make_unique<worker_tx_rx_t>(
-            worker_config, irregular, phy_radio_, json_export.get()));
+        worker_tx_rx_vec.push_back(
+            std::make_unique<worker_tx_rx_t>(worker_config, phy_radio_, json_export.get()));
     }
 
-    check_sync_param();
-    check_sync_timing();
+    is_sync_param_for_cover_sequence_valid();
+    is_sync_timing_valid();
 
     // baton requires number of sync workers
     baton = std::make_unique<baton_t>(worker_pool_config.threads_core_prio_config_sync_vec.size(),
@@ -85,8 +86,7 @@ worker_pool_t::worker_pool_t(const worker_pool_config_t& worker_pool_config_,
         worker_config.id = worker_id;
 
         // create
-        worker_sync_vec.push_back(
-            std::make_unique<worker_sync_t>(worker_config, *baton.get(), irregular));
+        worker_sync_vec.push_back(std::make_unique<worker_sync_t>(worker_config, *baton.get()));
     }
 }
 
@@ -184,7 +184,7 @@ void worker_pool_t::start_threads_and_get_ready_to_process_iq_samples() {
     }
 }
 
-void worker_pool_t::shutdown() {
+void worker_pool_t::work_stop() {
     dectnrp_assert(keep_running.load(std::memory_order_acquire), "keep_running already false");
 
     // this variable will be read in all workers and leads to them leaving their loops
@@ -219,7 +219,7 @@ void worker_pool_t::shutdown() {
     }
 }
 
-void worker_pool_t::check_sync_param() const {
+void worker_pool_t::is_sync_param_for_cover_sequence_valid() const {
     // get long cover sequence for u=2
     const auto cs = sp3::stf_t::get_cover_sequence(2);
 
@@ -246,7 +246,7 @@ void worker_pool_t::check_sync_param() const {
     }
 }
 
-void worker_pool_t::check_sync_timing() const {
+void worker_pool_t::is_sync_timing_valid() const {
     // clang-format off
     /* What is the relationship between the RX buffer, slots, chunks, sync workers and u=8-subslots?
      * 

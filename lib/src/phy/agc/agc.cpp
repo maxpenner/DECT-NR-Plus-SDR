@@ -37,13 +37,13 @@ agc_t::agc_t(const agc_config_t agc_config_)
 
     dectnrp_assert(agc_config.gain_step_dB_max >= agc_config.gain_step_dB_min, "out of order");
 
-    dectnrp_assert(check_if_number_is_positive_multiple(agc_config.gain_step_dB_max,
-                                                        agc_config.gain_step_dB_multiple),
-                   "not a multiple");
+    dectnrp_assert(
+        is_positive_multiple(agc_config.gain_step_dB_max, agc_config.gain_step_dB_multiple),
+        "not a multiple");
 
-    dectnrp_assert(check_if_number_is_positive_multiple(agc_config.gain_step_dB_min,
-                                                        agc_config.gain_step_dB_multiple),
-                   "not a multiple");
+    dectnrp_assert(
+        is_positive_multiple(agc_config.gain_step_dB_min, agc_config.gain_step_dB_multiple),
+        "not a multiple");
 }
 
 float agc_t::quantize_and_limit_gain_step_dB(float arbitrary_gain_step_dB) {
@@ -81,7 +81,7 @@ common::ant_t agc_t::quantize_and_limit_gain_step_dB(const common::ant_t& arbitr
     return ret;
 }
 
-bool agc_t::check_if_number_is_positive_multiple(const float inp, const float multiple) {
+bool agc_t::is_positive_multiple(const float inp, const float multiple) {
     dectnrp_assert(inp > 0.0f, "inp must be positive");
     dectnrp_assert(multiple > 0.0f, "multiple must be positive");
 

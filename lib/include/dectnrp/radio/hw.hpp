@@ -264,7 +264,7 @@ class hw_t : public common::layer_unit_t {
         const hw_config_t hw_config;
 
     protected:
-        virtual void shutdown() override = 0;
+        virtual void work_stop() override = 0;
 
         // ##################################################
         // hardware properties

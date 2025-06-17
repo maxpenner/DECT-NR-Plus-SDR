@@ -36,15 +36,15 @@
 
 namespace dectnrp::phy {
 
-class irregular_t {
+class irregular_queue_t {
     public:
-        irregular_t();
-        ~irregular_t() = default;
+        irregular_queue_t();
+        ~irregular_queue_t() = default;
 
-        irregular_t(const irregular_t&) = delete;
-        irregular_t& operator=(const irregular_t&) = delete;
-        irregular_t(irregular_t&&) = delete;
-        irregular_t& operator=(irregular_t&&) = delete;
+        irregular_queue_t(const irregular_queue_t&) = delete;
+        irregular_queue_t& operator=(const irregular_queue_t&) = delete;
+        irregular_queue_t(irregular_queue_t&&) = delete;
+        irregular_queue_t& operator=(irregular_queue_t&&) = delete;
 
         void push(const irregular_report_t&& irregular_report);
 

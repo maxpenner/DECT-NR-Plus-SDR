@@ -38,9 +38,6 @@ const std::string tfw_txrxdelay_t::firmware_name("txrxdelay");
 tfw_txrxdelay_t::tfw_txrxdelay_t(const tpoint_config_t& tpoint_config_,
                                  phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {
-    hpp =
-        std::make_unique<phy::harq::process_pool_t>(worker_pool_config.maximum_packet_sizes, 4, 4);
-
     hw.set_command_time();
     hw.set_tx_power_ant_0dBFS_tc(10.0f);
     hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
@@ -66,7 +63,7 @@ tfw_txrxdelay_t::tfw_txrxdelay_t(const tpoint_config_t& tpoint_config_,
     plcf_10.DFMCS = psdef.mcs_index;
 }
 
-phy::irregular_report_t tfw_txrxdelay_t::work_start_imminent(const int64_t start_time_64) {
+phy::irregular_report_t tfw_txrxdelay_t::work_start(const int64_t start_time_64) {
     next_measurement_time_64 =
         start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
                                                                  measurement_separation_ms);
@@ -134,7 +131,12 @@ phy::maclow_phy_t tfw_txrxdelay_t::work_pcc(const phy::phy_maclow_t& phy_maclow)
     return phy::maclow_phy_t();
 }
 
-phy::machigh_phy_t tfw_txrxdelay_t::work_pdc_async(
+phy::machigh_phy_t tfw_txrxdelay_t::work_pdc(
+    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
+    return phy::machigh_phy_t();
+}
+
+phy::machigh_phy_t tfw_txrxdelay_t::work_pdc_error(
     [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
     return phy::machigh_phy_t();
 }
@@ -144,16 +146,15 @@ phy::machigh_phy_t tfw_txrxdelay_t::work_application(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_tx_t tfw_txrxdelay_t::work_chscan_async(
-    [[maybe_unused]] const phy::chscan_t& chscan) {
+phy::machigh_phy_tx_t tfw_txrxdelay_t::work_channel([[maybe_unused]] const phy::chscan_t& chscan) {
     return phy::machigh_phy_tx_t();
 }
 
-void tfw_txrxdelay_t::shutdown() {}
+void tfw_txrxdelay_t::work_stop() {}
 
 int64_t tfw_txrxdelay_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // request harq process
-    auto* hp_tx = hpp->get_process_tx(
+    auto* hp_tx = hpp.get_process_tx(
         1, identity_ft.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
 
     // every firmware has to decide how to deal with unavailable HARQ process

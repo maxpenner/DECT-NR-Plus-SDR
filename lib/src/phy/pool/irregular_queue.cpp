@@ -18,25 +18,24 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#include "dectnrp/phy/pool/irregular.hpp"
+#include "dectnrp/phy/pool/irregular_queue.hpp"
 
 #include <algorithm>
 #include <cstdint>
-#include <optional>
 
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/phy/rx/sync/irregular_report.hpp"
 
 namespace dectnrp::phy {
 
-irregular_t::irregular_t() {
+irregular_queue_t::irregular_queue_t() {
     dectnrp_assert(std::all_of(irregular_report_arr.cbegin(),
                                irregular_report_arr.cend(),
                                [](const auto& elem) { return !elem.has_finite_time(); }),
                    "incorrect default value");
 }
 
-void irregular_t::push(const irregular_report_t&& irregular_report) {
+void irregular_queue_t::push(const irregular_report_t&& irregular_report) {
     dectnrp_assert(irregular_report.has_finite_time(), "invalid");
 
     lockv.lock();
@@ -63,7 +62,7 @@ void irregular_t::push(const irregular_report_t&& irregular_report) {
     lockv.unlock();
 }
 
-int64_t irregular_t::get_next_time() const {
+int64_t irregular_queue_t::get_next_time() const {
     const auto ret = next_time_64.load(std::memory_order_acquire);
 
     if (ret < irregular_report_t::undefined_late) {
@@ -73,7 +72,7 @@ int64_t irregular_t::get_next_time() const {
     return irregular_report_t::undefined_late;
 };
 
-irregular_report_t irregular_t::pop() {
+irregular_report_t irregular_queue_t::pop() {
     lockv.lock();
 
     dectnrp_assert(it_next != nullptr, "pop value does not exist");
