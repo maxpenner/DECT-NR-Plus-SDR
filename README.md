@@ -180,6 +180,8 @@ Furthermore, most SDRs are general-purpose devices with limitations regarding ty
 - [X] GPIO support for USRP B-series
 - [ ] continuous TX mode for USRP B-series
 - [ ] integrate [SoapySDR](https://github.com/pothosware/SoapySDR)
+- [ ] add virtual space breakpoint to stop IQ samples exchange
+- [ ] add tx_order_id overwrite without buffer_tx_t
 
 ### Physical Layer
 
