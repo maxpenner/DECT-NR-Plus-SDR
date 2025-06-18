@@ -22,13 +22,14 @@
 #include "dectnrp/sections_part4/mac_messages_and_ie/route_info_ie.hpp"
 
 #include "dectnrp/common/adt/bitbyte.hpp"
+#include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::sp4 {
 
 route_info_ie_t::route_info_ie_t() {
-    mac_mux_header.zero();
-    mac_mux_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::No_Length_Field;
-    mac_mux_header.ie_type.mac_ext_00_01_10 =
+    mac_multiplexing_header.zero();
+    mac_multiplexing_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::No_Length_Field;
+    mac_multiplexing_header.ie_type.mac_ext_00_01_10 =
         mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t::Route_Info_IE;
 
     zero();

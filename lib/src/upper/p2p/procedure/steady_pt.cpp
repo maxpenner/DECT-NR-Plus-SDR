@@ -23,7 +23,6 @@
 #include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/mmie.hpp"
-#include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
 
@@ -215,14 +214,22 @@ phy::machigh_phy_t steady_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_mac
         if (const auto* mmie_child = dynamic_cast<const sp4::cluster_beacon_message_t*>(mmie);
             mmie_child != nullptr) {
             ASSERT_MMIE_COUNT_EXACT(mac_pdu_decoder, mmie_child, 1);
-            worksub_mmie_cluster_beacon_message(phy_machigh, *mmie_child);
+            worksub_mmie_cluster_beacon_message(*mmie_child);
+            continue;
+        }
+
+        if (const auto* mmie_child = dynamic_cast<const sp4::extensions::power_target_ie_t*>(mmie);
+            mmie_child != nullptr) {
+            ASSERT_MMIE_COUNT_EXACT(mac_pdu_decoder, mmie_child, 1);
+            worksub_mmie_power_target(*mmie_child);
             continue;
         }
 
         if (const auto* mmie_child = dynamic_cast<const sp4::extensions::time_announce_ie_t*>(mmie);
             mmie_child != nullptr) {
             ASSERT_MMIE_COUNT_EXACT(mac_pdu_decoder, mmie_child, 1);
-            worksub_mmie_time_announce(phy_machigh, *mmie_child);
+            worksub_mmie_time_announce(phy_machigh.phy_maclow.sync_report.fine_peak_time_64,
+                                       *mmie_child);
             continue;
         }
     }
@@ -234,9 +241,9 @@ phy::machigh_phy_t steady_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_mac
         rd.cqi_lut.get_highest_mcs_possible(phy_machigh.pdc_report.snr_dB),
         phy_machigh.phy_maclow.sync_report);
 
-    // check if we can generate any uplink
     phy::machigh_phy_t machigh_phy;
 
+    // check if we can generate any uplink
     worksub_tx_unicast_consecutive(machigh_phy);
 
     return machigh_phy;
@@ -260,17 +267,12 @@ phy::machigh_phy_t steady_pt_t::worksub_pdc_21(const phy::phy_machigh_t& phy_mac
     for (auto mmie : mmie_decoded_vec) {
         if (const auto* mmie_child = dynamic_cast<const sp4::user_plane_data_t*>(mmie);
             mmie_child != nullptr) {
-            // submit to application_client
-            if (rd.application_client->write_nto(pt.contact_pt.conn_idx_client,
-                                                 mmie_child->get_data_ptr(),
-                                                 mmie_child->get_data_size()) > 0) {
+            // try submiting to application_client
+            if (worksub_mmie_user_plane_data(*mmie_child)) {
                 ++datagram_cnt;
             }
-
             continue;
         }
-
-        dectnrp_log_wrn("MMIE not user plane data");
     }
 
     rd.application_client->trigger_forward_nto(datagram_cnt);
@@ -304,23 +306,26 @@ void steady_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy
 }
 
 void steady_pt_t::worksub_mmie_cluster_beacon_message(
-    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh,
     [[maybe_unused]] const sp4::cluster_beacon_message_t& cluster_beacon_message) {
     // ToDo
 }
 
+void steady_pt_t::worksub_mmie_power_target(
+    const sp4::extensions::power_target_ie_t& power_target_ie) {
+    agc_tx.set_rx_dBm_target(power_target_ie.get_power_target_dBm_uncoded());
+}
+
 void steady_pt_t::worksub_mmie_time_announce(
-    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh,
+    [[maybe_unused]] const int64_t fine_peak_time_64,
     [[maybe_unused]] const sp4::extensions::time_announce_ie_t& time_announce_ie) {
 #ifdef TFW_P2P_EXPORT_PPX
     // is this the first time_announce_ie ever received?
     if (!rd.ppx.has_ppx_rising_edge()) {
         // initialize with first known PPX rising edge
-        rd.ppx.set_ppx_rising_edge(phy_machigh.phy_maclow.sync_report.fine_peak_time_64);
+        rd.ppx.set_ppx_rising_edge(fine_peak_time_64);
 
         // when is the next PPX due?
-        const int64_t A =
-            phy_machigh.phy_maclow.sync_report.fine_peak_time_64 + rd.ppx.get_ppx_period_warped();
+        const int64_t A = fine_peak_time_64 + rd.ppx.get_ppx_period_warped();
 
         rd.callbacks.add_callback(std::bind(&steady_pt_t::worksub_callback_ppx,
                                             this,
@@ -331,6 +336,12 @@ void steady_pt_t::worksub_mmie_time_announce(
                                   rd.ppx.get_ppx_period_warped());
     }
 #endif
+}
+
+bool steady_pt_t::worksub_mmie_user_plane_data(const sp4::user_plane_data_t& user_plane_data) {
+    return rd.application_client->write_nto(pt.contact_pt.conn_idx_client,
+                                            user_plane_data.get_data_ptr(),
+                                            user_plane_data.get_data_size()) > 0;
 }
 
 void steady_pt_t::worksub_callback_log(const int64_t now_64) const {

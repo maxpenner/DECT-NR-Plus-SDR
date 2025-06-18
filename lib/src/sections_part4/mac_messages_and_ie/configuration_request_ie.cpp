@@ -1,6 +1,5 @@
 /*
- * Copyright 2023-2024 Maxim Penner, Alexander Poets
- * Copyright 2025-2025 Maxim Penner
+ * Copyright 2023-2024 Maxim Penner
  *
  * This file is part of DECTNRP.
  *
@@ -21,13 +20,15 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/configuration_request_ie.hpp"
 
+#include "dectnrp/common/prog/assert.hpp"
+
 namespace dectnrp::sp4 {
 
 configuration_request_ie_t::configuration_request_ie_t() {
-    mac_mux_header.zero();
-    mac_mux_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::Length_Field_1_Bit;
-    mac_mux_header.length = 0;
-    mac_mux_header.ie_type.mac_ext_11_len_0 =
+    mac_multiplexing_header.zero();
+    mac_multiplexing_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::Length_Field_1_Bit;
+    mac_multiplexing_header.length = 0;
+    mac_multiplexing_header.ie_type.mac_ext_11_len_0 =
         mac_multiplexing_header_t::ie_type_mac_ext_11_len_0_t::Configuration_Request_IE;
 
     dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");

@@ -79,8 +79,7 @@ class mac_multiplexing_header_t final : public common::serdes::packing_t {
              * The following MMIEs are not part of the standard, and exist only in this project.
              */
             Power_Target_IE = 0b11101,
-            Forward_To_IE = 0b11110,
-            Time_Announce_IE = 0b11111
+            Time_Announce_IE = 0b11110
         };
 
         ///  IE type field encoding for MAC extension field encoding 11 and payload length 0 byte
@@ -179,7 +178,6 @@ E from_coded_value(const std::underlying_type_t<E> value) {
              * The following MMIEs are not part of the standard, and exist only in this project.
              */
         case std::to_underlying(E::Power_Target_IE):
-        case std::to_underlying(E::Forward_To_IE):
         case std::to_underlying(E::Time_Announce_IE):
             return static_cast<E>(value);
 

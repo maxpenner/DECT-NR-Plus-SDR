@@ -199,7 +199,7 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
                             dynamic_cast<mmie_packing_peeking_t*>(mmie);
                         mmie_packing_peeking != nullptr) {
                         // make a copy of the MAC multiplexing header
-                        mmie->mac_mux_header = mmh;
+                        mmie->mac_multiplexing_header = mmh;
 
                         // add full MAC multiplexing header packed size
                         a_cnt_r += N_bytes_required;
@@ -221,7 +221,7 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
                     mmh.unpack_length(a + a_cnt_r);
 
                     // make a copy of the MAC multiplexing header
-                    mmie->mac_mux_header = mmh;
+                    mmie->mac_multiplexing_header = mmh;
 
                     // add full MAC multiplexing header packed size
                     a_cnt_r += N_bytes_required;
@@ -229,8 +229,8 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
                     state = MAC_MESSAGE_IE_UNPACK;
 
                     // if mmh contains a length, than this is the number of bytes we need
-                    if (mmie->mac_mux_header.length < common::adt::UNDEFINED_NUMERIC_32) {
-                        N_bytes_required = mmie->mac_mux_header.length;
+                    if (mmie->mac_multiplexing_header.length < common::adt::UNDEFINED_NUMERIC_32) {
+                        N_bytes_required = mmie->mac_multiplexing_header.length;
                     }
                     // if mmh does not contain a length, the mmie must be of fixed size
                     else {
@@ -284,7 +284,7 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
 
                     if (is_mmie_unpacked_content_valid) {
                         // increment index of next available MMIE
-                        ++index_next_ie[*mmie->mac_mux_header.tinfo];
+                        ++index_next_ie[*mmie->mac_multiplexing_header.tinfo];
 
                         // message IE is valid, add to vector containing decoded IEs
                         mmie_decoded_vec.push_back(mmie);

@@ -22,14 +22,15 @@
 #include "dectnrp/sections_part4/mac_messages_and_ie/radio_device_status_ie.hpp"
 
 #include "dectnrp/common/adt/enumeration.hpp"
+#include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::sp4 {
 
 radio_device_status_ie_t::radio_device_status_ie_t() {
-    mac_mux_header.zero();
-    mac_mux_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::Length_Field_1_Bit;
-    mac_mux_header.length = 1;
-    mac_mux_header.ie_type.mac_ext_11_len_1 =
+    mac_multiplexing_header.zero();
+    mac_multiplexing_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::Length_Field_1_Bit;
+    mac_multiplexing_header.length = 1;
+    mac_multiplexing_header.ie_type.mac_ext_11_len_1 =
         mac_multiplexing_header_t::ie_type_mac_ext_11_len_1_t::Radio_Device_Status_IE;
 
     zero();

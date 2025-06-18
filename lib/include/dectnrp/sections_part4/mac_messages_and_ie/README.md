@@ -44,9 +44,8 @@ MMIEs of this type are:
 
 [Additional, non-standard compliant MMIEs](extensions/) of this type are:
 
-8. forward_to_ie_t
-9. power_target_ie_t
-10. time_announce_ie_t
+8. power_target_ie_t
+9. time_announce_ie_t
 
 ### mmie_packing_peeking_t
 

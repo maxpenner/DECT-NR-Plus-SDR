@@ -25,6 +25,8 @@
 #include "dectnrp/common/thread/watch.hpp"
 #endif
 
+#include "dectnrp/common/prog/assert.hpp"
+
 namespace dectnrp::phy {
 
 job_queue_naive_t::job_queue_naive_t(const uint32_t id_, const uint32_t capacity_)

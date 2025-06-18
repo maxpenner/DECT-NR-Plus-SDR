@@ -82,6 +82,8 @@ class agc_tx_t final : public agc_t {
 
         float get_ofdm_amplitude_factor() const { return ofdm_amplitude_factor; };
 
+        void set_rx_dBm_target(const float rx_dBm_target_) { rx_dBm_target = rx_dBm_target_; }
+
     private:
         /// gain settings are applied in the future, keeps track of what value is effective
         mutable float power_ant_0dBFS;

@@ -46,6 +46,9 @@ class padding_ie_t final : public mmie_t {
          * TS.
          */
         static constexpr uint32_t N_PADDING_BYTES_MAX = common::adt::bitmask_lsb<8>() + 2;
+
+        uint32_t get_packed_size_of_mmh_sdu() const override final;
+        void pack_mmh_sdu(uint8_t* mac_pdu_offset) override final;
 };
 
 }  // namespace dectnrp::sp4

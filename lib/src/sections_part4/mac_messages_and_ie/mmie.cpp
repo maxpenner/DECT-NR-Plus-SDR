@@ -45,7 +45,7 @@ bool has_valid_inheritance_and_properties(const mmie_t* mmie) {
     // if peeking ...
     if (dynamic_cast<const mmie_packing_peeking_t*>(mmie) != nullptr) {
         // ... an mmie must use No_Length_Field
-        if (!(mmie->mac_mux_header.mac_ext ==
+        if (!(mmie->mac_multiplexing_header.mac_ext ==
               mac_multiplexing_header_t::mac_ext_t::No_Length_Field)) {
             return false;
         }
@@ -55,49 +55,45 @@ bool has_valid_inheritance_and_properties(const mmie_t* mmie) {
 }
 
 uint32_t mmie_packing_t::get_packed_size_of_mmh_sdu() const {
-    uint32_t packed_size = mmie_t::get_packed_size_of_mmh_sdu();
-    packed_size += get_packed_size();
-    return packed_size;
+    return mac_multiplexing_header.get_packed_size() + get_packed_size();
 }
 
 void mmie_packing_t::pack_mmh_sdu(uint8_t* mac_pdu_offset) {
-    mmie_t::pack_mmh_sdu(mac_pdu_offset);
-
-    uint8_t* dst = mac_pdu_offset + mac_mux_header.get_packed_size();
-
-    pack(dst);
+    mac_multiplexing_header.pack(mac_pdu_offset);
+    pack(mac_pdu_offset + mac_multiplexing_header.get_packed_size());
 }
 
 uint32_t mmie_flowing_t::get_packed_size_of_mmh_sdu() const {
-    uint32_t packed_size = mmie_t::get_packed_size_of_mmh_sdu();
-    packed_size += mac_mux_header.length;
-    return packed_size;
+    return mac_multiplexing_header.get_packed_size() + mac_multiplexing_header.length;
 }
 
 void mmie_flowing_t::pack_mmh_sdu(uint8_t* mac_pdu_offset) {
-    mmie_t::pack_mmh_sdu(mac_pdu_offset);
-
-    uint8_t* dst = mac_pdu_offset + mac_mux_header.get_packed_size();
-
-    data_ptr = dst;
+    mac_multiplexing_header.pack(mac_pdu_offset);
+    data_ptr = mac_pdu_offset + mac_multiplexing_header.get_packed_size();
 }
 
 void mmie_flowing_t::set_data_size(const uint32_t N_bytes) {
     dectnrp_assert(0 < N_bytes && N_bytes <= (common::adt::bitmask_lsb<16>()),
-                   "data size is not supported");
+                   "data size not supported");
 
-    mac_mux_header.mac_ext = N_bytes <= common::adt::bitmask_lsb<8>()
-                                 ? mac_multiplexing_header_t::mac_ext_t::Length_Field_8_Bit
-                                 : mac_multiplexing_header_t::mac_ext_t::Length_Field_16_Bit;
+    mac_multiplexing_header.mac_ext =
+        N_bytes <= common::adt::bitmask_lsb<8>()
+            ? mac_multiplexing_header_t::mac_ext_t::Length_Field_8_Bit
+            : mac_multiplexing_header_t::mac_ext_t::Length_Field_16_Bit;
 
-    mac_mux_header.length = N_bytes;
+    mac_multiplexing_header.length = N_bytes;
 }
 
-uint32_t mmie_flowing_t::get_data_size() const { return mac_mux_header.length; }
+uint32_t mmie_flowing_t::get_data_size() const { return mac_multiplexing_header.length; }
 
 uint8_t* mmie_flowing_t::get_data_ptr() const {
-    dectnrp_assert(data_ptr != nullptr, "pointer nullptr");
+    dectnrp_assert(data_ptr != nullptr, "nullptr");
     return data_ptr;
+}
+
+void mu_depending_t::set_mu(const uint32_t mu_) {
+    dectnrp_assert(std::has_single_bit(mu_) && mu_ <= 8, "mu must be 1, 2, 4 or 8");
+    mu = mu_;
 }
 
 }  // namespace dectnrp::sp4

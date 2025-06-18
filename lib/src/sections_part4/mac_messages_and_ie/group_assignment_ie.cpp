@@ -23,12 +23,13 @@
 
 #include "dectnrp/common/adt/bitbyte.hpp"
 #include "dectnrp/common/adt/enumeration.hpp"
+#include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::sp4 {
 
 group_assignment_ie_t::group_assignment_ie_t() {
-    mac_mux_header.zero();
-    mac_mux_header.ie_type.mac_ext_00_01_10 =
+    mac_multiplexing_header.zero();
+    mac_multiplexing_header.ie_type.mac_ext_00_01_10 =
         mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t::Group_Assignment_IE;
 
     zero();
@@ -98,7 +99,7 @@ bool group_assignment_ie_t::unpack(const uint8_t* mac_pdu_offset) {
     group_id = mac_pdu_offset[0] & common::adt::bitmask_lsb<7>();
 
     // unpack resource assignments starting in octet 1 of IE
-    for (uint32_t N_bytes = 1; N_bytes < mac_mux_header.length; ++N_bytes) {
+    for (uint32_t N_bytes = 1; N_bytes < mac_multiplexing_header.length; ++N_bytes) {
         resource_assignment_t assignment;
         assignment.direct =
             common::adt::from_coded_value<resource_direction_t>(mac_pdu_offset[N_bytes] >> 7);
@@ -106,7 +107,7 @@ bool group_assignment_ie_t::unpack(const uint8_t* mac_pdu_offset) {
         resource_assignments.push_back(assignment);
     }
 
-    dectnrp_assert(get_packed_size() == mac_mux_header.length, "lengths do not match");
+    dectnrp_assert(get_packed_size() == mac_multiplexing_header.length, "lengths do not match");
 
     return is_valid();
 }

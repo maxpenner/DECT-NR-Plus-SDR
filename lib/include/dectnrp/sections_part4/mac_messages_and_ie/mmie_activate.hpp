@@ -69,6 +69,5 @@
 // ##################################################
 // separated as not standard-compliant
 
-// #define ACTIVATE_Power_Target_IE
-// #define ACTIVATE_Forward_To_IE
+#define ACTIVATE_Power_Target_IE
 #define ACTIVATE_Time_Announce_IE

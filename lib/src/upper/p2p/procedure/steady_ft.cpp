@@ -403,30 +403,30 @@ bool steady_ft_t::worksub_tx_beacon_mac_pdu(phy::harq::process_tx_t& hp_tx) {
 
     uint32_t a_cnt_w = rd.ppmp_beacon.pack_first_3_header(hp_tx.get_a_plcf(), hp_tx.get_a_tb());
 
-    // change content of cluster_beacon_message_t
+    // request cluster_beacon_message_t
     auto& cbm = rd.mmie_pool_tx.get<sp4::cluster_beacon_message_t>();
     cbm.set_system_frame_number(rd.allocation_ft.get_beacon_cnt());
-    dectnrp_assert(a_cnt_w + cbm.get_packed_size_of_mmh_sdu() <= packet_sizes.N_TB_byte, "TB");
+    dectnrp_assert(cbm.is_fitting(a_cnt_w, packet_sizes), "TB too small");
     cbm.pack_mmh_sdu(hp_tx.get_a_tb() + a_cnt_w);
     a_cnt_w += cbm.get_packed_size_of_mmh_sdu();
 
     // add power target IE
     auto& ptie = rd.mmie_pool_tx.get<sp4::extensions::power_target_ie_t>();
     ptie.set_power_target_dBm_coded(ft.ReceiverPower_dBm);
-    dectnrp_assert(a_cnt_w + ptie.get_packed_size_of_mmh_sdu() <= packet_sizes.N_TB_byte, "TB");
+    dectnrp_assert(ptie.is_fitting(a_cnt_w, packet_sizes), "TB too small");
     ptie.pack_mmh_sdu(hp_tx.get_a_tb() + a_cnt_w);
     a_cnt_w += ptie.get_packed_size_of_mmh_sdu();
 
     // one time_announce_ie_t per second
-    if (stats.beacon_cnt % rd.allocation_ft.get_N_beacons_per_second() == 0) {
+    if (rd.allocation_ft.get_beacon_cnt() % rd.allocation_ft.get_N_beacons_per_second() == 0) {
         auto& taie = rd.mmie_pool_tx.get<sp4::extensions::time_announce_ie_t>();
         taie.set_time(sp4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
-        dectnrp_assert(a_cnt_w + taie.get_packed_size_of_mmh_sdu() <= packet_sizes.N_TB_byte, "TB");
+        dectnrp_assert(taie.is_fitting(a_cnt_w, packet_sizes), "TB too small");
         taie.pack_mmh_sdu(hp_tx.get_a_tb() + a_cnt_w);
         a_cnt_w += taie.get_packed_size_of_mmh_sdu();
     }
 
-    // add allocation for each PT
+    // add allocation of each PT
     // ToDo
 
     dectnrp_assert(a_cnt_w <= packet_sizes.N_TB_byte, "transport block too small");

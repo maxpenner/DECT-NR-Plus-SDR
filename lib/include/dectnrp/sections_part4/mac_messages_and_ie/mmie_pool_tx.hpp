@@ -44,18 +44,18 @@ class mmie_pool_tx_t {
         mmie_pool_tx_t& operator=(mmie_pool_tx_t&&) = delete;
 
         /// number of different types of MMIEs in the pool
-        std::size_t get_nof_mmie() const { return pool.size(); }
+        [[nodiscard]] std::size_t get_nof_mmie() const { return pool.size(); }
 
         /// number of different types of MMIEs in the pool derived from T
         template <typename T>
-        std::size_t get_nof_mmie_derived_from() const {
+        [[nodiscard]] std::size_t get_nof_mmie_derived_from() const {
             return std::count_if(pool.begin(), pool.end(), [](const auto& elem) {
                 return dynamic_cast<const T*>(elem.second.at(0).get()) != nullptr;
             });
         }
 
         /// number of elements across all MMIEs
-        std::size_t get_nof_mmie_elements() const {
+        [[nodiscard]] std::size_t get_nof_mmie_elements() const {
             std::size_t cnt = 0;
             for (const auto& vec : pool) {
                 cnt += vec.second.size();
@@ -65,7 +65,7 @@ class mmie_pool_tx_t {
 
         /// get number of elements of a specific MMIE
         template <std::derived_from<mmie_t> T>
-        std::size_t get_nof_elements() {
+        [[nodiscard]] std::size_t get_nof_elements() {
             return pool[typeid(T)].size();
         }
 
@@ -92,13 +92,13 @@ class mmie_pool_tx_t {
          * \return reference to the requested MMIE
          */
         template <std::derived_from<mmie_t> T>
-        T& get(const std::size_t i = 0) {
+        [[nodiscard]] T& get(const std::size_t i = 0) {
             auto& vec = pool[typeid(T)];
             auto* ptr = vec.at(i).get();
             return *static_cast<T*>(ptr);
         }
 
-        mmie_t& get_by_index(const std::size_t i, const std::size_t j = 0) const {
+        [[nodiscard]] mmie_t& get_by_index(const std::size_t i, const std::size_t j = 0) const {
             auto vec = std::next(pool.begin(), i);
             return *(vec->second.at(j).get());
         }
