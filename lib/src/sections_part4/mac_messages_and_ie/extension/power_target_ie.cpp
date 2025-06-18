@@ -36,7 +36,9 @@ power_target_ie_t::power_target_ie_t() {
 
 void power_target_ie_t::zero() { power_target_dBm_coded = common::adt::UNDEFINED_NUMERIC_32; }
 
-bool power_target_ie_t::is_valid() const { return power_target_dBm_coded <= 110; }
+bool power_target_ie_t::is_valid() const {
+    return 20 <= power_target_dBm_coded && power_target_dBm_coded <= 100;
+}
 
 uint32_t power_target_ie_t::get_packed_size() const { return 1; }
 

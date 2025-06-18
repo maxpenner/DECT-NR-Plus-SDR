@@ -35,7 +35,7 @@ class power_target_ie_t final : public mmie_packing_t {
                 std::abs(std::roundf(power_target_dBm)));
         }
 
-        float set_power_target_dBm_coded() const {
+        float get_power_target_dBm_coded() const {
             return -static_cast<float>(power_target_dBm_coded);
         }
 

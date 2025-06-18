@@ -33,21 +33,10 @@ class mmie_t {
     public:
         virtual ~mmie_t() = default;
 
-        /**
-         * \brief Number of bytes that would be written if the pack_mmh_sdu() function was called.
-         *
-         * \return Length in bytes.
-         */
         virtual uint32_t get_packed_size_of_mmh_sdu() const {
             return mac_mux_header.get_packed_size();
         }
 
-        /**
-         * \brief In this base class, only the MAC multiplexing header (mmh) is written in packed
-         * form to the destination pointer. Deriving classes pack service data unit (sdu).
-         *
-         * \param mac_pdu_offset
-         */
         virtual void pack_mmh_sdu(uint8_t* mac_pdu_offset) { mac_mux_header.pack(mac_pdu_offset); }
 
         friend bool has_valid_inheritance_and_properties(const mmie_t* mmie);

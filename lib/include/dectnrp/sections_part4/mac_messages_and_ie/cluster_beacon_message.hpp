@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <optional>
 
 #include "dectnrp/common/serdes/testing.hpp"
@@ -78,6 +79,11 @@ class cluster_beacon_message_t final : public mmie_packing_peeking_t,
         count_to_trigger_t count_to_trigger;
         quality_threshold_t rel_quality;
         quality_threshold_t min_quality;
+
+        template <std::unsigned_integral T>
+        void set_system_frame_number(const T sfn) {
+            system_frame_number = static_cast<uint32_t>(sfn % T{256});
+        }
 
         void testing_set_random() override final;
         bool testing_is_equal(const testing_t& rhs) const override final;

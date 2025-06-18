@@ -73,6 +73,7 @@ class steady_ft_t final : public steady_rd_t {
         // clang-format on
 
         bool worksub_tx_beacon(phy::machigh_phy_t& machigh_phy);
+        bool worksub_tx_beacon_mac_pdu(phy::harq::process_tx_t& hp_tx);
 
         void worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy) override final;
 

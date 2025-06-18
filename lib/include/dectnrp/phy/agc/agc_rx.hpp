@@ -81,6 +81,8 @@ class agc_rx_t final : public agc_t {
                                              const common::ant_t& rx_power_ant_0dBFS,
                                              const common::ant_t& rms_measured_);
 
+        float get_rms_target() const { return rms_target; };
+
         const common::ant_t& get_rms_measured_last_known() const {
             return rms_measured_last_known;
         };

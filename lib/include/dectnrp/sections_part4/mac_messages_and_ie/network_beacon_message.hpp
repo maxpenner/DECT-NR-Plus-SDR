@@ -80,20 +80,7 @@ class network_beacon_message_t final : public mmie_packing_peeking_t {
             upper
         };
 
-        /**
-         * \brief
-         *
-         * \param tx_power_dBm
-         * \return
-         */
         static clusters_max_tx_power_t clusters_max_tx_power_from_dBm(const int32_t tx_power_dBm);
-
-        /**
-         * \brief
-         *
-         * \param tx_power_coded
-         * \return
-         */
         static int32_t clusters_max_tx_power_to_dBm(const clusters_max_tx_power_t tx_power_coded);
 
         network_beacon_message_t();
