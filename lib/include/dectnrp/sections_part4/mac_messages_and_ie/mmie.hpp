@@ -45,7 +45,7 @@ class mmie_t {
 
         [[nodiscard]] bool is_fitting(const uint32_t a_cnt_w,
                                       const sp3::packet_sizes_t& packet_sizes) const {
-            return a_cnt_w + get_packed_size_of_mmh_sdu() <= packet_sizes.N_TB_byte;
+            return is_fitting(a_cnt_w, packet_sizes.N_TB_byte);
         }
 
         friend bool has_valid_inheritance_and_properties(const mmie_t* mmie);
@@ -101,7 +101,7 @@ class mmie_flowing_t : public mmie_t {
          *
          * \return
          */
-        uint8_t* get_data_ptr() const;
+        [[nodiscard]] uint8_t* get_data_ptr() const;
 
         friend class mac_pdu_decoder_t;
 

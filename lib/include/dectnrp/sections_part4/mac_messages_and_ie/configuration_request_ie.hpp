@@ -26,9 +26,9 @@ namespace dectnrp::sp4 {
 
 class configuration_request_ie_t final : public mmie_t {
     public:
-        configuration_request_ie_t();
+        [[nodiscard]] configuration_request_ie_t();
 
-        uint32_t get_packed_size_of_mmh_sdu() const override final { return 1; };
+        [[nodiscard]] uint32_t get_packed_size_of_mmh_sdu() const override final { return 1; };
 
         void pack_mmh_sdu(uint8_t* mac_pdu_offset) override final {
             mac_multiplexing_header.pack(mac_pdu_offset);

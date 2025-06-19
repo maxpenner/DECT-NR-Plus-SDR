@@ -27,7 +27,7 @@ namespace dectnrp::sp4::extensions {
 
 class time_announce_ie_t final : public mmie_packing_t {
     public:
-        time_announce_ie_t();
+        [[nodiscard]] time_announce_ie_t();
 
         enum class time_type_t : uint32_t {
             not_defined = common::adt::UNDEFINED_NUMERIC_32,
@@ -43,10 +43,10 @@ class time_announce_ie_t final : public mmie_packing_t {
 
     private:
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 
         time_type_t time_type{time_type_t::not_defined};
 

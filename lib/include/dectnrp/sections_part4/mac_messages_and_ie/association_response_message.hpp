@@ -74,7 +74,7 @@ class association_response_message_t final : public mmie_packing_peeking_t {
                 uint32_t resource_tag;
         };
 
-        association_response_message_t();
+        [[nodiscard]] association_response_message_t();
 
         std::optional<reject_info_t> reject_info;
         std::optional<association_request_message_t::harq_configuration_tx_rx_t> harq_configuration;
@@ -85,13 +85,14 @@ class association_response_message_t final : public mmie_packing_peeking_t {
 
     private:
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 
-        constexpr uint32_t get_packed_size_min_to_peek() const override { return 1; }
-        peek_result_t get_packed_size_by_peeking(const uint8_t* mac_pdu_offset) const override;
+        [[nodiscard]] constexpr uint32_t get_packed_size_min_to_peek() const override { return 1; }
+        [[nodiscard]] peek_result_t get_packed_size_by_peeking(
+            const uint8_t* mac_pdu_offset) const override;
 };
 
 }  // namespace dectnrp::sp4

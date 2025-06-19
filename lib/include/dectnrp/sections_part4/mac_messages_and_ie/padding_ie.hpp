@@ -28,7 +28,7 @@ namespace dectnrp::sp4 {
 
 class padding_ie_t final : public mmie_t {
     public:
-        padding_ie_t();
+        [[nodiscard]] padding_ie_t();
 
         /**
          * \brief Sets the entire length of the padding IE including the MAC multiplexing header.
@@ -45,9 +45,9 @@ class padding_ie_t final : public mmie_t {
          * bytes. For a description of how padding IEs are assembled refer to clause 6.4.3.8 of the
          * TS.
          */
-        static constexpr uint32_t N_PADDING_BYTES_MAX = common::adt::bitmask_lsb<8>() + 2;
+        static constexpr uint32_t N_PADDING_BYTES_MAX{common::adt::bitmask_lsb<8>() + 2};
 
-        uint32_t get_packed_size_of_mmh_sdu() const override final;
+        [[nodiscard]] uint32_t get_packed_size_of_mmh_sdu() const override final;
         void pack_mmh_sdu(uint8_t* mac_pdu_offset) override final;
 };
 

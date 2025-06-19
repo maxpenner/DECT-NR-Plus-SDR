@@ -192,7 +192,7 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
                                                                  : rx_gain_table.size() - 1;
                 }
 
-                std::optional<int32_t> get_rx_gain_dB() const {
+                [[nodiscard]] std::optional<int32_t> get_rx_gain_dB() const {
                     try {
                         return rx_gain_table.at(rx_gain_index);
                     } catch (const std::exception& e) {
@@ -229,13 +229,14 @@ class rd_capability_ie_t final : public mmie_packing_peeking_t {
 
     private:
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 
-        constexpr uint32_t get_packed_size_min_to_peek() const override { return 1; }
-        peek_result_t get_packed_size_by_peeking(const uint8_t* mac_pdu_offset) const override;
+        [[nodiscard]] constexpr uint32_t get_packed_size_min_to_peek() const override { return 1; }
+        [[nodiscard]] peek_result_t get_packed_size_by_peeking(
+            const uint8_t* mac_pdu_offset) const override;
 };
 
 }  // namespace dectnrp::sp4

@@ -27,10 +27,10 @@ namespace dectnrp::sp4 {
 
 class user_plane_data_t final : public mmie_flowing_t {
     public:
-        user_plane_data_t();
+        [[nodiscard]] user_plane_data_t();
 
         void set_flow_id(const uint32_t flow_id) override;
-        uint32_t get_flow_id() const override;
+        [[nodiscard]] uint32_t get_flow_id() const override;
 };
 
 }  // namespace dectnrp::sp4

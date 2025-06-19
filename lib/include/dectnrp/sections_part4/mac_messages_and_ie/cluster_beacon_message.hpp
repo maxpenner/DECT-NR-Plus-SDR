@@ -66,7 +66,7 @@ class cluster_beacon_message_t final : public mmie_packing_peeking_t,
             upper
         };
 
-        cluster_beacon_message_t();
+        [[nodiscard]] cluster_beacon_message_t();
 
         uint32_t system_frame_number;
         std::optional<network_beacon_message_t::clusters_max_tx_power_t> clusters_max_tx_power;
@@ -86,18 +86,19 @@ class cluster_beacon_message_t final : public mmie_packing_peeking_t,
         }
 
         void testing_set_random() override final;
-        bool testing_is_equal(const testing_t& rhs) const override final;
-        const char* testing_name() const override final;
+        [[nodiscard]] bool testing_is_equal(const testing_t& rhs) const override final;
+        [[nodiscard]] const char* testing_name() const override final;
 
     private:
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 
-        constexpr uint32_t get_packed_size_min_to_peek() const override { return 2; }
-        peek_result_t get_packed_size_by_peeking(const uint8_t* mac_pdu_offset) const override;
+        [[nodiscard]] constexpr uint32_t get_packed_size_min_to_peek() const override { return 2; }
+        [[nodiscard]] peek_result_t get_packed_size_by_peeking(
+            const uint8_t* mac_pdu_offset) const override;
 };
 
 }  // namespace dectnrp::sp4

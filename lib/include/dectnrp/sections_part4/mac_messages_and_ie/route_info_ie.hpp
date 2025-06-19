@@ -27,7 +27,7 @@ namespace dectnrp::sp4 {
 
 class route_info_ie_t final : public mmie_packing_t {
     public:
-        route_info_ie_t();
+        [[nodiscard]] route_info_ie_t();
 
         uint32_t sink_address;
         uint32_t route_cost;
@@ -35,10 +35,10 @@ class route_info_ie_t final : public mmie_packing_t {
 
     private:
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 };
 
 }  // namespace dectnrp::sp4
