@@ -47,7 +47,7 @@ class mac_security_info_ie_t final : public mmie_packing_t {
                 security_iv_type_mode_1_t mode_1;
         };
 
-        mac_security_info_ie_t();
+        [[nodiscard]] mac_security_info_ie_t();
 
         static constexpr version_t version{version_t::mode_1};
         uint32_t key_index;
@@ -56,10 +56,10 @@ class mac_security_info_ie_t final : public mmie_packing_t {
 
     private:
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 };
 
 }  // namespace dectnrp::sp4

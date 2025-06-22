@@ -27,10 +27,10 @@ namespace dectnrp::sp4 {
 
 class higher_layer_signalling_t final : public mmie_flowing_t {
     public:
-        higher_layer_signalling_t();
+        [[nodiscard]] higher_layer_signalling_t();
 
         void set_flow_id(const uint32_t flow_id) override;
-        uint32_t get_flow_id() const override;
+        [[nodiscard]] uint32_t get_flow_id() const override;
 };
 
 }  // namespace dectnrp::sp4

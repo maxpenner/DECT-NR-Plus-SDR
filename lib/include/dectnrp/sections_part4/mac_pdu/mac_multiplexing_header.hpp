@@ -79,8 +79,7 @@ class mac_multiplexing_header_t final : public common::serdes::packing_t {
              * The following MMIEs are not part of the standard, and exist only in this project.
              */
             Power_Target_IE = 0b11101,
-            Forward_To_IE = 0b11110,
-            Time_Announce_IE = 0b11111
+            Time_Announce_IE = 0b11110
         };
 
         ///  IE type field encoding for MAC extension field encoding 11 and payload length 0 byte
@@ -116,13 +115,13 @@ class mac_multiplexing_header_t final : public common::serdes::packing_t {
                 ie_type_mac_ext_11_len_1_t mac_ext_11_len_1;
         };
 
-        mac_multiplexing_header_t() { zero(); };
+        [[nodiscard]] mac_multiplexing_header_t() { zero(); };
 
         void zero() override;
-        bool is_valid() const override final;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override final;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 
         /// first byte of any MAC multiplexing header is enough to determine the full packed size
         static constexpr uint32_t packed_size_min_to_peek{1U};
@@ -130,7 +129,7 @@ class mac_multiplexing_header_t final : public common::serdes::packing_t {
         /// when containing two byte for length
         static constexpr uint32_t packet_size_max{3U};
 
-        bool unpack_mac_ext_ie_type(const uint8_t* mac_pdu_offset);
+        [[nodiscard]] bool unpack_mac_ext_ie_type(const uint8_t* mac_pdu_offset);
         void unpack_length(const uint8_t* mac_pdu_offset);
 
         mac_ext_t mac_ext;
@@ -146,7 +145,7 @@ class mac_multiplexing_header_t final : public common::serdes::packing_t {
 namespace dectnrp::common::adt {
 
 template <std::same_as<sp4::mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t> E>
-E from_coded_value(const std::underlying_type_t<E> value) {
+[[nodiscard]] E from_coded_value(const std::underlying_type_t<E> value) {
     switch (value) {
         case std::to_underlying(E::Padding_IE):
         case std::to_underlying(E::Higher_Layer_Signalling_Flow_1):
@@ -179,7 +178,6 @@ E from_coded_value(const std::underlying_type_t<E> value) {
              * The following MMIEs are not part of the standard, and exist only in this project.
              */
         case std::to_underlying(E::Power_Target_IE):
-        case std::to_underlying(E::Forward_To_IE):
         case std::to_underlying(E::Time_Announce_IE):
             return static_cast<E>(value);
 
@@ -189,7 +187,7 @@ E from_coded_value(const std::underlying_type_t<E> value) {
 }
 
 template <std::same_as<sp4::mac_multiplexing_header_t::ie_type_mac_ext_11_len_0_t> E>
-E from_coded_value(const std::underlying_type_t<E> value) {
+[[nodiscard]] E from_coded_value(const std::underlying_type_t<E> value) {
     switch (value) {
         case std::to_underlying(E::Padding_IE):
         case std::to_underlying(E::Configuration_Request_IE):
@@ -203,7 +201,7 @@ E from_coded_value(const std::underlying_type_t<E> value) {
 }
 
 template <std::same_as<sp4::mac_multiplexing_header_t::ie_type_mac_ext_11_len_1_t> E>
-E from_coded_value(const std::underlying_type_t<E> value) {
+[[nodiscard]] E from_coded_value(const std::underlying_type_t<E> value) {
     switch (value) {
         case std::to_underlying(E::Padding_IE):
         case std::to_underlying(E::Radio_Device_Status_IE):

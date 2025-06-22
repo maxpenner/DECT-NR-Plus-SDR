@@ -43,16 +43,16 @@ class association_release_message_t final : public mmie_packing_t {
             upper
         };
 
-        association_release_message_t();
+        [[nodiscard]] association_release_message_t();
 
         release_cause_t release_cause;
 
     private:
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 };
 
 }  // namespace dectnrp::sp4

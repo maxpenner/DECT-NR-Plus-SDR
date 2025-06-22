@@ -20,6 +20,8 @@
 
 #include "dectnrp/phy/rx/rx_synced/mimo/mimo_csi.hpp"
 
+#include "dectnrp/common/prog/assert.hpp"
+
 namespace dectnrp::phy {
 
 void mimo_csi_t::update_from_feedback(const uint32_t feedback_format,

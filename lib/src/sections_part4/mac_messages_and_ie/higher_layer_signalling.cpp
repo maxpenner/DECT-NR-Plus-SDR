@@ -26,7 +26,7 @@
 namespace dectnrp::sp4 {
 
 higher_layer_signalling_t::higher_layer_signalling_t() {
-    mac_mux_header.zero();
+    mac_multiplexing_header.zero();
     data_ptr = nullptr;
 
     dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
@@ -37,11 +37,11 @@ void higher_layer_signalling_t::set_flow_id(const uint32_t flow_id) {
         using enum mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t;
 
         case 1:
-            mac_mux_header.ie_type.mac_ext_00_01_10 = Higher_Layer_Signalling_Flow_1;
+            mac_multiplexing_header.ie_type.mac_ext_00_01_10 = Higher_Layer_Signalling_Flow_1;
             break;
 
         case 2:
-            mac_mux_header.ie_type.mac_ext_00_01_10 = Higher_Layer_Signalling_Flow_2;
+            mac_multiplexing_header.ie_type.mac_ext_00_01_10 = Higher_Layer_Signalling_Flow_2;
             break;
 
         default:
@@ -50,7 +50,7 @@ void higher_layer_signalling_t::set_flow_id(const uint32_t flow_id) {
 }
 
 uint32_t higher_layer_signalling_t::get_flow_id() const {
-    switch (mac_mux_header.ie_type.mac_ext_00_01_10) {
+    switch (mac_multiplexing_header.ie_type.mac_ext_00_01_10) {
         using enum mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t;
 
         case Higher_Layer_Signalling_Flow_1:

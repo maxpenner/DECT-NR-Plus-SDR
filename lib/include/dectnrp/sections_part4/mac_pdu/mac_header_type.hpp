@@ -53,24 +53,24 @@ class mac_header_type_t final : public common::serdes::packing_t {
         };
 
         void zero() override final;
-        bool is_valid() const override final;
-        uint32_t get_packed_size() const override final { return 1; };
+        [[nodiscard]] bool is_valid() const override final;
+        [[nodiscard]] uint32_t get_packed_size() const override final { return 1; };
         void pack(uint8_t* mac_pdu_front) const override final;
-        bool unpack(const uint8_t* mac_pdu_front) override final;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_front) override final;
 
         version_ec Version{version_ec::not_defined};
         mac_security_ec MAC_security{mac_security_ec::not_defined};
         mac_header_type_ec MAC_header_type{mac_header_type_ec::not_defined};
 
-        static inline version_ec get_version_ec(const uint32_t val) {
+        [[nodiscard]] static inline version_ec get_version_ec(const uint32_t val) {
             return val == 0 ? static_cast<version_ec>(val) : version_ec::not_defined;
         }
 
-        static inline mac_security_ec get_mac_security_ec(const uint32_t val) {
+        [[nodiscard]] static inline mac_security_ec get_mac_security_ec(const uint32_t val) {
             return val <= 3 ? static_cast<mac_security_ec>(val) : mac_security_ec::not_defined;
         }
 
-        static inline mac_header_type_ec get_mac_header_type_ec(const uint32_t val) {
+        [[nodiscard]] static inline mac_header_type_ec get_mac_header_type_ec(const uint32_t val) {
             // Escape is not valid
             return val <= 4 ? static_cast<mac_header_type_ec>(val)
                             : mac_header_type_ec::not_defined;

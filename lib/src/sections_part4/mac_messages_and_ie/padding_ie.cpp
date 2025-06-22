@@ -36,28 +36,42 @@ void padding_ie_t::set_nof_padding_bytes(const uint32_t N_bytes) {
     switch (N_bytes) {
         // one octet of padding is needed
         case 1:
-            mac_mux_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::Length_Field_1_Bit;
-            mac_mux_header.ie_type.mac_ext_11_len_0 =
+            mac_multiplexing_header.mac_ext =
+                mac_multiplexing_header_t::mac_ext_t::Length_Field_1_Bit;
+            mac_multiplexing_header.ie_type.mac_ext_11_len_0 =
                 mac_multiplexing_header_t::ie_type_mac_ext_11_len_0_t::Padding_IE;
-            mac_mux_header.length = 0;
+            mac_multiplexing_header.length = 0;
             break;
 
         // two octets of padding are needed
         case 2:
-            mac_mux_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::Length_Field_1_Bit;
-            mac_mux_header.ie_type.mac_ext_11_len_1 =
+            mac_multiplexing_header.mac_ext =
+                mac_multiplexing_header_t::mac_ext_t::Length_Field_1_Bit;
+            mac_multiplexing_header.ie_type.mac_ext_11_len_1 =
                 mac_multiplexing_header_t::ie_type_mac_ext_11_len_1_t::Padding_IE;
-            mac_mux_header.length = 1;
+            mac_multiplexing_header.length = 1;
             break;
 
         // more than two octets of padding are needed
         default:
-            mac_mux_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::Length_Field_8_Bit;
-            mac_mux_header.ie_type.mac_ext_00_01_10 =
+            mac_multiplexing_header.mac_ext =
+                mac_multiplexing_header_t::mac_ext_t::Length_Field_8_Bit;
+            mac_multiplexing_header.ie_type.mac_ext_00_01_10 =
                 mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t::Padding_IE;
-            mac_mux_header.length = N_bytes - mac_mux_header.get_packed_size();
+            mac_multiplexing_header.length = N_bytes - mac_multiplexing_header.get_packed_size();
             break;
     }
+}
+
+uint32_t padding_ie_t::get_packed_size_of_mmh_sdu() const {
+    return mac_multiplexing_header.get_packed_size() + mac_multiplexing_header.length;
+}
+
+void padding_ie_t::pack_mmh_sdu(uint8_t* mac_pdu_offset) {
+    mac_multiplexing_header.pack(mac_pdu_offset);
+    std::memset(mac_pdu_offset + mac_multiplexing_header.get_packed_size(),
+                0x0,
+                mac_multiplexing_header.length);
 }
 
 }  // namespace dectnrp::sp4

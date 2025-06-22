@@ -29,19 +29,19 @@ namespace dectnrp::sp4 {
 class mac_common_header_t : public common::serdes::packing_t {
     public:
         virtual void zero() override = 0;
-        virtual bool is_valid() const override = 0;
-        virtual uint32_t get_packed_size() const override = 0;
+        [[nodiscard]] virtual bool is_valid() const override = 0;
+        [[nodiscard]] virtual uint32_t get_packed_size() const override = 0;
         virtual void pack(uint8_t* mch_front) const override = 0;
-        virtual bool unpack(const uint8_t* mch_front) override = 0;
+        [[nodiscard]] virtual bool unpack(const uint8_t* mch_front) override = 0;
 };
 
 class data_mac_pdu_header_t final : public mac_common_header_t {
     public:
         virtual void zero() override final;
-        virtual bool is_valid() const override final;
-        virtual uint32_t get_packed_size() const override final { return 2; };
+        [[nodiscard]] virtual bool is_valid() const override final;
+        [[nodiscard]] virtual uint32_t get_packed_size() const override final { return 2; };
         virtual void pack(uint8_t* mch_front) const override final;
-        virtual bool unpack(const uint8_t* mch_front) override final;
+        [[nodiscard]] virtual bool unpack(const uint8_t* mch_front) override final;
 
         uint32_t Reserved;
         uint32_t Reset;
@@ -51,10 +51,10 @@ class data_mac_pdu_header_t final : public mac_common_header_t {
 class beacon_header_t final : public mac_common_header_t {
     public:
         virtual void zero() override final;
-        virtual bool is_valid() const override final;
-        virtual uint32_t get_packed_size() const override final { return 7; };
+        [[nodiscard]] virtual bool is_valid() const override final;
+        [[nodiscard]] virtual uint32_t get_packed_size() const override final { return 7; };
         virtual void pack(uint8_t* mch_front) const override final;
-        virtual bool unpack(const uint8_t* mch_front) override final;
+        [[nodiscard]] virtual bool unpack(const uint8_t* mch_front) override final;
 
         void set_Network_ID_3_lsb(const uint32_t Network_ID);
 
@@ -65,10 +65,10 @@ class beacon_header_t final : public mac_common_header_t {
 class unicast_header_t final : public mac_common_header_t {
     public:
         virtual void zero() override final;
-        virtual bool is_valid() const override final;
-        virtual uint32_t get_packed_size() const override final { return 10; };
+        [[nodiscard]] virtual bool is_valid() const override final;
+        [[nodiscard]] virtual uint32_t get_packed_size() const override final { return 10; };
         virtual void pack(uint8_t* mch_front) const override final;
-        virtual bool unpack(const uint8_t* mch_front) override final;
+        [[nodiscard]] virtual bool unpack(const uint8_t* mch_front) override final;
 
         uint32_t Reserved;
         uint32_t Reset;
@@ -80,10 +80,10 @@ class unicast_header_t final : public mac_common_header_t {
 class rd_broadcasting_header_t final : public mac_common_header_t {
     public:
         virtual void zero() override final;
-        virtual bool is_valid() const override final;
-        virtual uint32_t get_packed_size() const override final { return 6; };
+        [[nodiscard]] virtual bool is_valid() const override final;
+        [[nodiscard]] virtual uint32_t get_packed_size() const override final { return 6; };
         virtual void pack(uint8_t* mch_front) const override final;
-        virtual bool unpack(const uint8_t* mch_front) override final;
+        [[nodiscard]] virtual bool unpack(const uint8_t* mch_front) override final;
 
         uint32_t Reserved;
         uint32_t Reset;
@@ -94,10 +94,11 @@ class rd_broadcasting_header_t final : public mac_common_header_t {
 class mch_empty_t final : public mac_common_header_t {
     public:
         virtual void zero() override final {};
-        virtual bool is_valid() const override final { return true; };
-        virtual uint32_t get_packed_size() const override final { return 0; };
+        [[nodiscard]] virtual bool is_valid() const override final { return true; };
+        [[nodiscard]] virtual uint32_t get_packed_size() const override final { return 0; };
         virtual void pack([[maybe_unused]] uint8_t* mch_front) const override final {};
-        virtual bool unpack([[maybe_unused]] const uint8_t* mch_front) override final {
+        [[nodiscard]] virtual bool unpack(
+            [[maybe_unused]] const uint8_t* mch_front) override final {
             return true;
         };
 };

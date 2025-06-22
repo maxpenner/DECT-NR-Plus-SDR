@@ -99,15 +99,18 @@ void tfw_p2p_ft_t::init_radio() {
     hw.set_freq_tc(3830.0e6);
 
     // check what output power at 0dBFS the radio device can deliver
-    ft.TransmitPower_dBm_fixed = hw.set_tx_power_ant_0dBFS_tc(20.0f);
+    ft.TransmitPower_dBm = hw.set_tx_power_ant_0dBFS_tc(20.0f);
 
     // make AGC remember current power at 0dBFS, taking effect immediately
-    agc_tx.set_power_ant_0dBFS_pending(ft.TransmitPower_dBm_fixed);
+    agc_tx.set_power_ant_0dBFS_pending(ft.TransmitPower_dBm);
 
     // take into consideration the OFDM crest factor
-    ft.TransmitPower_dBm_fixed += common::adt::mag2db(agc_tx.get_ofdm_amplitude_factor());
+    ft.TransmitPower_dBm += common::adt::mag2db(agc_tx.get_ofdm_amplitude_factor());
 
     const auto& rx_power_ant_0dBFS = hw.set_rx_power_ant_0dBFS_uniform_tc(-40.0f);
+
+    ft.ReceiverPower_dBm = rx_power_ant_0dBFS.at(0);
+    ft.ReceiverPower_dBm += common::adt::mag2db(agc_rx.get_rms_target());
 
     // make AGC remember current power at 0dBFS, taking effect immediately
     agc_rx.set_power_ant_0dBFS_pending(rx_power_ant_0dBFS);

@@ -28,14 +28,14 @@ namespace dectnrp::sp4::extensions {
 
 class power_target_ie_t final : public mmie_packing_t {
     public:
-        power_target_ie_t();
+        [[nodiscard]] power_target_ie_t();
 
         void set_power_target_dBm_coded(const float power_target_dBm) {
             power_target_dBm_coded = static_cast<decltype(power_target_dBm_coded)>(
                 std::abs(std::roundf(power_target_dBm)));
         }
 
-        float set_power_target_dBm_coded() const {
+        [[nodiscard]] float get_power_target_dBm_uncoded() const {
             return -static_cast<float>(power_target_dBm_coded);
         }
 
@@ -44,10 +44,10 @@ class power_target_ie_t final : public mmie_packing_t {
 
     private:
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 };
 
 }  // namespace dectnrp::sp4::extensions

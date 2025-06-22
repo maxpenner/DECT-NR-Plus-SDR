@@ -28,24 +28,19 @@ class packing_t {
     public:
         virtual ~packing_t() = default;
 
-        /// set all values to zero
         virtual void zero() = 0;
 
-        /// called before pack() or after unpack()
-        virtual bool is_valid() const = 0;
+        [[nodiscard]] virtual bool is_valid() const = 0;
 
-        /// called after is_valid(), typically called with pack()
-        virtual uint32_t get_packed_size() const = 0;
+        [[nodiscard]] virtual uint32_t get_packed_size() const = 0;
 
-        /// serialize
         virtual void pack(uint8_t* a_ptr) const = 0;
 
-        /// deserialize
-        virtual bool unpack(const uint8_t* a_ptr) = 0;
+        [[nodiscard]] virtual bool unpack(const uint8_t* a_ptr) = 0;
 
         void operator~() { zero(); }
         void operator>>(uint8_t* a_ptr) const { pack(a_ptr); }
-        void operator<<(const uint8_t* a_ptr) { unpack(a_ptr); }
+        [[nodiscard]] bool operator<<(const uint8_t* a_ptr) { return unpack(a_ptr); }
 };
 
 }  // namespace dectnrp::common::serdes

@@ -51,7 +51,7 @@ class feedback_info_t : public common::serdes::packing_t {
 
         static constexpr uint32_t MCS_out_of_range{common::adt::UNDEFINED_NUMERIC_32};
 
-        static uint32_t buffer_size_2_buffer_status(const uint32_t buffer_size);
+        [[nodiscard]] static uint32_t buffer_size_2_buffer_status(const uint32_t buffer_size);
 
         static constexpr std::array<uint32_t, 16> buffer_status_2_buffer_size_lower = {
             0, 0, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072};
@@ -76,13 +76,13 @@ class feedback_info_t : public common::serdes::packing_t {
 
     protected:
         virtual void zero() override = 0;
-        virtual bool is_valid() const override = 0;
-        virtual uint32_t get_packed_size() const override final;
+        [[nodiscard]] virtual bool is_valid() const override = 0;
+        [[nodiscard]] virtual uint32_t get_packed_size() const override final;
         virtual void pack(uint8_t* a_ptr) const override = 0;
-        virtual bool unpack(const uint8_t* a_ptr) override = 0;
+        [[nodiscard]] virtual bool unpack(const uint8_t* a_ptr) override = 0;
 
-        static uint32_t mcs_2_cqi(const int32_t mcs);
-        static uint32_t cqi_2_mcs(const uint32_t cqi);
+        [[nodiscard]] static uint32_t mcs_2_cqi(const int32_t mcs);
+        [[nodiscard]] static uint32_t cqi_2_mcs(const uint32_t cqi);
 };
 
 class feedback_info_f1_t final : public feedback_info_t {
@@ -96,9 +96,9 @@ class feedback_info_f1_t final : public feedback_info_t {
 
     private:
         void zero() override final;
-        bool is_valid() const override final;
+        [[nodiscard]] bool is_valid() const override final;
         void pack(uint8_t* a_ptr) const override final;
-        bool unpack(const uint8_t* a_ptr) override final;
+        [[nodiscard]] bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_f2_t final : public feedback_info_t {
@@ -112,9 +112,9 @@ class feedback_info_f2_t final : public feedback_info_t {
 
     private:
         void zero() override final;
-        bool is_valid() const override final;
+        [[nodiscard]] bool is_valid() const override final;
         void pack(uint8_t* a_ptr) const override final;
-        bool unpack(const uint8_t* a_ptr) override final;
+        [[nodiscard]] bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_f3_t final : public feedback_info_t {
@@ -129,9 +129,9 @@ class feedback_info_f3_t final : public feedback_info_t {
 
     private:
         void zero() override final;
-        bool is_valid() const override final;
+        [[nodiscard]] bool is_valid() const override final;
         void pack(uint8_t* a_ptr) const override final;
-        bool unpack(const uint8_t* a_ptr) override final;
+        [[nodiscard]] bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_f4_t final : public feedback_info_t {
@@ -143,9 +143,9 @@ class feedback_info_f4_t final : public feedback_info_t {
 
     private:
         void zero() override final;
-        bool is_valid() const override final;
+        [[nodiscard]] bool is_valid() const override final;
         void pack(uint8_t* a_ptr) const override final;
-        bool unpack(const uint8_t* a_ptr) override final;
+        [[nodiscard]] bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_f5_t final : public feedback_info_t {
@@ -159,9 +159,9 @@ class feedback_info_f5_t final : public feedback_info_t {
 
     private:
         void zero() override final;
-        bool is_valid() const override final;
+        [[nodiscard]] bool is_valid() const override final;
         void pack(uint8_t* a_ptr) const override final;
-        bool unpack(const uint8_t* a_ptr) override final;
+        [[nodiscard]] bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_f6_t final : public feedback_info_t {
@@ -175,15 +175,15 @@ class feedback_info_f6_t final : public feedback_info_t {
 
     private:
         void zero() override final;
-        bool is_valid() const override final;
+        [[nodiscard]] bool is_valid() const override final;
         void pack(uint8_t* a_ptr) const override final;
-        bool unpack(const uint8_t* a_ptr) override final;
+        [[nodiscard]] bool unpack(const uint8_t* a_ptr) override final;
 };
 
 class feedback_info_pool_t {
     public:
         void pack(const uint32_t feedback_format, uint8_t* a_ptr) const;
-        bool unpack(const uint32_t feedback_format, const uint8_t* a_ptr);
+        [[nodiscard]] bool unpack(const uint32_t feedback_format, const uint8_t* a_ptr);
 
         feedback_info_f1_t feedback_info_f1;
         feedback_info_f2_t feedback_info_f2;

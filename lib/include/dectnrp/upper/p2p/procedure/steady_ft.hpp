@@ -42,7 +42,7 @@ class steady_ft_t final : public steady_rd_t {
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
-        // work_pcc(), work_pdc() and work_pdc_error() are implemented in deriving classes
+        // work_pcc(), work_pdc() and work_pdc_error() are implemented in base class
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_channel(const phy::chscan_t& chscan) override final;
@@ -73,6 +73,7 @@ class steady_ft_t final : public steady_rd_t {
         // clang-format on
 
         bool worksub_tx_beacon(phy::machigh_phy_t& machigh_phy);
+        bool worksub_tx_beacon_mac_pdu(phy::harq::process_tx_t& hp_tx);
 
         void worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy) override final;
 

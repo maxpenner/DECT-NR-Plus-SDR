@@ -20,13 +20,15 @@
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/extensions/power_target_ie.hpp"
 
+#include "dectnrp/common/prog/assert.hpp"
+
 namespace dectnrp::sp4::extensions {
 
 power_target_ie_t::power_target_ie_t() {
-    mac_mux_header.zero();
-    mac_mux_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::No_Length_Field;
-    mac_mux_header.length = 1;
-    mac_mux_header.ie_type.mac_ext_00_01_10 =
+    mac_multiplexing_header.zero();
+    mac_multiplexing_header.mac_ext = mac_multiplexing_header_t::mac_ext_t::No_Length_Field;
+    mac_multiplexing_header.length = 1;
+    mac_multiplexing_header.ie_type.mac_ext_00_01_10 =
         mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t::Power_Target_IE;
 
     zero();
@@ -36,7 +38,9 @@ power_target_ie_t::power_target_ie_t() {
 
 void power_target_ie_t::zero() { power_target_dBm_coded = common::adt::UNDEFINED_NUMERIC_32; }
 
-bool power_target_ie_t::is_valid() const { return power_target_dBm_coded <= 110; }
+bool power_target_ie_t::is_valid() const {
+    return 45 <= power_target_dBm_coded && power_target_dBm_coded <= 60;
+}
 
 uint32_t power_target_ie_t::get_packed_size() const { return 1; }
 

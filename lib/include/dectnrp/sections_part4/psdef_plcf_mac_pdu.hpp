@@ -46,7 +46,7 @@ class psdef_plcf_mac_pdu_t {
         /// deriving classes add specific MAC common headers, this pointers picks one
         sp4::mac_common_header_t* mch_base_effective{nullptr};
 
-        uint32_t get_packed_size_mht_mch() const {
+        [[nodiscard]] uint32_t get_packed_size_mht_mch() const {
             return mac_header_type.get_packed_size() + mch_base_effective->get_packed_size();
         }
 };

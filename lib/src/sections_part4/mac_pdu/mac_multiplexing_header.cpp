@@ -22,7 +22,9 @@
 #include "dectnrp/sections_part4/mac_pdu/mac_multiplexing_header.hpp"
 
 #include "dectnrp/common/adt/enumeration.hpp"
+#include "dectnrp/common/prog/assert.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/cluster_beacon_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/extensions/power_target_ie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/padding_ie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 
@@ -272,12 +274,6 @@ bool mac_multiplexing_header_t::unpack_mac_ext_ie_type(const uint8_t* mac_pdu_of
 #ifdef ACTIVATE_Power_Target_IE
                     case Power_Target_IE:
                         tinfo = &typeid(extensions::power_target_ie_t);
-                        break;
-#endif
-
-#ifdef ACTIVATE_Forward_To_IE
-                    case Forward_To_IE:
-                        tinfo = &typeid(extensions::forward_to_ie_t);
                         break;
 #endif
 

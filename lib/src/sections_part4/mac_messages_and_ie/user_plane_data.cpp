@@ -26,7 +26,7 @@
 namespace dectnrp::sp4 {
 
 user_plane_data_t::user_plane_data_t() {
-    mac_mux_header.zero();
+    mac_multiplexing_header.zero();
     data_ptr = nullptr;
 
     dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
@@ -37,19 +37,19 @@ void user_plane_data_t::set_flow_id(const uint32_t flow_id) {
         using enum mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t;
 
         case 1:
-            mac_mux_header.ie_type.mac_ext_00_01_10 = User_Plane_Data_Flow_1;
+            mac_multiplexing_header.ie_type.mac_ext_00_01_10 = User_Plane_Data_Flow_1;
             break;
 
         case 2:
-            mac_mux_header.ie_type.mac_ext_00_01_10 = User_Plane_Data_Flow_2;
+            mac_multiplexing_header.ie_type.mac_ext_00_01_10 = User_Plane_Data_Flow_2;
             break;
 
         case 3:
-            mac_mux_header.ie_type.mac_ext_00_01_10 = User_Plane_Data_Flow_3;
+            mac_multiplexing_header.ie_type.mac_ext_00_01_10 = User_Plane_Data_Flow_3;
             break;
 
         case 4:
-            mac_mux_header.ie_type.mac_ext_00_01_10 = User_Plane_Data_Flow_4;
+            mac_multiplexing_header.ie_type.mac_ext_00_01_10 = User_Plane_Data_Flow_4;
             break;
 
         default:
@@ -58,7 +58,7 @@ void user_plane_data_t::set_flow_id(const uint32_t flow_id) {
 }
 
 uint32_t user_plane_data_t::get_flow_id() const {
-    switch (mac_mux_header.ie_type.mac_ext_00_01_10) {
+    switch (mac_multiplexing_header.ie_type.mac_ext_00_01_10) {
         using enum mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t;
 
         case User_Plane_Data_Flow_1:

@@ -30,7 +30,10 @@ namespace dectnrp::upper::tfw::p2p {
 class ft_t {
     public:
         /// FTs use a fixed transmit power that must be written into the PLCF
-        float TransmitPower_dBm_fixed;
+        float TransmitPower_dBm;
+
+        /// FTs use a variable RX power target that is announces to PTs in the beacon
+        float ReceiverPower_dBm;
 
         /// fast lookup of all PTs and their properties
         mac::contact_list_t<contact_p2p_t> contact_list;

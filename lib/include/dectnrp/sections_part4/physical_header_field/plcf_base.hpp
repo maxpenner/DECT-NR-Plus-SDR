@@ -31,10 +31,10 @@ namespace dectnrp::sp4 {
 class plcf_base_t : public common::serdes::packing_t {
     public:
         virtual void zero() override;
-        virtual bool is_valid() const override;
-        virtual uint32_t get_packed_size() const override = 0;
+        [[nodiscard]] virtual bool is_valid() const override;
+        [[nodiscard]] virtual uint32_t get_packed_size() const override = 0;
         virtual void pack(uint8_t* plcf_front) const override;
-        virtual bool unpack(const uint8_t* plcf_front) override;
+        [[nodiscard]] virtual bool unpack(const uint8_t* plcf_front) override;
 
         uint32_t HeaderFormat;
         uint32_t PacketLengthType;
@@ -44,20 +44,20 @@ class plcf_base_t : public common::serdes::packing_t {
         uint32_t DFMCS;
 
         void set_PacketLength_m1(const int32_t PacketLength);
-        uint32_t get_PacketLength() const;
+        [[nodiscard]] uint32_t get_PacketLength() const;
 
         void set_TransmitPower(const int32_t TransmitPower_dBm);
 
         template <typename T>
             requires std::is_signed_v<T>
-        T get_TransmitPower_dBm() const {
+        [[nodiscard]] T get_TransmitPower_dBm() const {
             return static_cast<T>(tx_power_table.at(TransmitPower));
         }
 
-        virtual uint32_t get_Type() const = 0;
-        virtual uint32_t get_HeaderFormat() const = 0;
-        virtual uint32_t get_N_SS() const = 0;
-        virtual uint32_t get_DFRedundancyVersion() const = 0;
+        [[nodiscard]] virtual uint32_t get_Type() const = 0;
+        [[nodiscard]] virtual uint32_t get_HeaderFormat() const = 0;
+        [[nodiscard]] virtual uint32_t get_N_SS() const = 0;
+        [[nodiscard]] virtual uint32_t get_DFRedundancyVersion() const = 0;
 
     protected:
         plcf_base_t() = default;

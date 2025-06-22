@@ -66,7 +66,7 @@ class random_access_resource_ie_t final : public mmie_packing_peeking_t, public 
                 uint32_t validity{};
         };
 
-        random_access_resource_ie_t();
+        [[nodiscard]] random_access_resource_ie_t();
 
         std::optional<repeat_info_t> repeat_info;
         std::optional<uint32_t> sfn_offset;
@@ -91,13 +91,14 @@ class random_access_resource_ie_t final : public mmie_packing_peeking_t, public 
         };
 
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 
-        constexpr uint32_t get_packed_size_min_to_peek() const override { return 1; }
-        peek_result_t get_packed_size_by_peeking(const uint8_t* mac_pdu_offset) const override;
+        [[nodiscard]] constexpr uint32_t get_packed_size_min_to_peek() const override { return 1; }
+        [[nodiscard]] peek_result_t get_packed_size_by_peeking(
+            const uint8_t* mac_pdu_offset) const override;
 };
 
 }  // namespace dectnrp::sp4

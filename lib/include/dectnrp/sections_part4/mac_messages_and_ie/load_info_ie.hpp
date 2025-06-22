@@ -42,7 +42,7 @@ class load_info_ie_t final : public mmie_packing_peeking_t {
                 uint32_t percentage_subslots_busy;
         };
 
-        load_info_ie_t();
+        [[nodiscard]] load_info_ie_t();
 
         max_assoc_size_t max_assoc;
         std::optional<uint32_t> rd_pt_load_percentage;
@@ -54,13 +54,14 @@ class load_info_ie_t final : public mmie_packing_peeking_t {
 
     private:
         void zero() override;
-        bool is_valid() const override;
-        uint32_t get_packed_size() const override;
+        [[nodiscard]] bool is_valid() const override;
+        [[nodiscard]] uint32_t get_packed_size() const override;
         void pack(uint8_t* mac_pdu_offset) const override;
-        bool unpack(const uint8_t* mac_pdu_offset) override;
+        [[nodiscard]] bool unpack(const uint8_t* mac_pdu_offset) override;
 
-        constexpr uint32_t get_packed_size_min_to_peek() const override { return 1; }
-        peek_result_t get_packed_size_by_peeking(const uint8_t* mac_pdu_offset) const override;
+        [[nodiscard]] constexpr uint32_t get_packed_size_min_to_peek() const override { return 1; }
+        [[nodiscard]] peek_result_t get_packed_size_by_peeking(
+            const uint8_t* mac_pdu_offset) const override;
 };
 
 }  // namespace dectnrp::sp4

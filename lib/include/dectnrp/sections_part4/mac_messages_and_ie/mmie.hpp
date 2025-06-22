@@ -25,6 +25,7 @@
 
 #include "dectnrp/common/adt/result.hpp"
 #include "dectnrp/common/serdes/packing.hpp"
+#include "dectnrp/sections_part3/derivative/packet_sizes.hpp"
 #include "dectnrp/sections_part4/mac_pdu/mac_multiplexing_header.hpp"
 
 namespace dectnrp::sp4 {
@@ -33,22 +34,19 @@ class mmie_t {
     public:
         virtual ~mmie_t() = default;
 
-        /**
-         * \brief Number of bytes that would be written if the pack_mmh_sdu() function was called.
-         *
-         * \return Length in bytes.
-         */
-        virtual uint32_t get_packed_size_of_mmh_sdu() const {
-            return mac_mux_header.get_packed_size();
+        /// mmh = MAC multiplexing header, sdu = MAC service data unit
+        [[nodiscard]] virtual uint32_t get_packed_size_of_mmh_sdu() const = 0;
+
+        virtual void pack_mmh_sdu(uint8_t* mac_pdu_offset) = 0;
+
+        [[nodiscard]] bool is_fitting(const uint32_t a_cnt_w, const uint32_t N_TB_byte) const {
+            return a_cnt_w + get_packed_size_of_mmh_sdu() <= N_TB_byte;
         }
 
-        /**
-         * \brief In this base class, only the MAC multiplexing header (mmh) is written in packed
-         * form to the destination pointer. Deriving classes pack service data unit (sdu).
-         *
-         * \param mac_pdu_offset
-         */
-        virtual void pack_mmh_sdu(uint8_t* mac_pdu_offset) { mac_mux_header.pack(mac_pdu_offset); }
+        [[nodiscard]] bool is_fitting(const uint32_t a_cnt_w,
+                                      const sp3::packet_sizes_t& packet_sizes) const {
+            return is_fitting(a_cnt_w, packet_sizes.N_TB_byte);
+        }
 
         friend bool has_valid_inheritance_and_properties(const mmie_t* mmie);
 
@@ -56,12 +54,12 @@ class mmie_t {
 
     protected:
         mmie_t() = default;
-        mac_multiplexing_header_t mac_mux_header;
+        mac_multiplexing_header_t mac_multiplexing_header;
 };
 
 class mmie_packing_t : public mmie_t, public common::serdes::packing_t {
     public:
-        uint32_t get_packed_size_of_mmh_sdu() const override final;
+        [[nodiscard]] uint32_t get_packed_size_of_mmh_sdu() const override final;
         void pack_mmh_sdu(uint8_t* mac_pdu_offset) override final;
 
         friend class mac_pdu_decoder_t;
@@ -79,26 +77,31 @@ class mmie_packing_peeking_t : public mmie_packing_t {
 
         using peek_result_t = common::adt::res_t<uint32_t, peek_errc>;
 
-        virtual constexpr uint32_t get_packed_size_min_to_peek() const = 0;
-        virtual peek_result_t get_packed_size_by_peeking(const uint8_t* mac_pdu_offset) const = 0;
+        [[nodiscard]] virtual constexpr uint32_t get_packed_size_min_to_peek() const = 0;
+        [[nodiscard]] virtual peek_result_t get_packed_size_by_peeking(
+            const uint8_t* mac_pdu_offset) const = 0;
 };
 
 class mmie_flowing_t : public mmie_t {
     public:
-        uint32_t get_packed_size_of_mmh_sdu() const override final;
+        [[nodiscard]] uint32_t get_packed_size_of_mmh_sdu() const override final;
         void pack_mmh_sdu(uint8_t* mac_pdu_offset) override final;
 
-        /// every IE with a flow ID happens to be a non-packing IE
         virtual void set_flow_id(const uint32_t flow_id) = 0;
-        virtual uint32_t get_flow_id() const = 0;
+        [[nodiscard]] virtual uint32_t get_flow_id() const = 0;
 
         /// flowing lengths are not self-contained, they have to be defined with these functions
         void set_data_size(const uint32_t N_bytes);
-        uint32_t get_data_size() const;
+        [[nodiscard]] uint32_t get_data_size() const;
 
-        /// After calling set_flow_id() and set_data_size(), this function returns the destination
-        /// address to which at most N_bytes can be copied. Must be done externally.
-        uint8_t* get_data_ptr() const;
+        /**
+         * \brief  After calling set_flow_id() and set_data_size(), this function returns the
+         * destination address to which at most N_bytes bytes can be copied. The copy process must
+         * be done externally.
+         *
+         * \return
+         */
+        [[nodiscard]] uint8_t* get_data_ptr() const;
 
         friend class mac_pdu_decoder_t;
 
@@ -108,12 +111,9 @@ class mmie_flowing_t : public mmie_t {
 
 class mu_depending_t {
     public:
-        uint32_t get_mu() const { return mu; }
+        [[nodiscard]] uint32_t get_mu() const { return mu; }
 
-        void set_mu(const uint32_t mu_) {
-            dectnrp_assert(std::has_single_bit(mu_) && mu_ <= 8, "Mu must be 1, 2, 4 or 8");
-            mu = mu_;
-        }
+        void set_mu(const uint32_t mu_);
 
     protected:
         uint32_t mu;

@@ -21,7 +21,9 @@
 #pragma once
 
 #include "dectnrp/sections_part4/mac_messages_and_ie/cluster_beacon_message.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/extensions/power_target_ie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/extensions/time_announce_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 #include "dectnrp/upper/p2p/data/pt.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_rd.hpp"
 
@@ -44,7 +46,7 @@ class steady_pt_t final : public steady_rd_t {
         phy::machigh_phy_t work_regular(const phy::regular_report_t& regular_report) override final;
         phy::machigh_phy_t work_irregular(
             const phy::irregular_report_t& irregular_report) override final;
-        // work_pcc(), work_pdc() and work_pdc_error() are implemented in deriving classes
+        // work_pcc(), work_pdc() and work_pdc_error() are implemented in base class
         phy::machigh_phy_t work_application(
             const application::application_report_t& application_report) override final;
         phy::machigh_phy_tx_t work_channel(const phy::chscan_t& chscan) override final;
@@ -74,12 +76,16 @@ class steady_pt_t final : public steady_rd_t {
         void worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy) override final;
 
         void worksub_mmie_cluster_beacon_message(
-            const phy::phy_machigh_t& phy_machigh,
             const sp4::cluster_beacon_message_t& cluster_beacon_message);
 
+        void worksub_mmie_power_target(const sp4::extensions::power_target_ie_t& power_target_ie);
+
         void worksub_mmie_time_announce(
-            const phy::phy_machigh_t& phy_machigh,
+            const int64_t fine_peak_time_64,
             const sp4::extensions::time_announce_ie_t& time_announce_ie);
+
+        [[nodiscard]] bool worksub_mmie_user_plane_data(
+            const sp4::user_plane_data_t& user_plane_data);
 
         // ##################################################
         // DLC and Convergence Layer
