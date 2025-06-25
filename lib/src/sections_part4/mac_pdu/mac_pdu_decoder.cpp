@@ -1,6 +1,5 @@
 /*
- * Copyright 2023-2024 Maxim Penner, Alexander Poets
- * Copyright 2025-2025 Maxim Penner
+ * Copyright 2023-2025 Maxim Penner
  *
  * This file is part of DECTNRP.
  *
@@ -234,7 +233,7 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
                     }
                     // if mmh does not contain a length, the mmie must be of fixed size
                     else {
-                        N_bytes_required = mmie->get_packed_size_of_mmh_sdu();
+                        N_bytes_required = mmie->get_packed_size_of_sdu();
                     }
 
                     break;

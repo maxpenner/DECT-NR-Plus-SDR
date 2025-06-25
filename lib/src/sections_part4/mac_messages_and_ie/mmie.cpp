@@ -54,6 +54,8 @@ bool has_valid_inheritance_and_properties(const mmie_t* mmie) {
     return true;
 }
 
+uint32_t mmie_packing_t::get_packed_size_of_sdu() const { return get_packed_size(); }
+
 uint32_t mmie_packing_t::get_packed_size_of_mmh_sdu() const {
     return mac_multiplexing_header.get_packed_size() + get_packed_size();
 }
@@ -62,6 +64,8 @@ void mmie_packing_t::pack_mmh_sdu(uint8_t* mac_pdu_offset) {
     mac_multiplexing_header.pack(mac_pdu_offset);
     pack(mac_pdu_offset + mac_multiplexing_header.get_packed_size());
 }
+
+uint32_t mmie_flowing_t::get_packed_size_of_sdu() const { return mac_multiplexing_header.length; }
 
 uint32_t mmie_flowing_t::get_packed_size_of_mmh_sdu() const {
     return mac_multiplexing_header.get_packed_size() + mac_multiplexing_header.length;

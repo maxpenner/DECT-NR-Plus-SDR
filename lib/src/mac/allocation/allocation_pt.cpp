@@ -53,19 +53,22 @@ void allocation_pt_t::add_resource(const direction_t direction,
 
     switch (direction) {
         using enum direction_t;
-        case uplink:
+        case ul:
             resource_ul_vec.push_back(resource);
 
             dectnrp_assert(resource_ul_vec.size() <= limits::max_nof_ul_resources_per_pt,
                            "too many uplink resources");
             break;
 
-        case downlink:
+        case dl:
             resource_dl_vec.push_back(resource);
 
             dectnrp_assert(resource_dl_vec.size() <= limits::max_nof_dl_resources_per_pt,
                            "too many downlink resources");
             break;
+
+        case both:
+            dectnrp_assert_failure("resource can only be added in one direction");
     }
 }
 
@@ -94,19 +97,22 @@ bool allocation_pt_t::is_orthogonal(const resource_vec_t& ref, const resource_t&
 bool allocation_pt_t::is_orthogonal(const direction_t direction, const resource_t& other) const {
     switch (direction) {
         using enum direction_t;
-        case uplink:
+        case ul:
             if (resource_ul_vec.size() == 0) {
                 return true;
             }
 
             return is_orthogonal(resource_ul_vec, other);
 
-        case downlink:
+        case dl:
             if (resource_dl_vec.size() == 0) {
                 return true;
             }
 
             return is_orthogonal(resource_dl_vec, other);
+
+        case both:
+            dectnrp_assert_failure("resource can only be added in one direction");
     }
 
     dectnrp_assert_failure("unreachable");
@@ -133,7 +139,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity(const direction_t direction
 
     switch (direction) {
         using enum direction_t;
-        case uplink:
+        case ul:
             {
                 dectnrp_assert(beacon_time_last_known_64 <= now_64, "uplink times out-of-order");
 
@@ -147,7 +153,7 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity(const direction_t direction
                     tx_earliest_local_64, tx_latest_local_64, resource_ul_vec);
             }
 
-        case downlink:
+        case dl:
             {
                 // maximum transmission time
                 const int64_t tx_latest_local_64 =
@@ -156,6 +162,9 @@ tx_opportunity_t allocation_pt_t::get_tx_opportunity(const direction_t direction
                 return get_tx_opportunity_generic(
                     tx_earliest_local_64, tx_latest_local_64, resource_dl_vec);
             }
+
+        case both:
+            dectnrp_assert_failure("resource can only be added in one direction");
     }
 
     dectnrp_assert_failure("unreachable");
@@ -185,6 +194,40 @@ int64_t allocation_pt_t::get_tx_opportunity_ul_time_closest(const int64_t refere
     }
 
     return ret;
+}
+
+void allocation_pt_t::translate(sp4::resource_allocation_ie_t& raie,
+                                const direction_t dir,
+                                const uint32_t srdid) const {
+    if (dir == direction_t::dl || dir == direction_t::both) {
+        raie.allocation_dl = sp4::resource_allocation_ie_t::allocation_t{
+            .start_subslot = 1,
+            .length_type = sp4::resource_allocation_ie_t::length_type_t::length_in_subslots,
+            .length = 2};
+    }
+
+    if (dir == direction_t::ul || dir == direction_t::both) {
+        raie.allocation_ul = sp4::resource_allocation_ie_t::allocation_t{
+            .start_subslot = 1,
+            .length_type = sp4::resource_allocation_ie_t::length_type_t::length_in_subslots,
+            .length = 2};
+    }
+
+    raie.is_additional_allocation = false;
+
+    raie.short_rd_id = srdid;
+
+    raie.repeat_info = sp4::resource_allocation_ie_t::repeat_info_t{
+        .repeat_type = sp4::resource_allocation_ie_t::repeat_type_t::repeated_in_following_frames,
+        .allow_specific_repeated_resources = false,
+        .repetition = 1,
+        .validity = 2};
+
+    raie.sfn_offset.reset();
+
+    raie.channel.reset();
+
+    raie.dect_scheduled_resource_failure.reset();
 }
 
 tx_opportunity_t allocation_pt_t::get_tx_opportunity_generic(const int64_t tx_earliest_local_64,

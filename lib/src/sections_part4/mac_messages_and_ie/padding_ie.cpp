@@ -63,6 +63,8 @@ void padding_ie_t::set_nof_padding_bytes(const uint32_t N_bytes) {
     }
 }
 
+uint32_t padding_ie_t::get_packed_size_of_sdu() const { return mac_multiplexing_header.length; }
+
 uint32_t padding_ie_t::get_packed_size_of_mmh_sdu() const {
     return mac_multiplexing_header.get_packed_size() + mac_multiplexing_header.length;
 }

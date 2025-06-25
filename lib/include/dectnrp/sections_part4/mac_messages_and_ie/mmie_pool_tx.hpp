@@ -85,17 +85,29 @@ class mmie_pool_tx_t {
         /**
          * \brief Retrieves and returns a MMIE of a given type from the pool. In case that the pool
          * holds multiple instances of the specified MMIE type, an index must be specified to
-         * indicate which element is to be retrieved. By default, the first element is returned.
+         * indicate which element is to be retrieved.
          *
          * \param i index of the element to be retrieved
          * \tparam T MMIE type, must be derived from mmie_t
          * \return reference to the requested MMIE
          */
         template <std::derived_from<mmie_t> T>
-        [[nodiscard]] T& get(const std::size_t i = 0) {
+            requires(std::derived_from<T, mu_depending_t> == false)
+        [[nodiscard]] T& get(const std::size_t i) {
             auto& vec = pool[typeid(T)];
             auto* ptr = vec.at(i).get();
             return *static_cast<T*>(ptr);
+        }
+
+        /// same as above, but in case the class depends on mu, it must be passed as an argument
+        template <std::derived_from<mmie_t> T>
+            requires(std::derived_from<T, mu_depending_t> == true)
+        [[nodiscard]] T& get(const std::size_t i, const uint32_t mu) {
+            auto& vec = pool[typeid(T)];
+            auto* ptr = vec.at(i).get();
+            T* ret = static_cast<T*>(ptr);
+            ret->set_mu(mu);
+            return *ret;
         }
 
         [[nodiscard]] mmie_t& get_by_index(const std::size_t i, const std::size_t j = 0) const {

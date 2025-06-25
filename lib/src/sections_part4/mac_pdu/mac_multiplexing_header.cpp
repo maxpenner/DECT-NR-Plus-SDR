@@ -26,6 +26,7 @@
 #include "dectnrp/sections_part4/mac_messages_and_ie/cluster_beacon_message.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/extensions/power_target_ie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/padding_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/resource_allocation_ie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 
 // separated as not standard-compliant

@@ -246,14 +246,14 @@ mac::allocation::allocation_pt_t steady_rd_t::init_allocation_pt(const uint32_t 
     // PT specific
     const uint32_t offset = offset_beacon + firmware_id_ * ul_gap_dl_gap;
 
-    allocation_pt.add_resource_regular(mac::allocation::direction_t::uplink,
+    allocation_pt.add_resource_regular(mac::allocation::direction_t::ul,
                                        offset,
                                        ul,
                                        stride,
                                        N_resources,
                                        sp3::duration_ec_t::slot001);
 
-    allocation_pt.add_resource_regular(mac::allocation::direction_t::downlink,
+    allocation_pt.add_resource_regular(mac::allocation::direction_t::dl,
                                        offset + ul_gap,
                                        dl,
                                        stride,
@@ -471,7 +471,7 @@ bool steady_rd_t::worksub_tx_unicast_mac_sdu(const contact_p2p_t& contact_p2p,
     // then attach as many user plane data MMIEs as possible
     for (uint32_t i = 0; i < queue_level.N_filled; ++i) {
         // request ...
-        auto& upd = rd.mmie_pool_tx.get<sp4::user_plane_data_t>();
+        auto& upd = rd.mmie_pool_tx.get<sp4::user_plane_data_t>(0);
 
         // ... and configure user plane data MMIE
         upd.set_flow_id(1);
