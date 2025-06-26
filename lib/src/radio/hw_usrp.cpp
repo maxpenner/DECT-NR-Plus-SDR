@@ -630,7 +630,6 @@ void hw_usrp_t::work_stop() {
     pthread_join(thread_tx, NULL);
     pthread_join(thread_tx_async_helper, NULL);
 
-    // USRP
     std::string str("USRP");
     str.append(" TX Sent " + std::to_string(tx_stats.buffer_tx_sent));
     str.append(" TX Sent Consecutive " + std::to_string(tx_stats.buffer_tx_sent_consecutive));

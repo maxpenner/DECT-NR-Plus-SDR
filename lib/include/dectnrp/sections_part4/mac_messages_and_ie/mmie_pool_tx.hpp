@@ -44,18 +44,18 @@ class mmie_pool_tx_t {
         mmie_pool_tx_t& operator=(mmie_pool_tx_t&&) = delete;
 
         /// number of different types of MMIEs in the pool
-        [[nodiscard]] std::size_t get_nof_mmie() const { return pool.size(); }
+        [[nodiscard]] std::size_t get_nof_mmie() const noexcept { return pool.size(); }
 
         /// number of different types of MMIEs in the pool derived from T
         template <typename T>
-        [[nodiscard]] std::size_t get_nof_mmie_derived_from() const {
+        [[nodiscard]] std::size_t get_nof_mmie_derived_from() const noexcept {
             return std::count_if(pool.begin(), pool.end(), [](const auto& elem) {
                 return dynamic_cast<const T*>(elem.second.at(0).get()) != nullptr;
             });
         }
 
         /// number of elements across all MMIEs
-        [[nodiscard]] std::size_t get_nof_mmie_elements() const {
+        [[nodiscard]] std::size_t get_nof_mmie_elements() const noexcept {
             std::size_t cnt = 0;
             for (const auto& vec : pool) {
                 cnt += vec.second.size();
@@ -65,13 +65,13 @@ class mmie_pool_tx_t {
 
         /// get number of elements of a specific MMIE
         template <std::derived_from<mmie_t> T>
-        [[nodiscard]] std::size_t get_nof_elements() {
+        [[nodiscard]] std::size_t get_nof_elements() noexcept {
             return pool[typeid(T)].size();
         }
 
         /// set number of elements of a specific MMIE
         template <std::derived_from<mmie_t> T>
-        void set_nof_elements(const std::size_t n) {
+        void set_nof_elements(const std::size_t n) noexcept {
             dectnrp_assert(n > 0, "each MMIE must be contained at least once in the pool");
             auto& vec = pool[typeid(T)];
             while (vec.size() < n) {
@@ -93,7 +93,7 @@ class mmie_pool_tx_t {
          */
         template <std::derived_from<mmie_t> T>
             requires(std::derived_from<T, mu_depending_t> == false)
-        [[nodiscard]] T& get(const std::size_t i) {
+        [[nodiscard]] T& get(const std::size_t i) noexcept {
             auto& vec = pool[typeid(T)];
             auto* ptr = vec.at(i).get();
             return *static_cast<T*>(ptr);
@@ -102,7 +102,7 @@ class mmie_pool_tx_t {
         /// same as above, but in case the class depends on mu, it must be passed as an argument
         template <std::derived_from<mmie_t> T>
             requires(std::derived_from<T, mu_depending_t> == true)
-        [[nodiscard]] T& get(const std::size_t i, const uint32_t mu) {
+        [[nodiscard]] T& get(const std::size_t i, const uint32_t mu) noexcept {
             auto& vec = pool[typeid(T)];
             auto* ptr = vec.at(i).get();
             T* ret = static_cast<T*>(ptr);
@@ -110,7 +110,16 @@ class mmie_pool_tx_t {
             return *ret;
         }
 
-        [[nodiscard]] mmie_t& get_by_index(const std::size_t i, const std::size_t j = 0) const {
+        /**
+         * \brief Gets an MMIE based on two indexes. First index defines the type, second one the
+         * instance. This is useful if we iterate over MMIEs and used only for testing purposes.
+         *
+         * \param i defines type
+         * \param j defines instance of above type saved in pool
+         * \return
+         */
+        [[nodiscard]] mmie_t& get_by_index(const std::size_t i,
+                                           const std::size_t j = 0) const noexcept {
             auto vec = std::next(pool.begin(), i);
             return *(vec->second.at(j).get());
         }
@@ -122,7 +131,8 @@ class mmie_pool_tx_t {
          * \param mac_pdu_offset
          * \param N_bytes_to_fill
          */
-        void fill_with_padding_ies(uint8_t* mac_pdu_offset, const uint32_t N_bytes_to_fill);
+        void fill_with_padding_ies(uint8_t* mac_pdu_offset,
+                                   const uint32_t N_bytes_to_fill) noexcept;
 
     protected:
         /**

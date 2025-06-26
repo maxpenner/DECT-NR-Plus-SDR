@@ -40,7 +40,7 @@ mac_pdu_decoder_t::mac_pdu_decoder_t() {
 
 void mac_pdu_decoder_t::set_configuration(uint8_t* a_,
                                           const uint32_t a_cnt_w_tb_,
-                                          const uint32_t mu_) {
+                                          const uint32_t mu_) noexcept {
     dectnrp_assert(a_ != nullptr, "TB starts at nullptr");
     a = a_;
     dectnrp_assert(a_cnt_w_tb_ > 0, "number of bytes in TB must be larger 0");
@@ -67,7 +67,7 @@ void mac_pdu_decoder_t::set_configuration(uint8_t* a_,
     dectnrp_assert(a_cnt_r + N_bytes_required <= a_cnt_w_tb, "first state requires too many bytes");
 }
 
-void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
+void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) noexcept {
     dectnrp_assert(a_cnt_w_ <= a_cnt_w_tb, "invalid write counter");
     dectnrp_assert(a_cnt_r <= a_cnt_w_, "invalid read counter");
 
@@ -168,9 +168,6 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
                         break;
                     }
 
-                    // a_cnt_r is not incremented here, but instead the MAC multiplexing header's
-                    // full packed size is added in MAC_MUX_HEADER_UNPACK
-
                     /* The padding IE is a special case, because it terminates the MAC PDU as far as
                      * MMIEs are concerned. Quoting 6.4.3.8: "When a receiver detects a MAC
                      * extension field: 01 and IE Type: 000000 or MAC extension field 11 and IE
@@ -191,8 +188,9 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
 
                     /* Next step is to determine whether the size of the MMIE is self-contained. If
                      * not, we have to unpack the length field contained in the mac multiplexing
-                     * header before entering MAC_MESSAGE_IE_UNPACK. Otherwise, we have to determine
-                     * the size by peeking at the packed MAC message/IE.
+                     * header or lookup the MMIE's fixed size before entering MAC_MESSAGE_IE_UNPACK.
+                     * Otherwise, we have to determine the size by peeking at the packed MAC
+                     * message/IE.
                      */
                     if (mmie_packing_peeking_t* mmie_packing_peeking =
                             dynamic_cast<mmie_packing_peeking_t*>(mmie);
@@ -208,6 +206,9 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
                         // read enough bytes to peak the MMIE size
                         N_bytes_required = mmie_packing_peeking->get_packed_size_min_to_peek();
                     } else {
+                        // a_cnt_r is not incremented here, but in the next state
+                        // A_MAC_MUX_HEADER_UNPACK_LENGTH_OR_FIXED_SIZE
+
                         state = A_MAC_MUX_HEADER_UNPACK_LENGTH_OR_FIXED_SIZE;
                         N_bytes_required = mmh.get_packed_size();
                     }
@@ -246,8 +247,8 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
                         mu_depending->set_mu(mu);
                     }
 
-                    // a_cnt_r is not incremented here, but instead the MMIE's full size is added
-                    // in MAC_MESSAGE_IE_UNPACK
+                    // a_cnt_r is not incremented here by the size required to peek, but instead the
+                    // MMIE's full size is added in MAC_MESSAGE_IE_UNPACK
 
                     state = MAC_MESSAGE_IE_UNPACK;
 
@@ -329,7 +330,7 @@ void mac_pdu_decoder_t::decode(const uint32_t a_cnt_w_) {
     }
 }
 
-bool mac_pdu_decoder_t::has_reached_valid_final_state() const {
+bool mac_pdu_decoder_t::has_reached_valid_final_state() const noexcept {
     dectnrp_assert(
         a_cnt_r == a_cnt_w_tb, "not all bytes given to decoder {} {}", a_cnt_r, a_cnt_w_tb);
     dectnrp_assert((state == STATES::MAC_PDU_DONE) or (state == STATES::MAC_PDU_PREMATURE_ABORT),
@@ -339,7 +340,7 @@ bool mac_pdu_decoder_t::has_reached_valid_final_state() const {
            ((state == STATES::MAC_PDU_DONE) or (state == STATES::MAC_PDU_PREMATURE_ABORT));
 };
 
-mmie_t* mac_pdu_decoder_t::get_mmie_from_pool(const std::type_index& type_idx) {
+mmie_t* mac_pdu_decoder_t::get_mmie_from_pool(const std::type_index& type_idx) noexcept {
     auto& vec = pool[type_idx];
     std::size_t& i = index_next_ie[type_idx];
     return i < vec.size() ? vec[i].get() : nullptr;

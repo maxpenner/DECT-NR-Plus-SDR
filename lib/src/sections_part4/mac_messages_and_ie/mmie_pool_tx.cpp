@@ -88,7 +88,8 @@ mmie_pool_tx_t::mmie_pool_tx_t() {
     set_nof_elements<extensions::time_announce_ie_t>(1);
 }
 
-void mmie_pool_tx_t::fill_with_padding_ies(uint8_t* mac_pdu_offset, uint32_t N_bytes_to_fill) {
+void mmie_pool_tx_t::fill_with_padding_ies(uint8_t* mac_pdu_offset,
+                                           uint32_t N_bytes_to_fill) noexcept {
     padding_ie_t padding_ie;
 
     // iterate until there are no more padding bytes left

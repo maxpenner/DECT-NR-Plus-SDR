@@ -56,7 +56,9 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
          * \param a_cnt_w_tb_ total number of bytes that a will contain
          * \param mu_ subcarrier scaling factor
          */
-        void set_configuration(uint8_t* a_, const uint32_t a_cnt_w_tb_, const uint32_t mu_);
+        void set_configuration(uint8_t* a_,
+                               const uint32_t a_cnt_w_tb_,
+                               const uint32_t mu_) noexcept;
 
         /**
          * \brief Decodes the MAC PDU and verifies that a_cnt_w pointer does not exceed a_cnt_w_tb
@@ -64,7 +66,7 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
          *
          * \param a_cnt_w_ current number of processable bytes written to the HARQ buffer
          */
-        void decode(const uint32_t a_cnt_w_);
+        void decode(const uint32_t a_cnt_w_) noexcept;
 
         /**
          * \brief Convenience function to check if internal state machine has reached a valid final
@@ -73,7 +75,7 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
          * \return
          * \return
          */
-        [[nodiscard]] bool has_reached_valid_final_state() const;
+        [[nodiscard]] bool has_reached_valid_final_state() const noexcept;
 
         // ##################################################
         // MAC PDU retrieval after decoding, delivers valid results only if a_cnt_w = a_cnt_w_tb
@@ -85,12 +87,12 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
          *
          * \return
          */
-        [[nodiscard]] std::pair<const uint8_t*, const uint32_t> get_a_raw() const {
+        [[nodiscard]] std::pair<const uint8_t*, const uint32_t> get_a_raw() const noexcept {
             return std::make_pair(a, a_cnt_w_tb);
         }
 
         /// convenience function to copy raw content
-        void copy_a(uint8_t* a_dst) const { std::memcpy(a_dst, a, a_cnt_w_tb); }
+        void copy_a(uint8_t* a_dst) const noexcept { std::memcpy(a_dst, a, a_cnt_w_tb); }
 
         /**
          * \brief Convenience function to check if there are is any readable decoded MMIE in the MAC
@@ -99,21 +101,23 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
          * \return
          * \return
          */
-        [[nodiscard]] bool has_any_data() const { return !mmie_decoded_vec.empty(); }
+        [[nodiscard]] bool has_any_data() const noexcept { return !mmie_decoded_vec.empty(); }
 
         /**
          * \brief Pointer to extract information from the MAC header type.
          *
          * \return nullptr if decoding failed
          */
-        [[nodiscard]] const mac_header_type_t* get_mac_header_type() const { return mht_effective; }
+        [[nodiscard]] const mac_header_type_t* get_mac_header_type() const noexcept {
+            return mht_effective;
+        }
 
         /**
          * \brief Pointer to extract information from the MAC common header.
          *
          * \return nullptr if decoding failed
          */
-        [[nodiscard]] const mac_common_header_t* get_mac_common_header() const {
+        [[nodiscard]] const mac_common_header_t* get_mac_common_header() const noexcept {
             return mch_effective;
         }
 
@@ -123,13 +127,13 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
          *
          * \return empty vector if decoding failed
          */
-        [[nodiscard]] const std::vector<sp4::mmie_t*>& get_mmie_decoded_vec() const {
+        [[nodiscard]] const std::vector<sp4::mmie_t*>& get_mmie_decoded_vec() const noexcept {
             return mmie_decoded_vec;
         }
 
         /// number of specific MMIE, primarily used for asserts
         template <std::derived_from<sp4::mmie_t> T>
-        [[nodiscard]] size_t get_N_mmie() const {
+        [[nodiscard]] size_t get_N_mmie() const noexcept {
             return std::count_if(mmie_decoded_vec.begin(), mmie_decoded_vec.end(), [](auto elem) {
                 return dynamic_cast<T*>(elem) != nullptr;
             });
@@ -204,7 +208,7 @@ class mac_pdu_decoder_t final : private mmie_pool_tx_t {
          * \param type_idx type index that maps to an instance of the requested MMIE type
          * \return MMIE of requested type or nullptr
          */
-        [[nodiscard]] mmie_t* get_mmie_from_pool(const std::type_index& type_idx);
+        [[nodiscard]] mmie_t* get_mmie_from_pool(const std::type_index& type_idx) noexcept;
 };
 
 }  // namespace dectnrp::sp4
