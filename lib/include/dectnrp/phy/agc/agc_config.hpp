@@ -22,8 +22,6 @@
 
 #include <cstdint>
 
-#include "dectnrp/sections_part3/derivative/duration.hpp"
-
 namespace dectnrp::phy::agc {
 
 struct agc_config_t {
@@ -38,9 +36,6 @@ struct agc_config_t {
 
         /// minimum gain change in dB
         float gain_step_dB_min;
-
-        /// minimum duration between two AGC gain changes
-        sp3::duration_t protect_duration;
 };
 
 }  // namespace dectnrp::phy::agc

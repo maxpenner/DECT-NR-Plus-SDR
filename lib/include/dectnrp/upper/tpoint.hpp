@@ -244,22 +244,21 @@ class tpoint_t : public common::layer_unit_t {
          * FT holds a constant transmit power and a constant receiver sensitivity. Target power
          * levels for TX and RX are defined in agc_tx and agc_rx.
          *
-         * AGC gain changes can be applied ASAP (t_agc_change_64 < 0), or at a fixed point in time
-         * in the future (t_agc_change_64 >= 0). Typically, the AGC settings should be applied when
-         * it is guaranteed that no packet will be transmitted or received while the changes are
-         * made, for instance, in a GI at the end of a packet.
-         *
-         * Note that even if this function is called, AGC settings may be ignored if the protection
-         * duration of agc_tx is still active (protection duration of agc_rx is ignored).
+         * AGC gain changes can be applied ASAP (t_agc_xx_change_64 < 0), or at a fixed point in
+         * time in the future (t_agc_xx_change_64 >= 0). Typically, the AGC settings should be
+         * applied when it is guaranteed that no packet will be transmitted or received while the
+         * changes are made, for instance, in a GI at the end of a packet.
          *
          * \param sync_report contains received RMS
          * \param plcf_base contains transmit power
-         * \param t_agc_change_64 if negative, settings are applied ASAP
+         * \param t_agc_tx_change_64 if negative, settings are applied ASAP
+         * \param t_agc_rx_change_64 if negative, settings are applied ASAP
          * \param hw_idx index of hardware in mac_lower
          */
         void worksub_agc(const phy::sync_report_t& sync_report,
                          const sp4::plcf_base_t& plcf_base,
-                         const int64_t t_agc_change_64,
+                         const int64_t t_agc_tx_change_64,
+                         const int64_t t_agc_rx_change_64,
                          const std::size_t hw_idx = 0);
 
         /**
@@ -323,6 +322,15 @@ class tpoint_t : public common::layer_unit_t {
          */
         [[nodiscard]] sp3::packet_sizes_def_t worksub_psdef(const phy::phy_maclow_t& phy_maclow,
                                                             const uint32_t PLCF_type) const;
+
+        void worksub_agc_tx(const phy::sync_report_t& sync_report,
+                            const sp4::plcf_base_t& plcf_base,
+                            const int64_t t_agc_change_64,
+                            const std::size_t hw_idx);
+
+        void worksub_agc_rx(const phy::sync_report_t& sync_report,
+                            const int64_t t_agc_change_64,
+                            const std::size_t hw_idx);
 };
 
 }  // namespace dectnrp::upper

@@ -79,23 +79,14 @@ const common::ant_t& agc_rx_t::get_power_ant_0dBFS(const int64_t now_64) const {
     return power_ant_0dBFS;
 }
 
-const common::ant_t agc_rx_t::get_gain_step_dB(const int64_t t_64,
-                                               const common::ant_t& rx_power_ant_0dBFS,
+const common::ant_t agc_rx_t::get_gain_step_dB(const common::ant_t& rx_power_ant_0dBFS,
                                                const common::ant_t& rms_measured_) {
     dectnrp_assert(rx_power_ant_0dBFS.get_nof_antennas() == agc_config.nof_antennas,
                    "incorrect number of antennas");
     dectnrp_assert(rms_measured_.get_nof_antennas() == agc_config.nof_antennas,
                    "incorrect number of antennas");
 
-    // save value, even if protection duration is still active
     rms_measured_last_known = rms_measured_;
-
-    // return zero gain change if gain is protected
-    if (!has_protect_duration_passed(t_64)) {
-        return common::ant_t{};
-    } else {
-        protect_duration_start_64 = t_64;
-    }
 
     // what is the RX power at 0dBFS for the antenna with the lowest sensitivity?
     const float A = rx_power_ant_0dBFS.get_max();

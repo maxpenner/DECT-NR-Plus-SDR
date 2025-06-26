@@ -96,7 +96,7 @@ void tfw_p2p_pt_t::init_radio() {
     hw.set_command_time();
     hw.set_freq_tc(3830.0e6);
     const float tx_power_ant_0dBFS = hw.set_tx_power_ant_0dBFS_tc(10.0f);
-    const auto& rx_power_ant_0dBFS = hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
+    const auto& rx_power_ant_0dBFS = hw.set_rx_power_ant_0dBFS_uniform_tc(-40.0f);
 
     // make AGCs remember current power at 0dBFS, taking effect immediately
     agc_tx.set_power_ant_0dBFS_pending(tx_power_ant_0dBFS);

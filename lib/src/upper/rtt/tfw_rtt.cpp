@@ -187,16 +187,32 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc(const phy::phy_machigh_t& phy_machigh) {
 
         generate_packet_asap(machigh_phy);
 
-        // base pointer to extract PLCF_type=1
-        const auto* plcf_base = phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1);
+        const int64_t tx_time_64 = machigh_phy.tx_descriptor_vec.at(0).buffer_tx_meta.tx_time_64;
 
-        // make AGC gain changes right after sending the response packet
-        const int64_t t_agc_change_64 =
-            machigh_phy.tx_descriptor_vec.at(0).buffer_tx_meta.tx_time_64 +
-            duration_lut.get_N_samples_from_subslots(worker_pool_config.radio_device_class.u_min,
-                                                     psdef.PacketLength);
+        if (time_of_last_agc_change +
+                duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 100) <=
+            tx_time_64) {
+            // save time
+            time_of_last_agc_change = tx_time_64;
 
-        worksub_agc(phy_machigh.phy_maclow.sync_report, *plcf_base, t_agc_change_64);
+            // base pointer to extract PLCF_type=1
+            const auto* plcf_base = phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1);
+
+            // make AGC gain changes right after sending the response packet
+            const int64_t t_agc_tx_change_64 =
+                tx_time_64 +
+                duration_lut.get_N_samples_from_subslots(
+                    worker_pool_config.radio_device_class.u_min, psdef.PacketLength + 1);
+
+            const int64_t t_agc_rx_change_64 =
+                t_agc_tx_change_64 + duration_lut.get_N_samples_from_subslots(
+                                         worker_pool_config.radio_device_class.u_min, 1);
+
+            worksub_agc(phy_machigh.phy_maclow.sync_report,
+                        *plcf_base,
+                        t_agc_tx_change_64,
+                        t_agc_rx_change_64);
+        }
     }
 
     return machigh_phy;

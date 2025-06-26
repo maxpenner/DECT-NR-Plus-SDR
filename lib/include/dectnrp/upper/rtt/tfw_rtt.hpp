@@ -72,6 +72,9 @@ class tfw_rtt_t final : public tpoint_t {
         /// packet dimensions
         sp3::packet_sizes_def_t psdef;
 
+        /// last time the AGC was tuned
+        int64_t time_of_last_agc_change{common::adt::UNDEFINED_EARLY_64};
+
         /// FT and PT must know both identities
         sp4::mac_architecture::identity_t identity_ft;
         sp4::mac_architecture::identity_t identity_pt;

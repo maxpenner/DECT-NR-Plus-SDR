@@ -148,20 +148,29 @@ std::optional<phy::maclow_phy_t> steady_pt_t::worksub_pcc_10(const phy::phy_macl
     }
 #endif
 
-#ifdef TFW_P2P_PT_AGC_ENABLED
-#ifdef TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
-    // apply AGC change for RX and TX immediately before the next beacon
-    const int64_t t_agc_change_64 = pt.contact_pt.allocation_pt.get_beacon_time_last_known() +
-                                    pt.contact_pt.allocation_pt.get_beacon_period() -
-                                    hw.get_tmin_samples(radio::hw_t::tmin_t::gain);
+    if (pt.time_of_last_agc_change +
+            duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
+                                                     TFW_P2P_PT_AGC_MINIMUM_PERIOD_MS) <=
+        phy_maclow.sync_report.fine_peak_time_64) {
+        // save time
+        pt.time_of_last_agc_change = phy_maclow.sync_report.fine_peak_time_64;
+
+        // AGC change immediately before the next beacon
+        const int64_t t_agc_tx_change_64 =
+            pt.contact_pt.allocation_pt.get_beacon_time_last_known() +
+            pt.contact_pt.allocation_pt.get_beacon_period() -
+            hw.get_tmin_samples(radio::hw_t::tmin_t::gain);
+
+#ifdef TFW_P2P_PT_AGC_CHANGE_TIME_SAME_OR_DELAYED
+        const int64_t t_agc_rx_change_64 = t_agc_tx_change_64;
 #else
-    // immediate AGC gain change
-    const int64_t t_agc_change_64 = common::adt::UNDEFINED_EARLY_64;
+        // immediate AGC gain change
+        const int64_t t_agc_rx_change_64 =
+            t_agc_tx_change_64 + pt.contact_pt.allocation_pt.get_beacon_period();
 #endif
 
-    // apply AGC settings
-    worksub_agc(phy_maclow.sync_report, *plcf_10, t_agc_change_64);
-#endif
+        worksub_agc(phy_maclow.sync_report, *plcf_10, t_agc_tx_change_64, t_agc_rx_change_64);
+    }
 
     return worksub_pcc2pdc(
         phy_maclow,

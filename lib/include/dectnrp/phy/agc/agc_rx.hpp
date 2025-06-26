@@ -77,8 +77,7 @@ class agc_rx_t final : public agc_t {
          * the rx power at 0dBFS, and by that become more sensitive. Returns 0.0f if protection
          * duration has not passed yet or no change is required.
          */
-        const common::ant_t get_gain_step_dB(const int64_t t_64,
-                                             const common::ant_t& rx_power_ant_0dBFS,
+        const common::ant_t get_gain_step_dB(const common::ant_t& rx_power_ant_0dBFS,
                                              const common::ant_t& rms_measured_);
 
         float get_rms_target() const { return rms_target; };

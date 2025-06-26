@@ -56,20 +56,12 @@ class lower_ctrl_t {
               duration_lut(sp3::duration_lut_t(hw.get_samp_rate())),
               // generic values for a software TX AGC
               agc_tx(phy::agc::agc_tx_t(
-                  phy::agc::agc_config_t{buffer_rx.nof_antennas,
-                                         1.0f,
-                                         5.0f,
-                                         2.0f,
-                                         duration_lut.get_duration(sp3::duration_ec_t::ms001, 35)},
+                  phy::agc::agc_config_t{buffer_rx.nof_antennas, 1.0f, 5.0f, 2.0f},
                   phy::agc::agc_t::OFDM_AMPLITUDE_FACTOR_MINUS_15dB,
                   -55.0f)),
               // generic values for a software RX AGC
               agc_rx(phy::agc::agc_rx_t(
-                  phy::agc::agc_config_t{buffer_rx.nof_antennas,
-                                         1.0f,
-                                         8.0f,
-                                         2.0f,
-                                         duration_lut.get_duration(sp3::duration_ec_t::ms001, 1)},
+                  phy::agc::agc_config_t{buffer_rx.nof_antennas, 1.0f, 8.0f, 2.0f},
                   phy::agc::agc_t::OFDM_AMPLITUDE_FACTOR_MINUS_20dB,
                   15.0f)) {}
 

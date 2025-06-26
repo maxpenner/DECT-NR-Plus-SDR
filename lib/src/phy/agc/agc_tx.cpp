@@ -70,18 +70,10 @@ float agc_tx_t::get_power_ant_0dBFS(const int64_t now_64) const {
     return power_ant_0dBFS;
 }
 
-float agc_tx_t::get_gain_step_dB(const int64_t t_64,
-                                 const float tx_dBm_opposite,
+float agc_tx_t::get_gain_step_dB(const float tx_dBm_opposite,
                                  const float tx_power_ant_0dBFS,
                                  const common::ant_t& rx_power_ant_0dBFS,
                                  const common::ant_t& rms_measured_) {
-    // return zero gain change if gain is protected
-    if (!has_protect_duration_passed(t_64)) {
-        return 0.0f;
-    } else {
-        protect_duration_start_64 = t_64;
-    }
-
     // we have to find the antenna with the highest RX power
     float rx_power_dBm_measured_max = -1e6;
 

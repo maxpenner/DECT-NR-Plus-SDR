@@ -27,9 +27,6 @@
 #include "dectnrp/upper/p2p/data/pt.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_rd.hpp"
 
-#define TFW_P2P_PT_AGC_ENABLED
-#define TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
-
 namespace dectnrp::upper::tfw::p2p {
 
 class steady_pt_t final : public steady_rd_t {
