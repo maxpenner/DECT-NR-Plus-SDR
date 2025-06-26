@@ -26,7 +26,6 @@
 #include <csignal>
 #include <cstdlib>
 #include <ctime>
-#include <numeric>
 #include <string>
 #include <vector>
 
@@ -37,7 +36,6 @@
 #include <sys/types.h>
 
 // json export
-#include <fstream>
 #include <sstream>
 
 #include "dectnrp/apps/udp.hpp"
@@ -46,6 +44,7 @@
 #include "dectnrp/common/prog/print.hpp"
 #include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/common/thread/watch.hpp"
+#include "dectnrp/upper/rtt/tfw_rtt_param.hpp"
 #include "header_only/nlohmann/json.hpp"
 
 // ctrl+c
