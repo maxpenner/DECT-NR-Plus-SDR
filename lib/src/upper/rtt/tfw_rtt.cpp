@@ -36,9 +36,12 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     : tpoint_t(tpoint_config_, mac_lower_) {
     // set TX power, RX power, and frequency which should be free of any interference
     hw.set_command_time();
-    hw.set_tx_power_ant_0dBFS_tc(10.0f);
-    hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
     hw.set_freq_tc(3830.0e6);
+
+    const float tx_power_ant_0dBFS = hw.set_tx_power_ant_0dBFS_tc(10.0f);
+    const auto& rx_power_ant_0dBFS = hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
+    agc_tx.set_power_ant_0dBFS_pending(tx_power_ant_0dBFS);
+    agc_rx.set_power_ant_0dBFS_pending(rx_power_ant_0dBFS);
 
     psdef = {.u = worker_pool_config.radio_device_class.u_min,
              .b = worker_pool_config.radio_device_class.b_min,

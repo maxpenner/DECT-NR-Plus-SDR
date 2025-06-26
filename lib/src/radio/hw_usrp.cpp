@@ -667,10 +667,12 @@ void* hw_usrp_t::work_tx_async_helper(void* hw_usrp) {
     // stats (unused if logging is turned off)
     [[maybe_unused]] uint64_t ACK = 0;
     [[maybe_unused]] uint64_t UF = 0;
-    [[maybe_unused]] uint64_t UFIP = 0;
     [[maybe_unused]] uint64_t SE = 0;
+    [[maybe_unused]] uint64_t TE = 0;
+    [[maybe_unused]] uint64_t UFIP = 0;
     [[maybe_unused]] uint64_t SEIB = 0;
-    [[maybe_unused]] uint64_t LATE = 0;
+    [[maybe_unused]] uint64_t UP = 0;
+    [[maybe_unused]] uint64_t OTHER = 0;
 
     // print from time to time
     common::watch_t watch;
@@ -685,17 +687,23 @@ void* hw_usrp_t::work_tx_async_helper(void* hw_usrp) {
                 case uhd::async_metadata_t::EVENT_CODE_UNDERFLOW:
                     ++UF;
                     break;
-                case uhd::async_metadata_t::EVENT_CODE_UNDERFLOW_IN_PACKET:
-                    ++UFIP;
-                    break;
                 case uhd::async_metadata_t::EVENT_CODE_SEQ_ERROR:
                     ++SE;
+                    break;
+                case uhd::async_metadata_t::EVENT_CODE_TIME_ERROR:
+                    ++TE;
+                    break;
+                case uhd::async_metadata_t::EVENT_CODE_UNDERFLOW_IN_PACKET:
+                    ++UFIP;
                     break;
                 case uhd::async_metadata_t::EVENT_CODE_SEQ_ERROR_IN_BURST:
                     ++SEIB;
                     break;
+                case uhd::async_metadata_t::EVENT_CODE_USER_PAYLOAD:
+                    ++UP;
+                    break;
                 default:
-                    ++LATE;
+                    ++OTHER;
                     break;
             }
         }
@@ -703,8 +711,9 @@ void* hw_usrp_t::work_tx_async_helper(void* hw_usrp) {
         if (watch.is_elapsed<common::seconds>(5)) {
             calling_instance->log_line(
                 "USRP ACK: " + std::to_string(ACK) + "  UF: " + std::to_string(UF) +
-                "  UFIP: " + std::to_string(UFIP) + "  SE: " + std::to_string(SE) +
-                "  SEIB: " + std::to_string(SEIB) + "  LATE: " + std::to_string(LATE));
+                "  SE: " + std::to_string(SE) + "  TE: " + std::to_string(TE) +
+                "  UFIP: " + std::to_string(UFIP) + "  SEIB: " + std::to_string(SEIB) +
+                "  UP: " + std::to_string(UP) + "  OTHER: " + std::to_string(OTHER));
             watch.reset();
         }
     }

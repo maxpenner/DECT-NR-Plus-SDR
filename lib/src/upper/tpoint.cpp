@@ -55,12 +55,12 @@ phy::machigh_phy_t tpoint_t::work_pcc_error([[maybe_unused]] const phy::phy_macl
 #endif
 
 void tpoint_t::worksub_agc(const phy::sync_report_t& sync_report,
-                           const sp4::plcf_base_t& plcf_base,
+                           [[maybe_unused]] const sp4::plcf_base_t& plcf_base,
                            const int64_t t_agc_change_64,
                            const std::size_t hw_idx) {
     auto& hw_local = mac_lower.lower_ctrl_vec.at(hw_idx).hw;
     auto& agc_tx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_tx;
-    auto& agc_rx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_rx;
+    [[maybe_unused]] auto& agc_rx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_rx;
 
     hw_local.set_command_time(t_agc_change_64);
 
