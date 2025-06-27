@@ -96,6 +96,8 @@ class tfw_rtt_t final : public tpoint_t {
 
         /// used at FT and PT
         void generate_packet_asap(phy::machigh_phy_t& machigh_phy);
+
+        phy::machigh_phy_t work_pdc_internal(const phy::phy_machigh_t& phy_machigh);
 };
 
 }  // namespace dectnrp::upper::tfw::rtt

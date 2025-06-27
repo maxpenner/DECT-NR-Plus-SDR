@@ -158,73 +158,11 @@ phy::maclow_phy_t tfw_rtt_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
 }
 
 phy::machigh_phy_t tfw_rtt_t::work_pdc(const phy::phy_machigh_t& phy_machigh) {
-    phy::machigh_phy_t machigh_phy;
-
-    if (tpoint_config.firmware_id == 0) {
-        // measure round-trip time
-        const int64_t rtt = watch.get_elapsed();
-
-        // add to statistics
-        rtt_min = std::min(rtt_min, rtt);
-        rtt_max = std::max(rtt_max, rtt);
-        sync_report = phy_machigh.phy_maclow.sync_report;
-
-        // get pointer to payload of received packet
-        const auto a_raw = phy_machigh.pdc_report.mac_pdu_decoder.get_a_raw();
-
-        // copy first few bytes so rtt can verify the content of the packet
-        memcpy(&stage_a[0], a_raw.first, TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE);
-
-        // insert measured RTT into payload so rtt_external.cpp can log it
-        memcpy(&stage_a[TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE], &rtt, sizeof(rtt));
-
-        // forward to rtt
-        application_client->write_immediate(0, &stage_a[0], a_raw.second);
-
-        ++N_measurement_rx_cnt;
-    } else {
-        // copy received payload onto stage
-        phy_machigh.pdc_report.mac_pdu_decoder.copy_a(&stage_a[0]);
-
-        generate_packet_asap(machigh_phy);
-
-        const int64_t tx_time_64 = machigh_phy.tx_descriptor_vec.at(0).buffer_tx_meta.tx_time_64;
-
-        // if another AGC change due?
-        if (t_agc_xx_last_change_64 +
-                duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 50) <=
-            tx_time_64) {
-            // save time
-            t_agc_xx_last_change_64 = tx_time_64;
-
-            // copies used in the irregular callback after packet transmission has started
-            sync_report = phy_machigh.phy_maclow.sync_report;
-            plcf_10_rx = *static_cast<const sp4::plcf_10_t*>(
-                phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
-
-            // tune AGC some subslots after packet transmission has started
-            t_agc_tx_change_64 = tx_time_64 + duration_lut.get_N_samples_from_subslots(
-                                                  worker_pool_config.radio_device_class.u_min,
-                                                  psdef.PacketLength + 2);
-            t_agc_rx_change_64 = t_agc_tx_change_64;
-
-            // schedule callback to the center of the packet
-            const int64_t t_callback_64 =
-                tx_time_64 + duration_lut.get_N_samples_from_subslots(
-                                 worker_pool_config.radio_device_class.u_min, psdef.PacketLength) /
-                                 2;
-
-            // schedule an irregular callback to make the AGC change
-            machigh_phy.irregular_report = phy::irregular_report_t(t_callback_64, 0);
-        }
-    }
-
-    return machigh_phy;
+    return work_pdc_internal(phy_machigh);
 }
 
-phy::machigh_phy_t tfw_rtt_t::work_pdc_error(
-    [[maybe_unused]] const phy::phy_machigh_t& phy_machigh) {
-    return phy::machigh_phy_t();
+phy::machigh_phy_t tfw_rtt_t::work_pdc_error(const phy::phy_machigh_t& phy_machigh) {
+    return work_pdc_internal(phy_machigh);
 }
 
 phy::machigh_phy_t tfw_rtt_t::work_application(
@@ -347,6 +285,71 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
 
     machigh_phy.tx_descriptor_vec.push_back(
         phy::tx_descriptor_t(*hp_tx, codebook_index, tx_meta, buffer_tx_meta));
+}
+
+phy::machigh_phy_t tfw_rtt_t::work_pdc_internal(const phy::phy_machigh_t& phy_machigh) {
+    phy::machigh_phy_t machigh_phy;
+
+    if (tpoint_config.firmware_id == 0) {
+        // measure round-trip time
+        const int64_t rtt = watch.get_elapsed();
+
+        // add to statistics
+        rtt_min = std::min(rtt_min, rtt);
+        rtt_max = std::max(rtt_max, rtt);
+        sync_report = phy_machigh.phy_maclow.sync_report;
+
+        // get pointer to payload of received packet
+        const auto a_raw = phy_machigh.pdc_report.mac_pdu_decoder.get_a_raw();
+
+        // copy first few bytes so rtt can verify the content of the packet
+        memcpy(&stage_a[0], a_raw.first, TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE);
+
+        // insert measured RTT into payload so rtt_external.cpp can log it
+        memcpy(&stage_a[TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE], &rtt, sizeof(rtt));
+
+        // forward to rtt
+        application_client->write_immediate(0, &stage_a[0], a_raw.second);
+
+        ++N_measurement_rx_cnt;
+    } else {
+        // copy received payload onto stage
+        phy_machigh.pdc_report.mac_pdu_decoder.copy_a(&stage_a[0]);
+
+        generate_packet_asap(machigh_phy);
+
+        const int64_t tx_time_64 = machigh_phy.tx_descriptor_vec.at(0).buffer_tx_meta.tx_time_64;
+
+        // if another AGC change due?
+        if (t_agc_xx_last_change_64 +
+                duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 50) <=
+            tx_time_64) {
+            // save time
+            t_agc_xx_last_change_64 = tx_time_64;
+
+            // copies used in the irregular callback after packet transmission has started
+            sync_report = phy_machigh.phy_maclow.sync_report;
+            plcf_10_rx = *static_cast<const sp4::plcf_10_t*>(
+                phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
+
+            // tune AGC some subslots after packet transmission has started
+            t_agc_tx_change_64 = tx_time_64 + duration_lut.get_N_samples_from_subslots(
+                                                  worker_pool_config.radio_device_class.u_min,
+                                                  psdef.PacketLength + 2);
+            t_agc_rx_change_64 = t_agc_tx_change_64;
+
+            // schedule callback to the center of the packet
+            const int64_t t_callback_64 =
+                tx_time_64 + duration_lut.get_N_samples_from_subslots(
+                                 worker_pool_config.radio_device_class.u_min, psdef.PacketLength) /
+                                 2;
+
+            // schedule an irregular callback to make the AGC change
+            machigh_phy.irregular_report = phy::irregular_report_t(t_callback_64, 0);
+        }
+    }
+
+    return machigh_phy;
 }
 
 }  // namespace dectnrp::upper::tfw::rtt
