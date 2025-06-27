@@ -236,13 +236,8 @@ class tpoint_t : public common::layer_unit_t {
 
         /**
          * \brief This convenience function can be used by any firmware to apply AGC gain changes
-         * for both TX and RX. AGC gain changes are based on the RMS of a received packet (read from
-         * sync_report) which is typically a beacon, and the transmit power of the same packet
-         * encoded in the PLCF (read from plcf_base).
-         *
-         * In most cases, AGC gain changes for TX and RX should be applied only at the PT, while the
-         * FT holds a constant transmit power and a constant receiver sensitivity. Target power
-         * levels for TX and RX are defined in agc_tx and agc_rx.
+         * for both TX and RX. AGC gain changes are based on the RMS of a received packet read from
+         * sync_report, and the transmit power of the same packet extracted from its PLCF.
          *
          * AGC gain changes can be applied ASAP (t_agc_xx_change_64 < 0), or at a fixed point in
          * time in the future (t_agc_xx_change_64 >= 0). Typically, the AGC settings should be

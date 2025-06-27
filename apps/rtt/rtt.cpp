@@ -338,7 +338,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
     udp.add_connection_tx("127.0.0.1", TFW_RTT_UDP_PORT_DATA);
     udp.add_connection_tx("127.0.0.1", TFW_RTT_UDP_PORT_PRINT);
-    udp.add_connection_rx("127.0.0.1", 8050, RTT_UDP_TIMEOUT_BEFORE_ASSUMING_ERROR_US);
+    udp.add_connection_rx("127.0.0.1",
+                          TFW_RTT_UDP_PORT_RTT_IS_AWAITING_RESPONSE_AT,
+                          RTT_UDP_TIMEOUT_BEFORE_ASSUMING_ERROR_US);
 
     // core and priority of thread, start with sudo if elevated
     dectnrp::common::threads_core_prio_config_t threads_core_prio_config;

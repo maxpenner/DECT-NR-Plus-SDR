@@ -36,7 +36,7 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     : tpoint_t(tpoint_config_, mac_lower_) {
     // set TX power, RX power, and frequency which should be free of any interference
     hw.set_command_time();
-    hw.set_freq_tc(3830.0e6);
+    hw.set_freq_tc(3900.0e6);
 
     const float tx_power_ant_0dBFS = hw.set_tx_power_ant_0dBFS_tc(10.0f);
     const auto& rx_power_ant_0dBFS = hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
@@ -56,19 +56,19 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     ++identity_pt.LongRadioDeviceID;
     ++identity_pt.ShortRadioDeviceID;
 
-    plcf_10.HeaderFormat = 0;
-    plcf_10.PacketLengthType = psdef.PacketLengthType;
-    plcf_10.set_PacketLength_m1(psdef.PacketLength);
+    plcf_10_tx.HeaderFormat = 0;
+    plcf_10_tx.PacketLengthType = psdef.PacketLengthType;
+    plcf_10_tx.set_PacketLength_m1(psdef.PacketLength);
     if (tpoint_config.firmware_id == 0) {
-        plcf_10.ShortNetworkID = identity_ft.ShortNetworkID;
-        plcf_10.TransmitterIdentity = identity_ft.ShortRadioDeviceID;
+        plcf_10_tx.ShortNetworkID = identity_ft.ShortNetworkID;
+        plcf_10_tx.TransmitterIdentity = identity_ft.ShortRadioDeviceID;
     } else {
-        plcf_10.ShortNetworkID = identity_pt.ShortNetworkID;
-        plcf_10.TransmitterIdentity = identity_pt.ShortRadioDeviceID;
+        plcf_10_tx.ShortNetworkID = identity_pt.ShortNetworkID;
+        plcf_10_tx.TransmitterIdentity = identity_pt.ShortRadioDeviceID;
     }
-    plcf_10.set_TransmitPower(0);
-    plcf_10.Reserved = 0;
-    plcf_10.DFMCS = psdef.mcs_index;
+    plcf_10_tx.set_TransmitPower(0);
+    plcf_10_tx.Reserved = 0;
+    plcf_10_tx.DFMCS = psdef.mcs_index;
 
     const application::queue_size_t queue_size = {
         .N_datagram = 4, .N_datagram_max_byte = limits::application_max_queue_datagram_byte};
@@ -84,7 +84,7 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
         id,
         tpoint_config.application_client_thread_config,
         job_queue,
-        std::vector<uint32_t>{8050},
+        std::vector<uint32_t>{TFW_RTT_UDP_PORT_RTT_IS_AWAITING_RESPONSE_AT},
         queue_size);
 
     // client thread is not started as all data is forwarded directly from the calling worker thread
@@ -107,6 +107,7 @@ phy::machigh_phy_t tfw_rtt_t::work_regular(
 
 phy::machigh_phy_t tfw_rtt_t::work_irregular(
     [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
+    worksub_agc(sync_report, plcf_10_rx, t_agc_tx_change_64, t_agc_rx_change_64);
     return phy::machigh_phy_t();
 }
 
@@ -125,25 +126,25 @@ phy::maclow_phy_t tfw_rtt_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     }
 
     // cast guaranteed to work
-    const auto* plcf_10_rx =
+    const auto* plcf_10 =
         static_cast<const sp4::plcf_10_t*>(phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
 
-    dectnrp_assert(plcf_10_rx != nullptr, "cast ill-formed");
+    dectnrp_assert(plcf_10 != nullptr, "cast ill-formed");
 
     // is this the correct short network ID?
-    if (plcf_10_rx->ShortNetworkID != identity_ft.ShortNetworkID) {
+    if (plcf_10->ShortNetworkID != identity_ft.ShortNetworkID) {
         return phy::maclow_phy_t();
     }
 
     // expected TransmitterIdentity depends on FT or PT
     if (tpoint_config.firmware_id == 0) {
         // FT receives from PT
-        if (plcf_10_rx->TransmitterIdentity != identity_pt.ShortRadioDeviceID) {
+        if (plcf_10->TransmitterIdentity != identity_pt.ShortRadioDeviceID) {
             return phy::maclow_phy_t();
         }
     } else {
         // PT receives from FT
-        if (plcf_10_rx->TransmitterIdentity != identity_ft.ShortRadioDeviceID) {
+        if (plcf_10->TransmitterIdentity != identity_ft.ShortRadioDeviceID) {
             return phy::maclow_phy_t();
         }
     }
@@ -166,7 +167,7 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc(const phy::phy_machigh_t& phy_machigh) {
         // add to statistics
         rtt_min = std::min(rtt_min, rtt);
         rtt_max = std::max(rtt_max, rtt);
-        rms_max = std::max(rms_max, phy_machigh.phy_maclow.sync_report.rms_array.get_max());
+        sync_report = phy_machigh.phy_maclow.sync_report;
 
         // get pointer to payload of received packet
         const auto a_raw = phy_machigh.pdc_report.mac_pdu_decoder.get_a_raw();
@@ -189,29 +190,32 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc(const phy::phy_machigh_t& phy_machigh) {
 
         const int64_t tx_time_64 = machigh_phy.tx_descriptor_vec.at(0).buffer_tx_meta.tx_time_64;
 
-        if (time_of_last_agc_change +
-                duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 100) <=
+        // if another AGC change due?
+        if (t_agc_xx_last_change_64 +
+                duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, 50) <=
             tx_time_64) {
             // save time
-            time_of_last_agc_change = tx_time_64;
+            t_agc_xx_last_change_64 = tx_time_64;
 
-            // base pointer to extract PLCF_type=1
-            const auto* plcf_base = phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1);
+            // copies used in the irregular callback after packet transmission has started
+            sync_report = phy_machigh.phy_maclow.sync_report;
+            plcf_10_rx = *static_cast<const sp4::plcf_10_t*>(
+                phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
 
-            // make AGC gain changes right after sending the response packet
-            const int64_t t_agc_tx_change_64 =
-                tx_time_64 +
-                duration_lut.get_N_samples_from_subslots(
-                    worker_pool_config.radio_device_class.u_min, psdef.PacketLength + 1);
+            // tune AGC some subslots after packet transmission has started
+            t_agc_tx_change_64 = tx_time_64 + duration_lut.get_N_samples_from_subslots(
+                                                  worker_pool_config.radio_device_class.u_min,
+                                                  psdef.PacketLength + 2);
+            t_agc_rx_change_64 = t_agc_tx_change_64;
 
-            const int64_t t_agc_rx_change_64 =
-                t_agc_tx_change_64 + duration_lut.get_N_samples_from_subslots(
-                                         worker_pool_config.radio_device_class.u_min, 1);
+            // schedule callback to the center of the packet
+            const int64_t t_callback_64 =
+                tx_time_64 + duration_lut.get_N_samples_from_subslots(
+                                 worker_pool_config.radio_device_class.u_min, psdef.PacketLength) /
+                                 2;
 
-            worksub_agc(phy_machigh.phy_maclow.sync_report,
-                        *plcf_base,
-                        t_agc_tx_change_64,
-                        t_agc_rx_change_64);
+            // schedule an irregular callback to make the AGC change
+            machigh_phy.irregular_report = phy::irregular_report_t(t_callback_64, 0);
         }
     }
 
@@ -254,14 +258,14 @@ phy::machigh_phy_t tfw_rtt_t::work_application(
         dectnrp_log_inf("rtt_min = {} us rtt_max: = {} us <-- RTT adjusted for packet length",
                         rtt_min_us - 2 * packet_length_us_64,
                         rtt_max_us - 2 * packet_length_us_64);
-        dectnrp_log_inf("rms_max: = {}", rms_max);
+        dectnrp_log_inf("rms_array: = {}", sync_report.rms_array.get_readable_list());
 
         // reset measurement variables
         N_measurement_tx_cnt = 0;
         N_measurement_rx_cnt = 0;
         rtt_min = -common::adt::UNDEFINED_EARLY_64;
         rtt_max = common::adt::UNDEFINED_EARLY_64;
-        rms_max = -1000.0f;
+        sync_report = phy::sync_report_t(hw.get_nof_antennas());
 
         // invalidate payload
         application_server->read_nto(1, nullptr);
@@ -306,7 +310,7 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy) {
     // this is now a well-defined packet size
     const sp3::packet_sizes_t& packet_sizes = hp_tx->get_packet_sizes();
 
-    plcf_10.pack(hp_tx->get_a_plcf());
+    plcf_10_tx.pack(hp_tx->get_a_plcf());
 
     // define MAC PDU
     if (tpoint_config.firmware_id == 0) {

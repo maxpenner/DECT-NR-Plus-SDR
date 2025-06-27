@@ -62,6 +62,7 @@ class lower_ctrl_t {
               // generic values for a software RX AGC
               agc_rx(phy::agc::agc_rx_t(
                   phy::agc::agc_config_t{buffer_rx.nof_antennas, 1.0f, 8.0f, 2.0f},
+                  phy::agc::agc_rx_mode_t::tune_individually,
                   phy::agc::agc_t::OFDM_AMPLITUDE_FACTOR_MINUS_20dB,
                   15.0f)) {}
 

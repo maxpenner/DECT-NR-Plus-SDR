@@ -31,7 +31,7 @@ namespace dectnrp::upper::tfw::p2p {
 class pt_t {
     public:
         /// last time the AGC was tuned
-        int64_t time_of_last_agc_change{common::adt::UNDEFINED_EARLY_64};
+        int64_t t_agc_xx_last_change_64{common::adt::UNDEFINED_EARLY_64};
 
         /**
          * \brief The FT saves a full contact_list_t with one entry per PT. A single PT saves a

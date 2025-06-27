@@ -22,6 +22,7 @@
 
 #include "dectnrp/common/ant.hpp"
 #include "dectnrp/phy/agc/agc.hpp"
+#include "dectnrp/phy/agc/agc_rx_mode.hpp"
 
 namespace dectnrp::phy::agc {
 
@@ -38,6 +39,7 @@ class agc_rx_t final : public agc_t {
          * to least sensitive antenna (positive number)
          */
         explicit agc_rx_t(const agc_config_t agc_config_,
+                          const agc_rx_mode_t agc_rx_mode_,
                           const float rms_target_,
                           const float sensitivity_offset_max_dB_);
 
@@ -80,6 +82,8 @@ class agc_rx_t final : public agc_t {
         const common::ant_t get_gain_step_dB(const common::ant_t& rx_power_ant_0dBFS,
                                              const common::ant_t& rms_measured_);
 
+        void set_agc_rx_mode(const agc_rx_mode_t agc_rx_mode_) { agc_rx_mode = agc_rx_mode_; }
+
         float get_rms_target() const { return rms_target; };
 
         const common::ant_t& get_rms_measured_last_known() const {
@@ -89,6 +93,8 @@ class agc_rx_t final : public agc_t {
     private:
         mutable common::ant_t power_ant_0dBFS;
         common::ant_t power_ant_0dBFS_pending;
+
+        agc_rx_mode_t agc_rx_mode;
 
         float rms_target;
         common::ant_t rms_measured_last_known;

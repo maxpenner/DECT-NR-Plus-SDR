@@ -63,9 +63,6 @@ class tfw_rtt_t final : public tpoint_t {
         int64_t rtt_min{-common::adt::UNDEFINED_EARLY_64};
         int64_t rtt_max{common::adt::UNDEFINED_EARLY_64};
 
-        /// measured maximum rms
-        float rms_max{-1000.0f};
-
         /// operating system clock to measure rtt
         common::watch_t watch;
 
@@ -73,14 +70,22 @@ class tfw_rtt_t final : public tpoint_t {
         sp3::packet_sizes_def_t psdef;
 
         /// last time the AGC was tuned
-        int64_t time_of_last_agc_change{common::adt::UNDEFINED_EARLY_64};
+        int64_t t_agc_xx_last_change_64{common::adt::UNDEFINED_EARLY_64};
+
+        /// next time AGC will be tuned
+        int64_t t_agc_tx_change_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t t_agc_rx_change_64{common::adt::UNDEFINED_EARLY_64};
 
         /// FT and PT must know both identities
         sp4::mac_architecture::identity_t identity_ft;
         sp4::mac_architecture::identity_t identity_pt;
 
+        /// required to tune the AGC in an irregular callback
+        phy::sync_report_t sync_report;
+
         /// PLCF fixed to type 1 and header format 0
-        sp4::plcf_10_t plcf_10;
+        sp4::plcf_10_t plcf_10_tx;
+        sp4::plcf_10_t plcf_10_rx;
 
         /// FT receives data from application layer, and forwards data to application layer
         std::unique_ptr<application::application_server_t> application_server;

@@ -148,12 +148,12 @@ std::optional<phy::maclow_phy_t> steady_pt_t::worksub_pcc_10(const phy::phy_macl
     }
 #endif
 
-    if (pt.time_of_last_agc_change +
+    if (pt.t_agc_xx_last_change_64 +
             duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
                                                      TFW_P2P_PT_AGC_MINIMUM_PERIOD_MS) <=
         phy_maclow.sync_report.fine_peak_time_64) {
         // save time
-        pt.time_of_last_agc_change = phy_maclow.sync_report.fine_peak_time_64;
+        pt.t_agc_xx_last_change_64 = phy_maclow.sync_report.fine_peak_time_64;
 
         // AGC change immediately before the next beacon
         const int64_t t_agc_tx_change_64 =

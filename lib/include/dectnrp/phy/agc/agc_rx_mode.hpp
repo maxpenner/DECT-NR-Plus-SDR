@@ -20,4 +20,11 @@
 
 #pragma once
 
-// #define PHY_AGC_RX_ANTENNA_SENSITIVITY_INDIVIDUALLY_OR_EQUAL
+namespace dectnrp::phy::agc {
+
+enum class agc_rx_mode_t {
+    tune_individually,
+    tune_collectively
+};
+
+}  // namespace dectnrp::phy::agc

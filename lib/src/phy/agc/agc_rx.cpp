@@ -25,14 +25,15 @@
 #include "dectnrp/common/adt/decibels.hpp"
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/phy/agc/agc_rx_param.hpp"
 
 namespace dectnrp::phy::agc {
 
 agc_rx_t::agc_rx_t(const agc_config_t agc_config_,
+                   const agc_rx_mode_t agc_rx_mode_,
                    const float rms_target_,
                    const float sensitivity_offset_max_dB_)
     : agc_t(agc_config_),
+      agc_rx_mode(agc_rx_mode_),
       rms_target(rms_target_),
       sensitivity_offset_max_dB(sensitivity_offset_max_dB_) {
     // define number of antennas
@@ -95,62 +96,70 @@ const common::ant_t agc_rx_t::get_gain_step_dB(const common::ant_t& rx_power_ant
     // much
     const float B = A - sensitivity_offset_max_dB;
 
-#ifdef PHY_AGC_RX_ANTENNA_SENSITIVITY_INDIVIDUALLY_OR_EQUAL
-
-    // calculate arbitrary step for every antenna
-    common::ant_t arbitrary_gain_step_dB(agc_config.nof_antennas);
-    for (size_t i = 0; i < agc_config.nof_antennas; ++i) {
-        /* Not every antenna necessarily has a valid RMS value. This can happen if synchronization
-         * did not detect a valid peak.
-         *
-         * If there was a peak and thus the RMS value is valid (i.e. > 0), C is the arbitrary gain
-         * step required to achieve the target RMS.
-         *
-         * If there was no peak and thus the RMS value is invalid (i.e. == 0), C is set to the gain
-         * step required to achieve the same sensitivity as A. Thus, the antenna will move towards a
-         * lower sensitivity since A >= rx_power_ant_0dBFS.at(i) for all i.
-         *
-         *      Assume A = -30dBm and rx_power_ant_0dBFS.at(i) = -50dBm. Then C = 20dB.
-         *      Assume A = -40dBm and rx_power_ant_0dBFS.at(i) = -40dBm. Then C = 0dB.
-         */
-        const float C = (rms_measured_last_known.at(i) > 0)
+    switch (agc_rx_mode) {
+        using enum agc_rx_mode_t;
+        case tune_individually:
+            {
+                // calculate arbitrary step for every antenna
+                common::ant_t arbitrary_gain_step_dB(agc_config.nof_antennas);
+                for (size_t i = 0; i < agc_config.nof_antennas; ++i) {
+                    /* Not every antenna necessarily has a valid RMS value. This can happen if
+                     * synchronization did not detect a valid peak.
+                     *
+                     * If there was a peak and thus the RMS value is valid (i.e. > 0), C is the
+                     * arbitrary gain step required to achieve the target RMS.
+                     *
+                     * If there was no peak and thus the RMS value is invalid (i.e. == 0), C is set
+                     * to the gain step required to achieve the same sensitivity as A. Thus, the
+                     * antenna will move towards a lower sensitivity since A >=
+                     * rx_power_ant_0dBFS.at(i) for all i.
+                     *
+                     *      Assume A = -30dBm and rx_power_ant_0dBFS.at(i) = -50dBm. Then C = 20dB.
+                     *      Assume A = -40dBm and rx_power_ant_0dBFS.at(i) = -40dBm. Then C = 0dB.
+                     */
+                    const float C =
+                        (rms_measured_last_known.at(i) > 0)
                             ? common::adt::mag2db(rms_measured_last_known.at(i) / rms_target)
                             : A - rx_power_ant_0dBFS.at(i);
 
-        /* By how much are we allowed to reduce the sensitivity for this antenna?
-         *
-         * Assume B = -52dBm and rx_power_ant_0dBFS.at(i) = -30dBm. Then the allowed step is
-         * -52-(-30) = -22dB, i.e. the antenna may become more sensitive.
-         *
-         * Assume B = -44dBm and rx_power_ant_0dBFS.at(i) = -60dBm. Then the allowed step is
-         * -44-(-60) = +24dB, i.e. the antenna must become less sensitive.
-         */
-        const float D = B - rx_power_ant_0dBFS.at(i);
+                    /* By how much are we allowed to reduce the sensitivity for this antenna?
+                     *
+                     * Assume B = -52dBm and rx_power_ant_0dBFS.at(i) = -30dBm. Then the allowed
+                     * step is -52-(-30) = -22dB, i.e. the antenna may become more sensitive.
+                     *
+                     * Assume B = -44dBm and rx_power_ant_0dBFS.at(i) = -60dBm. Then the allowed
+                     * step is -44-(-60) = +24dB, i.e. the antenna must become less sensitive.
+                     */
+                    const float D = B - rx_power_ant_0dBFS.at(i);
 
-        // take the larger of both values
-        arbitrary_gain_step_dB.at(i) = std::max(C, D);
+                    // take the larger of both values
+                    arbitrary_gain_step_dB.at(i) = std::max(C, D);
+                }
+
+                return quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB);
+            }
+
+        case tune_collectively:
+            {
+                const auto idx_max = rms_measured_last_known.get_index_of_max();
+
+                const float C =
+                    common::adt::mag2db(rms_measured_last_known.at(idx_max) / rms_target);
+
+                const float D = B - rx_power_ant_0dBFS.at(idx_max);
+
+                // take the larger of both values
+                const float arbitrary_gain_step_dB_equal = std::max(C, D);
+
+                // calculate arbitrary step for every antenna
+                common::ant_t arbitrary_gain_step_dB(agc_config.nof_antennas);
+                for (size_t i = 0; i < agc_config.nof_antennas; ++i) {
+                    arbitrary_gain_step_dB.at(i) = arbitrary_gain_step_dB_equal;
+                }
+
+                return quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB);
+            }
     }
-
-#else
-
-    const auto idx_max = rms_measured_last_known.get_index_of_max();
-
-    const float C = common::adt::mag2db(rms_measured_last_known.at(idx_max) / rms_target);
-
-    const float D = B - rx_power_ant_0dBFS.at(idx_max);
-
-    // take the larger of both values
-    const float arbitrary_gain_step_dB_equal = std::max(C, D);
-
-    // calculate arbitrary step for every antenna
-    common::ant_t arbitrary_gain_step_dB(agc_config.nof_antennas);
-    for (size_t i = 0; i < agc_config.nof_antennas; ++i) {
-        arbitrary_gain_step_dB.at(i) = arbitrary_gain_step_dB_equal;
-    }
-
-#endif
-
-    return quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB);
 }
 
 }  // namespace dectnrp::phy::agc
