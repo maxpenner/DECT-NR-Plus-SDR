@@ -385,6 +385,11 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
             dectnrp_assert(tx_time_64 >= now_64,
                            "transmission time of expected packet earlier than current time");
 
+            // when does the current packet end on the global time axis?
+            const int64_t tx_time_in_samples_end =
+                buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_time_64 +
+                static_cast<int64_t>(tx_length_samples);
+
             // how many zero samples must be transmitted before the first sample of the packet?
             const int64_t time2tx = tx_time_64 - now_64;
 
@@ -567,6 +572,18 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                 spp_offset = 0;
 
                 vspptx.spp_zero();
+            }
+
+            if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {
+                calling_instance->set_command_time(tx_time_in_samples_end);
+                calling_instance->adjust_tx_power_ant_0dBFS_tc(
+                    buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.value());
+            }
+
+            if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.rx_power_adj_dB.has_value()) {
+                calling_instance->set_command_time(tx_time_in_samples_end);
+                calling_instance->adjust_rx_power_ant_0dBFS_tc(
+                    buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.rx_power_adj_dB.has_value());
             }
         }
         // expected TX buffer not available, so send zeros

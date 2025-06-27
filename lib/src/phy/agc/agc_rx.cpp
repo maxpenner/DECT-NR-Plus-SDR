@@ -21,6 +21,7 @@
 #include "dectnrp/phy/agc/agc_rx.hpp"
 
 #include <cmath>
+#include <utility>
 
 #include "dectnrp/common/adt/decibels.hpp"
 #include "dectnrp/common/adt/miscellaneous.hpp"
@@ -160,6 +161,9 @@ const common::ant_t agc_rx_t::get_gain_step_dB(const common::ant_t& rx_power_ant
                 return quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB);
             }
     }
+
+    dectnrp_assert_failure("unreachable");
+    std::unreachable();
 }
 
 }  // namespace dectnrp::phy::agc

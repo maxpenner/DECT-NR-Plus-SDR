@@ -766,7 +766,7 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
     const double rate = usrp->get_tx_rate();
 
     // maximum number of samples per call of send()
-    const uint32_t max_samps_per_packet = tx_stream->get_max_num_samps();
+    const uint32_t spp_max = tx_stream->get_max_num_samps();
 
     // timeout when calling send(), should ideally never timeout
     const double send_timeout = 0.01;
@@ -850,56 +850,68 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                 ++tx_stats.buffer_tx_sent;
 
                 // how long will the current packet ultimately be?
-                uint32_t n_samples_of_packet = buffer_tx_vec[current_buffer_tx]->tx_length_samples;
+                uint32_t tx_length_samples = buffer_tx_vec[current_buffer_tx]->tx_length_samples;
 
-                dectnrp_assert(max_samps_per_packet < n_samples_of_packet,
-                               "n_samples_of_packet too small. Reduce spp.");
+                dectnrp_assert(spp_max < tx_length_samples,
+                               "tx_length_samples too small, reduce spp");
 
                 // when does the current packet end on the global time axis?
                 const int64_t tx_time_in_samples_end =
                     buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_time_64 +
-                    static_cast<int64_t>(n_samples_of_packet);
+                    static_cast<int64_t>(tx_length_samples);
 
                 // counter of samples sent
-                uint32_t n_samples_cnt = 0;
+                uint32_t tx_length_samples_cnt = 0;
 
                 // backpressure
-                buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(max_samps_per_packet);
+                buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(spp_max);
 
                 // update pointers
                 buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams, 0);
 
                 // send the one maximum sized chunk that we have at least
-                n_samples_cnt +=
-                    tx_stream->send(ant_streams, max_samps_per_packet, tx_md, send_timeout);
+                tx_length_samples_cnt += tx_stream->send(ant_streams, spp_max, tx_md, send_timeout);
 
                 // next call requires these settings
                 tx_md.start_of_burst = false;
                 tx_md.has_time_spec = false;
 
+                if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {
+                    calling_instance->set_command_time(tx_time_in_samples_end);
+                    calling_instance->adjust_tx_power_ant_0dBFS_tc(
+                        buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_power_adj_dB.value());
+                }
+
+                if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.rx_power_adj_dB.has_value()) {
+                    calling_instance->set_command_time(tx_time_in_samples_end);
+                    calling_instance->adjust_rx_power_ant_0dBFS_tc(
+                        buffer_tx_vec[current_buffer_tx]
+                            ->buffer_tx_meta.rx_power_adj_dB.has_value());
+                }
+
                 // number of samples left to transmit
-                uint32_t n_samples_residual = n_samples_of_packet - n_samples_cnt;
+                uint32_t tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
 
                 // transmit until we have no more maximum sized chunks left
-                while (n_samples_residual > max_samps_per_packet) {
+                while (tx_length_samples_residual > spp_max) {
                     // backpressure
                     buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(
-                        n_samples_cnt + max_samps_per_packet);
+                        tx_length_samples_cnt + spp_max);
 
                     // update pointers
                     buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams,
-                                                                             n_samples_cnt);
+                                                                             tx_length_samples_cnt);
 
                     // send
-                    n_samples_cnt +=
-                        tx_stream->send(ant_streams, max_samps_per_packet, tx_md, send_timeout);
+                    tx_length_samples_cnt +=
+                        tx_stream->send(ant_streams, spp_max, tx_md, send_timeout);
 
                     // update
-                    n_samples_residual = n_samples_of_packet - n_samples_cnt;
+                    tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
                 }
 
-                dectnrp_assert(n_samples_of_packet - n_samples_cnt > 0 &&
-                                   (n_samples_of_packet - n_samples_cnt) <= max_samps_per_packet,
+                dectnrp_assert(tx_length_samples - tx_length_samples_cnt > 0 &&
+                                   (tx_length_samples - tx_length_samples_cnt) <= spp_max,
                                "Incorrect number of samples in final chunk");
 
                 /* At this point, we know that we still have some samples in the current buffer left
@@ -936,7 +948,7 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                         buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64;
 
                     dectnrp_assert(tx_time_in_samples_end <= next_buffer_tx_time,
-                                   "Packet TX times are out of order {} {} {} {}",
+                                   "packet TX times are out of order {} {} {} {}",
                                    current_buffer_tx,
                                    tx_time_in_samples_end,
                                    next_buffer_tx,
@@ -957,7 +969,7 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                         ++tx_stats.buffer_tx_sent_consecutive;
 
                         // zero gap samples at the end of the buffer so we don't send garbage
-                        buffer_tx_vec[current_buffer_tx]->set_zero(n_samples_of_packet,
+                        buffer_tx_vec[current_buffer_tx]->set_zero(tx_length_samples,
                                                                    tx_gap_samples_this);
                     }
                 }
@@ -968,22 +980,22 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
                 }
 
                 // backpressure until PHY has created all samples
-                buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(n_samples_of_packet);
+                buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(tx_length_samples);
 
                 // artificially increase size of packet by the number of gap samples
-                n_samples_of_packet += tx_gap_samples_this;
+                tx_length_samples += tx_gap_samples_this;
 
                 // transmit until we have no more samples left
-                while (n_samples_cnt < n_samples_of_packet) {
-                    n_samples_residual = n_samples_of_packet - n_samples_cnt;
+                while (tx_length_samples_cnt < tx_length_samples) {
+                    tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
 
                     const uint32_t n_samples_send_this =
-                        std::min(max_samps_per_packet, n_samples_residual);
+                        std::min(spp_max, tx_length_samples_residual);
 
                     buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams,
-                                                                             n_samples_cnt);
+                                                                             tx_length_samples_cnt);
 
-                    n_samples_cnt +=
+                    tx_length_samples_cnt +=
                         tx_stream->send(ant_streams, n_samples_send_this, tx_md, send_timeout);
                 }
 
@@ -1017,7 +1029,7 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
     const double rate = usrp->get_rx_rate();
 
     // maximum number of samples per call of recv()
-    const uint32_t max_samps_per_packet = rx_stream->get_max_num_samps();
+    const uint32_t spp_max = rx_stream->get_max_num_samps();
 
     // timeout when calling recv(), should ideally never timeout
     const double recv_timeout = 0.01;
@@ -1028,8 +1040,8 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
     // clang-format off
     calling_instance->log_line("USRP Work RX Thread: rate:         " + std::to_string(rate / 1e6) + " MHz");
     calling_instance->log_line("USRP Work RX Thread: nof channels: " + std::to_string(rx_stream->get_num_channels()));
-    calling_instance->log_line("USRP Work RX Thread: spp samples:  " + std::to_string(static_cast<long unsigned int>(max_samps_per_packet)));
-    calling_instance->log_line("USRP Work RX Thread: spp length:   " + std::to_string(static_cast<double>(max_samps_per_packet) / rate * 1e6) + " us");
+    calling_instance->log_line("USRP Work RX Thread: spp samples:  " + std::to_string(static_cast<long unsigned int>(spp_max)));
+    calling_instance->log_line("USRP Work RX Thread: spp length:   " + std::to_string(static_cast<double>(spp_max) / rate * 1e6) + " us");
     calling_instance->log_line("USRP Work RX Thread: rx_delay:     " + std::to_string(rx_delay * 1e6) + " us");
     calling_instance->log_line("USRP Work RX Thread: recv_timeout: " + std::to_string(recv_timeout * 1e6) + " us");
     // clang-format on
@@ -1050,12 +1062,12 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
 
     // construct stream command
     uhd::stream_cmd_t cmd(uhd::stream_cmd_t::STREAM_MODE_START_CONTINUOUS);
-    cmd.num_samps = max_samps_per_packet;  // should be irrelevant as we stream continuously
+    cmd.num_samps = spp_max;  // should be irrelevant as we stream continuously
     cmd.time_spec = usrp->get_time_now() + uhd::time_spec_t(rx_delay);
     cmd.stream_now = false;  // if set to true, UHD will be probably hiccup at startup
 
     // we check keep_running approximately every 100ms
-    const uint32_t nof_rounds = static_cast<uint32_t>(rate) / max_samps_per_packet / 10;
+    const uint32_t nof_rounds = static_cast<uint32_t>(rate) / spp_max / 10;
 
     // start streaming, recv() must now be called ASAP
     rx_stream->issue_stream_cmd(cmd);
@@ -1064,8 +1076,7 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
         // to reduce calls of keep_running
         for (uint32_t round = 0; round < nof_rounds; ++round) {
             try {
-                nof_new_samples =
-                    rx_stream->recv(ant_streams, max_samps_per_packet, md, recv_timeout);
+                nof_new_samples = rx_stream->recv(ant_streams, spp_max, md, recv_timeout);
             } catch (uhd::io_error& e) {
                 std::cerr << "[] Caught an IO exception. " << std::endl;
                 std::cerr << e.what() << std::endl;
@@ -1128,7 +1139,7 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
     while (!md.end_of_burst) {
         try {
             // just read samples to empty buffer, don't advance pointers
-            rx_stream->recv(ant_streams, max_samps_per_packet, md, recv_timeout);
+            rx_stream->recv(ant_streams, spp_max, md, recv_timeout);
         } catch (uhd::io_error& e) {
             std::cerr << "[] Caught an IO exception. " << std::endl;
             std::cerr << e.what() << std::endl;
