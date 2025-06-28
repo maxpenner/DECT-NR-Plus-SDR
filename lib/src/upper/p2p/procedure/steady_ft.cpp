@@ -480,13 +480,13 @@ void steady_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy
     }
 }
 
-void steady_ft_t::worksub_callback_log(const int64_t now_64) const {
+void steady_ft_t::worksub_callback_log([[maybe_unused]] const int64_t now_64) const {
     std::string str = "id=" + std::to_string(id) + " ";
 
     str += stats.get_as_string();
 
-    str += "tx_power_ant_0dBFS=" + std::to_string(agc_tx.get_power_ant_0dBFS(now_64)) + " ";
-    str += "rx_power_ant_0dBFS=" + agc_rx.get_power_ant_0dBFS(now_64).get_readable_list() + " ";
+    str += "tx_power_ant_0dBFS=" + std::to_string(hw.get_tx_power_ant_0dBFS()) + " ";
+    str += "rx_power_ant_0dBFS=" + hw.get_rx_power_ant_0dBFS().get_readable_list() + " ";
 
     for (const auto& contact : ft.contact_list.get_contacts_vec()) {
         str += "rx_rms=[";

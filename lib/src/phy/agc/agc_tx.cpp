@@ -38,38 +38,6 @@ agc_tx_t::agc_tx_t(const agc_config_t agc_config_,
     dectnrp_assert(rx_dBm_target <= -40.0f, "too large");
 }
 
-void agc_tx_t::set_power_ant_0dBFS_pending(const float power_ant_0dBFS_pending_,
-                                           const int64_t power_ant_0dBFS_pending_time_64_) {
-    // is this an immediate gain change?
-    if (power_ant_0dBFS_pending_time_64_ < 0) {
-        // change is effective now
-        power_ant_0dBFS = power_ant_0dBFS_pending_;
-
-        // indicate that we don't have a pending value
-        power_ant_0dBFS_pending_time_64 = common::adt::UNDEFINED_EARLY_64;
-    } else {
-        // save pending value
-        power_ant_0dBFS_pending = power_ant_0dBFS_pending_;
-        power_ant_0dBFS_pending_time_64 = power_ant_0dBFS_pending_time_64_;
-    }
-}
-
-float agc_tx_t::get_power_ant_0dBFS(const int64_t now_64) const {
-    // do we have a pending value?
-    if (0 <= power_ant_0dBFS_pending_time_64) {
-        // have we reached the time of the pending gain change?
-        if (power_ant_0dBFS_pending_time_64 <= now_64) {
-            // change is effective now
-            power_ant_0dBFS = power_ant_0dBFS_pending;
-
-            // indicate that we no longer have a pending value
-            power_ant_0dBFS_pending_time_64 = common::adt::UNDEFINED_EARLY_64;
-        }
-    }
-
-    return power_ant_0dBFS;
-}
-
 float agc_tx_t::get_gain_step_dB(const float tx_dBm_opposite,
                                  const float tx_power_ant_0dBFS,
                                  const common::ant_t& rx_power_ant_0dBFS,

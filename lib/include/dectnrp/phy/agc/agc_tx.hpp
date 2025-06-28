@@ -40,29 +40,6 @@ class agc_tx_t final : public agc_t {
                           const float rx_dBm_target_);
 
         /**
-         * \brief With an SDR, gain settings can't be applied quasi-instantaneously with
-         * deterministic latencies. Instead, UHD allows gain changes to be made at a specific point
-         * in time in the future. Until that time has been reached, the old gain value is still in
-         * effect. With this function we can save a pending gain change. Only one change can be
-         * pending.
-         *
-         * \param power_ant_0dBFS_pending_ gain value that will be effective shortly
-         * \param power_ant_0dBFS_pending_time_64_ time when above value will become effective
-         */
-        void set_power_ant_0dBFS_pending(
-            const float power_ant_0dBFS_pending_,
-            const int64_t power_ant_0dBFS_pending_time_64_ = common::adt::UNDEFINED_EARLY_64);
-
-        /**
-         * \brief Get current gain values. Internally also checks if a possibly pending value has
-         * taken effect in the meantime.
-         *
-         * \param now_64
-         * \return
-         */
-        float get_power_ant_0dBFS(const int64_t now_64) const;
-
-        /**
          * \brief TX gain change required to achieve rx_dBm_target at the opposite site.
          *
          * \param t_64
@@ -84,10 +61,6 @@ class agc_tx_t final : public agc_t {
         void set_rx_dBm_target(const float rx_dBm_target_) { rx_dBm_target = rx_dBm_target_; }
 
     private:
-        /// gain settings are applied in the future, keeps track of what value is effective
-        mutable float power_ant_0dBFS;
-        float power_ant_0dBFS_pending;
-
         float ofdm_amplitude_factor;
         float rx_dBm_target;
 };

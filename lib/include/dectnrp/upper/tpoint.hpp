@@ -21,8 +21,10 @@
 #pragma once
 
 #include <cstdint>
+#include <utility>
 
 #include "dectnrp/application/application_report.hpp"
+#include "dectnrp/common/ant.hpp"
 #include "dectnrp/common/layer/layer_unit.hpp"
 #include "dectnrp/phy/agc/agc_rx.hpp"
 #include "dectnrp/phy/agc/agc_tx.hpp"
@@ -257,8 +259,22 @@ class tpoint_t : public common::layer_unit_t {
                          const std::size_t hw_idx = 0);
 
         /**
-         * \brief When a firmware is called with a successfully received PCC and the choice is made
-         * to proceed with the PDC, this convenience can be used to create the respective
+         * \brief Same as above, but only returns optimal power adjustments without applying them.
+         * This is useful if AGC changes are made by the radio layer during packet transmission.
+         *
+         * \param sync_report see above
+         * \param plcf_base see above
+         * \param hw_idx see above
+         * \return optimal TX and RX AGC adjustments
+         */
+        [[nodiscard]] std::pair<float, common::ant_t> worksub_agc_adj_only(
+            const phy::sync_report_t& sync_report,
+            const sp4::plcf_base_t& plcf_base,
+            const std::size_t hw_idx = 0);
+
+        /**
+         * \brief When a firmware is called with a successfully received PCC and the choice is
+         * made to proceed with the PDC, this convenience can be used to create the respective
          * instruction of type maclow_phy_t for the PHY. For the PDC, a new HARQ buffer is
          * requested.
          *
@@ -317,15 +333,6 @@ class tpoint_t : public common::layer_unit_t {
          */
         [[nodiscard]] sp3::packet_sizes_def_t worksub_psdef(const phy::phy_maclow_t& phy_maclow,
                                                             const uint32_t PLCF_type) const;
-
-        void worksub_agc_tx(const phy::sync_report_t& sync_report,
-                            const sp4::plcf_base_t& plcf_base,
-                            const int64_t t_agc_change_64,
-                            const std::size_t hw_idx);
-
-        void worksub_agc_rx(const phy::sync_report_t& sync_report,
-                            const int64_t t_agc_change_64,
-                            const std::size_t hw_idx);
 };
 
 }  // namespace dectnrp::upper

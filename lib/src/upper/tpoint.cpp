@@ -54,18 +54,57 @@ phy::machigh_phy_t tpoint_t::work_pcc_error([[maybe_unused]] const phy::phy_macl
 };
 #endif
 
-void tpoint_t::worksub_agc(const phy::sync_report_t& sync_report,
-                           const sp4::plcf_base_t& plcf_base,
-                           const int64_t t_agc_tx_change_64,
-                           const int64_t t_agc_rx_change_64,
-                           const std::size_t hw_idx) {
+void tpoint_t::worksub_agc([[maybe_unused]] const phy::sync_report_t& sync_report,
+                           [[maybe_unused]] const sp4::plcf_base_t& plcf_base,
+                           [[maybe_unused]] const int64_t t_agc_tx_change_64,
+                           [[maybe_unused]] const int64_t t_agc_rx_change_64,
+                           [[maybe_unused]] const std::size_t hw_idx) {
+#if defined(AGC_TX_PT) || defined(AGC_RX_PT)
+    const auto [tx_power_adj_dB, rx_power_adj_dB] =
+        worksub_agc_adj_only(sync_report, plcf_base, hw_idx);
+
+    auto& hw_local = mac_lower.lower_ctrl_vec.at(hw_idx).hw;
+
     if (t_agc_tx_change_64 <= t_agc_rx_change_64) {
-        worksub_agc_tx(sync_report, plcf_base, t_agc_tx_change_64, hw_idx);
-        worksub_agc_rx(sync_report, t_agc_rx_change_64, hw_idx);
+#ifdef AGC_TX_PT
+        hw_local.set_command_time(t_agc_tx_change_64);
+        hw_local.adjust_tx_power_ant_0dBFS_tc(tx_power_adj_dB);
+#endif
+#ifdef AGC_RX_PT
+        hw_local.set_command_time(t_agc_rx_change_64);
+        hw_local.adjust_rx_power_ant_0dBFS_tc(rx_power_adj_dB);
+#endif
     } else {
-        worksub_agc_rx(sync_report, t_agc_rx_change_64, hw_idx);
-        worksub_agc_tx(sync_report, plcf_base, t_agc_tx_change_64, hw_idx);
+#ifdef AGC_RX_PT
+        hw_local.set_command_time(t_agc_rx_change_64);
+        hw_local.adjust_rx_power_ant_0dBFS_tc(rx_power_adj_dB);
+#endif
+#ifdef AGC_TX_PT
+        hw_local.set_command_time(t_agc_tx_change_64);
+        hw_local.adjust_tx_power_ant_0dBFS_tc(tx_power_adj_dB);
+#endif
     }
+#endif
+}
+
+std::pair<float, common::ant_t> tpoint_t::worksub_agc_adj_only(
+    const phy::sync_report_t& sync_report,
+    const sp4::plcf_base_t& plcf_base,
+    const std::size_t hw_idx) {
+    const auto& hw_local = mac_lower.lower_ctrl_vec.at(hw_idx).hw;
+    auto& agc_tx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_tx;
+    auto& agc_rx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_rx;
+
+    const auto tx_power_adj_dB =
+        agc_tx_local.get_gain_step_dB(plcf_base.get_TransmitPower_dBm<float>(),
+                                      hw_local.get_tx_power_ant_0dBFS(),
+                                      hw_local.get_rx_power_ant_0dBFS(),
+                                      sync_report.rms_array);
+
+    const auto rx_power_adj_dB =
+        agc_rx_local.get_gain_step_dB(hw_local.get_rx_power_ant_0dBFS(), sync_report.rms_array);
+
+    return std::make_pair(tx_power_adj_dB, rx_power_adj_dB);
 }
 
 phy::maclow_phy_t tpoint_t::worksub_pcc2pdc(const phy::phy_maclow_t& phy_maclow,
@@ -119,52 +158,6 @@ sp3::packet_sizes_def_t tpoint_t::worksub_psdef(const phy::phy_maclow_t& phy_mac
                                        phy_maclow.sync_report.N_eff_TX, plcf_base->get_N_SS()),
                                    .mcs_index = plcf_base->DFMCS,
                                    .Z = worker_pool_config.maximum_packet_sizes.psdef.Z};
-}
-
-void tpoint_t::worksub_agc_tx([[maybe_unused]] const phy::sync_report_t& sync_report,
-                              [[maybe_unused]] const sp4::plcf_base_t& plcf_base,
-                              [[maybe_unused]] const int64_t t_agc_change_64,
-                              [[maybe_unused]] const std::size_t hw_idx) {
-#ifdef AGC_TX_PT
-    auto& hw_local = mac_lower.lower_ctrl_vec.at(hw_idx).hw;
-    auto& agc_tx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_tx;
-
-    hw_local.set_command_time(t_agc_change_64);
-
-    // get required TX gain change
-    const auto tx_gain_change =
-        agc_tx_local.get_gain_step_dB(plcf_base.get_TransmitPower_dBm<float>(),
-                                      hw_local.get_tx_power_ant_0dBFS_tc(),
-                                      hw_local.get_rx_power_ant_0dBFS_tc(),
-                                      sync_report.rms_array);
-
-    // resulting TX power at 0dBFS after change
-    const float tx_power_ant_0dBFS = hw_local.adjust_tx_power_ant_0dBFS_tc(tx_gain_change);
-
-    // remember actual TX power at 0dBFS
-    agc_tx_local.set_power_ant_0dBFS_pending(tx_power_ant_0dBFS, t_agc_change_64);
-#endif
-}
-
-void tpoint_t::worksub_agc_rx([[maybe_unused]] const phy::sync_report_t& sync_report,
-                              [[maybe_unused]] const int64_t t_agc_change_64,
-                              [[maybe_unused]] const std::size_t hw_idx) {
-#ifdef AGC_RX_PT
-    auto& hw_local = mac_lower.lower_ctrl_vec.at(hw_idx).hw;
-    auto& agc_rx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_rx;
-
-    hw_local.set_command_time(t_agc_change_64);
-
-    // get required RX gain change
-    const auto rx_gain_change =
-        agc_rx_local.get_gain_step_dB(hw_local.get_rx_power_ant_0dBFS_tc(), sync_report.rms_array);
-
-    // resulting RX power at 0dBFS after change
-    const auto& rx_power_ant_0dBFS = hw_local.adjust_rx_power_ant_0dBFS_tc(rx_gain_change);
-
-    // remember actual RX power at 0dBFS
-    agc_rx_local.set_power_ant_0dBFS_pending(rx_power_ant_0dBFS, t_agc_change_64);
-#endif
 }
 
 }  // namespace dectnrp::upper

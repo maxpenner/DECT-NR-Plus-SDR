@@ -110,10 +110,8 @@ phy::maclow_phy_t steady_rd_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
 
     // lambda to overwrite gain settings for JSON file export
     auto inject_currect_gain_settings = [&](phy::maclow_phy_t& maclow_phy) -> void {
-        maclow_phy.hw_status.tx_power_ant_0dBFS =
-            agc_tx.get_power_ant_0dBFS(phy_maclow.sync_report.fine_peak_time_64);
-        maclow_phy.hw_status.rx_power_ant_0dBFS =
-            agc_rx.get_power_ant_0dBFS(phy_maclow.sync_report.fine_peak_time_64);
+        maclow_phy.hw_status.tx_power_ant_0dBFS = hw.get_tx_power_ant_0dBFS();
+        maclow_phy.hw_status.rx_power_ant_0dBFS = hw.get_rx_power_ant_0dBFS();
     };
 
     // if decoded with valid content, return without testing for type 2

@@ -134,7 +134,9 @@ std::optional<phy::maclow_phy_t> steady_pt_t::worksub_pcc_10(const phy::phy_macl
 
     ++stats.beacon_cnt;
 
-    // it's the beacon, so update beacon time
+    pt.contact_pt.sync_report = phy_maclow.sync_report;
+
+    // it's the beacon, so update beacon time wherever it's needed
     pt.contact_pt.allocation_pt.set_beacon_time_last_known(
         phy_maclow.sync_report.fine_peak_time_64);
     rd.pll.provide_beacon_time(
@@ -359,14 +361,14 @@ bool steady_pt_t::worksub_mmie_user_plane_data(const sp4::user_plane_data_t& upd
 void steady_pt_t::worksub_mmie_resource_allocation(
     [[maybe_unused]] const sp4::resource_allocation_ie_t& raie) {}
 
-void steady_pt_t::worksub_callback_log(const int64_t now_64) const {
+void steady_pt_t::worksub_callback_log([[maybe_unused]] const int64_t now_64) const {
     std::string str = "id=" + std::to_string(id) + " ";
 
     str += stats.get_as_string();
 
-    str += "tx_power_ant_0dBFS=" + std::to_string(agc_tx.get_power_ant_0dBFS(now_64)) + " ";
-    str += "rx_power_ant_0dBFS=" + agc_rx.get_power_ant_0dBFS(now_64).get_readable_list() + " ";
-    str += "rx_rms=" + agc_rx.get_rms_measured_last_known().get_readable_list();
+    str += "tx_power_ant_0dBFS=" + std::to_string(hw.get_tx_power_ant_0dBFS()) + " ";
+    str += "rx_power_ant_0dBFS=" + hw.get_rx_power_ant_0dBFS().get_readable_list() + " ";
+    str += "rx_rms=" + pt.contact_pt.sync_report.rms_array.get_readable_list();
 
     dectnrp_log_inf("{}", str);
 }

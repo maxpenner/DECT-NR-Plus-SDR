@@ -463,6 +463,19 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
 
                 // were these the final samples of the current packet?
                 if (tx_length_samples_cnt == tx_length_samples) {
+                    if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {
+                        calling_instance->set_command_time(tx_time_in_samples_end);
+                        calling_instance->adjust_tx_power_ant_0dBFS_tc(
+                            buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.value());
+                    }
+
+                    if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.rx_power_adj_dB.has_value()) {
+                        calling_instance->set_command_time(tx_time_in_samples_end);
+                        calling_instance->adjust_rx_power_ant_0dBFS_tc(
+                            buffer_tx_vec[buffer_tx_idx]
+                                ->buffer_tx_meta.rx_power_adj_dB.has_value());
+                    }
+
                     // set buffer as transmitted
                     buffer_tx_vec[buffer_tx_idx]->set_transmitted_or_abort();
 
@@ -572,18 +585,6 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
                 spp_offset = 0;
 
                 vspptx.spp_zero();
-            }
-
-            if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {
-                calling_instance->set_command_time(tx_time_in_samples_end);
-                calling_instance->adjust_tx_power_ant_0dBFS_tc(
-                    buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.value());
-            }
-
-            if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.rx_power_adj_dB.has_value()) {
-                calling_instance->set_command_time(tx_time_in_samples_end);
-                calling_instance->adjust_rx_power_ant_0dBFS_tc(
-                    buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.rx_power_adj_dB.has_value());
             }
         }
         // expected TX buffer not available, so send zeros

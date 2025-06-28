@@ -44,29 +44,6 @@ class agc_rx_t final : public agc_t {
                           const float sensitivity_offset_max_dB_);
 
         /**
-         * \brief With an SDR, gain settings can't be applied quasi-instantaneously with
-         * deterministic latencies. Instead, UHD allows gain changes to be made at a specific point
-         * in time in the future. Until that time has been reached, the old gain value is still in
-         * effect. With this function we can save a pending gain change. Only one change can be
-         * pending.
-         *
-         * \param power_ant_0dBFS_pending_ gain value that will be effective shortly
-         * \param power_ant_0dBFS_pending_time_64_ time when above value will become effective
-         */
-        void set_power_ant_0dBFS_pending(
-            const common::ant_t& power_ant_0dBFS_pending_,
-            const int64_t power_ant_0dBFS_pending_time_64_ = common::adt::UNDEFINED_EARLY_64);
-
-        /**
-         * \brief Get current gain values. Internally also checks if a possibly pending value has
-         * taken effect in the meantime.
-         *
-         * \param now_64 time of request
-         * \return
-         */
-        const common::ant_t& get_power_ant_0dBFS(const int64_t now_64) const;
-
-        /**
          * \brief Takes the measured RMS of the input signal, and calculates the required gain
          * change to achieve the target RMS. The change is limited is size. This is a software AGC,
          * and as such inherently slow.
@@ -80,24 +57,16 @@ class agc_rx_t final : public agc_t {
          * duration has not passed yet or no change is required.
          */
         const common::ant_t get_gain_step_dB(const common::ant_t& rx_power_ant_0dBFS,
-                                             const common::ant_t& rms_measured_);
+                                             const common::ant_t& rms_measured);
 
         void set_agc_rx_mode(const agc_rx_mode_t agc_rx_mode_) { agc_rx_mode = agc_rx_mode_; }
 
         float get_rms_target() const { return rms_target; };
 
-        const common::ant_t& get_rms_measured_last_known() const {
-            return rms_measured_last_known;
-        };
-
     private:
-        mutable common::ant_t power_ant_0dBFS;
-        common::ant_t power_ant_0dBFS_pending;
-
         agc_rx_mode_t agc_rx_mode;
 
         float rms_target;
-        common::ant_t rms_measured_last_known;
 
         float sensitivity_offset_max_dB;
 };

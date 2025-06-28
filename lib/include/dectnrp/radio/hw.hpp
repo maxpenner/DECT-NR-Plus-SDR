@@ -145,7 +145,7 @@ class hw_t : public common::layer_unit_t {
         virtual double set_freq_tc(const double freq_Hz) = 0;
 
         /// get current TX power at 0dBFS per antenna (value is the same for all antennas)
-        float get_tx_power_ant_0dBFS_tc() const { return tx_power_ant_0dBFS; };
+        float get_tx_power_ant_0dBFS() const { return tx_power_ant_0dBFS; };
 
         /**
          * \brief Set TX power at 0dBFS. Call after initialize_device(). Internally sets the PA
@@ -172,7 +172,7 @@ class hw_t : public common::layer_unit_t {
         float adjust_tx_power_ant_0dBFS_tc(const float adj_dB);
 
         /// get current RX power at 0dBFS per antenna (value is not the same for all antennas)
-        const common::ant_t& get_rx_power_ant_0dBFS_tc() const { return rx_power_ant_0dBFS; };
+        const common::ant_t& get_rx_power_ant_0dBFS() const { return rx_power_ant_0dBFS; };
 
         /**
          * \brief Set RX power at 0dBFS. Call after initialize_device(). Internally sets the LNA
