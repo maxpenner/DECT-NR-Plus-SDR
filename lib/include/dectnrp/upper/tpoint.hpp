@@ -267,7 +267,7 @@ class tpoint_t : public common::layer_unit_t {
          * \param hw_idx see above
          * \return optimal TX and RX AGC adjustments
          */
-        [[nodiscard]] std::pair<float, common::ant_t> worksub_agc_adj(
+        [[nodiscard]] std::pair<common::ant_t, common::ant_t> worksub_agc_adj(
             const phy::sync_report_t& sync_report,
             const sp4::plcf_base_t& plcf_base,
             const std::size_t hw_idx = 0);

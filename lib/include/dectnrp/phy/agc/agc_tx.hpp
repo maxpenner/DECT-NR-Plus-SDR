@@ -51,10 +51,10 @@ class agc_tx_t final : public agc_t {
          * Returns a negative step if radio hardware has to DECREASE the rx power at 0dBFS. Returns
          * 0.0f if protection duration has not passed yet or no change is required.
          */
-        float get_gain_step_dB(const float tx_dBm_opposite,
-                               const float tx_power_ant_0dBFS,
-                               const common::ant_t& rx_power_ant_0dBFS,
-                               const common::ant_t& rms_measured_);
+        const common::ant_t get_gain_step_dB(const float tx_dBm_opposite,
+                                             const common::ant_t& tx_power_ant_0dBFS,
+                                             const common::ant_t& rx_power_ant_0dBFS,
+                                             const common::ant_t& rms_measured_);
 
         float get_ofdm_amplitude_factor() const { return ofdm_amplitude_factor; };
 

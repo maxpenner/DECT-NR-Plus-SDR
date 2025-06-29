@@ -403,8 +403,8 @@ void hw_usrp_t::initialize_device() {
         }
     }
 
-    set_tx_power_ant_0dBFS_tc(-1000.0f);         // minimum TX power
-    set_rx_power_ant_0dBFS_uniform_tc(1000.0f);  // minimum RX sensitivity
+    set_tx_power_ant_0dBFS_uniform_tc(-1000.0f);  // minimum TX power
+    set_rx_power_ant_0dBFS_uniform_tc(1000.0f);   // minimum RX sensitivity
 
     // https://files.ettus.com/manual/page_general.html#general_tuning_rfsettling
     while (!m_usrp->get_rx_sensor("lo_locked").to_bool()) {
@@ -539,23 +539,21 @@ double hw_usrp_t::set_freq_tc(const double freq_Hz) {
     return tune_result_tx.target_rf_freq;
 }
 
-float hw_usrp_t::set_tx_power_ant_0dBFS_tc(const float power_dBm) {
+float hw_usrp_t::set_tx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) {
     const auto achievable_power_gain =
         gain_lut.get_achievable_power_gain_tx(power_dBm, m_usrp->get_tx_freq());
 
     // do not call hardware functions if there isn't a real change
-    if (std::abs(achievable_power_gain.power_dBm - tx_power_ant_0dBFS) <
+    if (std::abs(achievable_power_gain.power_dBm - tx_power_ant_0dBFS.at(idx)) <
         gain_lut.gains_tx_dB_step) {
-        return tx_power_ant_0dBFS;
+        return tx_power_ant_0dBFS.at(idx);
     }
 
-    for (size_t i = 0; i < nof_antennas; ++i) {
-        m_usrp->set_tx_gain(static_cast<double>(achievable_power_gain.gain_dB), i);
-    }
+    m_usrp->set_tx_gain(static_cast<double>(achievable_power_gain.gain_dB), idx);
 
-    tx_power_ant_0dBFS = achievable_power_gain.power_dBm;
+    tx_power_ant_0dBFS.at(idx) = achievable_power_gain.power_dBm;
 
-    return tx_power_ant_0dBFS;
+    return tx_power_ant_0dBFS.at(idx);
 }
 
 float hw_usrp_t::set_rx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) {

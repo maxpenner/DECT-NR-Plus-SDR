@@ -147,7 +147,7 @@ class hw_t : public common::layer_unit_t {
         virtual double set_freq_tc(const double freq_Hz) = 0;
 
         /// get current TX power at 0dBFS per antenna (value is the same for all antennas)
-        float get_tx_power_ant_0dBFS() const { return tx_power_ant_0dBFS; };
+        const common::ant_t& get_tx_power_ant_0dBFS() const { return tx_power_ant_0dBFS; };
 
         /**
          * \brief Set TX power at 0dBFS. Call after initialize_device(). Internally sets the PA
@@ -161,7 +161,10 @@ class hw_t : public common::layer_unit_t {
          * \param power_dBm power at 0dBFS (usually between -40 and 20 dBm)
          * \return actual TX power at 0dBFS
          */
-        virtual float set_tx_power_ant_0dBFS_tc(const float power_dBm) = 0;
+        virtual float set_tx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) = 0;
+
+        /// set same value for all antennas
+        const common::ant_t& set_tx_power_ant_0dBFS_uniform_tc(const float power_dBm);
 
         /**
          * \brief For a software AGC, it is easier to have relative gain changes in dB. When
@@ -171,7 +174,7 @@ class hw_t : public common::layer_unit_t {
          * \param adj_dB adjustment in dBm
          * \return actual TX power at 0dBFS
          */
-        float adjust_tx_power_ant_0dBFS_tc(const float adj_dB);
+        const common::ant_t& adjust_tx_power_ant_0dBFS_tc(const common::ant_t& adj_dB);
 
         /// get current RX power at 0dBFS per antenna (value is not the same for all antennas)
         const common::ant_t& get_rx_power_ant_0dBFS() const { return rx_power_ant_0dBFS; };
@@ -296,7 +299,7 @@ class hw_t : public common::layer_unit_t {
         gain_lut_t gain_lut{};
 
         /// current power settings
-        float tx_power_ant_0dBFS{};
+        common::ant_t tx_power_ant_0dBFS{};
         common::ant_t rx_power_ant_0dBFS{};
 
         antenna_array_t antenna_array{};

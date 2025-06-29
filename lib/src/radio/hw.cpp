@@ -38,6 +38,7 @@ void hw_t::set_nof_antennas(const uint32_t nof_antennas_) {
 
     nof_antennas = nof_antennas_;
 
+    tx_power_ant_0dBFS = common::ant_t(nof_antennas);
     rx_power_ant_0dBFS = common::ant_t(nof_antennas);
 }
 
@@ -51,12 +52,24 @@ void hw_t::set_tx_gap_samples(const uint32_t tx_gap_samples_) {
     tx_gap_samples = tx_gap_samples_;
 }
 
-float hw_t::adjust_tx_power_ant_0dBFS_tc(const float adj_dB) {
-    if (adj_dB == 0.0) {
-        return tx_power_ant_0dBFS;
+const common::ant_t& hw_t::set_tx_power_ant_0dBFS_uniform_tc(const float power_dBm) {
+    for (size_t i = 0; i < nof_antennas; ++i) {
+        set_tx_power_ant_0dBFS_tc(power_dBm, i);
     }
 
-    return set_tx_power_ant_0dBFS_tc(tx_power_ant_0dBFS + adj_dB);
+    return tx_power_ant_0dBFS;
+}
+
+const common::ant_t& hw_t::adjust_tx_power_ant_0dBFS_tc(const common::ant_t& adj_dB) {
+    for (size_t i = 0; i < nof_antennas; ++i) {
+        if (adj_dB.at(i) == 0.0f) {
+            continue;
+        }
+
+        set_tx_power_ant_0dBFS_tc(tx_power_ant_0dBFS.at(i) + adj_dB.at(i), i);
+    }
+
+    return tx_power_ant_0dBFS;
 }
 
 const common::ant_t& hw_t::set_rx_power_ant_0dBFS_uniform_tc(const float power_dBm) {

@@ -366,7 +366,7 @@ void steady_pt_t::worksub_callback_log([[maybe_unused]] const int64_t now_64) co
 
     str += stats.get_as_string();
 
-    str += "tx_power_ant_0dBFS=" + std::to_string(hw.get_tx_power_ant_0dBFS()) + " ";
+    str += "tx_power_ant_0dBFS=" + hw.get_tx_power_ant_0dBFS().get_readable_list() + " ";
     str += "rx_power_ant_0dBFS=" + hw.get_rx_power_ant_0dBFS().get_readable_list() + " ";
     str += "rx_rms=" + pt.contact_pt.sync_report.rms_array.get_readable_list();
 

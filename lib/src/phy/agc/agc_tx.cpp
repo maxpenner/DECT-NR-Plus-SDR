@@ -21,7 +21,6 @@
 #include "dectnrp/phy/agc/agc_tx.hpp"
 
 #include "dectnrp/common/adt/decibels.hpp"
-#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::phy::agc {
@@ -38,10 +37,10 @@ agc_tx_t::agc_tx_t(const agc_config_t agc_config_,
     dectnrp_assert(rx_dBm_target <= -40.0f, "too large");
 }
 
-float agc_tx_t::get_gain_step_dB(const float tx_dBm_opposite,
-                                 const float tx_power_ant_0dBFS,
-                                 const common::ant_t& rx_power_ant_0dBFS,
-                                 const common::ant_t& rms_measured_) {
+const common::ant_t agc_tx_t::get_gain_step_dB(const float tx_dBm_opposite,
+                                               const common::ant_t& tx_power_ant_0dBFS,
+                                               const common::ant_t& rx_power_ant_0dBFS,
+                                               const common::ant_t& rms_measured_) {
     // we have to find the antenna with the highest RX power
     float rx_power_dBm_measured_max = -1e6;
 
@@ -67,10 +66,14 @@ float agc_tx_t::get_gain_step_dB(const float tx_dBm_opposite,
         tx_dBm_opposite + (rx_dBm_target - rx_power_dBm_measured_max);
 
     // what is our current radiated transmit power?
-    const float tx_dBm = tx_power_ant_0dBFS + common::adt::mag2db(ofdm_amplitude_factor);
+    const float tx_dBm = tx_power_ant_0dBFS.get_max() + common::adt::mag2db(ofdm_amplitude_factor);
 
-    // get gain change to reach the same transmit power
-    return quantize_and_limit_gain_step_dB(tx_dBm_opposite_ideal - tx_dBm);
+    common::ant_t arbitrary_gain_step_dB(agc_config.nof_antennas);
+    for (size_t i = 0; i < agc_config.nof_antennas; ++i) {
+        arbitrary_gain_step_dB.at(i) = tx_dBm_opposite_ideal - tx_dBm;
+    }
+
+    return quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB);
 }
 
 }  // namespace dectnrp::phy::agc

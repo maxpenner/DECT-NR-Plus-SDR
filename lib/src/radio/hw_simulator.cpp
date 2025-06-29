@@ -135,8 +135,8 @@ void hw_simulator_t::initialize_device() {
     set_command_time();
     set_freq_tc(HW_DEFAULT_FREQ_HZ);
 
-    set_tx_power_ant_0dBFS_tc(-1000.0f);         // minimum TX power
-    set_rx_power_ant_0dBFS_uniform_tc(1000.0f);  // minimum RX sensitivity
+    set_tx_power_ant_0dBFS_uniform_tc(-1000.0f);  // minimum TX power
+    set_rx_power_ant_0dBFS_uniform_tc(1000.0f);   // minimum RX sensitivity
 }
 
 void hw_simulator_t::start_threads_and_iq_streaming() {
@@ -196,18 +196,18 @@ double hw_simulator_t::set_freq_tc(const double freq_Hz) {
     return vspptx->meta.freq_Hz;
 }
 
-float hw_simulator_t::set_tx_power_ant_0dBFS_tc(const float power_dBm) {
+float hw_simulator_t::set_tx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) {
     std::unique_lock<std::mutex> lock(hw_mtx);
 
     const auto achievable_power_gain =
         gain_lut.get_achievable_power_gain_tx(power_dBm, vspptx->meta.freq_Hz);
 
     // equivalent to making a hardware change
-    vspptx->meta.tx_power_ant_0dBFS = achievable_power_gain.power_dBm;
+    vspptx->meta.tx_power_ant_0dBFS.at(idx) = achievable_power_gain.power_dBm;
 
-    tx_power_ant_0dBFS = achievable_power_gain.power_dBm;
+    tx_power_ant_0dBFS.at(idx) = achievable_power_gain.power_dBm;
 
-    return tx_power_ant_0dBFS;
+    return tx_power_ant_0dBFS.at(idx);
 }
 
 float hw_simulator_t::set_rx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) {

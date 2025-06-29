@@ -86,7 +86,7 @@ void tpoint_t::worksub_agc([[maybe_unused]] const phy::sync_report_t& sync_repor
 #endif
 }
 
-std::pair<float, common::ant_t> tpoint_t::worksub_agc_adj(
+std::pair<common::ant_t, common::ant_t> tpoint_t::worksub_agc_adj(
     [[maybe_unused]] const phy::sync_report_t& sync_report,
     [[maybe_unused]] const sp4::plcf_base_t& plcf_base,
     [[maybe_unused]] const std::size_t hw_idx) {

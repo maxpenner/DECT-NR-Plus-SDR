@@ -47,7 +47,7 @@ tfw_loopback_t::tfw_loopback_t(const tpoint_config_t& tpoint_config_, phy::mac_l
     // set frequency, TX and RX power
     hw.set_command_time();
     hw.set_freq_tc(0.0);
-    hw.set_tx_power_ant_0dBFS_tc(0.0f);
+    hw.set_tx_power_ant_0dBFS_uniform_tc(0.0f);
     hw.set_rx_power_ant_0dBFS_uniform_tc(0.0f);
 
     // loopback requires the hardware to be a simulator

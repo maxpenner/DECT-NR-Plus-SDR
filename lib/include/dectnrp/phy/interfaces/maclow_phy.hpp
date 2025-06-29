@@ -77,7 +77,7 @@ class maclow_phy_t {
          * controls the hardware. These variable may or not be set, we don't make it a mandatory.
          */
         struct hw_status_t {
-                float tx_power_ant_0dBFS{};
+                common::ant_t tx_power_ant_0dBFS{};
                 common::ant_t rx_power_ant_0dBFS{};
         } hw_status;
 };

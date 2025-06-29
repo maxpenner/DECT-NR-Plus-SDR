@@ -93,8 +93,8 @@ class tfw_rtt_t final : public tpoint_t {
 
         /// used at FT and PT
         void generate_packet_asap(phy::machigh_phy_t& machigh_phy,
-                                  const std::optional<float> tx_power_adj_dB,
-                                  const std::optional<common::ant_t> rx_power_adj_dB);
+                                  const std::optional<common::ant_t>& tx_power_adj_dB,
+                                  const std::optional<common::ant_t>& rx_power_adj_dB);
 
         phy::machigh_phy_t work_pdc_internal(const phy::phy_machigh_t& phy_machigh);
 };

@@ -38,7 +38,7 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
     hw.set_command_time();
     hw.set_freq_tc(3900.0e6);
 
-    hw.set_tx_power_ant_0dBFS_tc(10.0f);
+    hw.set_tx_power_ant_0dBFS_uniform_tc(10.0f);
     hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
 
     psdef = {.u = worker_pool_config.radio_device_class.u_min,
@@ -234,8 +234,8 @@ void tfw_rtt_t::work_stop() {
 }
 
 void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy,
-                                     const std::optional<float> tx_power_adj_dB,
-                                     const std::optional<common::ant_t> rx_power_adj_dB) {
+                                     const std::optional<common::ant_t>& tx_power_adj_dB,
+                                     const std::optional<common::ant_t>& rx_power_adj_dB) {
     // request harq process
     auto* hp_tx = hpp.get_process_tx(
         1, identity_ft.NetworkID, psdef, phy::harq::finalize_tx_t::reset_and_terminate);
@@ -331,11 +331,11 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_internal(const phy::phy_machigh_t& phy_ma
             now_64) {
             t_agc_xx_last_change_64 = now_64;
 
-            const auto [tx_gain_adj, rx_gain_adj] =
+            const auto [tx_power_adj_dB, rx_power_adj_dB] =
                 worksub_agc_adj(phy_machigh.phy_maclow.sync_report,
                                 *phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
 
-            generate_packet_asap(machigh_phy, tx_gain_adj, rx_gain_adj);
+            generate_packet_asap(machigh_phy, tx_power_adj_dB, rx_power_adj_dB);
         } else {
             generate_packet_asap(machigh_phy, std::nullopt, std::nullopt);
         }

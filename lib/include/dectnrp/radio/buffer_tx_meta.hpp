@@ -38,7 +38,7 @@ struct buffer_tx_meta_t {
         int64_t tx_time_64{-1};
 
         /// adjustments applied after packet transmission
-        std::optional<float> tx_power_adj_dB{std::nullopt};
+        std::optional<common::ant_t> tx_power_adj_dB{std::nullopt};
         std::optional<common::ant_t> rx_power_adj_dB{std::nullopt};
 
         /**

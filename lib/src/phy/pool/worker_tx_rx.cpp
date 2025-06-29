@@ -367,7 +367,7 @@ void worker_tx_rx_t::collect_and_write_json(const sync_report_t& sync_report,
 
     json["RADIO"]["samp_rate"] = hw.buffer_rx->samp_rate;
     json["RADIO"]["N_TX_min"] = worker_pool_config.radio_device_class.N_TX_min;
-    json["RADIO"]["tx_power_ant_0dBFS"] = maclow_phy.hw_status.tx_power_ant_0dBFS;
+    json["RADIO"]["tx_power_ant_0dBFS"] = maclow_phy.hw_status.tx_power_ant_0dBFS.get_ary();
     json["RADIO"]["rx_power_ant_0dBFS"] = maclow_phy.hw_status.rx_power_ant_0dBFS.get_ary();
 
     // ####################################
