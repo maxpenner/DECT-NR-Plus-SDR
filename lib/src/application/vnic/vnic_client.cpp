@@ -40,11 +40,11 @@ uint32_t vnic_client_t::write_immediate(const uint32_t conn_idx,
                                         const uint32_t n) {
     dectnrp_assert(conn_idx == 0, "VNIC has only conn_idx=0");
 
-    const auto w_n = write(tuntap_fd, (const char*)inp, n);
+    const auto n_w = write(tuntap_fd, (const char*)inp, n);
 
-    dectnrp_assert(!(w_n > 0 && n != w_n), "nof bytes not the same");
+    dectnrp_assert(!(n_w > 0 && n != n_w), "nof bytes not the same");
 
-    return w_n > 0 ? w_n : 0;
+    return n_w > 0 ? n_w : 0;
 }
 
 uint32_t vnic_client_t::write_nto(const uint32_t conn_idx, const uint8_t* inp, const uint32_t n) {

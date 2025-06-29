@@ -61,16 +61,16 @@ socket_client_t::~socket_client_t() {
 uint32_t socket_client_t::write_immediate(const uint32_t conn_idx,
                                           const uint8_t* inp,
                                           const uint32_t n) {
-    const auto w_n = sendto(udp_vec[conn_idx]->socketfd,
+    const auto n_w = sendto(udp_vec[conn_idx]->socketfd,
                             (const char*)inp,
                             n,
                             MSG_CONFIRM,
                             (const struct sockaddr*)&udp_vec[conn_idx]->servaddr,
                             sizeof(udp_vec[conn_idx]->servaddr));
 
-    dectnrp_assert(n == w_n, "nof bytes not the same");
+    dectnrp_assert(n == n_w, "nof bytes not the same");
 
-    return w_n > 0 ? w_n : 0;
+    return n_w > 0 ? n_w : 0;
 }
 
 uint32_t socket_client_t::write_nto(const uint32_t conn_idx, const uint8_t* inp, const uint32_t n) {

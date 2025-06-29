@@ -62,8 +62,8 @@ class queue_t {
          * \param n number of oldest datagrams to consider
          * \return
          */
-        queue_level_t get_queue_level_nto(const uint32_t n) const;
-        queue_level_t get_queue_level_try(const uint32_t n) const;
+        [[nodiscard]] queue_level_t get_queue_level_nto(const uint32_t n) const;
+        [[nodiscard]] queue_level_t get_queue_level_try(const uint32_t n) const;
 
         /**
          * \brief Write a new datagram to the queue. If all internal datagrams slots are used, data
@@ -88,6 +88,8 @@ class queue_t {
         [[nodiscard]] uint32_t read_nto(uint8_t* dst);
         [[nodiscard]] uint32_t read_try(uint8_t* dst);
 
+        void clear();
+
         const queue_size_t queue_size;
 
     private:
@@ -103,12 +105,12 @@ class queue_t {
         std::vector<uint8_t*> datagram_vec;
         std::vector<uint32_t> datagram_level_vec;
 
-        queue_level_t get_queue_level_under_lock(const uint32_t n) const;
-        uint32_t write_under_lock(const uint8_t* inp, const uint32_t n);
-        uint32_t read_under_lock(uint8_t* dst);
+        [[nodiscard]] queue_level_t get_queue_level_under_lock(const uint32_t n) const;
+        [[nodiscard]] uint32_t write_under_lock(const uint8_t* inp, const uint32_t n);
+        [[nodiscard]] uint32_t read_under_lock(uint8_t* dst);
 
-        uint32_t get_free() const;
-        uint32_t get_used() const;
+        [[nodiscard]] uint32_t get_free() const;
+        [[nodiscard]] uint32_t get_used() const;
 };
 
 }  // namespace dectnrp::application

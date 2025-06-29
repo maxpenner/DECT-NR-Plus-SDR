@@ -53,6 +53,8 @@
 #include "dectnrp/radio/pulse_config.hpp"
 #endif
 
+#define RADIO_HW_AGC_IMMEDIATE_OR_AT_PACKET_END
+
 namespace dectnrp::radio {
 
 class hw_t : public common::layer_unit_t {

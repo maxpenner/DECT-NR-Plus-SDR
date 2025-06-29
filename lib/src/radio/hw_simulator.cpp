@@ -385,11 +385,6 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
             dectnrp_assert(tx_time_64 >= now_64,
                            "transmission time of expected packet earlier than current time");
 
-            // when does the current packet end on the global time axis?
-            const int64_t tx_time_in_samples_end =
-                buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_time_64 +
-                static_cast<int64_t>(tx_length_samples);
-
             // how many zero samples must be transmitted before the first sample of the packet?
             const int64_t time2tx = tx_time_64 - now_64;
 
@@ -463,17 +458,27 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
 
                 // were these the final samples of the current packet?
                 if (tx_length_samples_cnt == tx_length_samples) {
+#ifdef RADIO_HW_AGC_IMMEDIATE_OR_AT_PACKET_END
+                    const int64_t agc_time_64 = -1;
+#else
+                    // when does the current packet end on the global time axis?
+                    const int64_t agc_time_64 =
+                        buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_time_64 +
+                        static_cast<int64_t>(tx_length_samples);
+#endif
+
+                    // TX AGC
                     if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {
-                        calling_instance->set_command_time(tx_time_in_samples_end);
+                        calling_instance->set_command_time(agc_time_64);
                         calling_instance->adjust_tx_power_ant_0dBFS_tc(
                             buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.value());
                     }
 
+                    // RX AGC
                     if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.rx_power_adj_dB.has_value()) {
-                        calling_instance->set_command_time(tx_time_in_samples_end);
+                        calling_instance->set_command_time(agc_time_64);
                         calling_instance->adjust_rx_power_ant_0dBFS_tc(
-                            buffer_tx_vec[buffer_tx_idx]
-                                ->buffer_tx_meta.rx_power_adj_dB.has_value());
+                            buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.rx_power_adj_dB.value());
                     }
 
                     // set buffer as transmitted

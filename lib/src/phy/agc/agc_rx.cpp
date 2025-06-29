@@ -21,10 +21,8 @@
 #include "dectnrp/phy/agc/agc_rx.hpp"
 
 #include <cmath>
-#include <utility>
 
 #include "dectnrp/common/adt/decibels.hpp"
-#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::phy::agc {
@@ -121,7 +119,8 @@ const common::ant_t agc_rx_t::get_gain_step_dB(const common::ant_t& rx_power_ant
     }
 
     dectnrp_assert_failure("unreachable");
-    std::unreachable();
+
+    return common::ant_t(agc_config.nof_antennas);
 }
 
 }  // namespace dectnrp::phy::agc

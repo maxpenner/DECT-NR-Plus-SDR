@@ -47,7 +47,7 @@ class application_server_t : public application_t {
         application_server_t(application_server_t&&) = delete;
         application_server_t& operator=(application_server_t&&) = delete;
 
-        virtual uint32_t get_n_connections() const override = 0;
+        [[nodiscard]] virtual uint32_t get_n_connections() const override = 0;
 
         /**
          * \brief Get vector with current levels in a specific queue. The first element refers to
@@ -57,13 +57,13 @@ class application_server_t : public application_t {
          * \param n number of levels requested, can be set to very large number to get full overview
          * \return
          */
-        virtual queue_level_t get_queue_level_nto(const uint32_t conn_idx,
-                                                  const uint32_t n) const = 0;
-        virtual queue_level_t get_queue_level_try(const uint32_t conn_idx,
-                                                  const uint32_t n) const = 0;
+        [[nodiscard]] virtual queue_level_t get_queue_level_nto(const uint32_t conn_idx,
+                                                                const uint32_t n) const = 0;
+        [[nodiscard]] virtual queue_level_t get_queue_level_try(const uint32_t conn_idx,
+                                                                const uint32_t n) const = 0;
 
-        virtual uint32_t read_nto(const uint32_t conn_idx, uint8_t* dst) = 0;
-        virtual uint32_t read_try(const uint32_t conn_idx, uint8_t* dst) = 0;
+        [[nodiscard]] virtual uint32_t read_nto(const uint32_t conn_idx, uint8_t* dst) = 0;
+        [[nodiscard]] virtual uint32_t read_try(const uint32_t conn_idx, uint8_t* dst) = 0;
 
         /// call without an argument to disable the creation on jobs
         void set_job_queue_access_protection_ns(const int64_t job_queue_access_protection_ns_64_ =
@@ -78,7 +78,7 @@ class application_server_t : public application_t {
         std::vector<struct pollfd> pfds;
 
         /// every deriving class has its own way of reading datagrams
-        virtual ssize_t read_datagram(const uint32_t conn_idx) = 0;
+        [[nodiscard]] virtual ssize_t read_datagram(const uint32_t conn_idx) = 0;
 
         /**
          * \brief Every deriving class must filter ingress datagrams.
@@ -87,7 +87,7 @@ class application_server_t : public application_t {
          * \return true to keep datagram
          * \return false to discard datagram
          */
-        virtual bool filter_ingress_datagram(const uint32_t conn_idx) = 0;
+        [[nodiscard]] virtual bool filter_ingress_datagram(const uint32_t conn_idx) = 0;
 
         /**
          * \brief The application_server_t accepts data from outside. For each individual datagram,

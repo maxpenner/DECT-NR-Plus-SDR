@@ -95,6 +95,8 @@ tfw_rtt_t::tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& ma
 }
 
 phy::irregular_report_t tfw_rtt_t::work_start([[maybe_unused]] const int64_t start_time_64) {
+    application_server->clear();
+    application_client->clear();
     return phy::irregular_report_t();
 }
 
@@ -203,7 +205,7 @@ phy::machigh_phy_t tfw_rtt_t::work_application(
         sync_report = phy::sync_report_t(hw.get_nof_antennas());
 
         // invalidate payload
-        application_server->read_nto(1, nullptr);
+        [[maybe_unused]] const auto n_r = application_server->read_nto(1, nullptr);
 
         return phy::machigh_phy_t();
     }
@@ -259,7 +261,9 @@ void tfw_rtt_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy,
                        "N_TB_byte is only {}",
                        packet_sizes.N_TB_byte);
 
-        application_server->read_nto(0, hp_tx->get_a_tb());
+        const auto n_w = application_server->read_nto(0, hp_tx->get_a_tb());
+
+        dectnrp_assert(queue_level.levels[0] == n_w, "incorrect number of");
     } else {
         memcpy(hp_tx->get_a_tb(), &stage_a[0], packet_sizes.N_TB_byte);
     }
@@ -310,7 +314,9 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_internal(const phy::phy_machigh_t& phy_ma
         memcpy(&stage_a[TFW_RTT_TX_VS_RX_VERIFICATION_LENGTH_BYTE], &rtt, sizeof(rtt));
 
         // forward to rtt
-        application_client->write_immediate(0, &stage_a[0], a_raw.second);
+        const auto n_w = application_client->write_immediate(0, &stage_a[0], a_raw.second);
+
+        dectnrp_assert(a_raw.second == n_w, "incorrect number of");
 
         ++N_measurement_rx_cnt;
     } else {
@@ -325,9 +331,9 @@ phy::machigh_phy_t tfw_rtt_t::work_pdc_internal(const phy::phy_machigh_t& phy_ma
             now_64) {
             t_agc_xx_last_change_64 = now_64;
 
-            const auto [tx_gain_adj, rx_gain_adj] = worksub_agc_adj_only(
-                phy_machigh.phy_maclow.sync_report,
-                *phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
+            const auto [tx_gain_adj, rx_gain_adj] =
+                worksub_agc_adj(phy_machigh.phy_maclow.sync_report,
+                                *phy_machigh.phy_maclow.pcc_report.plcf_decoder.get_plcf_base(1));
 
             generate_packet_asap(machigh_phy, tx_gain_adj, rx_gain_adj);
         } else {

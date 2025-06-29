@@ -22,7 +22,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <utility>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
@@ -117,7 +116,8 @@ bool allocation_pt_t::is_orthogonal(const direction_t direction, const resource_
     }
 
     dectnrp_assert_failure("unreachable");
-    std::unreachable();
+
+    return false;
 }
 
 bool allocation_pt_t::is_orthogonal(const direction_t direction,

@@ -60,8 +60,7 @@ void tpoint_t::worksub_agc([[maybe_unused]] const phy::sync_report_t& sync_repor
                            [[maybe_unused]] const int64_t t_agc_rx_change_64,
                            [[maybe_unused]] const std::size_t hw_idx) {
 #if defined(AGC_TX_PT) || defined(AGC_RX_PT)
-    const auto [tx_power_adj_dB, rx_power_adj_dB] =
-        worksub_agc_adj_only(sync_report, plcf_base, hw_idx);
+    const auto [tx_power_adj_dB, rx_power_adj_dB] = worksub_agc_adj(sync_report, plcf_base, hw_idx);
 
     auto& hw_local = mac_lower.lower_ctrl_vec.at(hw_idx).hw;
 
@@ -87,22 +86,32 @@ void tpoint_t::worksub_agc([[maybe_unused]] const phy::sync_report_t& sync_repor
 #endif
 }
 
-std::pair<float, common::ant_t> tpoint_t::worksub_agc_adj_only(
-    const phy::sync_report_t& sync_report,
-    const sp4::plcf_base_t& plcf_base,
-    const std::size_t hw_idx) {
+std::pair<float, common::ant_t> tpoint_t::worksub_agc_adj(
+    [[maybe_unused]] const phy::sync_report_t& sync_report,
+    [[maybe_unused]] const sp4::plcf_base_t& plcf_base,
+    [[maybe_unused]] const std::size_t hw_idx) {
     const auto& hw_local = mac_lower.lower_ctrl_vec.at(hw_idx).hw;
+
+#ifdef AGC_TX_PT
     auto& agc_tx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_tx;
-    auto& agc_rx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_rx;
 
     const auto tx_power_adj_dB =
         agc_tx_local.get_gain_step_dB(plcf_base.get_TransmitPower_dBm<float>(),
                                       hw_local.get_tx_power_ant_0dBFS(),
                                       hw_local.get_rx_power_ant_0dBFS(),
                                       sync_report.rms_array);
+#else
+    const float tx_power_adj_dB = 0.0f;
+#endif
+
+#ifdef AGC_RX_PT
+    auto& agc_rx_local = mac_lower.lower_ctrl_vec.at(hw_idx).agc_rx;
 
     const auto rx_power_adj_dB =
         agc_rx_local.get_gain_step_dB(hw_local.get_rx_power_ant_0dBFS(), sync_report.rms_array);
+#else
+    const common::ant_t rx_power_adj_dB = common::ant_t(hw_local.get_nof_antennas());
+#endif
 
     return std::make_pair(tx_power_adj_dB, rx_power_adj_dB);
 }

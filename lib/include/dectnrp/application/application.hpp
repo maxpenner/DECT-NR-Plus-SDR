@@ -69,7 +69,9 @@ class application_t {
         void stop_sc();
 
         /// number of connections
-        virtual uint32_t get_n_connections() const = 0;
+        [[nodiscard]] virtual uint32_t get_n_connections() const = 0;
+
+        void clear();
 
     protected:
         const uint32_t id;
