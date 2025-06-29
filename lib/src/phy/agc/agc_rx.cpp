@@ -94,7 +94,7 @@ const common::ant_t agc_rx_t::get_gain_step_dB(const common::ant_t& rx_power_ant
                     arbitrary_gain_step_dB.at(i) = std::max(C, D);
                 }
 
-                return quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB);
+                return roundrobin.process(quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB));
             }
 
         case tune_collectively:
@@ -114,7 +114,7 @@ const common::ant_t agc_rx_t::get_gain_step_dB(const common::ant_t& rx_power_ant
                     arbitrary_gain_step_dB.at(i) = arbitrary_gain_step_dB_equal;
                 }
 
-                return quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB);
+                return roundrobin.process(quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB));
             }
     }
 

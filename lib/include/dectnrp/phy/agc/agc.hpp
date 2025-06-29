@@ -25,6 +25,7 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/ant.hpp"
 #include "dectnrp/phy/agc/agc_config.hpp"
+#include "dectnrp/phy/agc/roundrobin.hpp"
 
 namespace dectnrp::phy::agc {
 
@@ -47,6 +48,8 @@ class agc_t {
         /// gain settings can be applied in the future, keeps track of when the pending values takes
         /// effect
         mutable int64_t power_ant_0dBFS_pending_time_64{common::adt::UNDEFINED_EARLY_64};
+
+        roundrobin_t roundrobin;
 
         /**
          * \brief Determines the gain value closest to arbitrary_gain_step_dB adhering to the

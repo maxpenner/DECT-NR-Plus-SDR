@@ -73,7 +73,7 @@ const common::ant_t agc_tx_t::get_gain_step_dB(const float tx_dBm_opposite,
         arbitrary_gain_step_dB.at(i) = tx_dBm_opposite_ideal - tx_dBm;
     }
 
-    return quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB);
+    return roundrobin.process(quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB));
 }
 
 }  // namespace dectnrp::phy::agc
