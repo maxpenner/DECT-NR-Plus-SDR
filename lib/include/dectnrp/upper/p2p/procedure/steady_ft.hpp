@@ -24,8 +24,6 @@
 #include "dectnrp/upper/p2p/procedure/args.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_rd.hpp"
 
-// #define TFW_P2P_FT_ALIGN_BEACON_START_TO_FULL_SECOND_OR_CORRECT_OFFSET
-
 namespace dectnrp::upper::tfw::p2p {
 
 class steady_ft_t final : public steady_rd_t {

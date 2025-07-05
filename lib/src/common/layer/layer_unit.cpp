@@ -24,7 +24,7 @@
 
 namespace dectnrp::common {
 
-void layer_unit_t::log_line(const std::string line) const {
+void layer_unit_t::log_line([[maybe_unused]] const std::string line) const {
     dectnrp_log_inf("{}", std::string(identifier + " | " + line));
 }
 

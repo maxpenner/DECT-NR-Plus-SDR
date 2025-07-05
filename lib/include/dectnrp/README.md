@@ -6,7 +6,7 @@ Mutexes are typically held for a very short period of time, so switching to a sp
 
 - [queue.hpp](/lib/include/dectnrp/application/queue/queue.hpp)
 - [json_export.hpp](/lib/include/dectnrp/common/json/json_export.hpp)
-- [irregular.hpp](/lib/include/dectnrp/phy/pool/irregular.hpp)
+- [irregular_queue.hpp](/lib/include/dectnrp/phy/pool/irregular_queue.hpp)
 - [job_queue_mc.hpp](/lib/include/dectnrp/phy/pool/job_queue_mc.hpp)
 
 ## Condition Variable or Busy Waiting

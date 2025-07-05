@@ -46,11 +46,11 @@ class application_client_t : public application_t {
         application_client_t(application_client_t&&) = delete;
         application_client_t& operator=(application_client_t&&) = delete;
 
-        virtual uint32_t get_n_connections() const override = 0;
+        [[nodiscard]] virtual uint32_t get_n_connections() const override = 0;
 
-        virtual uint32_t write_immediate(const uint32_t conn_idx,
-                                         const uint8_t* inp,
-                                         const uint32_t n) = 0;
+        [[nodiscard]] virtual uint32_t write_immediate(const uint32_t conn_idx,
+                                                       const uint8_t* inp,
+                                                       const uint32_t n) = 0;
         [[nodiscard]] virtual uint32_t write_nto(const uint32_t conn_idx,
                                                  const uint8_t* inp,
                                                  const uint32_t n) = 0;
@@ -78,7 +78,7 @@ class application_client_t : public application_t {
          * \return true to forward datagram
          * \return false to discard datagram
          */
-        virtual bool filter_egress_datagram(const uint32_t conn_idx) = 0;
+        [[nodiscard]] virtual bool filter_egress_datagram(const uint32_t conn_idx) = 0;
 
         void inc_indicator_cnt_under_lock(const uint32_t datagram_cnt);
         void dec_indicator_cnt_under_lock();

@@ -25,6 +25,7 @@
 #include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/ant.hpp"
 #include "dectnrp/phy/agc/agc_config.hpp"
+#include "dectnrp/phy/agc/roundrobin.hpp"
 
 namespace dectnrp::phy::agc {
 
@@ -40,22 +41,15 @@ class agc_t {
         static constexpr float OFDM_AMPLITUDE_FACTOR_MINUS_15dB = 0.177827941f;
         static constexpr float OFDM_AMPLITUDE_FACTOR_MINUS_20dB = 0.1f;
 
-        bool has_protect_duration_passed(const int64_t t_64) const {
-            return protect_duration_start_64 +
-                       agc_config.protect_duration.get_N_samples<int64_t>() <=
-                   t_64;
-        };
-
     protected:
         /// common AGC parameters for TX and RX
         agc_config_t agc_config;
 
-        /// time of last AGC changes
-        int64_t protect_duration_start_64{common::adt::UNDEFINED_EARLY_64};
-
         /// gain settings can be applied in the future, keeps track of when the pending values takes
         /// effect
         mutable int64_t power_ant_0dBFS_pending_time_64{common::adt::UNDEFINED_EARLY_64};
+
+        roundrobin_t roundrobin;
 
         /**
          * \brief Determines the gain value closest to arbitrary_gain_step_dB adhering to the

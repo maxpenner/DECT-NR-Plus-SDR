@@ -135,8 +135,8 @@ void hw_simulator_t::initialize_device() {
     set_command_time();
     set_freq_tc(HW_DEFAULT_FREQ_HZ);
 
-    set_tx_power_ant_0dBFS_tc(-1000.0f);         // minimum TX power
-    set_rx_power_ant_0dBFS_uniform_tc(1000.0f);  // minimum RX sensitivity
+    set_tx_power_ant_0dBFS_uniform_tc(-1000.0f);  // minimum TX power
+    set_rx_power_ant_0dBFS_uniform_tc(1000.0f);   // minimum RX sensitivity
 }
 
 void hw_simulator_t::start_threads_and_iq_streaming() {
@@ -196,18 +196,18 @@ double hw_simulator_t::set_freq_tc(const double freq_Hz) {
     return vspptx->meta.freq_Hz;
 }
 
-float hw_simulator_t::set_tx_power_ant_0dBFS_tc(const float power_dBm) {
+float hw_simulator_t::set_tx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) {
     std::unique_lock<std::mutex> lock(hw_mtx);
 
     const auto achievable_power_gain =
         gain_lut.get_achievable_power_gain_tx(power_dBm, vspptx->meta.freq_Hz);
 
     // equivalent to making a hardware change
-    vspptx->meta.tx_power_ant_0dBFS = achievable_power_gain.power_dBm;
+    vspptx->meta.tx_power_ant_0dBFS.at(idx) = achievable_power_gain.power_dBm;
 
-    tx_power_ant_0dBFS = achievable_power_gain.power_dBm;
+    tx_power_ant_0dBFS.at(idx) = achievable_power_gain.power_dBm;
 
-    return tx_power_ant_0dBFS;
+    return tx_power_ant_0dBFS.at(idx);
 }
 
 float hw_simulator_t::set_rx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) {
@@ -458,6 +458,29 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
 
                 // were these the final samples of the current packet?
                 if (tx_length_samples_cnt == tx_length_samples) {
+#ifdef RADIO_HW_AGC_IMMEDIATE_OR_AT_PACKET_END
+                    const int64_t agc_time_64 = -1;
+#else
+                    // when does the current packet end on the global time axis?
+                    const int64_t agc_time_64 =
+                        buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_time_64 +
+                        static_cast<int64_t>(tx_length_samples);
+#endif
+
+                    // TX AGC
+                    if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {
+                        calling_instance->set_command_time(agc_time_64);
+                        calling_instance->adjust_tx_power_ant_0dBFS_tc(
+                            buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.value());
+                    }
+
+                    // RX AGC
+                    if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.rx_power_adj_dB.has_value()) {
+                        calling_instance->set_command_time(agc_time_64);
+                        calling_instance->adjust_rx_power_ant_0dBFS_tc(
+                            buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.rx_power_adj_dB.value());
+                    }
+
                     // set buffer as transmitted
                     buffer_tx_vec[buffer_tx_idx]->set_transmitted_or_abort();
 

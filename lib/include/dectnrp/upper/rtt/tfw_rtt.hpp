@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include "dectnrp/application/application_client.hpp"
 #include "dectnrp/application/application_server.hpp"
 #include "dectnrp/common/adt/miscellaneous.hpp"
@@ -63,18 +65,21 @@ class tfw_rtt_t final : public tpoint_t {
         int64_t rtt_min{-common::adt::UNDEFINED_EARLY_64};
         int64_t rtt_max{common::adt::UNDEFINED_EARLY_64};
 
-        /// measured maximum rms
-        float rms_max{-1000.0f};
-
         /// operating system clock to measure rtt
         common::watch_t watch;
 
         /// packet dimensions
         sp3::packet_sizes_def_t psdef;
 
+        /// last time the AGC was tuned
+        int64_t t_agc_xx_last_change_64{common::adt::UNDEFINED_EARLY_64};
+
         /// FT and PT must know both identities
         sp4::mac_architecture::identity_t identity_ft;
         sp4::mac_architecture::identity_t identity_pt;
+
+        /// required to tune the AGC in an irregular callback
+        phy::sync_report_t sync_report;
 
         /// PLCF fixed to type 1 and header format 0
         sp4::plcf_10_t plcf_10;
@@ -87,7 +92,11 @@ class tfw_rtt_t final : public tpoint_t {
         std::vector<uint8_t> stage_a;
 
         /// used at FT and PT
-        void generate_packet_asap(phy::machigh_phy_t& machigh_phy);
+        void generate_packet_asap(phy::machigh_phy_t& machigh_phy,
+                                  const std::optional<common::ant_t>& tx_power_adj_dB,
+                                  const std::optional<common::ant_t>& rx_power_adj_dB);
+
+        phy::machigh_phy_t work_pdc_internal(const phy::phy_machigh_t& phy_machigh);
 };
 
 }  // namespace dectnrp::upper::tfw::rtt

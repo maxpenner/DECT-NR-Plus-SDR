@@ -37,6 +37,7 @@ resource_allocation_ie_t::resource_allocation_ie_t() {
         mac_multiplexing_header_t::ie_type_mac_ext_00_01_10_t::Resource_Allocation_IE;
 
     zero();
+    mu = 1;
 
     dectnrp_assert(has_valid_inheritance_and_properties(this), "mmie invalid");
 }
@@ -206,7 +207,7 @@ void resource_allocation_ie_t::pack(uint8_t* mac_pdu_offset) const {
     mac_pdu_offset[0] |= sfn_offset.has_value();
 
     // set Channel and RLF fields in octet 1
-    mac_pdu_offset[1] |= channel.has_value() << 7;
+    mac_pdu_offset[1] = channel.has_value() << 7;
     mac_pdu_offset[1] |= dect_scheduled_resource_failure.has_value() << 6;
 
     uint32_t N_bytes = 2;

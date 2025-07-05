@@ -25,6 +25,7 @@
 #include "dectnrp/sections_part4/mac_messages_and_ie/cluster_beacon_message.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/extensions/power_target_ie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/extensions/time_announce_ie.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/resource_allocation_ie.hpp"
 #include "dectnrp/sections_part4/mac_messages_and_ie/user_plane_data.hpp"
 
 namespace dectnrp::upper::tfw::p2p {
@@ -245,7 +246,7 @@ void steady_ft_t::init_packet_beacon() {
     rd.ppmp_beacon.mch_base_effective = &rd.ppmp_beacon.beacon_header;
 
     // set values in cluster beacon IE
-    auto& cbm = rd.mmie_pool_tx.get<sp4::cluster_beacon_message_t>();
+    auto& cbm = rd.mmie_pool_tx.get<sp4::cluster_beacon_message_t>(0, psdef.u);
     cbm.system_frame_number = 0;
     cbm.clusters_max_tx_power = sp4::network_beacon_message_t::clusters_max_tx_power_t::_19_dBm;
     cbm.has_power_constraints = true;
@@ -403,31 +404,41 @@ bool steady_ft_t::worksub_tx_beacon_mac_pdu(phy::harq::process_tx_t& hp_tx) {
 
     uint32_t a_cnt_w = rd.ppmp_beacon.pack_first_3_header(hp_tx.get_a_plcf(), hp_tx.get_a_tb());
 
-    // request cluster_beacon_message_t
-    auto& cbm = rd.mmie_pool_tx.get<sp4::cluster_beacon_message_t>();
+    // add cluster_beacon_message_t
+    auto& cbm = rd.mmie_pool_tx.get<sp4::cluster_beacon_message_t>(0, packet_sizes.numerology.u);
     cbm.set_system_frame_number(rd.allocation_ft.get_beacon_cnt());
-    dectnrp_assert(cbm.is_fitting(a_cnt_w, packet_sizes), "TB too small");
+    dectnrp_assert(cbm.is_mmh_sdu_fitting(a_cnt_w, packet_sizes), "TB too small");
     cbm.pack_mmh_sdu(hp_tx.get_a_tb() + a_cnt_w);
     a_cnt_w += cbm.get_packed_size_of_mmh_sdu();
 
     // add power target IE
-    auto& ptie = rd.mmie_pool_tx.get<sp4::extensions::power_target_ie_t>();
+    auto& ptie = rd.mmie_pool_tx.get<sp4::extensions::power_target_ie_t>(0);
     ptie.set_power_target_dBm_coded(ft.ReceiverPower_dBm);
-    dectnrp_assert(ptie.is_fitting(a_cnt_w, packet_sizes), "TB too small");
+    dectnrp_assert(ptie.is_mmh_sdu_fitting(a_cnt_w, packet_sizes), "TB too small");
     ptie.pack_mmh_sdu(hp_tx.get_a_tb() + a_cnt_w);
     a_cnt_w += ptie.get_packed_size_of_mmh_sdu();
 
-    // one time_announce_ie_t per second
+    // add time_announce_ie_t once per second
     if (rd.allocation_ft.get_beacon_cnt() % rd.allocation_ft.get_N_beacons_per_second() == 0) {
-        auto& taie = rd.mmie_pool_tx.get<sp4::extensions::time_announce_ie_t>();
+        auto& taie = rd.mmie_pool_tx.get<sp4::extensions::time_announce_ie_t>(0);
         taie.set_time(sp4::extensions::time_announce_ie_t::time_type_t::LOCAL, 0, 0);
-        dectnrp_assert(taie.is_fitting(a_cnt_w, packet_sizes), "TB too small");
+        dectnrp_assert(taie.is_mmh_sdu_fitting(a_cnt_w, packet_sizes), "TB too small");
         taie.pack_mmh_sdu(hp_tx.get_a_tb() + a_cnt_w);
         a_cnt_w += taie.get_packed_size_of_mmh_sdu();
     }
 
+    const auto& contacts_vec = ft.contact_list.get_contacts_vec();
+
     // add allocation of each PT
-    // ToDo
+    for (const auto& contact : contacts_vec) {
+        auto& raie =
+            rd.mmie_pool_tx.get<sp4::resource_allocation_ie_t>(0, packet_sizes.numerology.u);
+        contact.allocation_pt.translate(
+            raie, mac::allocation::direction_t::both, contact.identity.ShortRadioDeviceID);
+        dectnrp_assert(raie.is_mmh_sdu_fitting(a_cnt_w, packet_sizes), "TB too small");
+        raie.pack_mmh_sdu(hp_tx.get_a_tb() + a_cnt_w);
+        a_cnt_w += raie.get_packed_size_of_mmh_sdu();
+    }
 
     dectnrp_assert(a_cnt_w <= packet_sizes.N_TB_byte, "transport block too small");
 
@@ -446,10 +457,8 @@ void steady_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy
             contact.allocation_pt.set_beacon_time_last_known(
                 rd.allocation_ft.get_beacon_time_transmitted());
 
-            const auto tx_opportunity =
-                contact.allocation_pt.get_tx_opportunity(mac::allocation::direction_t::downlink,
-                                                         buffer_rx.get_rx_time_passed(),
-                                                         tx_earliest_64);
+            const auto tx_opportunity = contact.allocation_pt.get_tx_opportunity(
+                mac::allocation::direction_t::dl, buffer_rx.get_rx_time_passed(), tx_earliest_64);
 
             // if no opportunity found, leave machigh_phy as is
             if (tx_opportunity.tx_time_64 < 0) {
@@ -471,13 +480,13 @@ void steady_ft_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy
     }
 }
 
-void steady_ft_t::worksub_callback_log(const int64_t now_64) const {
+void steady_ft_t::worksub_callback_log([[maybe_unused]] const int64_t now_64) const {
     std::string str = "id=" + std::to_string(id) + " ";
 
     str += stats.get_as_string();
 
-    str += "tx_power_ant_0dBFS=" + std::to_string(agc_tx.get_power_ant_0dBFS(now_64)) + " ";
-    str += "rx_power_ant_0dBFS=" + agc_rx.get_power_ant_0dBFS(now_64).get_readable_list() + " ";
+    str += "tx_power_ant_0dBFS=" + hw.get_tx_power_ant_0dBFS().get_readable_list() + " ";
+    str += "rx_power_ant_0dBFS=" + hw.get_rx_power_ant_0dBFS().get_readable_list() + " ";
 
     for (const auto& contact : ft.contact_list.get_contacts_vec()) {
         str += "rx_rms=[";

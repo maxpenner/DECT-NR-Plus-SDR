@@ -134,7 +134,9 @@ std::optional<phy::maclow_phy_t> steady_pt_t::worksub_pcc_10(const phy::phy_macl
 
     ++stats.beacon_cnt;
 
-    // it's the beacon, so update beacon time
+    pt.contact_pt.sync_report = phy_maclow.sync_report;
+
+    // it's the beacon, so update beacon time wherever it's needed
     pt.contact_pt.allocation_pt.set_beacon_time_last_known(
         phy_maclow.sync_report.fine_peak_time_64);
     rd.pll.provide_beacon_time(
@@ -148,20 +150,29 @@ std::optional<phy::maclow_phy_t> steady_pt_t::worksub_pcc_10(const phy::phy_macl
     }
 #endif
 
-#ifdef TFW_P2P_PT_AGC_ENABLED
-#ifdef TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
-    // apply AGC change for RX and TX immediately before the next beacon
-    const int64_t t_agc_change_64 = pt.contact_pt.allocation_pt.get_beacon_time_last_known() +
-                                    pt.contact_pt.allocation_pt.get_beacon_period() -
-                                    hw.get_tmin_samples(radio::hw_t::tmin_t::gain);
+    if (pt.t_agc_xx_last_change_64 +
+            duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
+                                                     TFW_P2P_PT_AGC_MINIMUM_PERIOD_MS) <=
+        phy_maclow.sync_report.fine_peak_time_64) {
+        // save time
+        pt.t_agc_xx_last_change_64 = phy_maclow.sync_report.fine_peak_time_64;
+
+        // AGC change immediately before the next beacon
+        const int64_t t_agc_tx_change_64 =
+            pt.contact_pt.allocation_pt.get_beacon_time_last_known() +
+            pt.contact_pt.allocation_pt.get_beacon_period() -
+            hw.get_tmin_samples(radio::hw_t::tmin_t::gain);
+
+#ifdef TFW_P2P_PT_AGC_CHANGE_TIME_SAME_OR_DELAYED
+        const int64_t t_agc_rx_change_64 = t_agc_tx_change_64;
 #else
-    // immediate AGC gain change
-    const int64_t t_agc_change_64 = common::adt::UNDEFINED_EARLY_64;
+        // immediate AGC gain change
+        const int64_t t_agc_rx_change_64 =
+            t_agc_tx_change_64 + pt.contact_pt.allocation_pt.get_beacon_period();
 #endif
 
-    // apply AGC settings
-    worksub_agc(phy_maclow.sync_report, *plcf_10, t_agc_change_64);
-#endif
+        worksub_agc(phy_maclow.sync_report, *plcf_10, t_agc_tx_change_64, t_agc_rx_change_64);
+    }
 
     return worksub_pcc2pdc(
         phy_maclow,
@@ -232,6 +243,13 @@ phy::machigh_phy_t steady_pt_t::worksub_pdc_10(const phy::phy_machigh_t& phy_mac
                                        *mmie_child);
             continue;
         }
+
+        if (const auto* mmie_child = dynamic_cast<const sp4::resource_allocation_ie_t*>(mmie);
+            mmie_child != nullptr) {
+            ASSERT_MMIE_COUNT_EXACT(mac_pdu_decoder, mmie_child, 1);
+            worksub_mmie_resource_allocation(*mmie_child);
+            continue;
+        }
     }
 
     pt.contact_pt.mimo_csi.update_from_phy(phy_machigh.pdc_report.mimo_report,
@@ -289,7 +307,7 @@ void steady_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy
     for (uint32_t i = 0; i < rd.max_simultaneous_tx_unicast; ++i) {
         // find next transmission opportunity
         const auto tx_opportunity = pt.contact_pt.allocation_pt.get_tx_opportunity(
-            mac::allocation::direction_t::uplink, buffer_rx.get_rx_time_passed(), tx_earliest_64);
+            mac::allocation::direction_t::ul, buffer_rx.get_rx_time_passed(), tx_earliest_64);
 
         // if no opportunity found, leave machigh_phy as is
         if (tx_opportunity.tx_time_64 < 0) {
@@ -306,18 +324,15 @@ void steady_pt_t::worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy
 }
 
 void steady_pt_t::worksub_mmie_cluster_beacon_message(
-    [[maybe_unused]] const sp4::cluster_beacon_message_t& cluster_beacon_message) {
-    // ToDo
-}
+    [[maybe_unused]] const sp4::cluster_beacon_message_t& cbm) {}
 
-void steady_pt_t::worksub_mmie_power_target(
-    const sp4::extensions::power_target_ie_t& power_target_ie) {
-    agc_tx.set_rx_dBm_target(power_target_ie.get_power_target_dBm_uncoded());
+void steady_pt_t::worksub_mmie_power_target(const sp4::extensions::power_target_ie_t& ptie) {
+    agc_tx.set_rx_dBm_target(ptie.get_power_target_dBm_uncoded());
 }
 
 void steady_pt_t::worksub_mmie_time_announce(
     [[maybe_unused]] const int64_t fine_peak_time_64,
-    [[maybe_unused]] const sp4::extensions::time_announce_ie_t& time_announce_ie) {
+    [[maybe_unused]] const sp4::extensions::time_announce_ie_t& taie) {
 #ifdef TFW_P2P_EXPORT_PPX
     // is this the first time_announce_ie ever received?
     if (!rd.ppx.has_ppx_rising_edge()) {
@@ -338,20 +353,22 @@ void steady_pt_t::worksub_mmie_time_announce(
 #endif
 }
 
-bool steady_pt_t::worksub_mmie_user_plane_data(const sp4::user_plane_data_t& user_plane_data) {
-    return rd.application_client->write_nto(pt.contact_pt.conn_idx_client,
-                                            user_plane_data.get_data_ptr(),
-                                            user_plane_data.get_data_size()) > 0;
+bool steady_pt_t::worksub_mmie_user_plane_data(const sp4::user_plane_data_t& upd) {
+    return rd.application_client->write_nto(
+               pt.contact_pt.conn_idx_client, upd.get_data_ptr(), upd.get_data_size()) > 0;
 }
 
-void steady_pt_t::worksub_callback_log(const int64_t now_64) const {
+void steady_pt_t::worksub_mmie_resource_allocation(
+    [[maybe_unused]] const sp4::resource_allocation_ie_t& raie) {}
+
+void steady_pt_t::worksub_callback_log([[maybe_unused]] const int64_t now_64) const {
     std::string str = "id=" + std::to_string(id) + " ";
 
     str += stats.get_as_string();
 
-    str += "tx_power_ant_0dBFS=" + std::to_string(agc_tx.get_power_ant_0dBFS(now_64)) + " ";
-    str += "rx_power_ant_0dBFS=" + agc_rx.get_power_ant_0dBFS(now_64).get_readable_list() + " ";
-    str += "rx_rms=" + agc_rx.get_rms_measured_last_known().get_readable_list();
+    str += "tx_power_ant_0dBFS=" + hw.get_tx_power_ant_0dBFS().get_readable_list() + " ";
+    str += "rx_power_ant_0dBFS=" + hw.get_rx_power_ant_0dBFS().get_readable_list() + " ";
+    str += "rx_rms=" + pt.contact_pt.sync_report.rms_array.get_readable_list();
 
     dectnrp_log_inf("{}", str);
 }

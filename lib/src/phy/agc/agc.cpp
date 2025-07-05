@@ -28,7 +28,8 @@
 namespace dectnrp::phy::agc {
 
 agc_t::agc_t(const agc_config_t agc_config_)
-    : agc_config(agc_config_) {
+    : agc_config(agc_config_),
+      roundrobin(roundrobin_t(agc_config.nof_antennas)) {
     dectnrp_assert(0 < agc_config.nof_antennas, "too small");
     dectnrp_assert(agc_config.nof_antennas <= limits::dectnrp_max_nof_antennas, "too large");
 

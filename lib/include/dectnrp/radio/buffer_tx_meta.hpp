@@ -21,6 +21,9 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
+
+#include "dectnrp/common/ant.hpp"
 
 namespace dectnrp::radio {
 
@@ -34,11 +37,15 @@ struct buffer_tx_meta_t {
         /// transmission time of first sample
         int64_t tx_time_64{-1};
 
+        /// adjustments applied after packet transmission
+        std::optional<common::ant_t> tx_power_adj_dB{std::nullopt};
+        std::optional<common::ant_t> rx_power_adj_dB{std::nullopt};
+
         /**
-         * \brief At the end of a transmission, we can busy wait for the next transmission to avoid
-         * unnecessary TX/RX switches. This usually only makes sense if the MAC layer already knows
-         * that another packet will follow, but which might take some time to fully calculate. If
-         * set to 0, busy-waiting is omitted.
+         * \brief At the end of a transmission, we can busy wait for the next transmission to
+         * avoid unnecessary TX/RX switches. This usually only makes sense if the MAC layer
+         * already knows that another packet will follow, but which might take some time to
+         * fully calculate. If set to 0, busy-waiting is omitted.
          */
         uint32_t busy_wait_us{0};
 };

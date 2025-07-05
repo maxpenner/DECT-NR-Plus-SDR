@@ -20,15 +20,19 @@
 
 #pragma once
 
+#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/upper/p2p/data/contact_p2p.hpp"
 
-#define TFW_P2P_PT_AGC_ENABLED
-#define TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
+#define TFW_P2P_PT_AGC_MINIMUM_PERIOD_MS 48
+#define TFW_P2P_PT_AGC_CHANGE_TIME_SAME_OR_DELAYED
 
 namespace dectnrp::upper::tfw::p2p {
 
 class pt_t {
     public:
+        /// last time the AGC was tuned
+        int64_t t_agc_xx_last_change_64{common::adt::UNDEFINED_EARLY_64};
+
         /**
          * \brief The FT saves a full contact_list_t with one entry per PT. A single PT saves a
          * single contact with information about itself.

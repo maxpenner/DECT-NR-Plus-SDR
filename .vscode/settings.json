@@ -4,6 +4,7 @@
     "[json]": {
         "editor.formatOnSave": true
     },
+    "clangd.arguments": ["--header-insertion=never"],
     "output.smartScroll.enabled": false,
     "workbench.tree.indent": 16,
     "C_Cpp.autoAddFileAssociations": false,

@@ -50,7 +50,6 @@ class socket_server_t final : public application_server_t, public socketx_t {
                                           const uint32_t n) const override final;
 
         uint32_t read_nto(const uint32_t conn_idx, uint8_t* dst) override final;
-
         uint32_t read_try(const uint32_t conn_idx, uint8_t* dst) override final;
 
     private:

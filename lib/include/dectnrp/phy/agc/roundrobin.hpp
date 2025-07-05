@@ -22,20 +22,24 @@
 
 #include <cstdint>
 
+#include "dectnrp/common/ant.hpp"
+#include "dectnrp/limits.hpp"
+
 namespace dectnrp::phy::agc {
 
-struct agc_config_t {
-        /// number of antennas AGC has to manage
+class roundrobin_t {
+    public:
+        roundrobin_t() = default;
+        explicit roundrobin_t(const uint32_t nof_antennas_,
+                              const uint32_t simultaneous_ = limits::dectnrp_max_nof_antennas);
+
+        common::ant_t process(const common::ant_t& ant);
+
+    protected:
         uint32_t nof_antennas;
+        uint32_t simultaneous;
 
-        /// each AGC gain change must be a multiple of this number
-        float gain_step_dB_multiple;
-
-        /// maximum gain change in dB
-        float gain_step_dB_max;
-
-        /// minimum gain change in dB
-        float gain_step_dB_min;
+        uint32_t r_idx{0};
 };
 
 }  // namespace dectnrp::phy::agc

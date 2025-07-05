@@ -34,18 +34,22 @@ class mmie_t {
     public:
         virtual ~mmie_t() = default;
 
-        /// mmh = MAC multiplexing header, sdu = MAC service data unit
+        /// sdu = MAC service data unit
+        [[nodiscard]] virtual uint32_t get_packed_size_of_sdu() const = 0;
+
+        /// mmh = MAC multiplexing header
         [[nodiscard]] virtual uint32_t get_packed_size_of_mmh_sdu() const = 0;
 
         virtual void pack_mmh_sdu(uint8_t* mac_pdu_offset) = 0;
 
-        [[nodiscard]] bool is_fitting(const uint32_t a_cnt_w, const uint32_t N_TB_byte) const {
+        [[nodiscard]] bool is_mmh_sdu_fitting(const uint32_t a_cnt_w,
+                                              const uint32_t N_TB_byte) const {
             return a_cnt_w + get_packed_size_of_mmh_sdu() <= N_TB_byte;
         }
 
-        [[nodiscard]] bool is_fitting(const uint32_t a_cnt_w,
-                                      const sp3::packet_sizes_t& packet_sizes) const {
-            return is_fitting(a_cnt_w, packet_sizes.N_TB_byte);
+        [[nodiscard]] bool is_mmh_sdu_fitting(const uint32_t a_cnt_w,
+                                              const sp3::packet_sizes_t& packet_sizes) const {
+            return is_mmh_sdu_fitting(a_cnt_w, packet_sizes.N_TB_byte);
         }
 
         friend bool has_valid_inheritance_and_properties(const mmie_t* mmie);
@@ -59,6 +63,7 @@ class mmie_t {
 
 class mmie_packing_t : public mmie_t, public common::serdes::packing_t {
     public:
+        [[nodiscard]] uint32_t get_packed_size_of_sdu() const override final;
         [[nodiscard]] uint32_t get_packed_size_of_mmh_sdu() const override final;
         void pack_mmh_sdu(uint8_t* mac_pdu_offset) override final;
 
@@ -84,6 +89,7 @@ class mmie_packing_peeking_t : public mmie_packing_t {
 
 class mmie_flowing_t : public mmie_t {
     public:
+        [[nodiscard]] uint32_t get_packed_size_of_sdu() const override final;
         [[nodiscard]] uint32_t get_packed_size_of_mmh_sdu() const override final;
         void pack_mmh_sdu(uint8_t* mac_pdu_offset) override final;
 

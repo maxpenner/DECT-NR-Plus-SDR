@@ -23,8 +23,9 @@
 namespace dectnrp::mac::allocation {
 
 enum class direction_t {
-    uplink,
-    downlink
+    ul,
+    dl,
+    both
 };
 
 }  // namespace dectnrp::mac::allocation

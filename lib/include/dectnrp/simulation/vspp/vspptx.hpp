@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "dectnrp/common/ant.hpp"
 #include "dectnrp/common/complex.hpp"
 #include "dectnrp/simulation/topology/position.hpp"
 #include "dectnrp/simulation/topology/trajectory.hpp"
@@ -70,7 +71,7 @@ class vspptx_t final : public vspp_t {
                 float net_bandwidth_norm;
 
                 /// TX specific
-                float tx_power_ant_0dBFS{};
+                common::ant_t tx_power_ant_0dBFS{};
                 /// positive values mean that the leaked power into TX is smaller than the
                 /// TX power, internally it is treated like large scale fading
                 float tx_into_rx_leakage_dB;

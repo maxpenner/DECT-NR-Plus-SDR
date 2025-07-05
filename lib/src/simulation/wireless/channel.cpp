@@ -53,6 +53,7 @@ bool channel_t::are_args_valid(const vspptx_t& vspptx, const vspprx_t& vspprx) c
 float channel_t::get_large_scale_via_pathloss(const vspptx_t& vspptx,
                                               const vspprx_t& vspprx,
                                               const vspptx_t& vspptx_other,
+                                              const size_t tx_idx,
                                               const size_t rx_idx) {
     // there are two ways to define large scale fading
     float large_scale_fading_dB = 0.0f;
@@ -67,8 +68,8 @@ float channel_t::get_large_scale_via_pathloss(const vspptx_t& vspptx,
         large_scale_fading_dB = vspptx.meta.tx_into_rx_leakage_dB;
     }
 
-    return common::adt::db2mag(vspptx_other.meta.tx_power_ant_0dBFS - large_scale_fading_dB -
-                               vspprx.meta.rx_power_ant_0dBFS.at(rx_idx));
+    return common::adt::db2mag(vspptx_other.meta.tx_power_ant_0dBFS.at(tx_idx) -
+                               large_scale_fading_dB - vspprx.meta.rx_power_ant_0dBFS.at(rx_idx));
 }
 
 }  // namespace dectnrp::simulation

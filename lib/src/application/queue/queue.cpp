@@ -108,6 +108,13 @@ uint32_t queue_t::read_try(uint8_t* dst) {
     return r_ret;
 }
 
+void queue_t::clear() {
+    lockv.lock();
+    w_idx = 0;
+    r_idx = 0;
+    lockv.unlock();
+}
+
 queue_level_t queue_t::get_queue_level_under_lock(const uint32_t n) const {
     dectnrp_assert(n <= limits::application_max_queue_level_reported,
                    "number of levels for reporting is limited");

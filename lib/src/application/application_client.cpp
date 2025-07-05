@@ -129,7 +129,10 @@ void application_client_t::forward_under_lock() {
                 }
 
                 // ... forward
-                write_immediate(i, buffer_local, n);
+                const auto n_w = write_immediate(i, buffer_local, n);
+
+                dectnrp_assert(n == n_w, "nof bytes not written");
+
                 dec_indicator_cnt_under_lock();
 
 #ifdef ENABLE_ASSERT

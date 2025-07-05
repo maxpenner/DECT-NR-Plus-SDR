@@ -21,7 +21,6 @@
 #include "dectnrp/phy/agc/agc_tx.hpp"
 
 #include "dectnrp/common/adt/decibels.hpp"
-#include "dectnrp/common/adt/miscellaneous.hpp"
 #include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::phy::agc {
@@ -38,50 +37,10 @@ agc_tx_t::agc_tx_t(const agc_config_t agc_config_,
     dectnrp_assert(rx_dBm_target <= -40.0f, "too large");
 }
 
-void agc_tx_t::set_power_ant_0dBFS_pending(const float power_ant_0dBFS_pending_,
-                                           const int64_t power_ant_0dBFS_pending_time_64_) {
-    // is this an immediate gain change?
-    if (power_ant_0dBFS_pending_time_64_ < 0) {
-        // change is effective now
-        power_ant_0dBFS = power_ant_0dBFS_pending_;
-
-        // indicate that we don't have a pending value
-        power_ant_0dBFS_pending_time_64 = common::adt::UNDEFINED_EARLY_64;
-    } else {
-        // save pending value
-        power_ant_0dBFS_pending = power_ant_0dBFS_pending_;
-        power_ant_0dBFS_pending_time_64 = power_ant_0dBFS_pending_time_64_;
-    }
-}
-
-float agc_tx_t::get_power_ant_0dBFS(const int64_t now_64) const {
-    // do we have a pending value?
-    if (0 <= power_ant_0dBFS_pending_time_64) {
-        // have we reached the time of the pending gain change?
-        if (power_ant_0dBFS_pending_time_64 <= now_64) {
-            // change is effective now
-            power_ant_0dBFS = power_ant_0dBFS_pending;
-
-            // indicate that we no longer have a pending value
-            power_ant_0dBFS_pending_time_64 = common::adt::UNDEFINED_EARLY_64;
-        }
-    }
-
-    return power_ant_0dBFS;
-}
-
-float agc_tx_t::get_gain_step_dB(const int64_t t_64,
-                                 const float tx_dBm_opposite,
-                                 const float tx_power_ant_0dBFS,
-                                 const common::ant_t& rx_power_ant_0dBFS,
-                                 const common::ant_t& rms_measured_) {
-    // return zero gain change if gain is protected
-    if (!has_protect_duration_passed(t_64)) {
-        return 0.0f;
-    } else {
-        protect_duration_start_64 = t_64;
-    }
-
+const common::ant_t agc_tx_t::get_gain_step_dB(const float tx_dBm_opposite,
+                                               const common::ant_t& tx_power_ant_0dBFS,
+                                               const common::ant_t& rx_power_ant_0dBFS,
+                                               const common::ant_t& rms_measured_) {
     // we have to find the antenna with the highest RX power
     float rx_power_dBm_measured_max = -1e6;
 
@@ -107,10 +66,14 @@ float agc_tx_t::get_gain_step_dB(const int64_t t_64,
         tx_dBm_opposite + (rx_dBm_target - rx_power_dBm_measured_max);
 
     // what is our current radiated transmit power?
-    const float tx_dBm = tx_power_ant_0dBFS + common::adt::mag2db(ofdm_amplitude_factor);
+    const float tx_dBm = tx_power_ant_0dBFS.get_max() + common::adt::mag2db(ofdm_amplitude_factor);
 
-    // get gain change to reach the same transmit power
-    return quantize_and_limit_gain_step_dB(tx_dBm_opposite_ideal - tx_dBm);
+    common::ant_t arbitrary_gain_step_dB(agc_config.nof_antennas);
+    for (size_t i = 0; i < agc_config.nof_antennas; ++i) {
+        arbitrary_gain_step_dB.at(i) = tx_dBm_opposite_ideal - tx_dBm;
+    }
+
+    return roundrobin.process(quantize_and_limit_gain_step_dB(arbitrary_gain_step_dB));
 }
 
 }  // namespace dectnrp::phy::agc

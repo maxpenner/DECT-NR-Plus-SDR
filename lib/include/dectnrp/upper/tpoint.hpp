@@ -21,8 +21,10 @@
 #pragma once
 
 #include <cstdint>
+#include <utility>
 
 #include "dectnrp/application/application_report.hpp"
+#include "dectnrp/common/ant.hpp"
 #include "dectnrp/common/layer/layer_unit.hpp"
 #include "dectnrp/phy/agc/agc_rx.hpp"
 #include "dectnrp/phy/agc/agc_tx.hpp"
@@ -236,35 +238,43 @@ class tpoint_t : public common::layer_unit_t {
 
         /**
          * \brief This convenience function can be used by any firmware to apply AGC gain changes
-         * for both TX and RX. AGC gain changes are based on the RMS of a received packet (read from
-         * sync_report) which is typically a beacon, and the transmit power of the same packet
-         * encoded in the PLCF (read from plcf_base).
+         * for both TX and RX. AGC gain changes are based on the RMS of a received packet read from
+         * sync_report, and the transmit power of the same packet extracted from its PLCF.
          *
-         * In most cases, AGC gain changes for TX and RX should be applied only at the PT, while the
-         * FT holds a constant transmit power and a constant receiver sensitivity. Target power
-         * levels for TX and RX are defined in agc_tx and agc_rx.
-         *
-         * AGC gain changes can be applied ASAP (t_agc_change_64 < 0), or at a fixed point in time
-         * in the future (t_agc_change_64 >= 0). Typically, the AGC settings should be applied when
-         * it is guaranteed that no packet will be transmitted or received while the changes are
-         * made, for instance, in a GI at the end of a packet.
-         *
-         * Note that even if this function is called, AGC settings may be ignored if the protection
-         * duration of agc_tx is still active (protection duration of agc_rx is ignored).
+         * AGC gain changes can be applied ASAP (t_agc_xx_change_64 < 0), or at a fixed point in
+         * time in the future (t_agc_xx_change_64 >= 0). Typically, the AGC settings should be
+         * applied when it is guaranteed that no packet will be transmitted or received while the
+         * changes are made, for instance, in a GI at the end of a packet.
          *
          * \param sync_report contains received RMS
          * \param plcf_base contains transmit power
-         * \param t_agc_change_64 if negative, settings are applied ASAP
+         * \param t_agc_tx_change_64 if negative, settings are applied ASAP
+         * \param t_agc_rx_change_64 if negative, settings are applied ASAP
          * \param hw_idx index of hardware in mac_lower
          */
         void worksub_agc(const phy::sync_report_t& sync_report,
                          const sp4::plcf_base_t& plcf_base,
-                         const int64_t t_agc_change_64,
+                         const int64_t t_agc_tx_change_64,
+                         const int64_t t_agc_rx_change_64,
                          const std::size_t hw_idx = 0);
 
         /**
-         * \brief When a firmware is called with a successfully received PCC and the choice is made
-         * to proceed with the PDC, this convenience can be used to create the respective
+         * \brief Same as above, but only returns optimal power adjustments without applying them.
+         * This is useful if AGC changes are made by the radio layer during packet transmission.
+         *
+         * \param sync_report see above
+         * \param plcf_base see above
+         * \param hw_idx see above
+         * \return optimal TX and RX AGC adjustments
+         */
+        [[nodiscard]] std::pair<common::ant_t, common::ant_t> worksub_agc_adj(
+            const phy::sync_report_t& sync_report,
+            const sp4::plcf_base_t& plcf_base,
+            const std::size_t hw_idx = 0);
+
+        /**
+         * \brief When a firmware is called with a successfully received PCC and the choice is
+         * made to proceed with the PDC, this convenience can be used to create the respective
          * instruction of type maclow_phy_t for the PHY. For the PDC, a new HARQ buffer is
          * requested.
          *

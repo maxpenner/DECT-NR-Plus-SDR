@@ -26,7 +26,6 @@
 #include <csignal>
 #include <cstdlib>
 #include <ctime>
-#include <numeric>
 #include <string>
 #include <vector>
 
@@ -37,7 +36,6 @@
 #include <sys/types.h>
 
 // json export
-#include <fstream>
 #include <sstream>
 
 #include "dectnrp/apps/udp.hpp"
@@ -46,6 +44,7 @@
 #include "dectnrp/common/prog/print.hpp"
 #include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/common/thread/watch.hpp"
+#include "dectnrp/upper/rtt/tfw_rtt_param.hpp"
 #include "header_only/nlohmann/json.hpp"
 
 // ctrl+c
@@ -339,7 +338,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
 
     udp.add_connection_tx("127.0.0.1", TFW_RTT_UDP_PORT_DATA);
     udp.add_connection_tx("127.0.0.1", TFW_RTT_UDP_PORT_PRINT);
-    udp.add_connection_rx("127.0.0.1", 8050, RTT_UDP_TIMEOUT_BEFORE_ASSUMING_ERROR_US);
+    udp.add_connection_rx("127.0.0.1",
+                          TFW_RTT_UDP_PORT_RTT_IS_AWAITING_RESPONSE_AT,
+                          RTT_UDP_TIMEOUT_BEFORE_ASSUMING_ERROR_US);
 
     // core and priority of thread, start with sudo if elevated
     dectnrp::common::threads_core_prio_config_t threads_core_prio_config;

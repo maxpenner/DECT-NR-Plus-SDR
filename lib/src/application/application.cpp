@@ -69,4 +69,10 @@ void application_t::stop_sc() {
     pthread_join(work_thread, NULL);
 };
 
+void application_t::clear() {
+    for (auto& elem : queue_vec) {
+        elem->clear();
+    }
+};
+
 }  // namespace dectnrp::application

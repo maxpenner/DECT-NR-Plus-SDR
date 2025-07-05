@@ -27,9 +27,6 @@
 #include "dectnrp/upper/p2p/data/pt.hpp"
 #include "dectnrp/upper/p2p/procedure/steady_rd.hpp"
 
-#define TFW_P2P_PT_AGC_ENABLED
-#define TFW_P2P_PT_AGC_CHANGE_TIMED_OR_IMMEDIATE_PT
-
 namespace dectnrp::upper::tfw::p2p {
 
 class steady_pt_t final : public steady_rd_t {
@@ -75,17 +72,16 @@ class steady_pt_t final : public steady_rd_t {
 
         void worksub_tx_unicast_consecutive(phy::machigh_phy_t& machigh_phy) override final;
 
-        void worksub_mmie_cluster_beacon_message(
-            const sp4::cluster_beacon_message_t& cluster_beacon_message);
+        void worksub_mmie_cluster_beacon_message(const sp4::cluster_beacon_message_t& cbm);
 
-        void worksub_mmie_power_target(const sp4::extensions::power_target_ie_t& power_target_ie);
+        void worksub_mmie_power_target(const sp4::extensions::power_target_ie_t& ptie);
 
-        void worksub_mmie_time_announce(
-            const int64_t fine_peak_time_64,
-            const sp4::extensions::time_announce_ie_t& time_announce_ie);
+        void worksub_mmie_time_announce(const int64_t fine_peak_time_64,
+                                        const sp4::extensions::time_announce_ie_t& taie);
 
-        [[nodiscard]] bool worksub_mmie_user_plane_data(
-            const sp4::user_plane_data_t& user_plane_data);
+        [[nodiscard]] bool worksub_mmie_user_plane_data(const sp4::user_plane_data_t& upd);
+
+        void worksub_mmie_resource_allocation(const sp4::resource_allocation_ie_t& raie);
 
         // ##################################################
         // DLC and Convergence Layer

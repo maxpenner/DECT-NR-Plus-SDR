@@ -67,7 +67,7 @@ class hw_simulator_t final : public hw_t {
         /// called from tpoint firmware, thread-safe
         void set_command_time(const int64_t set_time = -1) override final;
         double set_freq_tc(const double freq_Hz) override final;
-        float set_tx_power_ant_0dBFS_tc(const float power_dBm) override final;
+        float set_tx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) override final;
         float set_rx_power_ant_0dBFS_tc(const float power_dBm, const size_t idx) override final;
 
 #ifdef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE

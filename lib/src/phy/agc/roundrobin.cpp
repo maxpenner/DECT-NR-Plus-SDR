@@ -18,24 +18,37 @@
  * and at http://www.gnu.org/licenses/.
  */
 
-#pragma once
+#include "dectnrp/phy/agc/roundrobin.hpp"
 
-#include <cstdint>
+#include <algorithm>
+
+#include "dectnrp/common/prog/assert.hpp"
 
 namespace dectnrp::phy::agc {
 
-struct agc_config_t {
-        /// number of antennas AGC has to manage
-        uint32_t nof_antennas;
+roundrobin_t::roundrobin_t(const uint32_t nof_antennas_, const uint32_t simultaneous_)
+    : nof_antennas(nof_antennas_),
+      simultaneous(std::min(simultaneous_, nof_antennas_)) {
+    dectnrp_assert(0 < simultaneous, "too small");
+    dectnrp_assert(simultaneous <= nof_antennas, "too large");
+}
 
-        /// each AGC gain change must be a multiple of this number
-        float gain_step_dB_multiple;
+common::ant_t roundrobin_t::process(const common::ant_t& ant) {
+    common::ant_t ret(nof_antennas);
 
-        /// maximum gain change in dB
-        float gain_step_dB_max;
+    for (uint32_t i = 0; i < simultaneous; ++i) {
+        if (ant.at(r_idx) != 0.0f) {
+            ret.at(r_idx) = ant.at(r_idx);
+        }
 
-        /// minimum gain change in dB
-        float gain_step_dB_min;
-};
+        ++r_idx;
+
+        if (r_idx == nof_antennas) {
+            r_idx = 0;
+        }
+    }
+
+    return ret;
+}
 
 }  // namespace dectnrp::phy::agc

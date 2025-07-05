@@ -28,6 +28,7 @@ class configuration_request_ie_t final : public mmie_t {
     public:
         [[nodiscard]] configuration_request_ie_t();
 
+        [[nodiscard]] uint32_t get_packed_size_of_sdu() const override final { return 0; };
         [[nodiscard]] uint32_t get_packed_size_of_mmh_sdu() const override final { return 1; };
 
         void pack_mmh_sdu(uint8_t* mac_pdu_offset) override final {

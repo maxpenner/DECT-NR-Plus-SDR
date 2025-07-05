@@ -60,11 +60,7 @@ float estimator_cfo_t::get_residual_CFO_s2s_rad(const uint32_t N_DF_symbol_sampl
 
 void estimator_cfo_t::reset_internal() {}
 
-void estimator_cfo_t::process_stf_phase_rotation([[maybe_unused]] const cf_t* chestim_drs_zf) {
-    //
-
-    //
-}
+void estimator_cfo_t::process_stf_phase_rotation([[maybe_unused]] const cf_t* chestim_drs_zf) {}
 
 void estimator_cfo_t::process_drs_phase_rotation_model_lr(const cf_t* chestim_drs_zf) {
     /* Common phase error (CPE) is symbol-dependent, but not subcarrier-dependent (for small

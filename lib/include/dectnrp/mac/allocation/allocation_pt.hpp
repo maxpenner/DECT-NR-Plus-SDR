@@ -27,6 +27,7 @@
 #include "dectnrp/mac/allocation/direction.hpp"
 #include "dectnrp/mac/allocation/resource.hpp"
 #include "dectnrp/mac/allocation/tx_opportunity.hpp"
+#include "dectnrp/sections_part4/mac_messages_and_ie/resource_allocation_ie.hpp"
 
 namespace dectnrp::mac::allocation {
 
@@ -73,6 +74,11 @@ class allocation_pt_t final : public allocation_t {
 
         /// after receiving an uplink, we can request the closest tx_opportunity
         int64_t get_tx_opportunity_ul_time_closest(const int64_t reference_time_64) const;
+
+        /// translation between C++ and DECT NR+
+        void translate(sp4::resource_allocation_ie_t& raie,
+                       const direction_t dir,
+                       const uint32_t srdid) const;
 
     private:
         /// duration after receiving a beacon in which we are allowed to transmit
