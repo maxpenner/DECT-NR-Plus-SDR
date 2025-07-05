@@ -24,7 +24,6 @@
 
 #include "dectnrp/common/adt/cast.hpp"
 #include "dectnrp/common/prog/assert.hpp"
-#include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/constants.hpp"
 #include "dectnrp/phy/interfaces/maclow_phy.hpp"
@@ -348,7 +347,8 @@ void worker_tx_rx_t::run_tx_chscan(const tx_descriptor_vec_t& tx_descriptor_vec,
         chscan_opt_t chscan_opt_empty = chscan_opt_t{std::nullopt};
 
         // recursive call
-        run_tx_chscan(machigh_phy.tx_descriptor_vec, irregular_report_t(), chscan_opt_empty);
+        run_tx_chscan(
+            machigh_phy.tx_descriptor_vec, machigh_phy.irregular_report, chscan_opt_empty);
     }
 }
 

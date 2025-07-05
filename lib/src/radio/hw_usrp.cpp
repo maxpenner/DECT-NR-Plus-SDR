@@ -403,6 +403,9 @@ void hw_usrp_t::initialize_device() {
         }
     }
 
+    // log_gains(uhd::direction_t::TX_DIRECTION);
+    // log_gains(uhd::direction_t::RX_DIRECTION);
+
     set_tx_power_ant_0dBFS_uniform_tc(-1000.0f);  // minimum TX power
     set_rx_power_ant_0dBFS_uniform_tc(1000.0f);   // minimum RX sensitivity
 
@@ -644,6 +647,56 @@ void hw_usrp_t::work_stop() {
     // each TX Buffer
     for (auto& elem : buffer_tx_pool->buffer_tx_vec) {
         log_lines(elem->report_stop());
+    }
+}
+
+void hw_usrp_t::log_gains(const uhd::direction_t direction) {
+    dectnrp_assert(
+        direction == uhd::direction_t::TX_DIRECTION || direction == uhd::direction_t::RX_DIRECTION,
+        "undefined direction");
+
+    auto log_gain_and_its_range = [this](const std::string gain_name,
+                                         const uhd::gain_range_t gain_range) {
+        log_line(gain_name + " " + std::to_string(gain_range.start()) + " " +
+                 std::to_string(gain_range.stop()) + " " + std::to_string(gain_range.step()));
+    };
+
+    const std::string dir_str = direction == uhd::direction_t::TX_DIRECTION ? "tx" : "rx";
+
+    const auto gain_range = direction == uhd::direction_t::TX_DIRECTION
+                                ? m_usrp->get_tx_gain_range()
+                                : m_usrp->get_rx_gain_range();
+
+    log_gain_and_its_range(dir_str + " " + "overall", gain_range);
+
+    const auto gain_names = direction == uhd::direction_t::TX_DIRECTION
+                                ? m_usrp->get_tx_gain_names()
+                                : m_usrp->get_rx_gain_names();
+
+    for (const auto& elem : gain_names) {
+        const auto gain_range_elem = direction == uhd::direction_t::TX_DIRECTION
+                                         ? m_usrp->get_tx_gain_range(elem)
+                                         : m_usrp->get_rx_gain_range(elem);
+
+        log_gain_and_its_range(dir_str + " " + elem, gain_range_elem);
+    }
+
+    set_command_time(-1);
+
+    for (auto s = gain_range.start(); s <= gain_range.stop(); s += gain_range.step()) {
+        direction == uhd::direction_t::TX_DIRECTION ? m_usrp->set_tx_gain(s)
+                                                    : m_usrp->set_rx_gain(s);
+
+        std::string ret;
+        for (const auto& elem : gain_names) {
+            const auto gain_elem = direction == uhd::direction_t::TX_DIRECTION
+                                       ? m_usrp->get_tx_gain(elem)
+                                       : m_usrp->get_rx_gain(elem);
+
+            ret += elem + " " + std::to_string(gain_elem);
+        }
+
+        log_line(dir_str + " " + std::to_string(s) + " " + ret);
     }
 }
 

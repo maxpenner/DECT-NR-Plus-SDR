@@ -93,6 +93,8 @@ class hw_usrp_t final : public hw_t {
         } gpio_state;
 #endif
 
+        void log_gains(const uhd::direction_t direction);
+
         // ##################################################
         // threading
 

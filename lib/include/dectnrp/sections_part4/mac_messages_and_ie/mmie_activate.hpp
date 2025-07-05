@@ -36,7 +36,7 @@
 // #define ACTIVATE_Additional_Mac_Messages
 // #define ACTIVATE_MAC_Security_Info_IE
 // #define ACTIVATE_Route_Info_IE
-#define ACTIVATE_Resource_Allocation_IE
+// #define ACTIVATE_Resource_Allocation_IE
 // #define ACTIVATE_Random_Access_Resource_IE
 // #define ACTIVATE_RD_Capability_IE
 // #define ACTIVATE_Neighbouring_IE
