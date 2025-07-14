@@ -773,45 +773,18 @@ void* hw_usrp_t::work_tx_async_helper(void* hw_usrp) {
 }
 
 void* hw_usrp_t::work_tx(void* hw_usrp) {
-    // pointer to our hw_usrp instance that was passed to the thread executing this function as
-    // argument this
     hw_usrp_t* calling_instance = reinterpret_cast<hw_usrp_t*>(hw_usrp);
 
-    // for readability
+    // hw_t parameters for readability
     auto& buffer_tx_pool = *calling_instance->buffer_tx_pool.get();
     auto& keep_running = calling_instance->keep_running;
     const auto tx_gap_samples = calling_instance->tx_gap_samples;
     auto buffer_tx_vec = buffer_tx_pool.get_buffer_tx_vec();
 
-    // hw usrp parameters for readability
+    // hw_usrp_t parameters for readability
     auto& usrp = calling_instance->m_usrp;
     auto& tx_stream = calling_instance->tx_stream;
     auto& tx_stats = calling_instance->tx_stats;
-
-    // reset statistics
-    tx_stats.buffer_tx_sent = 0;
-    tx_stats.buffer_tx_sent_consecutive = 0;
-
-#ifdef RADIO_HW_IMPLEMENTS_TX_BURST_LEADING_ZERO
-    // how many zeros do we have to prefix?
-    const int64_t N_leading_zero_64 =
-        static_cast<int64_t>(calling_instance->samp_rate) *
-        static_cast<int64_t>(calling_instance->hw_config.tx_burst_leading_zero_us) /
-        static_cast<int64_t>(1000000);
-
-    // similiar to https://github.com/EttusResearch/uhd/blob/master/host/examples/benchmark_rate.cpp
-    const std::vector<cf32_t> leading_zero(N_leading_zero_64, cf32_t{0.0f, 0.0f});
-    const std::vector<const cf32_t*> leading_zero_vec(buffer_tx_vec[0]->nof_antennas,
-                                                      &leading_zero[0]);
-#endif
-
-#ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
-    const int64_t tx_time_advance_samples =
-        static_cast<int64_t>(calling_instance->hw_config.tx_time_advance_samples);
-#endif
-
-    // working copy
-    std::vector<void*> ant_streams(calling_instance->nof_antennas);
 
     // sample rate needed for to-tick conversion
     const double rate = usrp->get_tx_rate();
@@ -830,11 +803,37 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
     calling_instance->log_line("USRP Work TX Thread: send_timeout: " + std::to_string(rate / 1e6) + " us");
     // clang-format on
 
+    // working copy
+    std::vector<void*> ant_streams(calling_instance->nof_antennas);
+
+    dectnrp_assert(ant_streams.size() == buffer_tx_pool.nof_antennas,
+                   "incorrect number of antennas");
+
+    // we check keep_running approximately every 100ms
+    const uint32_t nof_rounds = static_cast<uint32_t>(rate) / spp_max / 10;
+
+#ifdef RADIO_HW_IMPLEMENTS_TX_BURST_LEADING_ZERO
+    // how many zeros do we have to prefix?
+    const int64_t nof_prefix_zeros_64 =
+        static_cast<int64_t>(calling_instance->samp_rate) *
+        static_cast<int64_t>(calling_instance->hw_config.tx_burst_leading_zero_us) /
+        static_cast<int64_t>(1000000);
+
+    dectnrp_assert(nof_prefix_zeros_64 <= spp_max, "too many zeros");
+
+    // https://github.com/EttusResearch/uhd/blob/master/host/examples/benchmark_rate.cpp
+    const std::vector<cf32_t> leading_zero(nof_prefix_zeros_64, cf32_t{0.0f, 0.0f});
+    const std::vector<const cf32_t*> leading_zero_vec(buffer_tx_vec[0]->nof_antennas,
+                                                      &leading_zero[0]);
+#endif
+
+#ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
+    const int64_t tx_time_advance_samples =
+        static_cast<int64_t>(calling_instance->hw_config.tx_time_advance_samples);
+#endif
+
     // each packet has a 64 bit number, we transmit them in exact order
     int64_t tx_order_id_expected = 0;
-
-    // we check keep_running approximately every 100ms when there are no packets
-    const uint32_t nof_rounds = 10;
 
     // execute until external flag is set
     while (keep_running.load(std::memory_order_acquire)) {
@@ -869,9 +868,9 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
             tx_md.time_spec = uhd::time_spec_t::from_ticks(tx_burst_start_time, rate);
 
 #ifdef RADIO_HW_IMPLEMENTS_TX_BURST_LEADING_ZERO
-            if (N_leading_zero_64 > 0) {
+            if (nof_prefix_zeros_64 > 0) {
                 // send zeros
-                tx_stream->send(leading_zero_vec, N_leading_zero_64, tx_md, send_timeout);
+                tx_stream->send(leading_zero_vec, nof_prefix_zeros_64, tx_md, send_timeout);
 
                 // next call requires these settings
                 tx_md.start_of_burst = false;
@@ -1069,18 +1068,15 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
 }
 
 void* hw_usrp_t::work_rx(void* hw_usrp) {
-    // pointer to our hw_usrp instance that was passed to the thread executing this function as
-    // argument this
     hw_usrp_t* calling_instance = reinterpret_cast<hw_usrp_t*>(hw_usrp);
 
-    // synchronize PPS across all devices
     calling_instance->pps_set_full_sec_at_next_pps_and_wait_until_it_passed();
 
-    // hw parameters for readability
+    // hw_t parameters for readability
     auto& buffer_rx = *calling_instance->buffer_rx;
     auto& keep_running = calling_instance->keep_running;
 
-    // hw usrp parameters for readability
+    // hw_usrp_t parameters for readability
     auto& usrp = calling_instance->m_usrp;
     auto& rx_stream = calling_instance->rx_stream;
 
@@ -1105,10 +1101,7 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
     calling_instance->log_line("USRP Work RX Thread: recv_timeout: " + std::to_string(recv_timeout * 1e6) + " us");
     // clang-format on
 
-    // updated for every new call of rx_streamer->recv()
-    int64_t time_of_first_sample;
-    uint32_t nof_new_samples;
-
+    // working copy
     std::vector<void*> ant_streams(calling_instance->nof_antennas);
 
     dectnrp_assert(ant_streams.size() == buffer_rx.nof_antennas, "incorrect number of antennas");
@@ -1116,7 +1109,12 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
     // init pointer into streaming buffer
     buffer_rx.get_ant_streams_next(ant_streams, 0, 0);
 
-    // meta data for every call of recv()
+    // we check keep_running approximately every 100ms
+    const uint32_t nof_rounds = static_cast<uint32_t>(rate) / spp_max / 10;
+
+    // updated for every new call of rx_streamer->recv()
+    int64_t time_of_first_sample;
+    uint32_t nof_new_samples;
     uhd::rx_metadata_t md;
 
     // construct stream command
@@ -1124,9 +1122,6 @@ void* hw_usrp_t::work_rx(void* hw_usrp) {
     cmd.num_samps = spp_max;  // should be irrelevant as we stream continuously
     cmd.time_spec = usrp->get_time_now() + uhd::time_spec_t(rx_delay);
     cmd.stream_now = false;  // if set to true, UHD will be probably hiccup at startup
-
-    // we check keep_running approximately every 100ms
-    const uint32_t nof_rounds = static_cast<uint32_t>(rate) / spp_max / 10;
 
     // start streaming, recv() must now be called ASAP
     rx_stream->issue_stream_cmd(cmd);
