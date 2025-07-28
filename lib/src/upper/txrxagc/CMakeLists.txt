@@ -18,16 +18,5 @@
 # and at http://www.gnu.org/licenses/.
 #
 
-add_library(dectnrp_upper STATIC)
-target_link_libraries(dectnrp_upper dectnrp_common dectnrp_radio dectnrp_phy dectnrp_mac dectnrp_dlc dectnrp_cvg dectnrp_application)
-
 file(GLOB DECTNRP_UPPER_SOURCES "*.cpp")
 target_sources(dectnrp_upper PRIVATE ${DECTNRP_UPPER_SOURCES})
-
-add_subdirectory(basic)
-add_subdirectory(chscanner)
-add_subdirectory(loopback)
-add_subdirectory(p2p)
-add_subdirectory(rtt)
-add_subdirectory(txrxagc)
-add_subdirectory(txrxdelay)

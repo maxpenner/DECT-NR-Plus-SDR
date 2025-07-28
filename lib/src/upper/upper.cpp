@@ -32,6 +32,7 @@
 #include "dectnrp/upper/p2p/tfw_p2p_ft.hpp"
 #include "dectnrp/upper/p2p/tfw_p2p_pt.hpp"
 #include "dectnrp/upper/rtt/tfw_rtt.hpp"
+#include "dectnrp/upper/txrxagc/tfw_txrxagc.hpp"
 #include "dectnrp/upper/txrxdelay/tfw_txrxdelay.hpp"
 
 // more readable
@@ -104,6 +105,9 @@ void upper_t::add_tpoint(const tpoint_config_t& tpoint_config, phy::mac_lower_t&
 
     } else if (TFW_NAME_STARTS_WITH(tfw::rtt::tfw_rtt_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::rtt::tfw_rtt_t>(TFW_ARGS));
+
+    } else if (TFW_NAME_STARTS_WITH(tfw::txrxagc::tfw_txrxagc_t::firmware_name)) {
+        layer_unit_vec.push_back(std::make_unique<tfw::txrxagc::tfw_txrxagc_t>(TFW_ARGS));
 
     } else if (TFW_NAME_STARTS_WITH(tfw::txrxdelay::tfw_txrxdelay_t::firmware_name)) {
         layer_unit_vec.push_back(std::make_unique<tfw::txrxdelay::tfw_txrxdelay_t>(TFW_ARGS));
