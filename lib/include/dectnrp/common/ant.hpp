@@ -34,7 +34,7 @@ namespace dectnrp::common {
 class ant_t {
     public:
         ant_t() = default;
-        ant_t(const std::size_t nof_antennas_);
+        explicit ant_t(const std::size_t nof_antennas_);
 
         typedef std::array<float, limits::dectnrp_max_nof_antennas> ary_t;
 
