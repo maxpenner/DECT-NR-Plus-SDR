@@ -30,7 +30,7 @@ class result_t {
     public:
         result_t() = default;
 
-        result_t(const std::size_t N_parameter_values, const std::size_t N_snr_values);
+        explicit result_t(const std::size_t N_parameter_values, const std::size_t N_snr_values);
 
         /// at every SNR the success metrics are CRC hits and the PLCF content
         uint32_t n_pcc;

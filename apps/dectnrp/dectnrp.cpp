@@ -42,7 +42,9 @@
 
 static std::atomic<bool> ctrl_c_pressed{false};
 
-static void signal_handler([[maybe_unused]] int signo) { ctrl_c_pressed.store(true); }
+static void signal_handler([[maybe_unused]] int signo) {
+    ctrl_c_pressed.store(true, std::memory_order_release);
+}
 
 int main(int argc, char** argv) {
     // register signal handler
@@ -108,7 +110,7 @@ int main(int argc, char** argv) {
     radio->start_threads_of_all_layer_units();  // start streaming IQ samples
 
     // wait for user to press ctrl+c
-    while (!ctrl_c_pressed.load()) {
+    while (!ctrl_c_pressed.load(std::memory_order_acquire)) {
         dectnrp::common::watch_t::sleep<dectnrp::common::milli>(250);
         dectnrp_log_save();
     }

@@ -1,0 +1,19 @@
+{
+  "WORKERPOOL0":
+  {
+    "radio_device_class_string": "1.8.1.A",
+    "os_min": 2,
+    "enforce_dectnrp_samp_rate_by_resampling": true,
+    "nof_jobs": 64,
+    "tx_gap_samples": 40,
+    "rx_ant_streams_length_slots": 48,
+    "rx_chunk_length_u8subslot": 32,
+    "rx_chunk_unit_length_u8subslot": 2,
+    "rx_job_regular_period": 4,
+    "threads_core_prio_config_sync_vec": [0, -1],
+    "threads_core_prio_config_tx_rx_vec": [0, -1],
+    "chestim_mode_lr_default": true,
+    "chestim_mode_lr_t_stride_default": 2,
+    "json_export_length": 0
+  }
+}

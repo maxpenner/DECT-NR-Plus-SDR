@@ -171,8 +171,8 @@ void link_t::randomize() {
      */
 // #define FOLLOW_CLARKES_MODEL
 #ifdef FOLLOW_CLARKES_MODEL
-    const double angular_separation = 2.0 * std::numbers::pi_v<double> /
-                                      static_cast<double>(WIRELESS_CHANNEL_DOUBLY_NOF_SINUSOIDS);
+    const double angular_spacing = 2.0 * std::numbers::pi_v<double> /
+                                   static_cast<double>(WIRELESS_CHANNEL_DOUBLY_NOF_SINUSOIDS);
 #endif
 
     for (uint32_t i = 0; i < tap_delays_smpl.size(); ++i) {
@@ -185,7 +185,7 @@ void link_t::randomize() {
         for (uint32_t j = 0; j < WIRELESS_CHANNEL_DOUBLY_NOF_SINUSOIDS; ++j) {
 #ifdef FOLLOW_CLARKES_MODEL
             const double angular_offset =
-                static_cast<double>(j) * angular_separation + random_angular_offset_common;
+                static_cast<double>(j) * angular_spacing + random_angular_offset_common;
 #else
             const double angular_offset = randomgen.rand_m1p1() * 2.0 * std::numbers::pi_v<double>;
 #endif

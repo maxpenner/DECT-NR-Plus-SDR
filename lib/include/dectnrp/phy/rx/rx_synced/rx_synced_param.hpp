@@ -164,9 +164,9 @@ namespace dectnrp::phy {
 
 /**
  * \brief The residual CFO estimation is based on two OFDM symbols with STO and/or DRS cells. In
- * case of two OFDM with DRS cells are compared, their separation in time domain is N_step. The
- * phase rotation due to the residual CFO is the same for each subcarrier of an OFDM symbol, but
- * increases over time.
+ * case of two OFDM with DRS cells are compared, their spacing in time domain is N_step. The phase
+ * rotation due to the residual CFO is the same for each subcarrier of an OFDM symbol, but increases
+ * over time.
  *
  * https://de.mathworks.com/help/wlan/ug/joint-sampling-rate-and-carrier-frequency-offset-tracking.html
  */

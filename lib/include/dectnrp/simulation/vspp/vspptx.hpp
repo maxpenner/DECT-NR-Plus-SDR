@@ -76,7 +76,7 @@ class vspptx_t final : public vspp_t {
                 /// TX power, internally it is treated like large scale fading
                 float tx_into_rx_leakage_dB;
 
-                void set_reasonable_default_values();
+                void set_reasonable_default_values(const uint32_t nof_antennas);
         } meta;
 };
 

@@ -31,7 +31,7 @@ namespace dectnrp::upper::tfw::p2p {
 
 class tfw_p2p_rd_t : public tpoint_t {
     public:
-        tfw_p2p_rd_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
+        explicit tfw_p2p_rd_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
             : tpoint_t(tpoint_config_, mac_lower_) {};
         virtual ~tfw_p2p_rd_t() = default;
 

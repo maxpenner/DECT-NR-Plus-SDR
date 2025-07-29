@@ -144,7 +144,7 @@ phy::machigh_phy_tx_t tfw_chscanner_t::work_channel(const phy::chscan_t& chscan)
         hw.set_freq_tc(freqs[freqs_idx]);
 
         next_measurement_time_64 += duration_lut.get_N_samples_from_duration(
-            sp3::duration_ec_t::ms001, measurement_separation_between_frequencies_ms);
+            sp3::duration_ec_t::ms001, measurement_spacing_between_frequencies_ms);
     } else {
         next_measurement_time_64 += duration_lut.get_N_samples_from_duration(
             sp3::duration_ec_t::ms001, measurement_period_ms);

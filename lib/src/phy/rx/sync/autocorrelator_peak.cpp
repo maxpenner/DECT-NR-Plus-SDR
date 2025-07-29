@@ -387,7 +387,8 @@ void autocorrelator_peak_t::post_processing_at_coarse_peak(sync_report_t& sync_r
 void autocorrelator_peak_t::write_all_data_to_json(const sync_report_t& sync_report) const {
     // create filename with unique file count
     std::ostringstream filename;
-    filename << "metric_packet_" << std::setw(10) << std::setfill('0') << json_file_cnt.load();
+    filename << "metric_packet_" << std::setw(10) << std::setfill('0')
+             << json_file_cnt.load(std::memory_order_acquire);
 
     // increase static file count
     json_file_cnt.fetch_add(1);

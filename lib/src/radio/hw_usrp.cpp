@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "dectnrp/common/prog/assert.hpp"
+#include "dectnrp/common/prog/log.hpp"
 #include "dectnrp/common/thread/threads.hpp"
 #include "dectnrp/common/thread/watch.hpp"
 #include "dectnrp/radio/calibration/cal_usrp_b210.hpp"
@@ -244,8 +245,8 @@ void hw_usrp_t::initialize_device() {
 
 #ifdef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
         // https://files.ettus.com/manual/page_usrp_n3xx.html#n3xx_fpgio
-        dectnrp_assert(
-            false, "GPIO toggle not implmented for {}", device_addrs.at(0).get("product", ""));
+        dectnrp_log_wrn("GPIO toggle not implemented for {}",
+                        device_addrs.at(0).get("product", ""));
 #endif
 
     } else if (device_addrs.at(0).get("product", "") == "n320") {
@@ -261,8 +262,8 @@ void hw_usrp_t::initialize_device() {
 
 #ifdef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
         // https://files.ettus.com/manual/page_usrp_n3xx.html#n3xx_fpgio
-        dectnrp_assert(
-            false, "GPIO toggle not implmented for {}", device_addrs.at(0).get("product", ""));
+        dectnrp_log_wrn("GPIO toggle not implemented for {}",
+                        device_addrs.at(0).get("product", ""));
 #endif
 
     } else if (device_addrs.at(0).get("product", "") == "B210") {
@@ -760,11 +761,13 @@ void* hw_usrp_t::work_tx_async_helper(void* hw_usrp) {
         }
 
         if (watch.is_elapsed<common::seconds>(5)) {
-            calling_instance->log_line(
-                "USRP ACK: " + std::to_string(ACK) + "  UF: " + std::to_string(UF) +
-                "  SE: " + std::to_string(SE) + "  TE: " + std::to_string(TE) +
-                "  UFIP: " + std::to_string(UFIP) + "  SEIB: " + std::to_string(SEIB) +
-                "  UP: " + std::to_string(UP) + "  OTHER: " + std::to_string(OTHER));
+            if (calling_instance->enable_runtime_logging.load(std::memory_order_acquire)) {
+                calling_instance->log_line(
+                    "USRP ACK: " + std::to_string(ACK) + "  UF: " + std::to_string(UF) +
+                    "  SE: " + std::to_string(SE) + "  TE: " + std::to_string(TE) +
+                    "  UFIP: " + std::to_string(UFIP) + "  SEIB: " + std::to_string(SEIB) +
+                    "  UP: " + std::to_string(UP) + "  OTHER: " + std::to_string(OTHER));
+            }
             watch.reset();
         }
     }
@@ -809,9 +812,6 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
     dectnrp_assert(ant_streams.size() == buffer_tx_pool.nof_antennas,
                    "incorrect number of antennas");
 
-    // we check keep_running approximately every 100ms
-    const uint32_t nof_rounds = static_cast<uint32_t>(rate) / spp_max / 10;
-
 #ifdef RADIO_HW_IMPLEMENTS_TX_BURST_LEADING_ZERO
     // how many zeros do we have to prefix?
     const int64_t nof_prefix_zeros_64 =
@@ -837,231 +837,221 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
 
     // execute until external flag is set
     while (keep_running.load(std::memory_order_acquire)) {
-        for (uint32_t round = 0; round < nof_rounds; ++round) {
-            // wait for specific packet to become available
-            int32_t next_buffer_tx = buffer_tx_pool.wait_for_specific_tx_order_id_to(
-                tx_order_id_expected, BUFFER_TX_WAIT_NON_CRITICAL_TIMEOUT_MS);
+        // wait for specific packet to become available
+        int32_t next_buffer_tx = buffer_tx_pool.wait_for_specific_tx_order_id_to(
+            tx_order_id_expected, BUFFER_TX_WAIT_NON_CRITICAL_TIMEOUT_MS);
 
-            // since above function can timeout, we have to check its return value
-            if (next_buffer_tx < 0) {
-                continue;
-            }
+        // since above function can timeout, we have to check its return value
+        if (next_buffer_tx < 0) {
+            continue;
+        }
 
 #ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
-            // artificially move tx time forward
-            buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -= tx_time_advance_samples;
+        // artificially move tx time forward
+        buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -= tx_time_advance_samples;
 #endif
 
-            // when should the packet be transmitted?
+        // when should the packet be transmitted?
 #ifdef RADIO_HW_IMPLEMENTS_TX_BURST_LEADING_ZERO
-            const int64_t tx_burst_start_time =
-                buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 - leading_zero.size();
+        const int64_t tx_burst_start_time =
+            buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 - leading_zero.size();
 #else
-            const int64_t tx_burst_start_time =
-                buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64;
+        const int64_t tx_burst_start_time =
+            buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64;
 #endif
-            // construct the stream command for a burst transmission
-            uhd::tx_metadata_t tx_md;
-            tx_md.start_of_burst = true;
-            tx_md.end_of_burst = false;
-            tx_md.has_time_spec = true;
-            tx_md.time_spec = uhd::time_spec_t::from_ticks(tx_burst_start_time, rate);
+        // construct the stream command for a burst transmission
+        uhd::tx_metadata_t tx_md;
+        tx_md.start_of_burst = true;
+        tx_md.end_of_burst = false;
+        tx_md.has_time_spec = true;
+        tx_md.time_spec = uhd::time_spec_t::from_ticks(tx_burst_start_time, rate);
 
 #ifdef RADIO_HW_IMPLEMENTS_TX_BURST_LEADING_ZERO
-            if (nof_prefix_zeros_64 > 0) {
-                // send zeros
-                tx_stream->send(leading_zero_vec, nof_prefix_zeros_64, tx_md, send_timeout);
+        if (nof_prefix_zeros_64 > 0) {
+            // send zeros
+            tx_stream->send(leading_zero_vec, nof_prefix_zeros_64, tx_md, send_timeout);
 
-                // next call requires these settings
-                tx_md.start_of_burst = false;
-                tx_md.has_time_spec = false;
-            }
+            // next call requires these settings
+            tx_md.start_of_burst = false;
+            tx_md.has_time_spec = false;
+        }
 #endif
-            /* At this point we know that we have at least one packet to transmit. However, there
-             * might be multiple packets with small or no gaps between them. These packets get
-             * transmitted consecutively in a single UHD burst. Between the packets, we send zeros.
-             * This way we avoid unnecessary TX/RX switches.
-             */
-            bool consecutive_transmission_on = true;
-            while (consecutive_transmission_on) {
-                // make next packet current packet, logic is needed for consecutive transmissions
-                const uint32_t current_buffer_tx = next_buffer_tx;
+        /* At this point we know that we have at least one packet to transmit. However, there
+         * might be multiple packets with small or no gaps between them. These packets get
+         * transmitted consecutively in a single UHD burst. Between the packets, we send zeros.
+         * This way we avoid unnecessary TX/RX switches.
+         */
+        bool consecutive_transmission_on = true;
+        while (consecutive_transmission_on) {
+            // make next packet current packet, logic is needed for consecutive transmissions
+            const uint32_t current_buffer_tx = next_buffer_tx;
 
-                // this buffer is as good as sent ...
-                if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_order_id_expect_next < 0) {
-                    // ... so either increase ID counter for next packet by one ...
-                    ++tx_order_id_expected;
-                } else {
-                    // ... or overwrite if firmware wants to change the order
-                    tx_order_id_expected =
-                        buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_order_id_expect_next;
-                }
+            // this buffer is as good as sent ...
+            if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_order_id_expect_next < 0) {
+                // ... so either increase ID counter for next packet by one ...
+                ++tx_order_id_expected;
+            } else {
+                // ... or overwrite if firmware wants to change the order
+                tx_order_id_expected =
+                    buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_order_id_expect_next;
+            }
 
-                ++tx_stats.buffer_tx_sent;
+            ++tx_stats.buffer_tx_sent;
 
-                // how long will the current packet ultimately be?
-                uint32_t tx_length_samples = buffer_tx_vec[current_buffer_tx]->tx_length_samples;
+            // how long will the current packet ultimately be?
+            uint32_t tx_length_samples = buffer_tx_vec[current_buffer_tx]->tx_length_samples;
 
-                dectnrp_assert(spp_max < tx_length_samples,
-                               "tx_length_samples too small, reduce spp");
+            dectnrp_assert(spp_max < tx_length_samples, "tx_length_samples too small, reduce spp");
 
-                // when does the current packet end on the global time axis?
-                const int64_t tx_time_in_samples_end =
-                    buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_time_64 +
-                    static_cast<int64_t>(tx_length_samples);
+            // when does the current packet end on the global time axis?
+            const int64_t tx_time_in_samples_end =
+                buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_time_64 +
+                static_cast<int64_t>(tx_length_samples);
 
-                // counter of samples sent
-                uint32_t tx_length_samples_cnt = 0;
+            // counter of samples sent
+            uint32_t tx_length_samples_cnt = 0;
 
+            // backpressure
+            buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(spp_max);
+
+            // update pointers
+            buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams, 0);
+
+            // send the one maximum sized chunk that we have at least
+            tx_length_samples_cnt += tx_stream->send(ant_streams, spp_max, tx_md, send_timeout);
+
+            // next call requires these settings
+            tx_md.start_of_burst = false;
+            tx_md.has_time_spec = false;
+
+            // number of samples left to transmit
+            uint32_t tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
+
+            // transmit until we have no more maximum sized chunks left
+            while (tx_length_samples_residual > spp_max) {
                 // backpressure
-                buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(spp_max);
+                buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(tx_length_samples_cnt +
+                                                                            spp_max);
 
                 // update pointers
-                buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams, 0);
+                buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams,
+                                                                         tx_length_samples_cnt);
 
-                // send the one maximum sized chunk that we have at least
+                // send
                 tx_length_samples_cnt += tx_stream->send(ant_streams, spp_max, tx_md, send_timeout);
 
-                // next call requires these settings
-                tx_md.start_of_burst = false;
-                tx_md.has_time_spec = false;
+                // update
+                tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
+            }
 
-                // number of samples left to transmit
-                uint32_t tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
+            dectnrp_assert(tx_length_samples - tx_length_samples_cnt > 0 &&
+                               (tx_length_samples - tx_length_samples_cnt) <= spp_max,
+                           "Incorrect number of samples in final chunk");
 
-                // transmit until we have no more maximum sized chunks left
-                while (tx_length_samples_residual > spp_max) {
-                    // backpressure
-                    buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(
-                        tx_length_samples_cnt + spp_max);
+            /* At this point, we know that we still have some samples in the current buffer left
+             * for transmission. However, we can't transmit them just yet, because the final
+             * UHD-packet of a UHD-burst has to be marked with tx_md.end_of_burst = true. We
+             * must check if another packet starts right after the current one to remain within
+             * the same burst.
+             */
 
-                    // update pointers
-                    buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams,
-                                                                             tx_length_samples_cnt);
+            // if not last packet we wait for some time
+            if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.busy_wait_us > 0) {
+                // busy wait some time for next buffer
+                next_buffer_tx = buffer_tx_pool.wait_for_specific_tx_order_id_busy_to(
+                    tx_order_id_expected,
+                    buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.busy_wait_us);
+            } else {
+                // check if packet with next tx_order_id is already available
+                next_buffer_tx =
+                    buffer_tx_pool.get_specific_tx_order_id_if_available(tx_order_id_expected);
+            }
 
-                    // send
-                    tx_length_samples_cnt +=
-                        tx_stream->send(ant_streams, spp_max, tx_md, send_timeout);
+            // assume there are no gap samples
+            uint32_t tx_gap_samples_this = 0;
 
-                    // update
-                    tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
-                }
-
-                dectnrp_assert(tx_length_samples - tx_length_samples_cnt > 0 &&
-                                   (tx_length_samples - tx_length_samples_cnt) <= spp_max,
-                               "Incorrect number of samples in final chunk");
-
-                /* At this point, we know that we still have some samples in the current buffer left
-                 * for transmission. However, we can't transmit them just yet, because the final
-                 * UHD-packet of a UHD-burst has to be marked with tx_md.end_of_burst = true. We
-                 * must check if another packet starts right after the current one to remain within
-                 * the same burst.
-                 */
-
-                // if not last packet we wait for some time
-                if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.busy_wait_us > 0) {
-                    // busy wait some time for next buffer
-                    next_buffer_tx = buffer_tx_pool.wait_for_specific_tx_order_id_busy_to(
-                        tx_order_id_expected,
-                        buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.busy_wait_us);
-                } else {
-                    // check if packet with next tx_order_id is already available
-                    next_buffer_tx =
-                        buffer_tx_pool.get_specific_tx_order_id_if_available(tx_order_id_expected);
-                }
-
-                // assume there are no gap samples
-                uint32_t tx_gap_samples_this = 0;
-
-                // packet available?
-                if (next_buffer_tx >= 0) {
+            // packet available?
+            if (next_buffer_tx >= 0) {
 #ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
-                    // artificially move tx time forward
-                    buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -=
-                        tx_time_advance_samples;
+                // artificially move tx time forward
+                buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -= tx_time_advance_samples;
 #endif
-                    // transmission time of potential consecutive transmission
-                    const int64_t next_buffer_tx_time =
-                        buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64;
+                // transmission time of potential consecutive transmission
+                const int64_t next_buffer_tx_time =
+                    buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64;
 
-                    dectnrp_assert(tx_time_in_samples_end <= next_buffer_tx_time,
-                                   "packet TX times are out of order {} {} {} {}",
-                                   current_buffer_tx,
-                                   tx_time_in_samples_end,
-                                   next_buffer_tx,
-                                   next_buffer_tx_time);
+                dectnrp_assert(tx_time_in_samples_end <= next_buffer_tx_time,
+                               "packet TX times are out of order {} {} {} {}",
+                               current_buffer_tx,
+                               tx_time_in_samples_end,
+                               next_buffer_tx,
+                               next_buffer_tx_time);
 
-                    // gap between this buffer's final sample and the next buffers first sample
-                    tx_gap_samples_this =
-                        static_cast<uint32_t>(next_buffer_tx_time - tx_time_in_samples_end);
+                // gap between this buffer's final sample and the next buffers first sample
+                tx_gap_samples_this =
+                    static_cast<uint32_t>(next_buffer_tx_time - tx_time_in_samples_end);
 
-                    // gap too large? burst ends here
-                    if (tx_gap_samples_this > tx_gap_samples) {
-                        tx_gap_samples_this = 0;
-                        tx_md.end_of_burst = true;
-                        consecutive_transmission_on = false;
-                    }
-                    // gap small enough? we transmit consecutively
-                    else {
-                        ++tx_stats.buffer_tx_sent_consecutive;
-
-                        // zero gap samples at the end of the buffer so we don't send garbage
-                        buffer_tx_vec[current_buffer_tx]->set_zero(tx_length_samples,
-                                                                   tx_gap_samples_this);
-                    }
-                }
-                // no packet found, burst ends here
-                else {
+                // gap too large? burst ends here
+                if (tx_gap_samples_this > tx_gap_samples) {
+                    tx_gap_samples_this = 0;
                     tx_md.end_of_burst = true;
                     consecutive_transmission_on = false;
                 }
+                // gap small enough? we transmit consecutively
+                else {
+                    ++tx_stats.buffer_tx_sent_consecutive;
 
-                // backpressure until PHY has created all samples
-                buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(tx_length_samples);
-
-                // artificially increase size of packet by the number of gap samples
-                tx_length_samples += tx_gap_samples_this;
-
-                // transmit until we have no more samples left
-                while (tx_length_samples_cnt < tx_length_samples) {
-                    tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
-
-                    const uint32_t n_samples_send_this =
-                        std::min(spp_max, tx_length_samples_residual);
-
-                    buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams,
-                                                                             tx_length_samples_cnt);
-
-                    tx_length_samples_cnt +=
-                        tx_stream->send(ant_streams, n_samples_send_this, tx_md, send_timeout);
+                    // zero gap samples at the end of the buffer so we don't send garbage
+                    buffer_tx_vec[current_buffer_tx]->set_zero(tx_length_samples,
+                                                               tx_gap_samples_this);
                 }
+            }
+            // no packet found, burst ends here
+            else {
+                tx_md.end_of_burst = true;
+                consecutive_transmission_on = false;
+            }
 
-#ifdef RADIO_HW_AGC_IMMEDIATE_OR_AT_PACKET_END
-                const int64_t agc_time_64 = -1;
-#else
-                // when does the current packet end on the global time axis?
-                const int64_t agc_time_64 = tx_time_in_samples_end;
-#endif
+            // backpressure until PHY has created all samples
+            buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(tx_length_samples);
 
-                // TX AGC
-                if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {
-                    calling_instance->set_command_time(agc_time_64);
-                    calling_instance->adjust_tx_power_ant_0dBFS_tc(
-                        buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_power_adj_dB.value());
-                }
+            // artificially increase size of packet by the number of gap samples
+            tx_length_samples += tx_gap_samples_this;
 
-                // RX AGC
-                if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.rx_power_adj_dB.has_value()) {
-                    calling_instance->set_command_time(agc_time_64);
-                    calling_instance->adjust_rx_power_ant_0dBFS_tc(
-                        buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.rx_power_adj_dB.value());
-                }
+            // transmit until we have no more samples left
+            while (tx_length_samples_cnt < tx_length_samples) {
+                tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
 
-                // release TX buffer
-                buffer_tx_vec[current_buffer_tx]->set_transmitted_or_abort();
+                const uint32_t n_samples_send_this = std::min(spp_max, tx_length_samples_residual);
 
-            }  // consecutive_transmission_on
-        }  // nof_rounds
+                buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams,
+                                                                         tx_length_samples_cnt);
+
+                tx_length_samples_cnt +=
+                    tx_stream->send(ant_streams, n_samples_send_this, tx_md, send_timeout);
+            }
+
+            // when does the current packet end on the global time axis?
+            const int64_t agc_time_64 = tx_time_in_samples_end;
+
+            // TX AGC
+            if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {
+                calling_instance->set_command_time(agc_time_64);
+                calling_instance->adjust_tx_power_ant_0dBFS_tc(
+                    buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_power_adj_dB.value());
+            }
+
+            // RX AGC
+            if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.rx_power_adj_dB.has_value()) {
+                calling_instance->set_command_time(agc_time_64);
+                calling_instance->adjust_rx_power_ant_0dBFS_tc(
+                    buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.rx_power_adj_dB.value());
+            }
+
+            // release TX buffer
+            buffer_tx_vec[current_buffer_tx]->set_transmitted_or_abort();
+
+        }  // consecutive_transmission_on
     }  // burst time
 
     return nullptr;

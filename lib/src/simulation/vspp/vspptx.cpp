@@ -36,7 +36,7 @@ vspptx_t::vspptx_t(const uint32_t id_,
                    const uint32_t samp_rate_,
                    const uint32_t spp_size_)
     : vspp_t(id_, nof_antennas_, samp_rate_, spp_size_) {
-    meta.set_reasonable_default_values();
+    meta.set_reasonable_default_values(nof_antennas);
 }
 
 void vspptx_t::spp_write(const std::vector<cf_t*>& inp, uint32_t offset, uint32_t nof_samples) {
@@ -69,7 +69,7 @@ void vspptx_t::tx_set_no_non_zero_samples() {
     tx_length = -1;
 }
 
-void vspptx_t::meta_t::set_reasonable_default_values() {
+void vspptx_t::meta_t::set_reasonable_default_values(const uint32_t nof_antennas) {
     vspprx_counterpart_registered = false;
 
     now_64 = common::adt::UNDEFINED_EARLY_64;
@@ -77,7 +77,7 @@ void vspptx_t::meta_t::set_reasonable_default_values() {
     freq_Hz = 1.0e9f;
     net_bandwidth_norm = 1.0f;
 
-    tx_power_ant_0dBFS = 0.0f;
+    tx_power_ant_0dBFS = common::ant_t(nof_antennas);
     tx_into_rx_leakage_dB = 1000.0f;
 }
 

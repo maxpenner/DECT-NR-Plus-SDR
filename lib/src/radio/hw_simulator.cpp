@@ -458,14 +458,10 @@ void* hw_simulator_t::work_tx(void* hw_simulator) {
 
                 // were these the final samples of the current packet?
                 if (tx_length_samples_cnt == tx_length_samples) {
-#ifdef RADIO_HW_AGC_IMMEDIATE_OR_AT_PACKET_END
-                    const int64_t agc_time_64 = -1;
-#else
                     // when does the current packet end on the global time axis?
                     const int64_t agc_time_64 =
                         buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_time_64 +
                         static_cast<int64_t>(tx_length_samples);
-#endif
 
                     // TX AGC
                     if (buffer_tx_vec[buffer_tx_idx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {

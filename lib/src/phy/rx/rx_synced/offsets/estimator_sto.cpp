@@ -142,7 +142,7 @@ float estimator_sto_t::process_stf_phase_rotation(const cf_t* chestim_drs_zf) {
     volk_32fc_accumulator_s32fc_a(&B, (const lv_32fc_t*)stage, N_STF_cells_b - 1);
 
     // phase rotation from subcarrier to subcarrier
-    return atan2(B.imag(), B.real()) / static_cast<float>(constants::N_STF_cells_separation);
+    return atan2(B.imag(), B.real()) / static_cast<float>(constants::N_STF_cells_spacing);
 }
 
 // helpers for residual STO based on DRS
@@ -158,7 +158,7 @@ float estimator_sto_t::process_drs_phase_rotation(const cf_t* chestim_drs_zf) {
     volk_32fc_accumulator_s32fc_a(&B, (const lv_32fc_t*)stage, N_DRS_cells_b - 1);
 
     // phase rotation from subcarrier to subcarrier
-    return atan2(B.imag(), B.real()) / static_cast<float>(constants::N_STF_cells_separation);
+    return atan2(B.imag(), B.real()) / static_cast<float>(constants::N_STF_cells_spacing);
 }
 
 void estimator_sto_t::convert_to_phasors() {

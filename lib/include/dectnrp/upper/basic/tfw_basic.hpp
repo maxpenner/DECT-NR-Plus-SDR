@@ -27,7 +27,7 @@ namespace dectnrp::upper::tfw::basic {
 
 class tfw_basic_t final : public tpoint_t {
     public:
-        tfw_basic_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
+        explicit tfw_basic_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
         ~tfw_basic_t() = default;
 
         tfw_basic_t() = delete;

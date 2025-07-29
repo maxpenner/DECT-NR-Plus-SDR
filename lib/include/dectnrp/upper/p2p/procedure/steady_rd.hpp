@@ -34,7 +34,7 @@ namespace dectnrp::upper::tfw::p2p {
 
 class steady_rd_t : public tpoint_state_t {
     public:
-        steady_rd_t(args_t& args);
+        explicit steady_rd_t(args_t& args);
         virtual ~steady_rd_t() = default;
 
         // same dispatchers for FT and PT, calls worksub_* functions

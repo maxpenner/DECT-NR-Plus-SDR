@@ -685,7 +685,7 @@ void rx_synced_t::run_stf_chestim_zf() {
             // pseudo code: chestim = (received cell value) / (transmitted cell value)
             chestim_drs_zf_0[w_idx] = ofdm_symbol_now_ant[r_idx] / y_STF.at(r_idx);
 
-            r_idx += constants::N_STF_cells_separation;
+            r_idx += constants::N_STF_cells_spacing;
             ++w_idx;
         }
 
@@ -693,7 +693,7 @@ void rx_synced_t::run_stf_chestim_zf() {
         chestim_drs_zf_0[w_idx] = ofdm_symbol_now_ant[r_idx] / y_STF.at(r_idx);
 
         // center STF cell
-        r_idx += constants::N_STF_cells_separation_center;
+        r_idx += constants::N_STF_cells_spacing_center;
         ++w_idx;
 
         // upper part of spectrum
@@ -702,7 +702,7 @@ void rx_synced_t::run_stf_chestim_zf() {
             chestim_drs_zf_0[w_idx] = ofdm_symbol_now_ant[r_idx] / y_STF.at(r_idx);
 
             // if will be always for at this point
-            r_idx += constants::N_STF_cells_separation;
+            r_idx += constants::N_STF_cells_spacing;
             ++w_idx;
         }
     }
