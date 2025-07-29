@@ -31,7 +31,8 @@ namespace dectnrp::upper::tfw::txrxdelay {
 
 class tfw_txrxdelay_t final : public tpoint_t {
     public:
-        tfw_txrxdelay_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
+        explicit tfw_txrxdelay_t(const tpoint_config_t& tpoint_config_,
+                                 phy::mac_lower_t& mac_lower_);
         ~tfw_txrxdelay_t() = default;
 
         tfw_txrxdelay_t() = delete;
@@ -55,7 +56,7 @@ class tfw_txrxdelay_t final : public tpoint_t {
         void work_stop() override final;
 
     private:
-        const int64_t measurement_separation_ms{500};
+        const int64_t measurement_spacing_ms{500};
 
         int64_t next_measurement_time_64{common::adt::UNDEFINED_EARLY_64};
         int64_t tx_time_last_64{common::adt::UNDEFINED_EARLY_64};

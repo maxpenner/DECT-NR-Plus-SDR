@@ -33,7 +33,7 @@ namespace dectnrp::upper::tfw::rtt {
 
 class tfw_rtt_t final : public tpoint_t {
     public:
-        tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
+        explicit tfw_rtt_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
         ~tfw_rtt_t() = default;
 
         tfw_rtt_t() = delete;

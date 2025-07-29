@@ -40,20 +40,18 @@
 
 #define RADIO_HW_SLEEP_BEFORE_STARTING_RX_THREAD_MS 100
 
-// only refers to real hardware, simulator does not prefix zeros
+/// only refers to real hardware, simulator does not prefix zeros
 #define RADIO_HW_IMPLEMENTS_TX_BURST_LEADING_ZERO
 
-// only refers to real hardware, simulator does not send earlier
+/// only refers to real hardware, simulator does not send earlier
 #define RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
 
-// only refers to real hardware, simulator has no GPIOs
-// #define RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
+/// only refers to real hardware, simulator has no GPIOs
+#define RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
 
 #ifdef RADIO_HW_IMPLEMENTS_GPIO_TOGGLE
 #include "dectnrp/radio/pulse_config.hpp"
 #endif
-
-#define RADIO_HW_AGC_IMMEDIATE_OR_AT_PACKET_END
 
 namespace dectnrp::radio {
 
@@ -72,8 +70,8 @@ class hw_t : public common::layer_unit_t {
         hw_t(hw_t&&) = delete;
         hw_t& operator=(hw_t&&) = delete;
 
-        static constexpr double HW_DEFAULT_FREQ_HZ = 100.0e6;
-        static constexpr uint32_t HW_TX_GAP_SAMPLES_MAX = 100;
+        static constexpr double HW_DEFAULT_FREQ_HZ{100.0e6};
+        static constexpr uint32_t HW_TX_GAP_SAMPLES_MAX{100};
 
         uint32_t get_nof_antennas_max() const { return nof_antennas_max; };
         uint32_t get_nof_antennas() const { return nof_antennas; };
@@ -262,6 +260,8 @@ class hw_t : public common::layer_unit_t {
             return samp_rate - full_second_to_pps_measured_samples;
         };
 
+        std::atomic<bool> enable_runtime_logging{true};
+
         /// buffer's public interfaces used by hardware and PHY
         std::unique_ptr<buffer_tx_pool_t> buffer_tx_pool;
         std::unique_ptr<buffer_rx_t> buffer_rx;
@@ -321,7 +321,7 @@ class hw_t : public common::layer_unit_t {
          * if keep_running is true, then keep threads running once their started
          * if keep_running is false, then stop the threads
          */
-        std::atomic<bool> keep_running{};
+        std::atomic<bool> keep_running{false};
 };
 
 }  // namespace dectnrp::radio

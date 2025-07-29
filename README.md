@@ -27,8 +27,8 @@ DECT NR+ is a non-cellular radio standard and part of [5G as defined by ITU-R](h
 Advanced Topics
 
 1. [Architecture](#architecture)
-2. [TX/RX Delay Calibration](#txrx-delay-calibration)
-3. [AGC](#agc)
+2. [AGC](#agc)
+3. [TX/RX Delay Calibration](#txrx-delay-calibration)
 4. [Resampling](#resampling)
 5. [Synchronization](#synchronization)
 6. [Compatibility](#compatibility)
@@ -41,7 +41,8 @@ Advanced Topics
     3. [loopback](#loopback)
     4. [p2p](#p2p)
     5. [rtt](#rtt)
-    6. [txrxdelay](#txrxdelay)
+    6. [txrxagc](#txrxagc)
+    7. [txrxdelay](#txrxdelay)
 11. [Interesting Links](#interesting-links)
 
 ## Core Idea
@@ -236,6 +237,21 @@ The key takeaways are:
 - Each firmware starts and controls its own application layer interface ([application_server_t](lib/include/dectnrp/application/application_server.hpp) and [application_client_t](lib/include/dectnrp/application/application_client.hpp)). To allow immediate action for new application layer data, [application_server_t](lib/include/dectnrp/application/application_server.hpp) is given access to [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp). The job type created by [application_server_t](lib/include/dectnrp/application/application_server.hpp) contains an [application_report_t](lib/include/dectnrp/application/application_report.hpp) with the number and size of datagrams available on the application layer.
 - The application layer interface is either a [set of UDP ports](lib/include/dectnrp/application/socket/) or a [virtual NIC](lib/include/dectnrp/application/vnic/).
 
+## AGC
+
+An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second in regular intervals. These comparatively infrequent gain adjustments impair the performance in fast time-variant channels when simultaneously using a high modulation order.
+
+Another drawback of a slow AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power, for example in a near–far scenario. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
+
+| **$\mu$** | **GI length in $\mu s$** | **STF length in $\mu s$**  |
+|:---------:|:------------------------:|:--------------------------:|
+|     1     |           18.52          |            64.81           |
+|     2     |           20.83          |            41.67           |
+|     4     |           10.42          |            20.83           |
+|     8     |           10.42          |            10.42           |
+
+In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. 10 $dB$. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
+
 ## TX/RX Delay Calibration
 
 If a packet is scheduled for transmission at a specific time in the future, the packet is effectively [sent several samples later](https://docs.srsran.com/projects/project/en/latest/user_manuals/source/troubleshooting.html#usrp-time-calibration), as various delay-afflicted processes (upsampling, filtering, etc.) are performed in the radio hardware. At low sample rates, a few samples add up to several microseconds.
@@ -252,21 +268,6 @@ Exemplary measurements:
 |  B210  |         1.728        |           1.728           |        47        |       27.20      |
 |  B210  |         1.728        |           3.456           |        53        |       15.34      |
 |  B210  |         1.728        |           6.912           |        68        |        9.84      |
-
-## AGC
-
-An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second in regular intervals. These comparatively infrequent gain adjustments impair the performance in fast time-variant channels when simultaneously using a high modulation order.
-
-Another drawback of a slow AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power, for example in a near–far scenario. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
-
-| **$\mu$** | **GI length in $\mu s$** | **STF length in $\mu s$**  |
-|:---------:|:------------------------:|:--------------------------:|
-|     1     |           18.52          |            64.81           |
-|     2     |           20.83          |            41.67           |
-|     4     |           10.42          |            20.83           |
-|     8     |           10.42          |            10.42           |
-
-In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. 10 $dB$. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
 
 ## Resampling
 
@@ -422,6 +423,10 @@ In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310
 ```JSON
 "firmware_id": 1
 ```
+
+### [txrxagc](lib/include/dectnrp/upper/txrxagc/tfw_txrxagc.hpp)
+
+See [AGC](#agc).
 
 ### [txrxdelay](lib/include/dectnrp/upper/txrxdelay/tfw_txrxdelay.hpp)
 

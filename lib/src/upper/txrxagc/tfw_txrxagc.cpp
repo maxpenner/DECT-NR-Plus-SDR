@@ -20,6 +20,7 @@
 
 #include "dectnrp/upper/txrxagc/tfw_txrxagc.hpp"
 
+#include <algorithm>
 #include <cstdint>
 #include <cstring>
 
@@ -38,8 +39,9 @@ tfw_txrxagc_t::tfw_txrxagc_t(const tpoint_config_t& tpoint_config_, phy::mac_low
     : tpoint_t(tpoint_config_, mac_lower_) {
     hw.set_command_time();
     hw.set_tx_power_ant_0dBFS_uniform_tc(10.0f);
-    hw.set_rx_power_ant_0dBFS_uniform_tc(-30.0f);
+    hw.set_rx_power_ant_0dBFS_uniform_tc(-50.0f);
     hw.set_freq_tc(3830.0e6);
+    hw.enable_runtime_logging.store(false, std::memory_order_release);
 
     // loopback requires the hardware to be a simulator
     radio::hw_simulator_t* hw_simulator = dynamic_cast<radio::hw_simulator_t*>(&hw);
@@ -91,11 +93,9 @@ tfw_txrxagc_t::tfw_txrxagc_t(const tpoint_config_t& tpoint_config_, phy::mac_low
 }
 
 phy::irregular_report_t tfw_txrxagc_t::work_start(const int64_t start_time_64) {
-    next_measurement_time_64 =
-        start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
-                                                                 measurement_separation_ms);
-
-    return phy::irregular_report_t(next_measurement_time_64);
+    return phy::irregular_report_t(start_time_64 +
+                                   duration_lut.get_N_samples_from_duration(
+                                       sp3::duration_ec_t::ms001, measurement_spacing_ms));
 }
 
 phy::machigh_phy_t tfw_txrxagc_t::work_regular(
@@ -103,50 +103,88 @@ phy::machigh_phy_t tfw_txrxagc_t::work_regular(
     return phy::machigh_phy_t();
 }
 
-phy::machigh_phy_t tfw_txrxagc_t::work_irregular(
-    [[maybe_unused]] const phy::irregular_report_t& irregular_report) {
-    dectnrp_assert(next_measurement_time_64 < buffer_rx.get_rx_time_passed(), "time out-of-order");
+phy::machigh_phy_t tfw_txrxagc_t::work_irregular(const phy::irregular_report_t& irregular_report) {
+    dectnrp_assert(
+        irregular_report.call_asap_after_this_time_has_passed_64 < buffer_rx.get_rx_time_passed(),
+        "time out-of-order");
+
+    if (tpoint_config.firmware_id == 1) {
+        return phy::machigh_phy_t();
+    }
 
     phy::machigh_phy_t ret;
 
-    // define the next possible transmission time
-    const int64_t tx_time_front_64 =
+    tx_time_front_64 =
         buffer_rx.get_rx_time_passed() + hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround);
 
-    // define AGC settings
-    common::ant_t tx_power_adj_dB(hw.get_nof_antennas());
-    for (std::size_t i = 0; i < tx_power_adj_dB.get_nof_antennas(); ++i) {
-        if (measurement_cnt_64 % 2 == 0) {
-            tx_power_adj_dB.at(i) = 10.0f;
-        } else {
-            tx_power_adj_dB.at(i) = -10.0f;
-        }
+    // toggle the AGC change to make RMS level distinguishable
+    const float agc_change_dB_now = measurement_cnt_64 % 2 == 0 ? -agc_change_dB : agc_change_dB;
+
+    // AGC settings attached to front packet, change antennas with every call
+    common::ant_t adj_dB(hw.get_nof_antennas());
+    for (std::size_t i = 0; i < std::min(adj_dB.get_nof_antennas(), nof_antennas_simultaneous);
+         ++i) {
+        adj_dB.at(i) = agc_change_dB_now;
     }
 
-    // add definition of front packet
-    const int64_t tx_size_front_64 =
-        generate_packet_asap(ret, plcf_10_front, tx_time_front_64, tx_power_adj_dB, std::nullopt);
+    // length of front packet
+    int64_t tx_length_front_64{common::adt::UNDEFINED_EARLY_64};
+    switch (agc_dut) {
+        using enum agc_dut_t;
+        case none:
+            tx_length_front_64 = generate_packet_asap(
+                ret, plcf_10_front, tx_time_front_64, std::nullopt, std::nullopt);
+            break;
+        case tx:
+            tx_length_front_64 =
+                generate_packet_asap(ret, plcf_10_front, tx_time_front_64, adj_dB, std::nullopt);
+            break;
+        case rx:
+            tx_length_front_64 =
+                generate_packet_asap(ret, plcf_10_front, tx_time_front_64, std::nullopt, adj_dB);
+            break;
+        case both:
+            tx_length_front_64 =
+                generate_packet_asap(ret, plcf_10_front, tx_time_front_64, adj_dB, adj_dB);
+            break;
+        case alternating:
+            if (measurement_cnt_64 % 4 <= 1) {
+                tx_length_front_64 = generate_packet_asap(
+                    ret, plcf_10_front, tx_time_front_64, adj_dB, std::nullopt);
+            } else {
+                tx_length_front_64 = generate_packet_asap(
+                    ret, plcf_10_front, tx_time_front_64, std::nullopt, adj_dB);
+            }
+
+            break;
+    }
 
     // transmission time of back packet
     const int64_t tx_time_back_64 =
-        tx_time_front_64 + tx_size_front_64 +
+        tx_time_front_64 + tx_length_front_64 +
         duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::subslot_u8_001,
-                                                 front_back_separation_u8_subslots);
+                                                 front_back_spacing_u8_subslots);
 
-    // add definition of back packet
     generate_packet_asap(ret, plcf_10_back, tx_time_back_64, std::nullopt, std::nullopt);
 
-    next_measurement_time_64 += duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
-                                                                         measurement_separation_ms);
+    // unused if logging is disabled
+    [[maybe_unused]] const int64_t TX_f_TX_b = tx_time_back_64 - tx_time_front_64;
+    [[maybe_unused]] const int64_t TX_f_TX_b_gap = TX_f_TX_b - tx_length_front_64;
 
-    ret.irregular_report = phy::irregular_report_t(next_measurement_time_64);
+    dectnrp_log_inf("");
+    dectnrp_log_inf(
+        "tx_time_front_64={} tx_length_front_64={}samples={}us TX_f_TX_b={}samples={}us TX_f_TX_b_gap={}samples={}us",
+        tx_time_front_64,
+        tx_length_front_64,
+        duration_lut.get_N_us_from_samples(tx_length_front_64),
+        TX_f_TX_b,
+        duration_lut.get_N_us_from_samples(TX_f_TX_b),
+        TX_f_TX_b_gap,
+        duration_lut.get_N_us_from_samples(TX_f_TX_b_gap));
 
-    const int64_t separation_samples = tx_time_back_64 - (tx_time_front_64 + tx_size_front_64);
-
-    dectnrp_log_inf("TX Times={}   separation_samples={}   samples_us={}",
-                    tx_time_front_64 + tx_size_front_64,
-                    separation_samples,
-                    duration_lut.get_N_us_from_samples(separation_samples));
+    ret.irregular_report =
+        irregular_report.get_same_with_time_increment(duration_lut.get_N_samples_from_duration(
+            sp3::duration_ec_t::ms001, measurement_spacing_ms));
 
     ++measurement_cnt_64;
 
@@ -176,17 +214,36 @@ phy::maclow_phy_t tfw_txrxagc_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
     // front?
     if (plcf_10_rx->ShortNetworkID == identity_front.ShortNetworkID &&
         plcf_10_rx->TransmitterIdentity == identity_front.ShortRadioDeviceID) {
-        dectnrp_log_inf("RX Front Time={}   rms_array={}",
-                        phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64,
-                        phy_maclow.sync_report.rms_array.get_readable_list());
+        // time relative to old front packet
+        const int64_t RX_f_RX_f =
+            phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64 - rx_time_front_64;
+
+        // save front packet time for comparison with back packet
+        rx_time_front_64 = phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64;
+
+        dectnrp_log_inf("rx_time_front_64={} rms_array={} = RX_f_RX_f={}samples={}us",
+                        rx_time_front_64,
+                        phy_maclow.sync_report.rms_array.get_readable_list(),
+                        RX_f_RX_f,
+                        duration_lut.get_N_us_from_samples(RX_f_RX_f));
     }
 
     // back?
     if (plcf_10_rx->ShortNetworkID == identity_back.ShortNetworkID &&
         plcf_10_rx->TransmitterIdentity == identity_back.ShortRadioDeviceID) {
-        dectnrp_log_inf("RX Back Time={}   rms_array={}",
-                        phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64,
-                        phy_maclow.sync_report.rms_array.get_readable_list());
+        // measure times between both TX and both RX
+        const int64_t TX_f_RX_f = rx_time_front_64 - tx_time_front_64;
+        const int64_t RX_f_RX_b =
+            phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64 - rx_time_front_64;
+
+        dectnrp_log_inf(
+            "rx_time_back_64={} rms_array={} | TX_f_RX_f={}samples={}us | RX_f_RX_b={}samples={}us",
+            phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64,
+            phy_maclow.sync_report.rms_array.get_readable_list(),
+            TX_f_RX_f,
+            duration_lut.get_N_us_from_samples(TX_f_RX_f),
+            RX_f_RX_b,
+            duration_lut.get_N_us_from_samples(RX_f_RX_b));
     }
 
     return phy::maclow_phy_t();

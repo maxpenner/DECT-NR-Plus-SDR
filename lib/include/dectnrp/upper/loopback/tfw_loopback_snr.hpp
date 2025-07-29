@@ -29,7 +29,8 @@ namespace dectnrp::upper::tfw::loopback {
 
 class tfw_loopback_snr_t final : public tfw_loopback_t {
     public:
-        tfw_loopback_snr_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
+        explicit tfw_loopback_snr_t(const tpoint_config_t& tpoint_config_,
+                                    phy::mac_lower_t& mac_lower_);
         ~tfw_loopback_snr_t() = default;
 
         tfw_loopback_snr_t() = delete;

@@ -54,8 +54,8 @@ static constexpr uint32_t N_samples_stf_u248{N_stf_pattern_u248 * N_samples_stf_
 
 /// for beta=1, there are 14 occupied STF cells across the full spectrum
 static constexpr uint32_t N_STF_cells_b_1{14};
-static constexpr uint32_t N_STF_cells_separation{4};
-static constexpr uint32_t N_STF_cells_separation_center{8};
+static constexpr uint32_t N_STF_cells_spacing{4};
+static constexpr uint32_t N_STF_cells_spacing_center{8};
 
 /// antenna and MIMO configurations
 static constexpr uint32_t N_TS_max{8};

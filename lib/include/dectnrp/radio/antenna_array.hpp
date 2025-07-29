@@ -34,22 +34,17 @@ class antenna_array_t {
 
         antenna_array_t() = default;
 
-        explicit antenna_array_t(const arrangement_t arrangement_, const float separation_);
+        explicit antenna_array_t(const arrangement_t arrangement_, const float spacing_);
 
-        /**
-         * \brief Constructor for uneven separation.
-         *
-         * \param arrangement_
-         * \param separation_ number of elements should be number of antennas
-         */
+        /// constructor for uneven spacing
         explicit antenna_array_t(const arrangement_t arrangement_,
-                                 const std::vector<float> separation_);
+                                 const std::vector<float> spacing_);
 
     private:
         arrangement_t arrangement{arrangement_t::linear};
 
-        /// antenna separation in meters
-        std::vector<float> separation{0.05};
+        /// antenna spacing in meters
+        std::vector<float> spacing{0.05};
 };
 
 }  // namespace dectnrp::radio

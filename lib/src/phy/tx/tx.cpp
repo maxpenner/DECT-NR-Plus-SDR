@@ -317,7 +317,8 @@ void tx_t::generate_tx_packet(const tx_descriptor_t& tx_descriptor_,
 void tx_t::write_all_data_to_json() const {
     // create filename with unique file count
     std::ostringstream filename;
-    filename << "tx_packet_" << std::setw(10) << std::setfill('0') << json_file_cnt.load();
+    filename << "tx_packet_" << std::setw(10) << std::setfill('0')
+             << json_file_cnt.load(std::memory_order_acquire);
 
     // increase static file count
     json_file_cnt.fetch_add(1);

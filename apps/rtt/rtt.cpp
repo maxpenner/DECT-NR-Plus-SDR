@@ -49,7 +49,9 @@
 
 // ctrl+c
 static std::atomic<bool> ctrl_c_pressed{false};
-static void signal_handler([[maybe_unused]] int signo) { ctrl_c_pressed.store(true); }
+static void signal_handler([[maybe_unused]] int signo) {
+    ctrl_c_pressed.store(true, std::memory_order_release);
+}
 
 // threading
 static pthread_t udp_thread;
@@ -143,7 +145,7 @@ static size_t probe_sdr_packet_length() {
         }
 
         // abort prematurely
-        if (ctrl_c_pressed.load()) {
+        if (ctrl_c_pressed.load(std::memory_order_acquire)) {
             break;
         }
 
@@ -271,7 +273,7 @@ static void* udp_thread_routine([[maybe_unused]] void* ptr) {
         size_t N_measurements_cnt = 0;
         while (N_measurements_cnt < RTT_MEASUREMENTS_PER_PRINT) {
             // abort prematurely
-            if (ctrl_c_pressed.load()) {
+            if (ctrl_c_pressed.load(std::memory_order_acquire)) {
                 return nullptr;
             }
 
@@ -355,7 +357,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
     }
 
     // ctrl+c
-    while (!ctrl_c_pressed.load()) {
+    while (!ctrl_c_pressed.load(std::memory_order_acquire)) {
         dectnrp::common::watch_t::sleep<dectnrp::common::milli>(250);
     }
 

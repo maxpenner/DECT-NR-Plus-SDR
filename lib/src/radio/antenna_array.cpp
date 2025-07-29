@@ -26,21 +26,20 @@
 
 namespace dectnrp::radio {
 
-antenna_array_t::antenna_array_t(const arrangement_t arrangement_, const float separation_)
+antenna_array_t::antenna_array_t(const arrangement_t arrangement_, const float spacing_)
     : arrangement(arrangement_),
-      separation(std::vector<float>{separation_}) {
-    dectnrp_assert(arrangement != arrangement_t::linear_uneven, "constructor for even separation");
+      spacing(std::vector<float>{spacing_}) {
+    dectnrp_assert(arrangement != arrangement_t::linear_uneven, "constructor for even spacing");
 };
 
 antenna_array_t::antenna_array_t(const arrangement_t arrangement_,
-                                 const std::vector<float> separation_)
+                                 const std::vector<float> spacing_)
     : arrangement(arrangement_),
-      separation(separation_) {
-    dectnrp_assert(arrangement == arrangement_t::linear_uneven,
-                   "constructor for uneven separation");
+      spacing(spacing_) {
+    dectnrp_assert(arrangement == arrangement_t::linear_uneven, "constructor for uneven spacing");
 
-    dectnrp_assert(std::set<double>(separation.begin(), separation.end()).size() > 1,
-                   "constructor for uneven separation with even separation");
+    dectnrp_assert(std::set<double>(spacing.begin(), spacing.end()).size() > 1,
+                   "constructor for uneven spacing with even spacing");
 }
 
 }  // namespace dectnrp::radio

@@ -30,7 +30,8 @@ namespace dectnrp::upper::tfw::chscanner {
 
 class tfw_chscanner_t final : public tpoint_t {
     public:
-        tfw_chscanner_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
+        explicit tfw_chscanner_t(const tpoint_config_t& tpoint_config_,
+                                 phy::mac_lower_t& mac_lower_);
         ~tfw_chscanner_t() = default;
 
         tfw_chscanner_t() = delete;
@@ -74,7 +75,7 @@ class tfw_chscanner_t final : public tpoint_t {
         /// time between two measurements
         const uint32_t measurement_period_ms{29};
         /// additional between before the next measurement immediately after switching frequency
-        const uint32_t measurement_separation_between_frequencies_ms{100};
+        const uint32_t measurement_spacing_between_frequencies_ms{100};
 
         /// number of measurements per frequency
         uint32_t N_measurement{0};

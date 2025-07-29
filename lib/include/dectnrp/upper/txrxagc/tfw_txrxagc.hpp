@@ -23,6 +23,7 @@
 #include <cstdint>
 
 #include "dectnrp/common/adt/miscellaneous.hpp"
+#include "dectnrp/limits.hpp"
 #include "dectnrp/sections_part4/mac_architecture/identity.hpp"
 #include "dectnrp/upper/tpoint.hpp"
 
@@ -30,7 +31,7 @@ namespace dectnrp::upper::tfw::txrxagc {
 
 class tfw_txrxagc_t final : public tpoint_t {
     public:
-        tfw_txrxagc_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
+        explicit tfw_txrxagc_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
         ~tfw_txrxagc_t() = default;
 
         tfw_txrxagc_t() = delete;
@@ -54,15 +55,27 @@ class tfw_txrxagc_t final : public tpoint_t {
         void work_stop() override final;
 
     private:
-        const int64_t measurement_separation_ms{2000};
-
-        int64_t next_measurement_time_64{common::adt::UNDEFINED_EARLY_64};
+        static constexpr int64_t measurement_spacing_ms{2000};
         int64_t measurement_cnt_64{0};
 
         /// packet dimensions
         sp3::packet_sizes_def_t psdef;
 
-        const int64_t front_back_separation_u8_subslots{10};
+        /// packet spacing and measured times
+        const int64_t front_back_spacing_u8_subslots{0};
+        int64_t tx_time_front_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t rx_time_front_64{common::adt::UNDEFINED_EARLY_64};
+
+        /// AGC settings attached to front packet
+        static constexpr float agc_change_dB{10.0f};
+        static constexpr std::size_t nof_antennas_simultaneous{limits::dectnrp_max_nof_antennas};
+        enum class agc_dut_t {
+            none,
+            tx,
+            rx,
+            both,
+            alternating
+        } agc_dut{agc_dut_t::tx};
 
         /// used to identify packets in RX path
         sp4::mac_architecture::identity_t identity_front;

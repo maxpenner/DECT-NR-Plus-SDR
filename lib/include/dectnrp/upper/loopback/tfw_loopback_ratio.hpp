@@ -36,7 +36,8 @@ class tfw_loopback_ratio_t final : public tfw_loopback_t {
          * \param tpoint_config_
          * \param mac_lower_
          */
-        tfw_loopback_ratio_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_);
+        explicit tfw_loopback_ratio_t(const tpoint_config_t& tpoint_config_,
+                                      phy::mac_lower_t& mac_lower_);
         ~tfw_loopback_ratio_t() = default;
 
         tfw_loopback_ratio_t() = delete;

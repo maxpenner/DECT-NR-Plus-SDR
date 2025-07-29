@@ -65,8 +65,8 @@ tfw_txrxdelay_t::tfw_txrxdelay_t(const tpoint_config_t& tpoint_config_,
 
 phy::irregular_report_t tfw_txrxdelay_t::work_start(const int64_t start_time_64) {
     next_measurement_time_64 =
-        start_time_64 + duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
-                                                                 measurement_separation_ms);
+        start_time_64 +
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, measurement_spacing_ms);
 
     return phy::irregular_report_t(next_measurement_time_64);
 }
@@ -82,8 +82,8 @@ phy::machigh_phy_t tfw_txrxdelay_t::work_irregular(
 
     phy::machigh_phy_t ret;
 
-    next_measurement_time_64 += duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001,
-                                                                         measurement_separation_ms);
+    next_measurement_time_64 +=
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, measurement_spacing_ms);
 
     tx_time_last_64 = generate_packet_asap(ret);
 
