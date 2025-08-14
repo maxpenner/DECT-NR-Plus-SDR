@@ -580,7 +580,7 @@ void rx_synced_t::run_stf(sync_report_t& sync_report_) {
     // overwrite fractional STO in sync_report
     sync_report_.sto_fractional = estimator_sto->get_fractional_sto_in_samples(N_b_DFT_os);
 
-    dectnrp_assert(std::abs(sync_report_.sto_fractional) < static_cast<float>(N_b_DFT / 4),
+    dectnrp_assert(std::abs(sync_report_.sto_fractional) < static_cast<float>(N_b_DFT_os / 4),
                    "fractional STO very large");
 
     // overwrite exact fine peak time in sync_report
