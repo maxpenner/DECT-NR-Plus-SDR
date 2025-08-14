@@ -12,6 +12,7 @@
     "rx_thread_config": [0, 1],
     "pps_time_base": "zero",
     "usrp_args": "type=x4xx,addr=192.168.10.2,mgmt_addr=192.168.1.2,master_clock_rate=245.76e6,send_frame_size=8000,recv_frame_size=8000,init_cals=ALL,track_cals=ALL,use_dpdk=1",
-    "usrp_tx_async_helper_thread_config": [0, -1]
+    "usrp_tx_async_helper_thread_config": [0, -1],
+    "usrp_tx_gap_samples": 50
   }
 }

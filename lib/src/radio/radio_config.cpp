@@ -89,6 +89,9 @@ radio_config_t::radio_config_t(const std::string directory)
                     usrp_tx_async_helper_thread_config_array[0];
                 hw_config.usrp_tx_async_helper_thread_config.cpu_core =
                     usrp_tx_async_helper_thread_config_array[1];
+                hw_config.usrp_tx_gap_samples =
+                    common::jsonparse::read_int(it, "usrp_tx_gap_samples", -1, 100);
+
             } else {
                 dectnrp_assert_failure("undefined hardware type {}", hw_config.hw_name);
             }

@@ -130,7 +130,7 @@ git clone --depth 1 --branch release_23_11 https://github.com/srsRAN/srsRAN_4G.g
 cd srsRAN_4G
 mkdir build
 cd build
-# With gcc 12 or higher, there are false alarms warnings of type Warray-bounds.
+# With gcc 12 or higher, there are false alarm warnings of type Warray-bounds.
 # To allow compilation with gcc 12 or higher, Werror is disabled. 
 cmake -DENABLE_WERROR=OFF ../
 make -j $n_threads

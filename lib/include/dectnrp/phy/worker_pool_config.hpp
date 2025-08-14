@@ -78,17 +78,6 @@ struct worker_pool_config_t {
         uint32_t nof_jobs;
 
         /**
-         * \brief When generating individual packets from PHY to radio layer, the gap between
-         * consecutive packets can be zero or very small (e.g. a few samples for timing/clock
-         * correction). When that happens, the hardware should not switch from TX to RX and (almost)
-         * immediately back to TX. Instead, the radio layer can detect these small gaps and fill
-         * them with zeros to remain in TX mode. To detect gaps, both packets and their respective
-         * buffers must be available to the hardware when the final samples of the first packet are
-         * read.
-         */
-        uint32_t tx_gap_samples;
-
-        /**
          * \brief The length of the RX ring buffer on radio layer in slots. 24 slots correspond to
          * 10ms. Typical values are between 24 (10ms) and 120 (50ms). The length also determines how
          * long instantaneous channel measurements can be. For instance, if 10ms are buffered, the

@@ -63,8 +63,10 @@ class tfw_txrxagc_t final : public tpoint_t {
 
         /// packet spacing and measured times
         const int64_t front_back_spacing_u8_subslots{0};
-        int64_t tx_time_front_64{common::adt::UNDEFINED_EARLY_64};
-        int64_t rx_time_front_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t S0_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t L0_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t R0_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t R0_old_64{common::adt::UNDEFINED_EARLY_64};
 
         /// AGC settings attached to front packet
         static constexpr float agc_change_dB{10.0f};
@@ -86,11 +88,12 @@ class tfw_txrxagc_t final : public tpoint_t {
         sp4::plcf_10_t plcf_10_back;
 
         /// returns packet size in samples at hw sample rate
-        int64_t generate_packet_asap(phy::machigh_phy_t& machigh_phy,
-                                     const sp4::plcf_10_t& plcf_10,
-                                     const int64_t tx_time_64,
-                                     const std::optional<common::ant_t>& tx_power_adj_dB,
-                                     const std::optional<common::ant_t>& rx_power_adj_dB);
+        [[nodiscard]] int64_t generate_packet_asap(
+            phy::machigh_phy_t& machigh_phy,
+            const sp4::plcf_10_t& plcf_10,
+            const int64_t tx_time_64,
+            const std::optional<common::ant_t>& tx_power_adj_dB,
+            const std::optional<common::ant_t>& rx_power_adj_dB);
 };
 
 }  // namespace dectnrp::upper::tfw::txrxagc

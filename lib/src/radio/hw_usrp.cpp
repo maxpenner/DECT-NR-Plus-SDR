@@ -43,6 +43,8 @@ const std::string hw_usrp_t::name = "usrp";
 
 hw_usrp_t::hw_usrp_t(const hw_config_t& hw_config_)
     : hw_t(hw_config_) {
+    dectnrp_assert(hw_config.usrp_tx_gap_samples >= -1, "too small");
+
     // hw_config.usrp_args must be specific enough to find only one USRP
     device_addrs = uhd::device::find(hw_config.usrp_args, uhd::device::USRP);
 
@@ -203,10 +205,8 @@ void hw_usrp_t::set_samp_rate(const uint32_t samp_rate_in) {
 }
 
 void hw_usrp_t::initialize_buffer_tx_pool(const uint32_t ant_streams_length_samples_max) {
-    dectnrp_assert(tx_gap_samples > 0, "allowed gap size should be larger than 0");
-
     buffer_tx_pool = std::make_unique<buffer_tx_pool_t>(
-        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max + tx_gap_samples);
+        id, nof_antennas, hw_config.nof_buffer_tx, ant_streams_length_samples_max);
 }
 
 void hw_usrp_t::initialize_buffer_rx(const uint32_t ant_streams_length_samples) {
@@ -450,9 +450,8 @@ void hw_usrp_t::start_threads_and_iq_streaming() {
     dectnrp_assert(!keep_running.load(std::memory_order_acquire), "keep_running already true");
 
     dectnrp_assert(0 < nof_antennas && nof_antennas <= nof_antennas_max,
-                   "Number of antennas not set correctly.");
-    dectnrp_assert(samp_rate > 0, "Sample rate not set correctly.");
-    dectnrp_assert(tx_gap_samples > 0, "Minimum size of gap not set correctly.");
+                   "number of antennas not set correctly");
+    dectnrp_assert(samp_rate > 0, "sample rate not set correctly");
 
     // give the threads the okay to execute
     keep_running.store(true, std::memory_order_release);
@@ -781,7 +780,7 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
     // hw_t parameters for readability
     auto& buffer_tx_pool = *calling_instance->buffer_tx_pool.get();
     auto& keep_running = calling_instance->keep_running;
-    const auto tx_gap_samples = calling_instance->tx_gap_samples;
+    const auto usrp_tx_gap_samples = calling_instance->hw_config.usrp_tx_gap_samples;
     auto buffer_tx_vec = buffer_tx_pool.get_buffer_tx_vec();
 
     // hw_usrp_t parameters for readability
@@ -819,13 +818,17 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
         static_cast<int64_t>(calling_instance->hw_config.tx_burst_leading_zero_us) /
         static_cast<int64_t>(1000000);
 
+    dectnrp_assert(
+        !(calling_instance->hw_config.tx_burst_leading_zero_us > 0 && nof_prefix_zeros_64 == 0),
+        "positive duration in microseconds, but zero samples");
+
     dectnrp_assert(nof_prefix_zeros_64 <= spp_max, "too many zeros");
+#endif
 
     // https://github.com/EttusResearch/uhd/blob/master/host/examples/benchmark_rate.cpp
-    const std::vector<cf32_t> leading_zero(nof_prefix_zeros_64, cf32_t{0.0f, 0.0f});
+    const std::vector<cf32_t> leading_zero(spp_max, cf32_t{0.0f, 0.0f});
     const std::vector<const cf32_t*> leading_zero_vec(buffer_tx_vec[0]->nof_antennas,
                                                       &leading_zero[0]);
-#endif
 
 #ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
     const int64_t tx_time_advance_samples =
@@ -835,7 +838,6 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
     // each packet has a 64 bit number, we transmit them in exact order
     int64_t tx_order_id_expected = 0;
 
-    // execute until external flag is set
     while (keep_running.load(std::memory_order_acquire)) {
         // wait for specific packet to become available
         int32_t next_buffer_tx = buffer_tx_pool.wait_for_specific_tx_order_id_to(
@@ -846,19 +848,18 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
             continue;
         }
 
+        /* At this point, we know that a new UHD burst must begin because the target packet has
+         * become available. At what FPGA sample index does this new UHD burst begin?
+         */
+        const int64_t tx_burst_start_time = buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64
 #ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
-        // artificially move tx time forward
-        buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -= tx_time_advance_samples;
+                                            - tx_time_advance_samples
 #endif
-
-        // when should the packet be transmitted?
 #ifdef RADIO_HW_IMPLEMENTS_TX_BURST_LEADING_ZERO
-        const int64_t tx_burst_start_time =
-            buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 - leading_zero.size();
-#else
-        const int64_t tx_burst_start_time =
-            buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64;
+                                            - nof_prefix_zeros_64
 #endif
+            ;
+
         // construct the stream command for a burst transmission
         uhd::tx_metadata_t tx_md;
         tx_md.start_of_burst = true;
@@ -871,24 +872,24 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
             // send zeros
             tx_stream->send(leading_zero_vec, nof_prefix_zeros_64, tx_md, send_timeout);
 
-            // next call requires these settings
+            // update metadata
             tx_md.start_of_burst = false;
             tx_md.has_time_spec = false;
         }
 #endif
-        /* At this point we know that we have at least one packet to transmit. However, there
-         * might be multiple packets with small or no gaps between them. These packets get
-         * transmitted consecutively in a single UHD burst. Between the packets, we send zeros.
-         * This way we avoid unnecessary TX/RX switches.
+        /* At this point we know that we have at least one packet to transmit. However, there might
+         * be multiple packets with small or no gaps between them. These packets get transmitted
+         * consecutively in a single UHD burst. Between the packets, we send zeros. This way we
+         * avoid unnecessary TX/RX switches.
          */
         bool consecutive_transmission_on = true;
+
         while (consecutive_transmission_on) {
-            // make next packet current packet, logic is needed for consecutive transmissions
             const uint32_t current_buffer_tx = next_buffer_tx;
 
-            // this buffer is as good as sent ...
+            // once the current buffer is sent, what will the next ID be?
             if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_order_id_expect_next < 0) {
-                // ... so either increase ID counter for next packet by one ...
+                // either increase ID counter for next packet by one ...
                 ++tx_order_id_expected;
             } else {
                 // ... or overwrite if firmware wants to change the order
@@ -898,18 +899,22 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
 
             ++tx_stats.buffer_tx_sent;
 
-            // how long will the current packet ultimately be?
-            uint32_t tx_length_samples = buffer_tx_vec[current_buffer_tx]->tx_length_samples;
+            // TX time with time advance
+            const int64_t tx_time_ta_64 =
+                buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_time_64
+#ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
+                - tx_time_advance_samples
+#endif
+                ;
+
+            // how long is the current packet?
+            const uint32_t tx_length_samples = buffer_tx_vec[current_buffer_tx]->tx_length_samples;
 
             dectnrp_assert(spp_max < tx_length_samples, "tx_length_samples too small, reduce spp");
 
             // when does the current packet end on the global time axis?
-            const int64_t tx_time_in_samples_end =
-                buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_time_64 +
-                static_cast<int64_t>(tx_length_samples);
-
-            // counter of samples sent
-            uint32_t tx_length_samples_cnt = 0;
+            const int64_t tx_time_ta_end_64 =
+                tx_time_ta_64 + static_cast<int64_t>(tx_length_samples);
 
             // backpressure
             buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(spp_max);
@@ -917,18 +922,18 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
             // update pointers
             buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams, 0);
 
+            // counter of samples sent
+            uint32_t tx_length_samples_cnt = 0;
+
             // send the one maximum sized chunk that we have at least
             tx_length_samples_cnt += tx_stream->send(ant_streams, spp_max, tx_md, send_timeout);
 
-            // next call requires these settings
+            // update metadata
             tx_md.start_of_burst = false;
             tx_md.has_time_spec = false;
 
-            // number of samples left to transmit
-            uint32_t tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
-
             // transmit until we have no more maximum sized chunks left
-            while (tx_length_samples_residual > spp_max) {
+            while (tx_length_samples - tx_length_samples_cnt > spp_max) {
                 // backpressure
                 buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(tx_length_samples_cnt +
                                                                             spp_max);
@@ -939,116 +944,144 @@ void* hw_usrp_t::work_tx(void* hw_usrp) {
 
                 // send
                 tx_length_samples_cnt += tx_stream->send(ant_streams, spp_max, tx_md, send_timeout);
-
-                // update
-                tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
             }
 
             dectnrp_assert(tx_length_samples - tx_length_samples_cnt > 0 &&
                                (tx_length_samples - tx_length_samples_cnt) <= spp_max,
-                           "Incorrect number of samples in final chunk");
+                           "incorrect number of samples in final chunk");
 
-            /* At this point, we know that we still have some samples in the current buffer left
-             * for transmission. However, we can't transmit them just yet, because the final
-             * UHD-packet of a UHD-burst has to be marked with tx_md.end_of_burst = true. We
-             * must check if another packet starts right after the current one to remain within
-             * the same burst.
+            /* At this point, we know that we still have some samples in the current buffer left for
+             * transmission. However, we can't transmit them just yet, because the final UHD-packet
+             * of a UHD-burst has to be marked with tx_md.end_of_burst = true. If the minimum size
+             * of the gap between consecutive packets is positive, we must check if another packet
+             * starts right after the current one to remain within the same burst.
              */
 
-            // if not last packet we wait for some time
-            if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.busy_wait_us > 0) {
-                // busy wait some time for next buffer
-                next_buffer_tx = buffer_tx_pool.wait_for_specific_tx_order_id_busy_to(
-                    tx_order_id_expected,
-                    buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.busy_wait_us);
-            } else {
-                // check if packet with next tx_order_id is already available
-                next_buffer_tx =
-                    buffer_tx_pool.get_specific_tx_order_id_if_available(tx_order_id_expected);
-            }
+            // backpressure until PHY has created all samples of the current packet
+            buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(tx_length_samples);
 
-            // assume there are no gap samples
-            uint32_t tx_gap_samples_this = 0;
+            // assume the gap has length zero
+            uint32_t usrp_tx_gap_current_samples = 0;
 
-            // packet available?
-            if (next_buffer_tx >= 0) {
+            /* If usrp_tx_gap_samples is set to 0 or larger, we can gap consecutive packets by
+             * inserting samples.
+             */
+            if (usrp_tx_gap_samples >= 0) {
+                /* To gap consecutive packets, we must know whether there is a next packet with a
+                 * gap small enough. Thus, here we check for the packet with the correct value of
+                 * tx_order_id_expected. This can be done with a small busy-wait.
+                 */
+                if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.busy_wait_us > 0) {
+                    next_buffer_tx = buffer_tx_pool.wait_for_specific_tx_order_id_busy_to(
+                        tx_order_id_expected,
+                        buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.busy_wait_us);
+                } else {
+                    next_buffer_tx =
+                        buffer_tx_pool.get_specific_tx_order_id_if_available(tx_order_id_expected);
+                }
+
+                // packet available?
+                if (next_buffer_tx >= 0) {
+                    // TX time with time advance
+                    const int64_t tx_time_ta_candidate_64 =
+                        buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64
 #ifdef RADIO_HW_IMPLEMENTS_TX_TIME_ADVANCE
-                // artificially move tx time forward
-                buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64 -= tx_time_advance_samples;
+                        - tx_time_advance_samples
 #endif
-                // transmission time of potential consecutive transmission
-                const int64_t next_buffer_tx_time =
-                    buffer_tx_vec[next_buffer_tx]->buffer_tx_meta.tx_time_64;
+                        ;
 
-                dectnrp_assert(tx_time_in_samples_end <= next_buffer_tx_time,
-                               "packet TX times are out of order {} {} {} {}",
-                               current_buffer_tx,
-                               tx_time_in_samples_end,
-                               next_buffer_tx,
-                               next_buffer_tx_time);
+                    dectnrp_assert(tx_time_ta_end_64 <= tx_time_ta_candidate_64,
+                                   "packet TX times are out of order {} {} {} {}",
+                                   current_buffer_tx,
+                                   tx_time_ta_end_64,
+                                   next_buffer_tx,
+                                   tx_time_ta_candidate_64);
 
-                // gap between this buffer's final sample and the next buffers first sample
-                tx_gap_samples_this =
-                    static_cast<uint32_t>(next_buffer_tx_time - tx_time_in_samples_end);
+                    // gap between this buffer's final sample and the next buffer's first sample
+                    const int32_t usrp_tx_gap_candidate_samples =
+                        static_cast<int32_t>(tx_time_ta_candidate_64 - tx_time_ta_end_64);
 
-                // gap too large? burst ends here
-                if (tx_gap_samples_this > tx_gap_samples) {
-                    tx_gap_samples_this = 0;
+                    // gap too large? burst ends here
+                    if (usrp_tx_gap_candidate_samples > usrp_tx_gap_samples) {
+                        tx_md.end_of_burst = true;
+                        consecutive_transmission_on = false;
+                    }
+                    // gap small enough? we transmit consecutively
+                    else {
+                        ++tx_stats.buffer_tx_sent_consecutive;
+
+                        usrp_tx_gap_current_samples = usrp_tx_gap_candidate_samples;
+                    }
+                }
+                // no packet found, burst ends here
+                else {
                     tx_md.end_of_burst = true;
                     consecutive_transmission_on = false;
                 }
-                // gap small enough? we transmit consecutively
-                else {
-                    ++tx_stats.buffer_tx_sent_consecutive;
 
-                    // zero gap samples at the end of the buffer so we don't send garbage
-                    buffer_tx_vec[current_buffer_tx]->set_zero(tx_length_samples,
-                                                               tx_gap_samples_this);
-                }
             }
-            // no packet found, burst ends here
+            /* If usrp_tx_gap_samples is set to a negative value, we cannot gap consecutive samples
+             * and the burst ends here.
+             */
             else {
                 tx_md.end_of_burst = true;
                 consecutive_transmission_on = false;
             }
 
-            // backpressure until PHY has created all samples
-            buffer_tx_vec[current_buffer_tx]->wait_for_samples_busy_nto(tx_length_samples);
+            // update pointers
+            buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams,
+                                                                     tx_length_samples_cnt);
 
-            // artificially increase size of packet by the number of gap samples
-            tx_length_samples += tx_gap_samples_this;
+            // send final samples of buffer
+            tx_length_samples_cnt += tx_stream->send(
+                ant_streams, tx_length_samples - tx_length_samples_cnt, tx_md, send_timeout);
 
-            // transmit until we have no more samples left
-            while (tx_length_samples_cnt < tx_length_samples) {
-                tx_length_samples_residual = tx_length_samples - tx_length_samples_cnt;
+            dectnrp_assert(tx_length_samples == tx_length_samples_cnt,
+                           "incorrect number of samples");
 
-                const uint32_t n_samples_send_this = std::min(spp_max, tx_length_samples_residual);
+            if (0 < usrp_tx_gap_current_samples) {
+                dectnrp_assert(tx_md.end_of_burst == false, "burst must continue");
+                dectnrp_assert(consecutive_transmission_on == true, "transmission must continue");
 
-                buffer_tx_vec[current_buffer_tx]->get_ant_streams_offset(ant_streams,
-                                                                         tx_length_samples_cnt);
+                uint32_t usrp_tx_gap_current_samples_cnt = 0;
 
-                tx_length_samples_cnt +=
-                    tx_stream->send(ant_streams, n_samples_send_this, tx_md, send_timeout);
+                // transmit until we have no more samples left
+                while (usrp_tx_gap_current_samples_cnt < usrp_tx_gap_current_samples) {
+                    // send zeros
+                    usrp_tx_gap_current_samples_cnt += tx_stream->send(
+                        leading_zero_vec,
+                        std::min(spp_max,
+                                 usrp_tx_gap_current_samples - usrp_tx_gap_current_samples_cnt),
+                        tx_md,
+                        send_timeout);
+                }
             }
 
-            // when does the current packet end on the global time axis?
-            const int64_t agc_time_64 = tx_time_in_samples_end;
+            dectnrp_assert(
+                !(tx_md.end_of_burst == false &&
+                  buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_power_adj_dB.has_value()),
+                "AGC settings should only be attached to the end of a burst");
+
+            dectnrp_assert(
+                !(tx_md.end_of_burst == false &&
+                  buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.rx_power_adj_dB.has_value()),
+                "AGC settings should only be attached to the end of a burst");
 
             // TX AGC
             if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_power_adj_dB.has_value()) {
-                calling_instance->set_command_time(agc_time_64);
+                calling_instance->set_command_time(tx_time_ta_end_64);
                 calling_instance->adjust_tx_power_ant_0dBFS_tc(
                     buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.tx_power_adj_dB.value());
             }
 
             // RX AGC
             if (buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.rx_power_adj_dB.has_value()) {
-                calling_instance->set_command_time(agc_time_64);
+                calling_instance->set_command_time(tx_time_ta_end_64);
                 calling_instance->adjust_rx_power_ant_0dBFS_tc(
                     buffer_tx_vec[current_buffer_tx]->buffer_tx_meta.rx_power_adj_dB.value());
             }
 
-            // release TX buffer
+            // release buffer
             buffer_tx_vec[current_buffer_tx]->set_transmitted_or_abort();
 
         }  // consecutive_transmission_on
