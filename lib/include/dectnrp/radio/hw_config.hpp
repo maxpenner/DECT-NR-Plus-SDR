@@ -103,6 +103,17 @@ struct hw_config_t {
         std::string usrp_args{};
         common::threads_core_prio_config_t usrp_tx_async_helper_thread_config{};
 
+        /**
+         * \brief When generating individual packets from PHY to radio layer, the gap between
+         * consecutive packets can be zero or very small (e.g. a few samples for timing/clock
+         * correction). When that happens, the hardware should not switch from TX to RX and (almost)
+         * immediately back to TX. Instead, the radio layer can detect these small gaps and fill
+         * them with zeros to remain in TX mode. To detect gaps, both packets and their respective
+         * buffers must be available to the hardware when the final samples of the first packet are
+         * read. If set to -1, each packet is transmitted in its own burst.
+         */
+        int32_t usrp_tx_gap_samples{};
+
         // ##################################################
         // simulation specifics
 

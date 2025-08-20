@@ -53,7 +53,7 @@ class token_t {
         }
 
         /**
-         * \brief Locks only if internal fifo_cnt is equal to fifo_cnt_. Has a timeout (no).
+         * \brief Locks only if internal fifo_cnt is equal to fifo_cnt_. Has a timeout (to).
          *
          * \param fifo_cnt_
          * \return lock acquired

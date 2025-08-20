@@ -130,7 +130,7 @@ sudo -u "$SUDO_USER" git clone --depth 1 --branch release_23_11 https://github.c
 cd srsRAN_4G
 sudo -u "$SUDO_USER" mkdir build
 cd build
-# With gcc 12 or higher, there are false alarms warnings of type Warray-bounds.
+# With gcc 12 or higher, there are false alarm warnings of type Warray-bounds.
 # To allow compilation with gcc 12 or higher, Werror is disabled. 
 sudo -u "$SUDO_USER" cmake -DENABLE_WERROR=OFF ../
 sudo -u "$SUDO_USER" make -j $n_threads

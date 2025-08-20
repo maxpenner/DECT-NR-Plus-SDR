@@ -42,16 +42,6 @@ void hw_t::set_nof_antennas(const uint32_t nof_antennas_) {
     rx_power_ant_0dBFS = common::ant_t(nof_antennas);
 }
 
-void hw_t::set_tx_gap_samples(const uint32_t tx_gap_samples_) {
-    /* We zero the gap in the TX thread of the hw. Zeroing large gaps jeopardizes timing. Instead,
-     * increase the maximum TX buffer size on the PHY layer and do the zeroing there in dedicated
-     * threads.
-     */
-    dectnrp_assert(tx_gap_samples_ <= HW_TX_GAP_SAMPLES_MAX, "gap too large");
-
-    tx_gap_samples = tx_gap_samples_;
-}
-
 const common::ant_t& hw_t::set_tx_power_ant_0dBFS_uniform_tc(const float power_dBm) {
     for (size_t i = 0; i < nof_antennas; ++i) {
         set_tx_power_ant_0dBFS_tc(power_dBm, i);

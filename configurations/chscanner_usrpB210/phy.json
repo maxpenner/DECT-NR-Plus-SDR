@@ -5,7 +5,6 @@
     "os_min": 1,
     "enforce_dectnrp_samp_rate_by_resampling": true,
     "nof_jobs": 64,
-    "tx_gap_samples": 40,
     "rx_ant_streams_length_slots": 48,
     "rx_chunk_length_u8subslot": 32,
     "rx_chunk_unit_length_u8subslot": 2,

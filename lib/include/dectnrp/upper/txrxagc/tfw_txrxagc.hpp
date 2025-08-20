@@ -56,26 +56,38 @@ class tfw_txrxagc_t final : public tpoint_t {
 
     private:
         static constexpr int64_t measurement_spacing_ms{2000};
+        int64_t measurement_time_64{0};
         int64_t measurement_cnt_64{0};
 
         /// packet dimensions
         sp3::packet_sizes_def_t psdef;
 
         /// packet spacing and measured times
-        const int64_t front_back_spacing_u8_subslots{0};
-        int64_t tx_time_front_64{common::adt::UNDEFINED_EARLY_64};
-        int64_t rx_time_front_64{common::adt::UNDEFINED_EARLY_64};
+        const int64_t P0_u8_subslots{0};
+        const int64_t P1_u8_subslots{16 * 2};
+        int64_t S0_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t S1_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t L0_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t L1_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t R0_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t R1_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t S0_old_64{common::adt::UNDEFINED_EARLY_64};
+        int64_t R0_old_64{common::adt::UNDEFINED_EARLY_64};
 
-        /// AGC settings attached to front packet
+        /// AGC settings
+        static constexpr uint32_t irregular_report_agc_callback_handle{1};
         static constexpr float agc_change_dB{10.0f};
-        static constexpr std::size_t nof_antennas_simultaneous{limits::dectnrp_max_nof_antennas};
-        enum class agc_dut_t {
+        static constexpr std::size_t nof_antennas_simultaneous{1};
+        enum class agc_type_t {
             none,
             tx,
             rx,
-            both,
-            alternating
-        } agc_dut{agc_dut_t::tx};
+            both
+        } agc_type{agc_type_t::rx};
+        enum class agc_timing_t {
+            front,
+            transmission_free_period
+        } agc_timing{agc_timing_t::transmission_free_period};
 
         /// used to identify packets in RX path
         sp4::mac_architecture::identity_t identity_front;
@@ -85,12 +97,16 @@ class tfw_txrxagc_t final : public tpoint_t {
         sp4::plcf_10_t plcf_10_front;
         sp4::plcf_10_t plcf_10_back;
 
+        std::pair<std::optional<common::ant_t>, std::optional<common::ant_t>> get_agc_adj();
+        void generate_back(phy::machigh_phy_t& machigh_phy);
+
         /// returns packet size in samples at hw sample rate
-        int64_t generate_packet_asap(phy::machigh_phy_t& machigh_phy,
-                                     const sp4::plcf_10_t& plcf_10,
-                                     const int64_t tx_time_64,
-                                     const std::optional<common::ant_t>& tx_power_adj_dB,
-                                     const std::optional<common::ant_t>& rx_power_adj_dB);
+        [[nodiscard]] int64_t generate_packet_asap(
+            phy::machigh_phy_t& machigh_phy,
+            const sp4::plcf_10_t& plcf_10,
+            const int64_t tx_time_64,
+            const std::optional<common::ant_t>& tx_power_adj_dB,
+            const std::optional<common::ant_t>& rx_power_adj_dB);
 };
 
 }  // namespace dectnrp::upper::tfw::txrxagc

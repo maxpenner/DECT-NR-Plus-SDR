@@ -136,9 +136,6 @@ phy_config_t::phy_config_t(const std::string directory)
         // moodycamel requires at least 32
         worker_pool_config.nof_jobs = common::jsonparse::read_int(it, "nof_jobs", 32, 1024);
 
-        worker_pool_config.tx_gap_samples =
-            common::jsonparse::read_int(it, "tx_gap_samples", 0, 50);
-
         // 12 is 5ms, 240 is 100ms
         worker_pool_config.rx_ant_streams_length_slots =
             common::jsonparse::read_int(it, "rx_ant_streams_length_slots", 12, 240);

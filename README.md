@@ -28,6 +28,9 @@ Advanced Topics
 
 1. [Architecture](#architecture)
 2. [AGC](#agc)
+    1. [Procedure at FT and PT](#procedure-at-ft-and-pt)
+    1. [Packet Masking](#packet-masking)
+    3. [Timing](#timing)
 3. [TX/RX Delay Calibration](#txrx-delay-calibration)
 4. [Resampling](#resampling)
 5. [Synchronization](#synchronization)
@@ -54,7 +57,7 @@ The core idea of the SDR is to provide a basis to write custom DECT NR+ firmware
 - PHY to MAC layer interface
 - Application layer interface (e.g. UDP sockets, virtual NIC).
 
-Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for [termination point](https://www.dect.org/dect-nrplus-standard-upper-layers-technology-faq-blog) which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in [lib/include/dectnrp/upper/](lib/include/dectnrp/upper/) with a brief description of each available under [Firmware](#firmware). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
+Custom DECT NR+ firmware is implemented by deriving from the class [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and implementing its virtual functions. The abbreviation tpoint stands for [termination point](https://www.dect.org/dect-nrplus-standard-upper-layers-technology-faq-blog) which is DECT terminology and simply refers to a DECT NR+ node. There are multiple firmware examples in the directory [upper/](lib/include/dectnrp/upper/) with a brief description of each available under [Firmware](#firmware). For instance, the termination point firmware (tfw) [tfw_basic_t](lib/include/dectnrp/upper/basic/tfw_basic.hpp) provides the most basic firmware possible. It derives from [tpoint_t](lib/include/dectnrp/upper/tpoint.hpp) and leaves all virtual functions mostly empty. The full list of virtual functions is:
 
 |    | **Virtual Function** | **Properties**                                                            |
 |:--:|----------------------|---------------------------------------------------------------------------|
@@ -113,7 +116,7 @@ The SDR has been tested on Ubuntu 22.04 and 24.04 (Intel and AMD x86-64) and Ras
 - [VOLK](https://github.com/gnuradio/volk): SIMD
 - [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page): Matrix Inversion
 
-Installation instructions for these dependencies can be found in [scripts/install_dependencies.sh](scripts/install_dependencies.sh). After installing the dependencies, the SDR can be either downloaded and compiled with [scripts/install_sdr.sh](scripts/install_sdr.sh), or manually with: 
+Installation instructions for these dependencies can be found in [install_dependencies.sh](scripts/install_dependencies.sh). After installing the dependencies, the SDR can be either downloaded and compiled with [install_sdr.sh](scripts/install_sdr.sh), or manually with: 
 
 ```shell
 git clone --recurse-submodules https://github.com/maxpenner/DECT-NR-Plus-SDR
@@ -123,7 +126,7 @@ cd build
 cmake ..
 make -j
 ```
-The compiled code is kept local in [bin/](bin/) and not copied to any operating system directories such as `usr/local/`.
+The compiled code is kept local in [bin/](bin/) and not copied to any operating system directories such as `/usr/local/`.
 
 ## Starting
 
@@ -160,7 +163,7 @@ If you use this repository for any publication, please cite the repository accor
 
 ## Limitations of an SDR with Host Processing
 
-All processing of IQ samples and all decisions about the radio device state (gains, frequencies etc.) are made on the host. The host exchanges IQ samples and the radio device state with the radio device over an interface (100/10/1GbE, PCIe, USB etc.) which imposes a certain latency depending on the interface type and properties (Ethernet ideally less than 100 $\mu s$, USB up to 2 $ms$). The following restrictions arise as a result:
+All processing of IQ samples and all decisions about the radio device state (gains, frequencies etc.) are made on the host. The host exchanges IQ samples and the radio device state with the radio device over an interface (100/10/1GbE, PCIe, USB etc.) which imposes a certain latency depending on the interface type and properties (Ethernet ideally less than 100 $\mu s$, USB up to 3 $ms$). The following restrictions arise as a result:
 - The time between receiving a packet and sending a response packet is comparatively large and latencies such as for IEEE 802.11 (e.g. SIFS  of 16 $\mu s$ or less) are not feasible.
 - Quasi-instantaneous channel access with prior Listen-Before-Talk (LBT) is not possible. By the time the host has measured the channel as free and the TX packet arrives at the radio device, the channel measurement may already be stale.
 - The [AGC](#agc) is slow. By the time the host has made the decision to change a gain setting, the channel conditions may have already changed significantly.
@@ -183,6 +186,7 @@ Furthermore, most SDRs are general-purpose devices with limitations regarding ty
 - [ ] integrate [SoapySDR](https://github.com/pothosware/SoapySDR)
 - [ ] add virtual space breakpoint to stop IQ samples exchange
 - [ ] add tx_order_id overwrite without buffer_tx_t
+- [ ] test faster AGC gain changes, [Fast Gain Switching on TwinRX USRPs](https://ieeexplore.ieee.org/document/9769488)
 
 ### Physical Layer
 
@@ -213,7 +217,7 @@ Furthermore, most SDRs are general-purpose devices with limitations regarding ty
 
 ## Troubleshooting
 
-- If combining large bandwidths ($\beta$ >= 8), a large number of antennas (N<sub>TX</sub> >= 4) and resampling, synchronization may not be able to process IQ samples fast enough across all antennas. In that case, the program may stop abruptly once the write pointer of the IQ ring buffer catches up with the read pointer. To prevent this from happening, the number of antennas utilized by synchronization can be reduced in [lib/include/dectnrp/phy/rx/sync/sync_param.hpp](lib/include/dectnrp/phy/rx/sync/sync_param.hpp) by setting ```RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT``` to either 1, 2 or 4.
+- If combining large bandwidths ($\beta$ >= 8), a large number of antennas (N<sub>TX</sub> >= 4) and resampling, synchronization may not be able to process IQ samples fast enough across all antennas. In that case, the program may stop abruptly once the write pointer of the IQ ring buffer catches up with the read pointer. To prevent this from happening, the number of antennas utilized by synchronization can be reduced in [sync_param.hpp](lib/include/dectnrp/phy/rx/sync/sync_param.hpp) by setting ```RX_SYNC_PARAM_AUTOCORRELATOR_ANTENNA_LIMIT``` to either 1, 2 or 4.
 - If there are occasional packet losses, oversampling in `phy.json` can be increased. This is particularly helpful if [resampling](#resampling) is used. Downside is that the nominal bandwidth is increased while the actual signal bandwidth remains the same.
 - If the SNR is low despite a high receive power, [resampling](#resampling) has to be tuned. To rule out any other causes, resampling may also be deactivated for testing purposes.
 - DPDK and SDR threads should run on separate cores.
@@ -221,7 +225,7 @@ Furthermore, most SDRs are general-purpose devices with limitations regarding ty
 
 ## Architecture
 
-The figure below illustrates the architecture of the SDR with blocks representing C++ classes, objects and threads. All types (postfix *_t*) have identical names in the source code. The original image is [docs/sdr_architecture.drawio](docs/sdr_architecture.drawio).
+The figure below illustrates the architecture of the SDR with blocks representing C++ classes, objects and threads. All types (postfix *_t*) have identical names in the source code.
 
 <p align="center">
   <img src="docs/sdr_architecture.drawio.png" style="width: 75%; background-color: transparent;" alt="sdr_architecture.drawio.png"/>
@@ -231,17 +235,26 @@ The key takeaways are:
 
 - The radio layer uses a single RX ring buffer of type [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) to distribute IQ samples to all workers. For TX, it uses multiple independent [buffer_tx_t](lib/include/dectnrp/radio/buffer_tx.hpp) instances from a [buffer_tx_pool_t](lib/include/dectnrp/radio/buffer_tx_pool.hpp). The number of buffers is defined in `radio.json`, and their size by the radio device class and the oversampling in `phy.json`.
 - The PHY has workers for synchronization ([worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp)) and workers for packet encoding/decoding and modulation/demodulation ([worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp)). The number of workers, their CPU affinity and priority are set in `phy.json`. Both worker types communicate through a MPMC [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp).
-- When synchronization detects a DECT NR+ packet, it creates a job with a [sync_report_t](lib/include/dectnrp/phy/rx/sync/sync_report.hpp), which is then processed by instances of [worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp). During packet processing, these workers call the firmware through the virtual work_*() functions mentioned in [Core Idea](#core-idea). Access to the firmware is thread-safe as each worker has to acquire a [token_t](lib/include/dectnrp/phy/pool/token.hpp). All jobs are processed in the same order as they are inserted into the queue.
-- Synchronization also creates regular jobs with a [regular_report_t](lib/include/dectnrp/phy/rx/sync/regular_report.hpp). Each of these jobs contains a time update for the firmware, and the starting time of the last known packet. The rate of regular jobs depends on how processing of [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) is split up between instances of [worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp) in `phy.json`. A possible rate is one job each two slots, equivalent to 1200 jobs per second. 
+- When synchronization detects a DECT NR+ packet, it creates a job with a [sync_report_t](lib/include/dectnrp/phy/rx/sync/sync_report.hpp), which is then processed by instances of [worker_tx_rx_t](lib/include/dectnrp/phy/pool/worker_tx_rx.hpp). During packet processing, these workers call the firmware through the virtual work_*() functions described in [Core Idea](#core-idea). Access to the firmware is thread-safe as each worker has to acquire a [token_t](lib/include/dectnrp/phy/pool/token.hpp). All jobs are processed in the same order as they are inserted into the queue.
+- Synchronization also creates regular jobs with a [regular_report_t](lib/include/dectnrp/phy/rx/sync/regular_report.hpp). Each of these jobs contains a time update for the firmware, and the starting time of the last known packet. The rate of regular jobs depends on how processing of [buffer_rx_t](lib/include/dectnrp/radio/buffer_rx.hpp) is split up between instances of [worker_sync_t](lib/include/dectnrp/phy/pool/worker_sync.hpp) in `phy.json`. A possible rate is one job each two slots, equivalent to 1200 jobs per second.
+- Synchronization also creates irregular jobs with an [irregular_report_t](lib/include/dectnrp/phy/rx/sync/irregular_report.hpp) containing the same information as a [regular_report_t](lib/include/dectnrp/phy/rx/sync/regular_report.hpp). A firmware must request an [irregular_report_t](lib/include/dectnrp/phy/rx/sync/irregular_report.hpp) for a future point in time. Once this time has passed for synchronization, the respective job is created and the firmware is called as soon as possible.
 - The firmware of the SDR is not executed in an independent thread. Instead, the firmware is equivalent to a thread-safe state machine whose state changes are triggered by calls of the work_*() functions. The type of firmware executed is defined in `upper.json`.
 - Each firmware starts and controls its own application layer interface ([application_server_t](lib/include/dectnrp/application/application_server.hpp) and [application_client_t](lib/include/dectnrp/application/application_client.hpp)). To allow immediate action for new application layer data, [application_server_t](lib/include/dectnrp/application/application_server.hpp) is given access to [job_queue_t](lib/include/dectnrp/phy/pool/job_queue.hpp). The job type created by [application_server_t](lib/include/dectnrp/application/application_server.hpp) contains an [application_report_t](lib/include/dectnrp/application/application_report.hpp) with the number and size of datagrams available on the application layer.
 - The application layer interface is either a [set of UDP ports](lib/include/dectnrp/application/socket/) or a [virtual NIC](lib/include/dectnrp/application/vnic/).
 
 ## AGC
 
-An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second in regular intervals. These comparatively infrequent gain adjustments impair the performance in fast time-variant channels when simultaneously using a high modulation order.
+An ideal fast AGC receives a packet and adjusts its gain settings within a fraction of the STF (e.g. the first two or three patterns). However, as the SDR performs all processing exclusively on the host computer, only a slow software AGC is feasible, which, for example, adjusts gains 50 times per second.
 
-Another drawback of a slow AGC is that packets can be masked. This happens when a packet with very high input power is received, followed immediately by a packet with very low input power, for example in a near–far scenario. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
+### Procedure at FT and PT
+
+In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT is to achieve a specific uplink receive power at the FT, such that all PTs are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. 10 $dB$. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
+
+### Packet Masking
+
+With a slow AGC, it is common for two consecutive packets to be received with identical gain settings, which can lead to packet masking. This happens when a first packet is received with high input power, followed immediately by a second packet with low input power, for example in a near–far scenario. Both packets are separated only by a guard interval (GI). Since synchronization is based on correlations of the length of the STF, and the STF for $\mu < 8$ is longer than the GI, correlation is partially performed across both packets. This can lead to the second packet not being detected.
+
+<center>
 
 | **$\mu$** | **GI length in $\mu s$** | **STF length in $\mu s$**  |
 |:---------:|:------------------------:|:--------------------------:|
@@ -250,7 +263,17 @@ Another drawback of a slow AGC is that packets can be masked. This happens when 
 |     4     |           10.42          |            20.83           |
 |     8     |           10.42          |            10.42           |
 
-In general, it is best for the FT to keep both transmit power and sensitivity constant, and only for the PT to adjust its own transmit power and sensitivity. The objective of the PT is to achieve a specific receive power at the FT, such that all PTs in the uplink are received with similar power levels. Moreover, every AGC that is leveled to the STF of a beacon should leave a margin of approx. 10 $dB$. This is necessary because beamforming can cause the level of the STF of the beacon and the data field of other packets to diverge considerably.
+</center>
+
+### Timing
+
+AGC settings must be timed to avoid gain changes during packet transmission or reception, as this can lead to packet errors. Potential timing points for AGC adjustments are the GI at the end of every packet as shown in the figure below, or asynchronously any point in time at which a firmware is neither sending nor receiving. With USRPs, queueing gain changes for multiple antennas may lead to the second packet being sent late, i.e., the time span X not being zero.
+
+<p align="center">
+  <img src="docs/agc.drawio.png" style="width: 75%; background-color: transparent;" alt="docs/agc.drawio.png"/>
+</p>
+
+
 
 ## TX/RX Delay Calibration
 
@@ -260,6 +283,8 @@ The exact delay depends on the sample rate, radio device, software version etc. 
 
 Exemplary measurements:
 
+<center>
+
 | Device | DECT NR+ BW in $MHz$ | Sample Rate in $MSs^{-1}$ | Delay in Samples | Delay in $\mu s$ |
 |:------:|:--------------------:|:-------------------------:|:----------------:|:----------------:|
 |  X410  |        13.824        |           15.36           |        68        |        4.43      |
@@ -268,6 +293,8 @@ Exemplary measurements:
 |  B210  |         1.728        |           1.728           |        47        |       27.20      |
 |  B210  |         1.728        |           3.456           |        53        |       15.34      |
 |  B210  |         1.728        |           6.912           |        68        |        9.84      |
+
+</center>
 
 ## Resampling
 
@@ -281,13 +308,13 @@ Most SDR devices support a limited set of sample rates, which typically do not m
 
 ### Tuning
 
-Fractional resampling is computationally expensive. To reduce the computational load and enable larger bandwidths, the implicit FIR low-pass filter of the resampler can be made shorter. However, this also leads to more aliasing and thus to a larger EVM at the receiver. The resampler parameters are defined in [lib/include/dectnrp/phy/resample/resampler_param.hpp](lib/include/dectnrp/phy/resample/resampler_param.hpp).
+Fractional resampling is computationally expensive. To reduce the computational load and enable larger bandwidths, the implicit FIR low-pass filter of the resampler can be made shorter. However, this also leads to more aliasing and thus to a larger EVM at the receiver. The resampler parameters are defined in [resampler_param.hpp](lib/include/dectnrp/phy/resample/resampler_param.hpp).
 
 Another option is to disable resampling entirely and generate DECT NR+ packets directly at $1.92 MSs^{-1}$ or multiples thereof. The internal time of the SDR then runs at $1.92 MSs^{-1}$ or multiples thereof and it is still possible, for example, to send out packets exactly every $10ms$. However, the packets have a wider bandwidth and are shorter in time domain. Fractional resampling to a DECT NR+ sample rate is disabled by setting `"enforce_dectnrp_samp_rate_by_resampling": false` in `phy.json`.
 
 ## Synchronization
 
-Synchronization of packets based on the STF is described in [DECT-NR-Plus-Simulation](https://github.com/maxpenner/DECT-NR-Plus-Simulation?tab=readme-ov-file#synchronization). According to the DECT NR+ standard, the STF cover sequence can be disabled for testing purposes. In the SDR, this is done by changing the following line in [lib/include/dectnrp/sections_part3/stf_param.hpp](lib/include/dectnrp/sections_part3/stf_param.hpp) and recompiling:
+Synchronization of packets based on the STF is described in [DECT-NR-Plus-Simulation](https://github.com/maxpenner/DECT-NR-Plus-Simulation?tab=readme-ov-file#synchronization). According to the DECT NR+ standard, the STF cover sequence can be disabled for testing purposes. In the SDR, this is done by changing the following line in [stf_param.hpp](lib/include/dectnrp/sections_part3/stf_param.hpp) and recompiling:
 
 ``` C++
 // #define SECTIONS_PART_3_STF_COVER_SEQUENCE_ACTIVE
@@ -357,8 +384,8 @@ The P2P (point-to-point) firmware is started on two separate host computers, eac
 
 If a different USRP type is used, the value of `“usrp_args”` in `radio.json` must be modified accordingly. Furthermore, FT and PT must be tuned to a common center frequency. This is done by opening the following two files
 
-- [lib/src/upper/p2p/procedure/steady_ft_once.cpp](lib/src/upper/p2p/procedure/steady_ft_once.cpp)
-- [lib/src/upper/p2p/procedure/steady_pt_once.cpp](lib/src/upper/p2p/procedure/steady_pt_once.cpp)
+- [tfw_p2p_ft.cpp](lib/src/upper/p2p/tfw_p2p_ft.cpp)
+- [tfw_p2p_pt.cpp](lib/src/upper/p2p/tfw_p2p_pt.cpp)
 
 and changing the following line in both files to the desired center frequency in Hz:
 
@@ -388,7 +415,7 @@ sudo ./masquerade.sh <Interface Name>
 ```
 #### On the PT
 
-In the file [configurations/p2p_usrpX410/upper.json](configurations/p2p_usrpX410/upper.json), the firmware is changed to:
+In the file [upper.json](configurations/p2p_usrpX410/upper.json), the firmware is changed to:
 
 ```JSON
 "firmware_name": "p2p_pt"
@@ -418,7 +445,7 @@ This firmware tests the achievable round-trip time (RTT) between two instances o
 - The first SDR receives the response packets and forwards them to the program rtt which finally measures the RTT.
 - In case any packet is not received correctly, rtt has an integrated timeout before sending the next packet.
 
-In the file [configurations/rtt_usrpN310/upper.json](configurations/rtt_usrpN310/upper.json) of the second SDR, the firmware ID must be changed to:
+In the file [upper.json](configurations/rtt_usrpN310/upper.json) of the second SDR, the firmware ID must be changed to:
 
 ```JSON
 "firmware_id": 1

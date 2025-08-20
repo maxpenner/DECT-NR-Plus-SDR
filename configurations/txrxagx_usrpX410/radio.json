@@ -3,15 +3,16 @@
   {
     "hw_name": "usrp",
     "nof_buffer_tx": 4,
-    "turnaround_time_us": 2000,
-    "tx_burst_leading_zero_us": 5,
+    "turnaround_time_us": 250,
+    "tx_burst_leading_zero_us": 0,
     "tx_time_advance_samples": 0,
     "rx_prestream_ms": 1000,
     "rx_notification_period_us": 100,
-    "tx_thread_config": [0, -1],
-    "rx_thread_config": [0, -1],
+    "tx_thread_config": [0, 1],
+    "rx_thread_config": [0, 2],
     "pps_time_base": "zero",
-    "usrp_args": "type=x4xx,addr=192.168.10.2,mgmt_addr=192.168.1.2,master_clock_rate=245.76e6,send_frame_size=8000,recv_frame_size=8000,init_cals=ALL,track_cals=ALL,use_dpdk=1",
-    "usrp_tx_async_helper_thread_config": [-1, -1]
+    "usrp_args": "type=x4xx,addr=192.168.20.2,mgmt_addr=192.168.1.2,master_clock_rate=245.76e6,send_frame_size=500,recv_frame_size=500,init_cals=ALL,track_cals=ALL,use_dpdk=1",
+    "usrp_tx_async_helper_thread_config": [-1, -1],
+    "usrp_tx_gap_samples": -1
   }
 }
