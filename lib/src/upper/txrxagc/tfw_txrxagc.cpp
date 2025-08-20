@@ -37,6 +37,11 @@ const std::string tfw_txrxagc_t::firmware_name("txrxagc");
 
 tfw_txrxagc_t::tfw_txrxagc_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_lower_)
     : tpoint_t(tpoint_config_, mac_lower_) {
+    dectnrp_assert(0 <= P0_u8_subslots, "must be zero of positive");
+    dectnrp_assert(0 <= P1_u8_subslots, "must be zero of positive");
+    dectnrp_assert(!(agc_timing == agc_timing_t::transmission_free_period && P1_u8_subslots <= 0),
+                   "P1 must be positive if AGC settings are made in transmission free period");
+
     hw.set_command_time();
     hw.set_tx_power_ant_0dBFS_uniform_tc(10.0f);
     hw.set_rx_power_ant_0dBFS_uniform_tc(-50.0f);
@@ -50,7 +55,6 @@ tfw_txrxagc_t::tfw_txrxagc_t(const tpoint_config_t& tpoint_config_, phy::mac_low
         hw.set_tx_power_ant_0dBFS_uniform_tc(0.0f);
         hw.set_rx_power_ant_0dBFS_uniform_tc(0.0f);
 
-        // called from tpoint firmware, thread-safe
         hw_simulator->set_trajectory(simulation::topology::trajectory_t(
             simulation::topology::position_t::from_cartesian(0.0f, 0.0f, 0.0f)));
         hw_simulator->set_net_bandwidth_norm(1.0f / static_cast<float>(worker_pool_config.os_min));
@@ -93,9 +97,10 @@ tfw_txrxagc_t::tfw_txrxagc_t(const tpoint_config_t& tpoint_config_, phy::mac_low
 }
 
 phy::irregular_report_t tfw_txrxagc_t::work_start(const int64_t start_time_64) {
-    return phy::irregular_report_t(start_time_64 +
-                                   duration_lut.get_N_samples_from_duration(
-                                       sp3::duration_ec_t::ms001, measurement_spacing_ms));
+    measurement_time_64 = start_time_64 + duration_lut.get_N_samples_from_duration(
+                                              sp3::duration_ec_t::ms001, measurement_spacing_ms);
+
+    return phy::irregular_report_t(measurement_time_64);
 }
 
 phy::machigh_phy_t tfw_txrxagc_t::work_regular(
@@ -108,75 +113,71 @@ phy::machigh_phy_t tfw_txrxagc_t::work_irregular(const phy::irregular_report_t& 
         irregular_report.call_asap_after_this_time_has_passed_64 < buffer_rx.get_rx_time_passed(),
         "time out-of-order");
 
-    if (tpoint_config.firmware_id == 1) {
+    if (tpoint_config.firmware_id != 0) {
         return phy::machigh_phy_t();
     }
 
     phy::machigh_phy_t ret;
 
-    S0_64 = irregular_report.call_asap_after_this_time_has_passed_64 +
-            hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround);
+    // handle 0 indicates that front packet must be created
+    if (irregular_report.handle == 0) {
+        dectnrp_assert(
+            irregular_report.call_asap_after_this_time_has_passed_64 == measurement_time_64,
+            "incorrect time");
 
-    // toggle the AGC change to make RMS level distinguishable
-    const float agc_change_dB_now = measurement_cnt_64 % 2 == 0 ? -agc_change_dB : agc_change_dB;
+        // transmission time of front packet
+        S0_64 =
+            buffer_rx.get_rx_time_passed() + hw.get_tmin_samples(radio::hw_t::tmin_t::turnaround);
 
-    // AGC settings attached to front packet, change antennas with every call
-    common::ant_t adj_dB(hw.get_nof_antennas());
-    for (std::size_t i = 0; i < std::min(adj_dB.get_nof_antennas(), nof_antennas_simultaneous);
-         ++i) {
-        adj_dB.at(i) = agc_change_dB_now;
+        switch (agc_timing) {
+            using enum agc_type_t;
+            case agc_timing_t::front:
+                {
+                    const auto [tx_power_adj_dB, rx_power_adj_dB] = get_agc_adj();
+
+                    // create TX packet and attach AGC settings to it
+                    L0_64 = generate_packet_asap(
+                        ret, plcf_10_front, S0_64, tx_power_adj_dB, rx_power_adj_dB);
+
+                    generate_back(ret);
+
+                    break;
+                }
+
+            case agc_timing_t::transmission_free_period:
+                {
+                    // create TX packet without AGC settings
+                    L0_64 =
+                        generate_packet_asap(ret, plcf_10_front, S0_64, std::nullopt, std::nullopt);
+
+                    // callback for AGC settings in transmission free duration, use so
+                    ret.irregular_report = phy::irregular_report_t(
+                        S0_64 + L0_64 +
+                            duration_lut.get_N_samples_from_duration(
+                                sp3::duration_ec_t::subslot_u8_001, P0_u8_subslots),
+                        irregular_report_agc_callback_handle);
+
+                    break;
+                }
+        }
+
+    } else {
+        dectnrp_assert(irregular_report.handle == irregular_report_agc_callback_handle,
+                       "incorrect handle");
+
+        const auto [tx_power_adj_dB, rx_power_adj_dB] = get_agc_adj();
+
+        // set AGC asap
+        hw.set_command_time(-1);
+        if (tx_power_adj_dB.has_value()) {
+            hw.adjust_tx_power_ant_0dBFS_tc(tx_power_adj_dB.value());
+        }
+        if (rx_power_adj_dB.has_value()) {
+            hw.adjust_rx_power_ant_0dBFS_tc(rx_power_adj_dB.value());
+        }
+
+        generate_back(ret);
     }
-
-    // length of front packet
-    switch (agc_dut) {
-        using enum agc_dut_t;
-        case none:
-            L0_64 = generate_packet_asap(ret, plcf_10_front, S0_64, std::nullopt, std::nullopt);
-            break;
-        case tx:
-            L0_64 = generate_packet_asap(ret, plcf_10_front, S0_64, adj_dB, std::nullopt);
-            break;
-        case rx:
-            L0_64 = generate_packet_asap(ret, plcf_10_front, S0_64, std::nullopt, adj_dB);
-            break;
-        case both:
-            L0_64 = generate_packet_asap(ret, plcf_10_front, S0_64, adj_dB, adj_dB);
-            break;
-        case alternating:
-            if (measurement_cnt_64 % 4 <= 1) {
-                L0_64 = generate_packet_asap(ret, plcf_10_front, S0_64, adj_dB, std::nullopt);
-            } else {
-                L0_64 = generate_packet_asap(ret, plcf_10_front, S0_64, std::nullopt, adj_dB);
-            }
-
-            break;
-    }
-
-    // transmission time of back packet
-    const int64_t S1_64 = S0_64 + L0_64 +
-                          duration_lut.get_N_samples_from_duration(
-                              sp3::duration_ec_t::subslot_u8_001, front_back_spacing_u8_subslots);
-
-    [[maybe_unused]] const int64_t L1_64 =
-        generate_packet_asap(ret, plcf_10_back, S1_64, std::nullopt, std::nullopt);
-
-    dectnrp_log_inf("");
-    dectnrp_log_inf(
-        "S0_64={} S1_64={} L0_64={}samples={}us L1_64={}samples={}us S1_S0_64={}samples={}us",
-        S0_64,
-        S1_64,
-        L0_64,
-        duration_lut.get_N_us_from_samples(L0_64),
-        L1_64,
-        duration_lut.get_N_us_from_samples(L1_64),
-        S1_64 - S0_64,
-        duration_lut.get_N_us_from_samples(S1_64 - S0_64));
-
-    ret.irregular_report =
-        irregular_report.get_same_with_time_increment(duration_lut.get_N_samples_from_duration(
-            sp3::duration_ec_t::ms001, measurement_spacing_ms));
-
-    ++measurement_cnt_64;
 
     return ret;
 }
@@ -201,14 +202,14 @@ phy::maclow_phy_t tfw_txrxagc_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
 
     dectnrp_assert(plcf_10_rx != nullptr, "cast ill-formed");
 
-    // front?
+    // front packet?
     if (plcf_10_rx->ShortNetworkID == identity_front.ShortNetworkID &&
         plcf_10_rx->TransmitterIdentity == identity_front.ShortRadioDeviceID) {
         // RX time of front packet
         R0_64 = phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64;
 
         dectnrp_log_inf(
-            "R0_64={} rms_array={} | R0_S0_64={}samples={}us R0_R0_old_64={}samples={}us",
+            "R0_64={} rms_array={} | R0_S0_64={}samples={}us R0_old_R0_64={}samples={}us",
             R0_64,
             phy_maclow.sync_report.rms_array.get_readable_list(),
             R0_64 - S0_64,
@@ -220,21 +221,25 @@ phy::maclow_phy_t tfw_txrxagc_t::work_pcc(const phy::phy_maclow_t& phy_maclow) {
         R0_old_64 = phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64;
     }
 
-    // back?
+    // back packet?
     if (plcf_10_rx->ShortNetworkID == identity_back.ShortNetworkID &&
         plcf_10_rx->TransmitterIdentity == identity_back.ShortRadioDeviceID) {
         // RX time of back packet
-        const int64_t R1_64 = phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64;
+        R1_64 = phy_maclow.sync_report.fine_peak_time_corrected_by_sto_fractional_64;
 
-        [[maybe_unused]] const int64_t X_64 = R1_64 - R0_64 - L0_64;
+        [[maybe_unused]] const int64_t X_64 =
+            R1_64 - R0_64 - L0_64 -
+            duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::subslot_u8_001,
+                                                     P0_u8_subslots + P1_u8_subslots);
 
-        dectnrp_log_inf("R1_64={} rms_array={} | R1_R0_64={}samples={}us X_64={}samples={}us",
+        dectnrp_log_inf("R1_64={} rms_array={} | R0_R1_64={}samples={}us X_64={}samples={}us",
                         R1_64,
                         phy_maclow.sync_report.rms_array.get_readable_list(),
                         R1_64 - R0_64,
                         duration_lut.get_N_us_from_samples(R1_64 - R0_64),
                         X_64,
                         duration_lut.get_N_us_from_samples(X_64));
+        dectnrp_log_inf("");
     }
 
     return phy::maclow_phy_t();
@@ -259,6 +264,77 @@ phy::machigh_phy_tx_t tfw_txrxagc_t::work_channel([[maybe_unused]] const phy::ch
 }
 
 void tfw_txrxagc_t::work_stop() {}
+
+std::pair<std::optional<common::ant_t>, std::optional<common::ant_t>> tfw_txrxagc_t::get_agc_adj() {
+    // toggle the AGC change to make RMS level distinguishable
+    const float agc_change_dB_now = measurement_cnt_64 % 2 == 0 ? agc_change_dB : -agc_change_dB;
+
+    // we must process each antennas twice to keep the same gain
+    const auto A = measurement_cnt_64 / 2;
+
+    // AGC settings attached to front packet, change antennas with every call
+    common::ant_t adj_dB(hw.get_nof_antennas());
+    for (std::size_t i = 0; i < std::min(adj_dB.get_nof_antennas(), nof_antennas_simultaneous);
+         ++i) {
+        const std::size_t ant_idx = (A + i) % buffer_rx.nof_antennas;
+        adj_dB.at(ant_idx) = agc_change_dB_now;
+    }
+
+    std::optional<common::ant_t> tx_power_adj_dB = std::nullopt;
+    std::optional<common::ant_t> rx_power_adj_dB = std::nullopt;
+
+    switch (agc_type) {
+        using enum agc_type_t;
+        case none:
+            tx_power_adj_dB = std::nullopt;
+            rx_power_adj_dB = std::nullopt;
+            break;
+        case tx:
+            tx_power_adj_dB = adj_dB;
+            rx_power_adj_dB = std::nullopt;
+            break;
+        case rx:
+            tx_power_adj_dB = std::nullopt;
+            rx_power_adj_dB = adj_dB;
+            break;
+        case both:
+            tx_power_adj_dB = adj_dB;
+            rx_power_adj_dB = adj_dB;
+            break;
+    }
+
+    return std::make_pair(tx_power_adj_dB, rx_power_adj_dB);
+}
+
+void tfw_txrxagc_t::generate_back(phy::machigh_phy_t& machigh_phy) {
+    S1_64 = S0_64 + L0_64 +
+            duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::subslot_u8_001,
+                                                     P0_u8_subslots + P1_u8_subslots);
+
+    L1_64 = generate_packet_asap(machigh_phy, plcf_10_back, S1_64, std::nullopt, std::nullopt);
+
+    ++measurement_cnt_64;
+
+    measurement_time_64 +=
+        duration_lut.get_N_samples_from_duration(sp3::duration_ec_t::ms001, measurement_spacing_ms);
+
+    machigh_phy.irregular_report = phy::irregular_report_t(measurement_time_64);
+
+    dectnrp_log_inf(
+        "S0_64={} S1_64={} L0_64={}samples={}us L1_64={}samples={}us S0_old_S0_64={}samples={}us S0_S1_64={}samples={}us",
+        S0_64,
+        S1_64,
+        L0_64,
+        duration_lut.get_N_us_from_samples(L0_64),
+        L1_64,
+        duration_lut.get_N_us_from_samples(L1_64),
+        S0_64 - S0_old_64,
+        duration_lut.get_N_us_from_samples(S0_64 - S0_old_64),
+        S1_64 - S0_64,
+        duration_lut.get_N_us_from_samples(S1_64 - S0_64));
+
+    S0_old_64 = S0_64;
+}
 
 int64_t tfw_txrxagc_t::generate_packet_asap(phy::machigh_phy_t& machigh_phy,
                                             const sp4::plcf_10_t& plcf_10,

@@ -112,7 +112,7 @@ struct hw_config_t {
          * buffers must be available to the hardware when the final samples of the first packet are
          * read. If set to -1, each packet is transmitted in its own burst.
          */
-        int32_t usrp_tx_gap_samples;
+        int32_t usrp_tx_gap_samples{};
 
         // ##################################################
         // simulation specifics
