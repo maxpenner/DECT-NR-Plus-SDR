@@ -33,6 +33,8 @@ Advanced Topics
     3. [Timing](#timing)
 3. [TX/RX Delay Calibration](#txrx-delay-calibration)
 4. [Resampling](#resampling)
+    1. [Sample Rate Examples](#sample-rate-examples)
+    2. [Tuning](#tuning)
 5. [Synchronization](#synchronization)
 6. [Compatibility](#compatibility)
 7. [JSON Export](#json-export)
@@ -105,7 +107,7 @@ After all constructors have been called, work_start() is called to announce the 
     │  |  ├─ sections_part5_dlc/  sections of ETSI TS 103 636-5
     │  |  ├─ simulation/          wireless simulation
     │  |  ├─ upper/               upper layers, i.e. layers between PHY and application layer
-    │  ├─ src/                    source code (same directories as in include/dectnrp/)
+    │  ├─ src/                    source code (same directories as in lib/include/dectnrp/)
     └─ scripts/                   shell scripts
 
 ## Installation
@@ -192,9 +194,9 @@ Furthermore, most SDRs are general-purpose devices with limitations regarding ty
 
 - [ ] **$\mu$** detection
 - [ ] integer CFO
-- [ ] increase look-ahead of sync_chunk_t (increases latency)
+- [ ] ~~increase look-ahead of sync_chunk_t (increases latency)~~
 - [ ] add parallel queues in job_queue_t for asynchronous jobs
-- [ ] make job queue lockable by producer to enqueue multiple jobs (weakens encapsulation)
+- [ ] ~~make job queue lockable by producers to enqueue multiple jobs (weakens encapsulation as producers must lock/unlock the entire queue)~~
 - [ ] residual STO based on DRS
 - [ ] residual CFO based on STF
 - [ ] residual CFO based on DRS
@@ -214,6 +216,7 @@ Furthermore, most SDRs are general-purpose devices with limitations regarding ty
 ### Application Layer
 
 - [ ] mutex/spinlock around individual datagrams instead of entire queue
+- [ ] outsource datagram copying to instances of worker_tx_tx_t instead of copying when the firmware is locked
 
 ## Troubleshooting
 
@@ -273,8 +276,6 @@ AGC settings must be timed to avoid gain changes during packet transmission or r
   <img src="docs/agc.drawio.png" style="width: 75%; background-color: transparent;" alt="docs/agc.drawio.png"/>
 </p>
 
-
-
 ## TX/RX Delay Calibration
 
 If a packet is scheduled for transmission at a specific time in the future, the packet is effectively [sent several samples later](https://docs.srsran.com/projects/project/en/latest/user_manuals/source/troubleshooting.html#usrp-time-calibration), as various delay-afflicted processes (upsampling, filtering, etc.) are performed in the radio hardware. At low sample rates, a few samples add up to several microseconds.
@@ -300,7 +301,7 @@ Exemplary measurements:
 
 Most SDR devices support a limited set of sample rates, which typically do not match the DECT NR+ base rate of $1.728 MSs^{-1}$ or multiples thereof. A sample rate supported by most SDRs is $30.72 MSs^{-1}$. Therefore, the SDR uses fractional resampling with a polyphase filter to output IQ samples at the new base rate of $30.72 MSs^{-1} / 16 = 1.92 MSs^{-1}$ or multiples thereof.
 
-### Examples
+### Sample Rate Examples
 
 - $1.728 MSs^{-1}$ without oversampling is resampled to $30.72 MSs^{-1} / 16 = 1.92 MSs^{-1}$
 - $1.728 MSs^{-1}$ with oversampling by 2 is resampled to $30.72 MSs^{-1} / 8 = 3.84 MSs^{-1}$
@@ -374,15 +375,15 @@ This firmware starts channel measurements in regular intervals and writes the re
 
 ### [loopback](lib/include/dectnrp/upper/loopback/tfw_loopback.hpp)
 
-This is a firmware family. Each individual firmware is a simulation with a single device looping its TX signal back into its own RX path. It is used to test SDR functionality such as synchronization and packet error rates (PERs) over SNR. The wireless channel model can be switched in `radio.json` from an AWGN channel to a doubly selective Rayleigh fading channel.
+This is a firmware family. Each individual firmware is a simulation with a single device looping its TX signal back into its own RX path. It is used to test SDR functionality such as synchronization and packet error rates (PERs) over SNR. The wireless channel model can be switched in [radio.json](configurations/loopback_simulator/radio.json)  from an AWGN channel to a doubly selective Rayleigh fading channel.
 
-### [p2p](lib/include/dectnrp/upper/p2p/procedure/steady_rd.hpp)
+### [p2p](lib/include/dectnrp/upper/p2p/tfw_p2p_rd.hpp)
 
 The P2P (point-to-point) firmware is started on two separate host computers, each connected to an USRP (in this example an X410). One combination of host and USRP acts as a fixed termination point (FT), while the other is the portable termination point (PT). The FT is connected to the internet and once both FT and PT are started, the PT can access the internet through the wireless DECT NR+ connection acting as pipe for IP packets.
 
 #### Common settings on FT and PT
 
-If a different USRP type is used, the value of `“usrp_args”` in `radio.json` must be modified accordingly. Furthermore, FT and PT must be tuned to a common center frequency. This is done by opening the following two files
+If a different USRP type is used, the value of `“usrp_args”` in [radio.json](configurations/p2p_usrpX410/radio.json) must be modified accordingly. Furthermore, FT and PT must be tuned to a common center frequency. This is done by opening the following two files
 
 - [tfw_p2p_ft.cpp](lib/src/upper/p2p/tfw_p2p_ft.cpp)
 - [tfw_p2p_pt.cpp](lib/src/upper/p2p/tfw_p2p_pt.cpp)
@@ -393,13 +394,13 @@ and changing the following line in both files to the desired center frequency in
 hw.set_freq_tc(3890.0e6);
 ```
 
-The CPU cores used may also require modification as both FT and PT use specific cores for their threads. For instance, in `radio.json` the thread handling received IQ samples is specified as:
+The CPU cores used may also require modification as both FT and PT use specific cores for their threads. For instance, in [radio.json](configurations/p2p_usrpX410/radio.json) the thread handling received IQ samples is specified as:
 
 ```JSON
 "rx_thread_config": [0, 1]
 ```
 
-The first number 0 is the priority offset (or niceness), so here the thread is started with the highest priority 99 - 0 = 99. The second number 1 specifies the CPU core. Both numbers can also be negative, in which case the scheduler selects the priority and/or the CPU core. Further thread specifications can be found in all `.json` configuration files. 
+The first number 0 is the priority offset (or niceness), so here the thread is started with the highest priority 99 - 0 = 99. The second number 1 specifies the CPU core. Both numbers can also be negative, in which case the scheduler selects the priority and/or the CPU core. Further thread specifications can be found in all [.json](configurations/p2p_usrpX410/) configuration files. 
 
 #### On the FT:
 
