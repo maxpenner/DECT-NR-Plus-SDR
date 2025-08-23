@@ -29,7 +29,7 @@ namespace dectnrp::common {
 class randomgen_t {
     public:
         /**
-         * \brief Uses internally an XOR-based algorithm simple enough to be implemented in
+         * \brief Internally uses an XOR-based algorithm simple enough to be implemented in
          * different languages.
          *
          * source: https://de.wikipedia.org/wiki/Xorshift

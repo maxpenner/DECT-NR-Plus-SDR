@@ -127,7 +127,7 @@ void worker_tx_rx_t::work() {
 
                 // any PLCF found?
                 if (pcc_report.plcf_decoder.has_any_plcf() == 0) {
-#ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
+#ifdef UPPER_TPOINT_ENABLE_WORK_PCC_ERROR
                     // compile all reports
                     const phy_maclow_t phy_maclow{std::get<sync_report_t>(job.content), pcc_report};
 
