@@ -145,7 +145,6 @@ float estimator_sto_t::process_stf_phase_rotation(const cf_t* chestim_drs_zf) {
     return atan2(B.imag(), B.real()) / static_cast<float>(constants::N_STF_cells_spacing);
 }
 
-// helpers for residual STO based on DRS
 float estimator_sto_t::process_drs_phase_rotation(const cf_t* chestim_drs_zf) {
     // create pairwise product between neighbouring values
     volk_32fc_x2_multiply_conjugate_32fc((lv_32fc_t*)stage,

@@ -48,7 +48,7 @@ tpoint_t::tpoint_t(const tpoint_config_t& tpoint_config_, phy::mac_lower_t& mac_
                    "must be negative so first transmission is guaranteed to occur later");
 };
 
-#ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
+#ifdef UPPER_TPOINT_ENABLE_WORK_PCC_ERROR
 phy::machigh_phy_t tpoint_t::work_pcc_error([[maybe_unused]] const phy::phy_maclow_t& phy_maclow) {
     return phy::machigh_phy_t();
 };

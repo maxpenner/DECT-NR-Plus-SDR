@@ -127,7 +127,7 @@ class tpoint_t : public common::layer_unit_t {
          */
         [[nodiscard]] virtual phy::maclow_phy_t work_pcc(const phy::phy_maclow_t& phy_maclow) = 0;
 
-#ifdef UPPER_TPOINT_ENABLE_PCC_INCORRECT_CRC
+#ifdef UPPER_TPOINT_ENABLE_WORK_PCC_ERROR
         /**
          * \brief Function called after decoding a PCC with incorrect CRC. This function is virtual
          * while all other functions are pure virtual. Furthermore, it must be explicitly enabled by

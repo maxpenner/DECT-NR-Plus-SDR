@@ -39,7 +39,10 @@ Advanced Topics
 6. [Compatibility](#compatibility)
 7. [JSON Export](#json-export)
 8. [PPS Export and PTP](#pps-export-and-ptp)
-9. [Host and SDR Tuning](#host-and-sdr-tuning)
+9. [Performance Tuning](#performance-tuning)
+    1. [Host](#host)
+    2. [Interface Host-to-SDR](#interface-host-to-sdr)
+    3. [SDR](#sdr)
 10. [Firmware](#firmware)
     1. [basic](#basic)
     2. [chscanner](#chscanner)
@@ -347,19 +350,44 @@ A PPS signal itself is a frequently used clock for other systems. For example, a
   <img src="docs/synchronization.drawio.png" style="width: 75%; background-color: transparent;" alt="docs/synchronization.drawio.png"/>
 </p>
 
-## Host and SDR Tuning
+## Performance Tuning
 
-The following tuning tips have been tested with Ubuntu and help achieving low-latency real-time performance:
+The following tuning tips have been tested with Ubuntu and help achieving low-latency real-time performance.
 
-- Elevated thread priority through [threads_core_prio_config_t](lib/include/dectnrp/common/thread/threads.hpp)
-- SDR threads on [isolated CPU cores with disabled interrupts](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD#Isolate_Cores.2FCPUs) through [threads_core_prio_config_t](lib/include/dectnrp/common/thread/threads.hpp)
+### Host
+
+- SDR threads with elevated thread priority through [threads_core_prio_config_t](lib/include/dectnrp/common/thread/threads.hpp)
+- SDR threads on [isolated CPU cores (with disabled interrupts)](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD#Isolate_Cores.2FCPUs) through [threads_core_prio_config_t](lib/include/dectnrp/common/thread/threads.hpp)
 - [Disabled CPU sleep states and CPU frequency scaling](https://gitlab.eurecom.fr/oai/openairinterface5g/-/wikis/OpenAirKernelMainSetup#power-management)
-- Interface to SDR
-    - [DPDK with UHD](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD)
-    - [Adjusted send_frame_size and recv_frame_size](https://files.ettus.com/manual/page_transport.html#transport_param_overrides) in `radio.json`
-    - [Increased buffer sizes](https://kb.ettus.com/USRP_Host_Performance_Tuning_Tips_and_Tricks#Adjust_Network_Buffers)
-    - In each `radio.json`, the value `“turnaround_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR timestamp. For UHD, the SDR time is a [64-bit counter in the FPGA](https://kb.ettus.com/Synchronizing_USRP_Events_Using_Timed_Commands_in_UHD#Radio_Core_Block_Timing). The smaller the turn around time, the lower the latency. Under optimal conditions, between $80\mu s$ to $150\mu s$ are possible.
 - Low-latency kernel
+
+### Interface Host-to-SDR
+  - [DPDK with UHD](https://kb.ettus.com/Getting_Started_with_DPDK_and_UHD)
+  - [Adjusted send_frame_size and recv_frame_size](https://files.ettus.com/manual/page_transport.html#transport_param_overrides) in `radio.json`
+  - [Increased buffer sizes](https://kb.ettus.com/USRP_Host_Performance_Tuning_Tips_and_Tricks#Adjust_Network_Buffers)
+  - In each `radio.json`, the value `“turnaround_time_us”` defines how soon the SDR can schedule a packet transmission relative to the last known SDR timestamp. For UHD, the SDR time is a [64-bit counter in the FPGA](https://kb.ettus.com/Synchronizing_USRP_Events_Using_Timed_Commands_in_UHD#Radio_Core_Block_Timing). The smaller the turn around time, the lower the latency. Under optimal conditions, between $80\mu s$ to $150\mu s$ are possible.
+
+### SDR
+
+The use of spinlocks and/or busy waiting requires proper planning of CPU affinity and priority settings for each thread.
+
+**Mutex or Spinlock**: Mutexes are typically held for a very short period of time, so switching to a spinlock has little impact on CPU usage but may improve latency.
+
+- [queue.hpp](/lib/include/dectnrp/application/queue/queue.hpp)
+- [json_export.hpp](/lib/include/dectnrp/common/json/json_export.hpp)
+- [irregular_queue.hpp](/lib/include/dectnrp/phy/pool/irregular_queue.hpp)
+- [job_queue_mc.hpp](/lib/include/dectnrp/phy/pool/job_queue_mc.hpp)
+
+**Condition Variable or Busy Waiting**: Switching from a condition variable to busy waiting will lead to one or multiple CPU cores spinning at 100% usage.
+
+- [application_client.hpp](/lib/include/dectnrp/application/application_client.hpp)
+- [baton.hpp](/lib/include/dectnrp/phy/pool/baton.hpp)
+- [job_queue_naive.hpp](/lib/include/dectnrp/phy/pool/job_queue_naive.hpp)
+- [token.hpp](/lib/include/dectnrp/phy/pool/token.hpp)
+- [buffer_rx.hpp](/lib/include/dectnrp/radio/buffer_rx.hpp)
+- [buffer_tx.hpp](/lib/include/dectnrp/radio/buffer_tx.hpp)
+- [watch.hpp](/lib/include/dectnrp/common/thread/watch.hpp) (only additional busy wait methods)
+
 
 ## Firmware
 

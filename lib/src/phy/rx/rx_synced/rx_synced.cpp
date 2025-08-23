@@ -862,7 +862,7 @@ void rx_synced_t::run_drs_chestim_zf() {
 
 void rx_synced_t::run_drs_channel_lut_pick() {
 #ifndef RX_SYNCED_PARAM_CHANNEL_LUT_LOOKUP_AFTER_EVERY_DRS_SYMBOL_OR_ONCE
-    //  we must at least one at the beginning choose a LUT
+    // at the beginning, we must choose a LUT
     if (channel_lut_effective == nullptr) {
 #endif
         // load current SNR estimation

@@ -529,7 +529,7 @@ void tx_t::run_meta_dependencies() {
 
     dectnrp_assert(N_samples_packet_no_GI_os_rs <=
                        resampler->get_N_samples_after_resampling(N_samples_packet_no_GI_os),
-                   "resamples creates less samples than required for packet without GI");
+                   "resampler creates less samples than required for packet without GI");
 
     // packet length with GI after oversampling
     const uint32_t N_samples_packet_os = packet_sizes->N_samples_packet * N_b_DFT_os / N_b_DFT;
@@ -576,7 +576,7 @@ void tx_t::run_meta_dependencies() {
 
     dectnrp_assert((tx_descriptor->codebook_index > 0 && fec_cfg.beamforming) ||
                        (tx_descriptor->codebook_index == 0 && !fec_cfg.beamforming),
-                   "codebook index >0, but FEC configuration states beamforming is deactivated");
+                   "codebook index > 0, but FEC configuration states beamforming is deactivated");
 
     // amplitude/power scaling
     float scale_common = tx_meta->DAC_scale;
