@@ -1,6 +1,6 @@
 #
 # Copyright 2013-2025 Software Radio Systems Limited (see srsRAN_Project/CMakeLists.txt)
-# Copyright 2023-2025 Maxim Penner (changes made to srsRAN_Project/CMakeLists.txt)
+# Copyright 2023-present Maxim Penner (changes made to srsRAN_Project/CMakeLists.txt)
 #
 # This file is part of DECTNRP.
 #
