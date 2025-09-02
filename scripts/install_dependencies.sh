@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Copyright 2025-2025 Maxim Penner
+# Copyright 2025-present Maxim Penner
 #
 # This file is part of DECTNRP.
 #
